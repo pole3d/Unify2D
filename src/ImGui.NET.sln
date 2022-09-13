@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImGui.NET", "ImGui.NET\ImGu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImGui.NET.SampleProgram.XNA", "ImGui.NET.SampleProgram.XNA\ImGui.NET.SampleProgram.XNA.csproj", "{3024336E-9A19-475F-A95D-60A60C0B1C0D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FNA", "..\..\FNA-220901\FNA\FNA.csproj", "{35253CE1-C864-4CD3-8249-4D1319748E8F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FNA", "..\FNA\FNA.csproj", "{35253CE1-C864-4CD3-8249-4D1319748E8F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

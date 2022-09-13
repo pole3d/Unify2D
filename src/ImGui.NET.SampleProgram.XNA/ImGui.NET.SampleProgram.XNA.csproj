@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\..\FNA-220901\FNA\FNA.csproj" />
+        <ProjectReference Include="..\..\FNA\FNA.csproj" />
         <ProjectReference Include="..\ImGui.NET\ImGui.NET.csproj" />
     </ItemGroup>
 
