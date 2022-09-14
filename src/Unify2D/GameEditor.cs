@@ -101,14 +101,24 @@ namespace Unify2D
 
             _renderTargetId = _imGuiRenderer.BindTexture(_sceneRenderTarget);
 
-            ImGui.Begin("GAME", ImGuiWindowFlags.None);
+            ImGui.Begin("GAME", ImGuiWindowFlags.MenuBar);
+            if (ImGui.BeginMenuBar())
+            {
+                if (ImGui.BeginMenu("File"))
+                {
+                    if (ImGui.MenuItem("Cut", "CTRL+X")) { }
+                    ImGui.EndMenu();
+                }
+            ImGui.EndMenuBar();
+            }
+
             ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Num.Vector2.Zero);
             ImGui.Image(_renderTargetId, ImGui.GetContentRegionAvail());
             if (ImGui.BeginDragDropTarget())
             {
                 unsafe
                 {
-                    var ptr = ImGui.AcceptDragDropPayload("DND_DEMO_CELL");
+                    var ptr = ImGui.AcceptDragDropPayload("ASSET");
                     if (ptr.NativePtr != null)
                     {
 

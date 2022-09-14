@@ -31,6 +31,8 @@ namespace Unify2D.Toolbox
         public override void Show()
         {
             ImGui.Begin("Assets");
+
+
             for (int n = 0; n < _assets.Count; n++)
             {
                 if (ImGui.Selectable(_assets[n].ToString(), _selected[n]))
@@ -52,7 +54,7 @@ namespace Unify2D.Toolbox
                     unsafe
                     {
                         // Set payload to carry the index of our item (could be anything)
-                        ImGui.SetDragDropPayload("DND_DEMO_CELL", (IntPtr)(&n), sizeof(int));
+                        ImGui.SetDragDropPayload("ASSET", (IntPtr)(&n), sizeof(int));
                     }
 
                     ImGui.Text(_assets[n].ToString());
