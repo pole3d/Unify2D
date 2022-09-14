@@ -1,16 +1,17 @@
-﻿using Microsoft.Xna.Framework;
+﻿using ImGuiNET;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace ImGuiNET.SampleProgram.XNA
+namespace Unify2D.ImGuiRenderer
 {
     /// <summary>
     /// ImGui renderer for use with XNA-likes (FNA & MonoGame)
     /// </summary>
-    public class ImGuiRenderer
+    public class Renderer
     {
         private Game _game;
 
@@ -39,7 +40,7 @@ namespace ImGuiNET.SampleProgram.XNA
 
         private List<int> _keys = new List<int>();
 
-        public ImGuiRenderer(Game game)
+        public Renderer(Game game)
         {
             var context = ImGui.CreateContext();
             ImGui.SetCurrentContext(context);
@@ -339,7 +340,7 @@ namespace ImGuiNET.SampleProgram.XNA
                 {
                     ImDrawCmdPtr drawCmd = cmdList.CmdBuffer[cmdi];
 
-                    if (drawCmd.ElemCount == 0) 
+                    if (drawCmd.ElemCount == 0)
                     {
                         continue;
                     }

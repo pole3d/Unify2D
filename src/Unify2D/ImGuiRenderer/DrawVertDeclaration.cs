@@ -1,6 +1,7 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using ImGuiNET;
+using Microsoft.Xna.Framework.Graphics;
 
-namespace ImGuiNET.SampleProgram.XNA
+namespace Unify2D.ImGuiRenderer
 {
     public static class DrawVertDeclaration
     {

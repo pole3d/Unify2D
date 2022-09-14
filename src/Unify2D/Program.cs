@@ -1,10 +1,10 @@
-﻿namespace ImGuiNET.SampleProgram.XNA
+﻿namespace Unify2D
 {
     public static class Program
     {
         public static void Main(string[] args)
         {
-            using (var game = new SampleGame()) game.Run();
+            using (var game = new GameEditor()) game.Run();
         }
     }
 }
