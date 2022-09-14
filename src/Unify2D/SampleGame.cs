@@ -46,7 +46,7 @@ namespace ImGuiNET.SampleProgram.XNA
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
             // Texture loading example
-            _texture = Content.Load<Texture2D>("Content/Joconde.png");
+         //   _texture = Content.Load<Texture2D>("Content/Joconde.png");
 
 			// First, load the texture as a Texture2D (can also be done using the XNA/FNA content pipeline)
 			_xnaTexture = CreateTexture(GraphicsDevice, 300, 150, pixel =>
@@ -66,7 +66,7 @@ namespace ImGuiNET.SampleProgram.XNA
             GraphicsDevice.Clear(new Color(clear_color.X, clear_color.Y, clear_color.Z));
 
             spriteBatch.Begin();
-            spriteBatch.Draw(_texture, new Vector2(10, 10), Color.White);
+          //  spriteBatch.Draw(_texture, new Vector2(10, 10), Color.White);
 
             spriteBatch.End();
 

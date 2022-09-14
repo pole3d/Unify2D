@@ -263,3 +263,5 @@ deps/
 
 # VS Launch
 launchSettings.json
+
+!/deps/cimgui/win-x64/cimgui.dll
