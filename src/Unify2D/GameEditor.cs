@@ -4,8 +4,12 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Unify2D.Assets;
+using Unify2D.Core;
+using Unify2D.Core.Graphics;
 using Unify2D.ImGuiRenderer;
 using Unify2D.Toolbox;
+using Unify2D.Tools;
 using Num = System.Numerics;
 
 namespace Unify2D
@@ -18,13 +22,11 @@ namespace Unify2D
         private GraphicsDeviceManager _graphics;
         private ImGuiRenderer.Renderer _imGuiRenderer;
 
-        private Texture2D _xnaTexture;
-        private Texture2D _texture;
-        private IntPtr _imGuiTexture;
-        SpriteBatch spriteBatch;
+       // private IntPtr _imGuiTexture;
+        public SpriteBatch spriteBatch;
 
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
-
+        List<GameObject> _gameObjects = new List<GameObject>();
 
         public GameEditor()
         {
@@ -60,18 +62,10 @@ namespace Unify2D
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            // Texture loading example
-            _texture = Content.Load<Texture2D>("Assets/joconde.png");
 
-            // First, load the texture as a Texture2D (can also be done using the XNA/FNA content pipeline)
-            _xnaTexture = CreateTexture(GraphicsDevice, 300, 150, pixel =>
-            {
-                var red = (pixel % 300) / 2;
-                return new Color(red, 1, 1);
-            });
-
+     
             // Then, bind it to an ImGui-friendly pointer, that we can use during regular ImGui.** calls (see below)
-            _imGuiTexture = _imGuiRenderer.BindTexture(_xnaTexture);
+            //_imGuiTexture = _imGuiRenderer.BindTexture(_xnaTexture);
 
             base.LoadContent();
         }
@@ -87,7 +81,12 @@ namespace Unify2D
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             spriteBatch.Begin();
-            spriteBatch.Draw(_texture, new Vector2(10, 10), Color.White);
+
+            foreach (var item in _gameObjects)
+            {
+                item.Draw(this);
+            }
+
 
             spriteBatch.End();
 
@@ -98,42 +97,9 @@ namespace Unify2D
             ImGuiLayout();
 
             //base.Draw(gameTime);
+               
 
-            _renderTargetId = _imGuiRenderer.BindTexture(_sceneRenderTarget);
-
-            ImGui.Begin("GAME", ImGuiWindowFlags.MenuBar);
-            if (ImGui.BeginMenuBar())
-            {
-                if (ImGui.BeginMenu("File"))
-                {
-                    if (ImGui.MenuItem("Cut", "CTRL+X")) { }
-                    ImGui.EndMenu();
-                }
-            ImGui.EndMenuBar();
-            }
-
-            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Num.Vector2.Zero);
-            ImGui.Image(_renderTargetId, ImGui.GetContentRegionAvail());
-            if (ImGui.BeginDragDropTarget())
-            {
-                unsafe
-                {
-                    var ptr = ImGui.AcceptDragDropPayload("ASSET");
-                    if (ptr.NativePtr != null)
-                    {
-
-                    }
-                }
-
-
-            }
-            ImGui.EndDragDropTarget();
-            ImGui.PopStyleVar();
-            ImGui.End();
-
-    
-
-                    GraphicsDevice.SetRenderTarget(null);
+            GraphicsDevice.SetRenderTarget(null);
             GraphicsDevice.Clear(Color.Black);
 
             // Call AfterLayout now to finish up and draw all the things
@@ -149,7 +115,43 @@ namespace Unify2D
                 item.Show();
             }
 
-            ImGui.ShowDemoWindow();
+            //ImGui.ShowDemoWindow();
+
+            _renderTargetId = _imGuiRenderer.BindTexture(_sceneRenderTarget);
+
+            ImGui.Begin("GAME", ImGuiWindowFlags.MenuBar);
+            if (ImGui.BeginMenuBar())
+            {
+                if (ImGui.BeginMenu("File"))
+                {
+                    if (ImGui.MenuItem("Cut", "CTRL+X")) { }
+                    ImGui.EndMenu();
+                }
+                ImGui.EndMenuBar();
+            }
+
+            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Num.Vector2.Zero);
+            ImGui.Image(_renderTargetId, ImGui.GetContentRegionAvail());
+            if (ImGui.BeginDragDropTarget())
+            {
+                unsafe
+                {
+                    var ptr = ImGui.AcceptDragDropPayload("ASSET");
+                    if (ptr.NativePtr != null)
+                    {
+                        Asset asset = Clipboard.Content as Asset;
+                        GameObject go = new GameObject();
+                        SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
+                        renderer.Initialize(this, asset.FullPath);
+                        _gameObjects.Add(go);
+                    }
+                }
+
+
+            }
+            ImGui.EndDragDropTarget();
+            ImGui.PopStyleVar();
+            ImGui.End();
         }
 
         public static Texture2D CreateTexture(GraphicsDevice device, int width, int height, Func<int, Color> paint)

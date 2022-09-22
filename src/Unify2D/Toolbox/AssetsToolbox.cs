@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Unify2D.Assets;
+using Unify2D.Tools;
 
 namespace Unify2D.Toolbox
 {
@@ -21,7 +22,8 @@ namespace Unify2D.Toolbox
 
             foreach (var file in files)
             {
-                _assets.Add(new Asset(Path.GetFileNameWithoutExtension(file)));
+                _assets.Add(new Asset(Path.GetFileNameWithoutExtension(file),
+                    Path.GetExtension(file), Path.GetDirectoryName(file))) ;
             }
 
             _selected = new bool[files.Length];
@@ -31,7 +33,6 @@ namespace Unify2D.Toolbox
         public override void Show()
         {
             ImGui.Begin("Assets");
-
 
             for (int n = 0; n < _assets.Count; n++)
             {
@@ -56,6 +57,8 @@ namespace Unify2D.Toolbox
                         // Set payload to carry the index of our item (could be anything)
                         ImGui.SetDragDropPayload("ASSET", (IntPtr)(&n), sizeof(int));
                     }
+
+                    Clipboard.Content = _assets[n];
 
                     ImGui.Text(_assets[n].ToString());
 

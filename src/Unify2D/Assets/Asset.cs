@@ -8,11 +8,25 @@ namespace Unify2D.Assets
 {
     internal class Asset
     {
-        public string Name { get; set; }
+        public string Name => _name;
+        public string Extension => _extension;  
+        public string Path  => _path; 
 
-        public Asset(string name)
+        public string FullPath => _fullPath; 
+
+        private string _name;
+        private string _extension;
+        private string _path;
+        string _fullPath;
+
+
+        public Asset(string name, string extension, string path)
         {
-            Name = name;
+            _name = name;
+            _extension = extension;
+            _path = path;
+
+            _fullPath = System.IO.Path.Combine(path, name + extension);
         }
 
 
