@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,11 +23,17 @@ namespace Unify2D
         private GraphicsDeviceManager _graphics;
         private ImGuiRenderer.Renderer _imGuiRenderer;
 
-       // private IntPtr _imGuiTexture;
-        public SpriteBatch spriteBatch;
 
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
-        List<GameObject> _gameObjects = new List<GameObject>();
+
+        Num.Vector2 _gameWindowPosition;
+        Num.Vector2 _gameWindowSize;
+        readonly Num.Vector2 _gameWindowOffset = new Num.Vector2(8, 27);
+        const float _bottomOffset = 20;
+
+        Vector2 _gameResolution = new Vector2(1920, 1080);
+
+        GameCore _core;
 
         public GameEditor()
         {
@@ -39,6 +46,9 @@ namespace Unify2D
 
         protected override void Initialize()
         {
+            _core = new GameCore();
+            GameCore.SetCurrent(_core);
+
             _toolboxes.Add(new AssetsToolbox());
 
             foreach (var item in _toolboxes)
@@ -61,11 +71,7 @@ namespace Unify2D
 
         protected override void LoadContent()
         {
-            spriteBatch = new SpriteBatch(GraphicsDevice);
-
-     
-            // Then, bind it to an ImGui-friendly pointer, that we can use during regular ImGui.** calls (see below)
-            //_imGuiTexture = _imGuiRenderer.BindTexture(_xnaTexture);
+            _core.Initialize(GraphicsDevice);
 
             base.LoadContent();
         }
@@ -73,6 +79,7 @@ namespace Unify2D
         IntPtr _renderTargetId = IntPtr.Zero;
         RenderTarget2D _sceneRenderTarget;
 
+ 
 
         protected override void Draw(GameTime gameTime)
         {
@@ -80,15 +87,7 @@ namespace Unify2D
 
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            spriteBatch.Begin();
-
-            foreach (var item in _gameObjects)
-            {
-                item.Draw(this);
-            }
-
-
-            spriteBatch.End();
+            _core.Draw();
 
             // Call BeforeLayout first to set things up
             _imGuiRenderer.BeforeLayout(gameTime);
@@ -97,16 +96,33 @@ namespace Unify2D
             ImGuiLayout();
 
             //base.Draw(gameTime);
-               
-
             GraphicsDevice.SetRenderTarget(null);
             GraphicsDevice.Clear(Color.Black);
 
             // Call AfterLayout now to finish up and draw all the things
             _imGuiRenderer.AfterLayout();
-
         }
 
+        public Vector2 GetMousePosition()
+        {
+            var mouseState = Mouse.GetState();
+            Num.Vector2 mousePosition = new Num.Vector2(mouseState.X, mouseState.Y);
+            mousePosition -= (_gameWindowPosition + _gameWindowOffset);
+
+            Vector2 size = new Vector2(_gameWindowSize.X, _gameWindowSize.Y);
+            Vector2 result = new Vector2(mousePosition.X, mousePosition.Y);
+            result /= size;
+
+            result.X = MathHelper.Clamp(result.X, 0, 1);
+            result.Y = MathHelper.Clamp(result.Y, 0, 1);
+
+            result *= _gameResolution;
+
+            result.X = MathF.Round(result.X);
+            result.Y = MathF.Round(result.Y);
+
+            return result;
+        }
 
         protected virtual void ImGuiLayout()
         {
@@ -119,19 +135,28 @@ namespace Unify2D
 
             _renderTargetId = _imGuiRenderer.BindTexture(_sceneRenderTarget);
 
-            ImGui.Begin("GAME", ImGuiWindowFlags.MenuBar);
-            if (ImGui.BeginMenuBar())
-            {
-                if (ImGui.BeginMenu("File"))
-                {
-                    if (ImGui.MenuItem("Cut", "CTRL+X")) { }
-                    ImGui.EndMenu();
-                }
-                ImGui.EndMenuBar();
-            }
+
+
+
+            ImGui.Begin("GAME", ImGuiWindowFlags.None);
+            _gameWindowPosition = ImGui.GetWindowPos();
+            _gameWindowSize = ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin();
+            _gameWindowSize.Y -= _bottomOffset;
+            //if (ImGui.BeginMenuBar())
+            //{
+            //    if (ImGui.BeginMenu("File"))
+            //    {
+            //        if (ImGui.MenuItem("Cut", "CTRL+X")) { }
+            //        ImGui.EndMenu();
+            //    }
+            //    ImGui.EndMenuBar();
+            //}
 
             ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Num.Vector2.Zero);
-            ImGui.Image(_renderTargetId, ImGui.GetContentRegionAvail());
+            ImGui.Image(_renderTargetId, ImGui.GetContentRegionAvail() - new Num.Vector2(0, _bottomOffset));
+
+         
+
             if (ImGui.BeginDragDropTarget())
             {
                 unsafe
@@ -143,35 +168,18 @@ namespace Unify2D
                         GameObject go = new GameObject();
                         SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
                         renderer.Initialize(this, asset.FullPath);
-                        _gameObjects.Add(go);
                     }
                 }
-
-
             }
             ImGui.EndDragDropTarget();
+            var mouseState = GetMousePosition();
+            ImGui.Text($" {mouseState.X}:{mouseState.Y} + {_gameWindowPosition}");
             ImGui.PopStyleVar();
+
             ImGui.End();
         }
 
-        public static Texture2D CreateTexture(GraphicsDevice device, int width, int height, Func<int, Color> paint)
-        {
-            //initialize a texture
-            var texture = new Texture2D(device, width, height);
 
-            //the array holds the color for each pixel in the texture
-            Color[] data = new Color[width * height];
-            for (var pixel = 0; pixel < data.Length; pixel++)
-            {
-                //the function applies the color according to the specified pixel
-                data[pixel] = paint(pixel);
-            }
-
-            //set the color
-            texture.SetData(data);
-
-            return texture;
-        }
     }
 }
 

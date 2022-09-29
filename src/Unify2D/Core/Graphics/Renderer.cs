@@ -8,6 +8,6 @@ namespace Unify2D.Core.Graphics
 {
     abstract class Renderer
     {
-        public abstract void Draw(GameEditor game);
+        public abstract void Draw();
     }
 }

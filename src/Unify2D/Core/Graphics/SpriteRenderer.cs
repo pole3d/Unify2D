@@ -17,10 +17,9 @@ namespace Unify2D.Core.Graphics
             _texture = game.Content.Load<Texture2D>(pictures);
         }
 
-        public override void Draw(GameEditor game)
+        public override void Draw()
         {
-            game.spriteBatch.Draw(_texture, new Vector2(10, 10), Color.White);
-
+            GameCore.Current.SpriteBatch.Draw(_texture, new Vector2(10, 10), Color.White);
         }
     }
 }

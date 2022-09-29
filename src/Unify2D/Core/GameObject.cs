@@ -9,13 +9,17 @@ namespace Unify2D.Core
 {
     class GameObject
     {
+
         Renderer _renderer;
         List<Component> _components;
 
         public GameObject()
         {
             _components = new List<Component>();
+
+            GameCore.Current.AddGameObject(this);
         }
+
 
         internal T AddComponent<T>() where T : new()
         {
@@ -28,10 +32,15 @@ namespace Unify2D.Core
             return component;
         }
 
-        internal void Draw(GameEditor game)
+        public bool HasRenderer()
+        {
+            return _renderer != null;
+        }
+
+        internal void Draw()
         {
             if ( _renderer != null )
-                _renderer.Draw(game);
+                _renderer.Draw();
         }
     }
 }
