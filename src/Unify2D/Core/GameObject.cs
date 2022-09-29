@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,8 @@ namespace Unify2D.Core
 {
     class GameObject
     {
+        public Vector2 Position{ get; set; }
+        public string Name { get; internal set; }
 
         Renderer _renderer;
         List<Component> _components;
@@ -16,6 +19,7 @@ namespace Unify2D.Core
         public GameObject()
         {
             _components = new List<Component>();
+            Name = "GameObject";
 
             GameCore.Current.AddGameObject(this);
         }
@@ -23,7 +27,7 @@ namespace Unify2D.Core
 
         internal T AddComponent<T>() where T : new()
         {
-            T component = new T();
+            T component = new();
             if ( component is Renderer renderer)
             {
                 _renderer = renderer;

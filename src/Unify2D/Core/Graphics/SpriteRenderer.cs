@@ -10,16 +10,20 @@ namespace Unify2D.Core.Graphics
 {
     class SpriteRenderer : Renderer
     {
-        Texture2D _texture;
+        public Color Color { get; set; } = Color.White;
 
-        public void Initialize( Game game, string pictures)
+        Texture2D _texture;
+        GameObject _go;
+
+        public void Initialize( Game game, GameObject go, string pictures)
         {
+            _go = go;
             _texture = game.Content.Load<Texture2D>(pictures);
         }
 
         public override void Draw()
         {
-            GameCore.Current.SpriteBatch.Draw(_texture, new Vector2(10, 10), Color.White);
+            GameCore.Current.SpriteBatch.Draw(_texture, _go.Position, Color);
         }
     }
 }

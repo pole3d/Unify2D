@@ -35,6 +35,8 @@ namespace Unify2D
 
         GameCore _core;
 
+        GameObject _selected;
+
         public GameEditor()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -58,6 +60,7 @@ namespace Unify2D
 
             _imGuiRenderer = new ImGuiRenderer.Renderer(this);
             _imGuiRenderer.RebuildFontAtlas();
+            ImGui.GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
 
             Window.AllowUserResizing = true;
             _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
@@ -79,7 +82,7 @@ namespace Unify2D
         IntPtr _renderTargetId = IntPtr.Zero;
         RenderTarget2D _sceneRenderTarget;
 
- 
+
 
         protected override void Draw(GameTime gameTime)
         {
@@ -124,6 +127,10 @@ namespace Unify2D
             return result;
         }
 
+        bool[] _hierarchy = new bool[100];
+
+        public static uint ToColor32(byte r, byte g, byte b, byte a) { uint ret = a; ret <<= 8; ret += b; ret <<= 8; ret += g; ret <<= 8; ret += r; return ret; }
+        int _selectedHierarchy;
         protected virtual void ImGuiLayout()
         {
             foreach (var item in _toolboxes)
@@ -131,7 +138,7 @@ namespace Unify2D
                 item.Show();
             }
 
-            //ImGui.ShowDemoWindow();
+            ImGui.ShowDemoWindow();
 
             _renderTargetId = _imGuiRenderer.BindTexture(_sceneRenderTarget);
 
@@ -142,20 +149,10 @@ namespace Unify2D
             _gameWindowPosition = ImGui.GetWindowPos();
             _gameWindowSize = ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin();
             _gameWindowSize.Y -= _bottomOffset;
-            //if (ImGui.BeginMenuBar())
-            //{
-            //    if (ImGui.BeginMenu("File"))
-            //    {
-            //        if (ImGui.MenuItem("Cut", "CTRL+X")) { }
-            //        ImGui.EndMenu();
-            //    }
-            //    ImGui.EndMenuBar();
-            //}
 
             ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Num.Vector2.Zero);
             ImGui.Image(_renderTargetId, ImGui.GetContentRegionAvail() - new Num.Vector2(0, _bottomOffset));
-
-         
+            Circle();
 
             if (ImGui.BeginDragDropTarget())
             {
@@ -166,21 +163,83 @@ namespace Unify2D
                     {
                         Asset asset = Clipboard.Content as Asset;
                         GameObject go = new GameObject();
+                        _selected = go;
                         SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
-                        renderer.Initialize(this, asset.FullPath);
+                        renderer.Initialize(this, go, asset.FullPath);
                     }
                 }
             }
             ImGui.EndDragDropTarget();
             var mouseState = GetMousePosition();
-            ImGui.Text($" {mouseState.X}:{mouseState.Y} + {_gameWindowPosition}");
+            ImGui.Text($" {mouseState.X}:{mouseState.Y}");
             ImGui.PopStyleVar();
 
             ImGui.End();
+
+            ImGui.Begin("Inspector");
+            if (_selected != null)
+            {
+                string name = _selected.Name;
+                ImGui.InputText("name", ref name, 40);
+                _selected.Name = name;
+                Num.Vector2 position = new Num.Vector2(_selected.Position.X, _selected.Position.Y);
+                ImGui.InputFloat2("position", ref position);
+                _selected.Position = new Vector2(position.X, position.Y);
+            }
+            ImGui.End();
+
+            ImGui.Begin("Hierarchy");
+            //if (ImGui.TreeNode("Trees"))
+            //{
+            //    if (ImGui.TreeNode("Child"))
+            //    {
+            //    }
+            //    ImGui.TreePop();
+
+            //}
+
+            int i = 0;
+            foreach (var item in _core.GameObjects)
+            {
+                if (ImGui.Selectable($"{i++} : {item.Name}", _hierarchy[i]))
+                {
+                    for (int j = 0; j < _hierarchy.Length; j++)
+                    {
+                        _hierarchy[j] = false;
+                    }
+
+                    _hierarchy[i] = true;
+                    _selected = item;
+                }
+            }
+
+
+            ImGui.TreePop();
+            ImGui.End();
+
+
         }
 
+        private static void Circle()
+        {
+            var p0 = ImGui.GetItemRectMin();
+            var p1 = ImGui.GetItemRectMax();
 
+            var drawList = ImGui.GetWindowDrawList();
+            drawList.PushClipRect(p0, p1);
+
+            var io = ImGui.GetIO();
+
+
+            drawList.AddCircle(new Num.Vector2(p0.X + 100, p0.Y + 100),
+                      50, MakeColor32(50, 255, 50, 255), 64, 5);
+            drawList.PopClipRect();
+        }
+
+        public static uint MakeColor32(byte r, byte g, byte b, byte a) { uint ret = a; ret <<= 8; ret += b; ret <<= 8; ret += g; ret <<= 8; ret += r; return ret; }
     }
+
+
 }
 
 

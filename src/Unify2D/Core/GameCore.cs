@@ -23,6 +23,7 @@ namespace Unify2D.Core
         }
 
         public SpriteBatch SpriteBatch { get; private set; }
+        public List<GameObject> GameObjects => _gameObjects; 
 
         static GameCore s_current;
 
