@@ -8,10 +8,10 @@ using Unify2D.Core.Graphics;
 
 namespace Unify2D.Core
 {
-    class GameObject
+    public class GameObject
     {
         public Vector2 Position{ get; set; }
-        public string Name { get; internal set; }
+        public string Name { get; set; }
 
         Renderer _renderer;
         List<Component> _components;
@@ -25,7 +25,7 @@ namespace Unify2D.Core
         }
 
 
-        internal T AddComponent<T>() where T : new()
+        public T AddComponent<T>() where T : new()
         {
             T component = new();
             if ( component is Renderer renderer)

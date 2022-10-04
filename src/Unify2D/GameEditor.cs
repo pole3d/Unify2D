@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Unify2D.Assets;
+using Unify2D.Builder;
 using Unify2D.Core;
 using Unify2D.Core.Graphics;
 using Unify2D.ImGuiRenderer;
@@ -218,6 +219,17 @@ namespace Unify2D
             ImGui.End();
 
 
+            if ( ImGui.Button("Build"))
+                Build();
+
+        }
+
+        private void Build()
+        {
+            GameBuilder builder = new GameBuilder();
+            builder.Build();
+            builder.StartBuild();
+
         }
 
         private static void Circle()
@@ -238,6 +250,8 @@ namespace Unify2D
 
         public static uint MakeColor32(byte r, byte g, byte b, byte a) { uint ret = a; ret <<= 8; ret += b; ret <<= 8; ret += g; ret <<= 8; ret += r; return ret; }
     }
+
+
 
 
 }

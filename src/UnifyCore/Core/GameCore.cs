@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Unify2D.Core
 {
-    class GameCore
+    public class GameCore
     {
         public static GameCore Current
         {
@@ -39,7 +39,7 @@ namespace Unify2D.Core
             _gameObjects.Add(go);
         }
 
-        internal void Draw()
+        public void Draw()
         {
             SpriteBatch.Begin();
             foreach (var item in _gameObjects)
@@ -49,7 +49,7 @@ namespace Unify2D.Core
             SpriteBatch.End();
         }
 
-        internal void Initialize(GraphicsDevice graphicsDevice)
+        public void Initialize(GraphicsDevice graphicsDevice)
         {
             SpriteBatch = new SpriteBatch(graphicsDevice);
         }

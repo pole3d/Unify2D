@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Unify2D.Core.Graphics
 {
-    class SpriteRenderer : Renderer
+    public class SpriteRenderer : Renderer
     {
         public Color Color { get; set; } = Color.White;
 

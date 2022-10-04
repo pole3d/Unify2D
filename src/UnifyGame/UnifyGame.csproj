@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	  <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\FNA\FNA.csproj" />
+		<ProjectReference Include="..\ImGui.NET\ImGui.NET.csproj" />
+		<ProjectReference Include="..\UnifyCore\UnifyCore.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="$(RepositoryRootDirectory)/deps/cimgui/win-x64/cimgui.dll" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+
+</Project>
+
+

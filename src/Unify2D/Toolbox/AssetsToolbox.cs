@@ -13,12 +13,18 @@ namespace Unify2D.Toolbox
 {
     internal class AssetsToolbox : Toolbox
     {
+        const string PathAssets = "./Assets";
+
+
         bool[] _selected;
         List<Asset> _assets = new List<Asset>();
 
         public override void Initialize()
         {
-            var files = Directory.GetFiles("./Assets");
+            if ( Directory.Exists(PathAssets) == false)
+                Directory.CreateDirectory(PathAssets);
+
+            var files = Directory.GetFiles(PathAssets);
 
             foreach (var file in files)
             {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Unify2D.Core.Graphics
 {
-    abstract class Renderer
+    public abstract class Renderer
     {
         public abstract void Draw();
     }
