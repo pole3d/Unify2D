@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,6 +29,9 @@ namespace UnifyGame
             _graphics = new GraphicsDeviceManager(this);
 
             _graphics.PreferMultiSampling = true;
+            _graphics.PreferredBackBufferWidth = 1920;
+            _graphics.PreferredBackBufferHeight = 1080;
+            _graphics.PreferMultiSampling = true;
 
             IsMouseVisible = true;
         }
@@ -50,6 +54,14 @@ namespace UnifyGame
         protected override void LoadContent()
         {
             _core.Initialize(GraphicsDevice);
+
+            _core.GameObjects.Clear();
+
+            string text = File.ReadAllText("./test.scene");
+            JsonSerializerSettings settings = new JsonSerializerSettings();
+            settings.TypeNameHandling = TypeNameHandling.Auto;
+
+            _core.LoadScene(this, JsonConvert.DeserializeObject<List<GameObject>>(text, settings));
 
             base.LoadContent();
         }
@@ -100,7 +112,7 @@ namespace UnifyGame
 
         protected virtual void ImGuiLayout()
         {
-            ImGui.ShowDemoWindow();
+          //  ImGui.ShowDemoWindow();
         }
 
      

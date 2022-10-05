@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -68,7 +69,7 @@ namespace Unify2D
             _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 60;
             _graphics.ApplyChanges();
 
-            _sceneRenderTarget = new RenderTarget2D(GraphicsDevice, 1920, 1080);
+            _sceneRenderTarget = new RenderTarget2D(GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
 
             base.Initialize();
         }
@@ -131,7 +132,6 @@ namespace Unify2D
         bool[] _hierarchy = new bool[100];
 
         public static uint ToColor32(byte r, byte g, byte b, byte a) { uint ret = a; ret <<= 8; ret += b; ret <<= 8; ret += g; ret <<= 8; ret += r; return ret; }
-        int _selectedHierarchy;
         protected virtual void ImGuiLayout()
         {
             foreach (var item in _toolboxes)
@@ -142,9 +142,6 @@ namespace Unify2D
             ImGui.ShowDemoWindow();
 
             _renderTargetId = _imGuiRenderer.BindTexture(_sceneRenderTarget);
-
-
-
 
             ImGui.Begin("GAME", ImGuiWindowFlags.None);
             _gameWindowPosition = ImGui.GetWindowPos();
@@ -172,7 +169,9 @@ namespace Unify2D
             }
             ImGui.EndDragDropTarget();
             var mouseState = GetMousePosition();
-            ImGui.Text($" {mouseState.X}:{mouseState.Y}");
+            var mouse = Mouse.GetState();
+            Num.Vector2 mousePosition = new Num.Vector2(mouse.X, mouse.Y);
+            ImGui.Text($" {mouseState.X}:{mouseState.Y} /  {mousePosition.X}:{mousePosition.Y}");
             ImGui.PopStyleVar();
 
             ImGui.End();
@@ -181,6 +180,7 @@ namespace Unify2D
             if (_selected != null)
             {
                 string name = _selected.Name;
+
                 ImGui.InputText("name", ref name, 40);
                 _selected.Name = name;
                 Num.Vector2 position = new Num.Vector2(_selected.Position.X, _selected.Position.Y);
@@ -190,14 +190,6 @@ namespace Unify2D
             ImGui.End();
 
             ImGui.Begin("Hierarchy");
-            //if (ImGui.TreeNode("Trees"))
-            //{
-            //    if (ImGui.TreeNode("Child"))
-            //    {
-            //    }
-            //    ImGui.TreePop();
-
-            //}
 
             int i = 0;
             foreach (var item in _core.GameObjects)
@@ -219,33 +211,76 @@ namespace Unify2D
             ImGui.End();
 
 
+
             if ( ImGui.Button("Build"))
                 Build();
+            if (ImGui.Button("Save"))
+            {
+                Save();
+            }
+            if (ImGui.Button("Load"))
+            {
+                Load();
+            }
 
         }
 
         private void Build()
         {
             GameBuilder builder = new GameBuilder();
-            builder.Build();
+            builder.Build(_core);
             builder.StartBuild();
-
         }
 
-        private static void Circle()
+        private  void Circle()
         {
+            if (_selected == null)
+                return;
+
             var p0 = ImGui.GetItemRectMin();
             var p1 = ImGui.GetItemRectMax();
 
             var drawList = ImGui.GetWindowDrawList();
             drawList.PushClipRect(p0, p1);
 
-            var io = ImGui.GetIO();
-
-
-            drawList.AddCircle(new Num.Vector2(p0.X + 100, p0.Y + 100),
-                      50, MakeColor32(50, 255, 50, 255), 64, 5);
+            drawList.AddCircle( WorldToUI(_selected.Position),
+                      8, MakeColor32(50, 255, 50, 255), 64, 3);
             drawList.PopClipRect();
+        }
+
+        Num.Vector2 WorldToUI(Vector2 world)
+        {
+            Num.Vector2 result = new Num.Vector2(world.X, world.Y);
+
+            float x = world.X / _gameResolution.X;
+            float y = world.Y / _gameResolution.Y;
+
+            x *= _gameWindowSize.X;
+            y *= _gameWindowSize.Y;
+
+            result = _gameWindowPosition + _gameWindowOffset + new Num.Vector2(x,y);
+            return result;
+        }
+
+        void Save()
+        {
+            JsonSerializerSettings settings = new JsonSerializerSettings();
+            settings.TypeNameHandling = TypeNameHandling.Auto;
+            string text = JsonConvert.SerializeObject(_core.GameObjects ,settings);
+
+            File.WriteAllText("./test.scene", text);
+        }
+
+        void Load()
+        {
+            _core.GameObjects.Clear();
+            _selected = null;
+
+            string text = File.ReadAllText("./test.scene");
+            JsonSerializerSettings settings = new JsonSerializerSettings();
+            settings.TypeNameHandling = TypeNameHandling.Auto;
+
+            _core.LoadScene(this,  JsonConvert.DeserializeObject<List<GameObject>>(text, settings));
         }
 
         public static uint MakeColor32(byte r, byte g, byte b, byte a) { uint ret = a; ret <<= 8; ret += b; ret <<= 8; ret += g; ret <<= 8; ret += r; return ret; }

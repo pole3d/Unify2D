@@ -19,4 +19,8 @@
         <Content Include="$(RepositoryRootDirectory)/deps/cimgui/win-x64/cimgui.dll" CopyToOutputDirectory="PreserveNewest" />
        </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    </ItemGroup>
+
 </Project>

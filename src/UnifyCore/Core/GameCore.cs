@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,6 +53,14 @@ namespace Unify2D.Core
         public void Initialize(GraphicsDevice graphicsDevice)
         {
             SpriteBatch = new SpriteBatch(graphicsDevice);
+        }
+
+        public void LoadScene(Game game,  List<GameObject> gameObjects)
+        {
+            foreach (var item in gameObjects)
+            {
+                item.Load(game);
+            }
         }
     }
 }

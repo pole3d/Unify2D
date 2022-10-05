@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,19 +12,30 @@ namespace Unify2D.Core.Graphics
     public class SpriteRenderer : Renderer
     {
         public Color Color { get; set; } = Color.White;
+        public string Type { get; } = "SpriteRenderer";
 
-        Texture2D _texture;
+        [JsonProperty]
+        GameAsset _asset;
         GameObject _go;
+        Texture2D _texture;
 
-        public void Initialize( Game game, GameObject go, string pictures)
+        public void Initialize( Game game, GameObject go, string path)
         {
             _go = go;
-            _texture = game.Content.Load<Texture2D>(pictures);
+            _texture = game.Content.Load<Texture2D>(path);
+
+            _asset = new GameAsset(_texture, _texture.Name);
+            _go.BoundingSize = new Vector2(_texture.Width, _texture.Height);
+        }
+
+        public override void Load(Game game , GameObject go)
+        {
+            Initialize(game, go, _asset.Name);
         }
 
         public override void Draw()
         {
-            GameCore.Current.SpriteBatch.Draw(_texture, _go.Position, Color);
+            GameCore.Current.SpriteBatch.Draw(_texture, _go.Position - _go.BoundingSize / 2, Color);
         }
     }
 }
