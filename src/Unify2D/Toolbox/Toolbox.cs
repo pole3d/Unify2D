@@ -12,5 +12,9 @@ namespace Unify2D.Toolbox
         public abstract void Show();
 
         public abstract void Initialize(GameEditor editor);
+
+        internal virtual void Reset()
+        {
+        }
     }
 }

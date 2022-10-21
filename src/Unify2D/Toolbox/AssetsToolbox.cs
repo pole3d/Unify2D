@@ -19,12 +19,20 @@ namespace Unify2D.Toolbox
         string _path;
         bool[] _selected;
         List<Asset> _assets = new List<Asset>();
+        GameEditor _editor;
 
         public override void Initialize(GameEditor editor)
         {
-            _path = Path.Combine(editor.ProjectPath, PathAssets);
+            _editor = editor;
+            Reset();
+        }
 
-            if ( Directory.Exists(_path) == false)
+        internal override void Reset()
+        {
+            _assets.Clear();
+            _path = Path.Combine(_editor.ProjectPath, PathAssets);
+
+            if (Directory.Exists(_path) == false)
                 Directory.CreateDirectory(_path);
 
             var files = Directory.GetFiles(_path);
@@ -32,7 +40,7 @@ namespace Unify2D.Toolbox
             foreach (var file in files)
             {
                 _assets.Add(new Asset(Path.GetFileNameWithoutExtension(file),
-                    Path.GetExtension(file), Path.GetDirectoryName(file))) ;
+                    Path.GetExtension(file), Path.GetDirectoryName(file)));
             }
 
             _selected = new bool[files.Length];

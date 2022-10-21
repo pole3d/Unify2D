@@ -44,6 +44,7 @@ namespace Unify2D
         InspectorToolbox _inspector;
 
         SelectedState _selectState;
+        bool _showSelectPath;
 
         enum SelectedState
         {
@@ -65,6 +66,8 @@ namespace Unify2D
         {
             _core = new GameCore();
             GameCore.SetCurrent(_core);
+
+            Load();
 
             _inspector = new InspectorToolbox();
             _toolboxes.Add(new AssetsToolbox());
@@ -105,7 +108,9 @@ namespace Unify2D
         public void SelectGameObject(GameObject go)
         {
             _selected = go;
-            _inspector.SetGameObject(go);
+
+            if (_inspector != null)
+                _inspector.SetGameObject(go);
         }
 
         protected override void Update(GameTime gameTime)
@@ -145,7 +150,7 @@ namespace Unify2D
                 {
                     _selected.Position = GetWorldMousePosition();
                 }
-                if ( mouseState.LeftButton == ButtonState.Released)
+                if (mouseState.LeftButton == ButtonState.Released)
                 {
                     _selectState = SelectedState.None;
                 }
@@ -162,11 +167,37 @@ namespace Unify2D
 
             // Call BeforeLayout first to set things up
             _imGuiRenderer.BeforeLayout(gameTime);
-            
-            // Draw our UI
-               ImGuiLayout();
 
-            //base.Draw(gameTime);
+            if (ImGui.BeginMainMenuBar())
+            {
+                if (ImGui.BeginMenu("File"))
+                {
+                    if (ImGui.MenuItem("Load project"))
+                    {
+                        _showSelectPath = true;
+                    }
+                    if (ImGui.MenuItem("Build"))
+                        Build();
+                    if (ImGui.MenuItem("Save"))
+                    {
+                        Save();
+                    }
+                    if (ImGui.MenuItem("Load"))
+                    {
+                        Load();
+                    }
+                    ImGui.EndMenu();
+                }
+
+                ImGui.EndMainMenuBar();
+            }
+
+
+            // Draw our UI
+            ImGuiLayout();
+
+            Popups();
+
             GraphicsDevice.SetRenderTarget(null);
             GraphicsDevice.Clear(Color.Black);
 
@@ -176,31 +207,26 @@ namespace Unify2D
 
         void Popups()
         {
-            bool b = false;
-            if (ImGui.BeginMainMenuBar())
+            if (_showSelectPath)
             {
-                if (ImGui.BeginMenu("menu"))
-                {
-                    if (ImGui.MenuItem("menu item"))
-                    {
-                        b = true;
-                    }
-                    ImGui.EndMenu();
-                }
-                ImGui.EndMainMenuBar();
+                ImGui.OpenPopup("open-project");
+                _showSelectPath = false;
             }
 
-            if (b)
+            if (ImGui.BeginPopupModal("open-project"))
             {
-                ImGui.OpenPopup("save-file");
-            }
-
-            if (ImGui.BeginPopupModal("save-file"))
-            {
-                var picker = FilePicker.GetFolderPicker(this, "C://");
+                var picker = FilePicker.GetFolderPicker(this, _projectPath);
+                picker.RootFolder = "C:\\";
+                picker.OnlyAllowFolders = true;
                 if (picker.Draw())
                 {
-                    Console.WriteLine(picker.SelectedFile);
+                    _projectPath = picker.SelectedFile;
+                    Load();
+                    foreach (var item in _toolboxes)
+                    {
+                        item.Reset();
+                    }
+
                     FilePicker.RemoveFilePicker(this);
                 }
                 ImGui.EndPopup();
@@ -242,13 +268,9 @@ namespace Unify2D
             return result;
         }
 
-        //bool[] _hierarchy = new bool[100];
 
-        public static uint ToColor32(byte r, byte g, byte b, byte a) { uint ret = a; ret <<= 8; ret += b; ret <<= 8; ret += g; ret <<= 8; ret += r; return ret; }
         protected virtual void ImGuiLayout()
         {
-
- 
 
             foreach (var item in _toolboxes)
             {
@@ -257,6 +279,14 @@ namespace Unify2D
 
             ImGui.ShowDemoWindow();
 
+            GameWindow();
+
+
+
+        }
+
+        private void GameWindow()
+        {
             _renderTargetId = _imGuiRenderer.BindTexture(_sceneRenderTarget);
 
             ImGui.Begin("GAME", ImGuiWindowFlags.None);
@@ -290,19 +320,6 @@ namespace Unify2D
             ImGui.PopStyleVar();
 
             ImGui.End();
-
-
-            if ( ImGui.Button("Build"))
-                Build();
-            if (ImGui.Button("Save"))
-            {
-                Save();
-            }
-            if (ImGui.Button("Load"))
-            {
-                Load();
-            }
-
         }
 
         private void Build()
@@ -312,7 +329,7 @@ namespace Unify2D
             builder.StartBuild();
         }
 
-        private  void Circle()
+        private void Circle()
         {
             if (_selected == null)
                 return;
@@ -325,12 +342,12 @@ namespace Unify2D
 
             uint color = MakeColor32(50, 255, 50, 255);
 
-            if ( _selectState == SelectedState.Drag)
+            if (_selectState == SelectedState.Drag)
             {
                 color = MakeColor32(255, 255, 50, 255);
             }
- 
-            drawList.AddCircle( WorldToUI(_selected.Position),
+
+            drawList.AddCircle(WorldToUI(_selected.Position),
                       8, color, 64, 3);
             drawList.PopClipRect();
         }
@@ -345,7 +362,7 @@ namespace Unify2D
             x *= _gameWindowSize.X;
             y *= _gameWindowSize.Y;
 
-            result = _gameWindowPosition + _gameWindowOffset + new Num.Vector2(x,y);
+            result = _gameWindowPosition + _gameWindowOffset + new Num.Vector2(x, y);
             return result;
         }
 
@@ -354,9 +371,9 @@ namespace Unify2D
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
             settings.Formatting = Formatting.Indented;
-            string text = JsonConvert.SerializeObject(_core.GameObjects ,settings);
+            string text = JsonConvert.SerializeObject(_core.GameObjects, settings);
 
-            File.WriteAllText( Path.Combine(_projectPath , "./test.scene"), text);
+            File.WriteAllText(Path.Combine(_projectPath, "./test.scene"), text);
         }
 
         void Load()
@@ -365,11 +382,21 @@ namespace Unify2D
 
             SelectGameObject(null);
 
-            string text = File.ReadAllText( Path.Combine(_projectPath, "./test.scene"));
-            JsonSerializerSettings settings = new JsonSerializerSettings();
-            settings.TypeNameHandling = TypeNameHandling.Auto;
+            List<GameObject> gameObjects = null;
+            try
+            {
+                string text = File.ReadAllText(Path.Combine(_projectPath, "./test.scene"));
+                JsonSerializerSettings settings = new JsonSerializerSettings();
+                settings.TypeNameHandling = TypeNameHandling.Auto;
+                gameObjects = JsonConvert.DeserializeObject<List<GameObject>>(text, settings);
+            }
+            catch
+            {
 
-            _core.LoadScene(this,  JsonConvert.DeserializeObject<List<GameObject>>(text, settings));
+            }
+
+            if ( gameObjects != null)
+                _core.LoadScene(this, gameObjects);
         }
 
         public static uint MakeColor32(byte r, byte g, byte b, byte a) { uint ret = a; ret <<= 8; ret += b; ret <<= 8; ret += g; ret <<= 8; ret += r; return ret; }
