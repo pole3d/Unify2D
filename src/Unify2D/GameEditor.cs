@@ -136,7 +136,6 @@ namespace Unify2D
                                 _selectState = SelectedState.Drag;
                             }
                         }
-
                     }
                 }
             }
@@ -163,38 +162,7 @@ namespace Unify2D
 
             // Call BeforeLayout first to set things up
             _imGuiRenderer.BeforeLayout(gameTime);
-
-            //bool b = false;
-            //if (ImGui.BeginMainMenuBar())
-            //{
-            //    if (ImGui.BeginMenu("menu"))
-            //    {
-            //        if (ImGui.MenuItem("menu item"))
-            //        {
-            //            b = true;
-            //        }
-            //        ImGui.EndMenu();
-            //    }
-            //    ImGui.EndMainMenuBar();
-            //}
-
-            //if (b)
-            //{
-            //    ImGui.OpenPopup("save-file");
-            //}
-
-            //if (ImGui.BeginPopupModal("save-file"))
-            //{
-            //    var picker = FilePicker.GetFolderPicker(this, "C://");
-            //    if (picker.Draw())
-            //    {
-            //        Console.WriteLine(picker.SelectedFile);
-            //        FilePicker.RemoveFilePicker(this);
-            //    }
-            //    ImGui.EndPopup();
-            //}
-
-
+            
             // Draw our UI
                ImGuiLayout();
 
@@ -205,6 +173,40 @@ namespace Unify2D
             // Call AfterLayout now to finish up and draw all the things
             _imGuiRenderer.AfterLayout();
         }
+
+        void Popups()
+        {
+            bool b = false;
+            if (ImGui.BeginMainMenuBar())
+            {
+                if (ImGui.BeginMenu("menu"))
+                {
+                    if (ImGui.MenuItem("menu item"))
+                    {
+                        b = true;
+                    }
+                    ImGui.EndMenu();
+                }
+                ImGui.EndMainMenuBar();
+            }
+
+            if (b)
+            {
+                ImGui.OpenPopup("save-file");
+            }
+
+            if (ImGui.BeginPopupModal("save-file"))
+            {
+                var picker = FilePicker.GetFolderPicker(this, "C://");
+                if (picker.Draw())
+                {
+                    Console.WriteLine(picker.SelectedFile);
+                    FilePicker.RemoveFilePicker(this);
+                }
+                ImGui.EndPopup();
+            }
+        }
+
 
         public bool IsMouseInGameWindow()
         {
