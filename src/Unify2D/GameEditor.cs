@@ -22,9 +22,12 @@ namespace Unify2D
     /// </summary>
     public class GameEditor : Game
     {
+        public string ProjectPath => _projectPath;
+
+
         private GraphicsDeviceManager _graphics;
         private ImGuiRenderer.Renderer _imGuiRenderer;
-
+        string _projectPath = @"C:\Users\aesteves\Documents\TestUnify\Project1";
 
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
 
@@ -65,12 +68,13 @@ namespace Unify2D
 
             _inspector = new InspectorToolbox();
             _toolboxes.Add(new AssetsToolbox());
+            _toolboxes.Add(new HierarchyToolbox());
 
             _toolboxes.Add(_inspector);
 
             foreach (var item in _toolboxes)
             {
-                item.Initialize();
+                item.Initialize(this);
             }
 
             _imGuiRenderer = new ImGuiRenderer.Renderer(this);
@@ -98,7 +102,7 @@ namespace Unify2D
         RenderTarget2D _sceneRenderTarget;
 
 
-        void SelectGameObject(GameObject go)
+        public void SelectGameObject(GameObject go)
         {
             _selected = go;
             _inspector.SetGameObject(go);
@@ -110,7 +114,7 @@ namespace Unify2D
 
             var mouseState = Mouse.GetState();
 
-            if (_selectState == SelectedState.None)
+            if (_selectState == SelectedState.None && IsMouseInGameWindow())
             {
                 if (mouseState.LeftButton == ButtonState.Pressed)
                 {
@@ -131,8 +135,6 @@ namespace Unify2D
                             {
                                 _selectState = SelectedState.Drag;
                             }
-
-
                         }
 
                     }
@@ -162,8 +164,39 @@ namespace Unify2D
             // Call BeforeLayout first to set things up
             _imGuiRenderer.BeforeLayout(gameTime);
 
+            //bool b = false;
+            //if (ImGui.BeginMainMenuBar())
+            //{
+            //    if (ImGui.BeginMenu("menu"))
+            //    {
+            //        if (ImGui.MenuItem("menu item"))
+            //        {
+            //            b = true;
+            //        }
+            //        ImGui.EndMenu();
+            //    }
+            //    ImGui.EndMainMenuBar();
+            //}
+
+            //if (b)
+            //{
+            //    ImGui.OpenPopup("save-file");
+            //}
+
+            //if (ImGui.BeginPopupModal("save-file"))
+            //{
+            //    var picker = FilePicker.GetFolderPicker(this, "C://");
+            //    if (picker.Draw())
+            //    {
+            //        Console.WriteLine(picker.SelectedFile);
+            //        FilePicker.RemoveFilePicker(this);
+            //    }
+            //    ImGui.EndPopup();
+            //}
+
+
             // Draw our UI
-            ImGuiLayout();
+               ImGuiLayout();
 
             //base.Draw(gameTime);
             GraphicsDevice.SetRenderTarget(null);
@@ -171,6 +204,19 @@ namespace Unify2D
 
             // Call AfterLayout now to finish up and draw all the things
             _imGuiRenderer.AfterLayout();
+        }
+
+        public bool IsMouseInGameWindow()
+        {
+            var mouseState = Mouse.GetState();
+            Num.Vector2 mousePosition = new Num.Vector2(mouseState.X, mouseState.Y);
+            mousePosition -= (_gameWindowPosition + _gameWindowOffset);
+
+            Vector2 size = new Vector2(_gameWindowSize.X, _gameWindowSize.Y);
+            Vector2 result = new Vector2(mousePosition.X, mousePosition.Y);
+            result /= size;
+
+            return result.X >= 0 && result.X <= 1 && result.Y >= 0 && result.Y <= 1;
         }
 
         public Vector2 GetWorldMousePosition()
@@ -194,11 +240,14 @@ namespace Unify2D
             return result;
         }
 
-        bool[] _hierarchy = new bool[100];
+        //bool[] _hierarchy = new bool[100];
 
         public static uint ToColor32(byte r, byte g, byte b, byte a) { uint ret = a; ret <<= 8; ret += b; ret <<= 8; ret += g; ret <<= 8; ret += r; return ret; }
         protected virtual void ImGuiLayout()
         {
+
+ 
+
             foreach (var item in _toolboxes)
             {
                 item.Show();
@@ -225,7 +274,7 @@ namespace Unify2D
                     if (ptr.NativePtr != null)
                     {
                         Asset asset = Clipboard.Content as Asset;
-                        GameObject go = new GameObject();
+                        GameObject go = new GameObject() { Name = asset.Name };
                         SelectGameObject(go);
                         SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
                         renderer.Initialize(this, go, asset.FullPath);
@@ -235,35 +284,10 @@ namespace Unify2D
             ImGui.EndDragDropTarget();
             var mouseState = GetWorldMousePosition();
             var mouse = Mouse.GetState();
-            Num.Vector2 mousePosition = new Num.Vector2(mouse.X, mouse.Y);
-            ImGui.Text($" {mouseState.X}:{mouseState.Y} /  {mousePosition.X}:{mousePosition.Y}");
+            ImGui.Text($" {mouseState.X}:{mouseState.Y}");
             ImGui.PopStyleVar();
 
             ImGui.End();
-
-
-
-            ImGui.Begin("Hierarchy");
-
-            int i = 0;
-            foreach (var item in _core.GameObjects)
-            {
-                if (ImGui.Selectable($"{i++} : {item.Name}", _hierarchy[i]))
-                {
-                    for (int j = 0; j < _hierarchy.Length; j++)
-                    {
-                        _hierarchy[j] = false;
-                    }
-
-                    _hierarchy[i] = true;
-                    SelectGameObject(item);
-                }
-            }
-
-
-            ImGui.TreePop();
-            ImGui.End();
-
 
 
             if ( ImGui.Button("Build"))
@@ -330,7 +354,7 @@ namespace Unify2D
             settings.Formatting = Formatting.Indented;
             string text = JsonConvert.SerializeObject(_core.GameObjects ,settings);
 
-            File.WriteAllText("./test.scene", text);
+            File.WriteAllText( Path.Combine(_projectPath , "./test.scene"), text);
         }
 
         void Load()
@@ -339,7 +363,7 @@ namespace Unify2D
 
             SelectGameObject(null);
 
-            string text = File.ReadAllText("./test.scene");
+            string text = File.ReadAllText( Path.Combine(_projectPath, "./test.scene"));
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
 

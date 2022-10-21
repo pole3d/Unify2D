@@ -16,15 +16,18 @@ namespace Unify2D.Toolbox
         const string PathAssets = "./Assets";
 
 
+        string _path;
         bool[] _selected;
         List<Asset> _assets = new List<Asset>();
 
-        public override void Initialize()
+        public override void Initialize(GameEditor editor)
         {
-            if ( Directory.Exists(PathAssets) == false)
-                Directory.CreateDirectory(PathAssets);
+            _path = Path.Combine(editor.ProjectPath, PathAssets);
 
-            var files = Directory.GetFiles(PathAssets);
+            if ( Directory.Exists(_path) == false)
+                Directory.CreateDirectory(_path);
+
+            var files = Directory.GetFiles(_path);
 
             foreach (var file in files)
             {

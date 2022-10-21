@@ -20,7 +20,7 @@ namespace Unify2D.Toolbox
 
         GameObject _gameObject;
 
-        public override void Initialize()
+        public override void Initialize(GameEditor editor)
         {
    
         }
@@ -45,7 +45,11 @@ namespace Unify2D.Toolbox
                     _gameObject.Position = new Vector2(position.X, position.Y);
                     foreach (var component in _gameObject.Components)
                     {
-                        ShowComponent(component);
+                        ImGui.SetNextItemOpen(true, ImGuiCond.Once);
+                        if (ImGui.TreeNode(component.GetType().Name))
+                        {
+                            ShowComponent(component);
+                        }
                     }
 
                 }
