@@ -27,6 +27,9 @@ namespace Unify2D
 
         private GraphicsDeviceManager _graphics;
         private ImGuiRenderer.Renderer _imGuiRenderer;
+
+        GameEditorSettings _editorSettings;
+
         string _projectPath = @"C:\Users\aesteves\Documents\TestUnify\Project1";
 
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
@@ -67,6 +70,10 @@ namespace Unify2D
             _core = new GameCore();
             GameCore.SetCurrent(_core);
 
+
+
+            LoadSettings();
+
             Load();
 
             _inspector = new InspectorToolbox();
@@ -92,6 +99,26 @@ namespace Unify2D
             _sceneRenderTarget = new RenderTarget2D(GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
 
             base.Initialize();
+        }
+
+        void LoadSettings()
+        {
+
+            try
+            {
+                _editorSettings = new GameEditorSettings();
+                string text = File.ReadAllText(Path.Combine(_projectPath, "./unify.settings"));
+              //  GameEditorSettings editorSettings = new() { CurrentProjectPath = _projectPath };
+
+                JsonSerializerSettings settings = new JsonSerializerSettings();
+                settings.TypeNameHandling = TypeNameHandling.Auto;
+                GameEditorSettings editorSettings = JsonConvert.DeserializeObject<GameEditorSettings>(text, settings);
+                
+            }
+            catch
+            {
+
+            }
         }
 
         protected override void LoadContent()
