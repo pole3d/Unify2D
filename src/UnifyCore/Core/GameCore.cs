@@ -40,9 +40,11 @@ namespace Unify2D.Core
             _gameObjects.Add(go);
         }
 
+        BlendState _blendState;
+  
         public void Draw()
         {
-            SpriteBatch.Begin();
+            SpriteBatch.Begin( SpriteSortMode.Deferred, BlendState.NonPremultiplied);
             foreach (var item in _gameObjects)
             {
                 item.Draw();

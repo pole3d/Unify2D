@@ -9,6 +9,7 @@ namespace Unify2D.Core
 {
     class GameAsset
     {
+        [JsonIgnore]
         public string Name => _name;
 
         [JsonIgnore]

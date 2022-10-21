@@ -57,7 +57,11 @@ namespace Unify2D.Builder
 
         public void StartBuild()
         {
-            Process.Start(Path.Combine(BuildPath,ExeName));
+            var startInfo = new ProcessStartInfo();
+            startInfo.FileName = Path.Combine(BuildPath, ExeName);
+            startInfo.WorkingDirectory = BuildPath;
+
+            Process.Start(startInfo);
         }
     }
 }

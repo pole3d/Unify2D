@@ -38,6 +38,16 @@ namespace Unify2D
         GameCore _core;
 
         GameObject _selected;
+        InspectorToolbox _inspector;
+
+        SelectedState _selectState;
+
+        enum SelectedState
+        {
+            None,
+            Select,
+            Drag
+        }
 
         public GameEditor()
         {
@@ -53,7 +63,10 @@ namespace Unify2D
             _core = new GameCore();
             GameCore.SetCurrent(_core);
 
+            _inspector = new InspectorToolbox();
             _toolboxes.Add(new AssetsToolbox());
+
+            _toolboxes.Add(_inspector);
 
             foreach (var item in _toolboxes)
             {
@@ -85,6 +98,58 @@ namespace Unify2D
         RenderTarget2D _sceneRenderTarget;
 
 
+        void SelectGameObject(GameObject go)
+        {
+            _selected = go;
+            _inspector.SetGameObject(go);
+        }
+
+        protected override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+
+            var mouseState = Mouse.GetState();
+
+            if (_selectState == SelectedState.None)
+            {
+                if (mouseState.LeftButton == ButtonState.Pressed)
+                {
+                    Vector2 worldPosition = GetWorldMousePosition();
+
+                    foreach (var item in _core.GameObjects)
+                    {
+                        if (worldPosition.X >= item.Position.X - item.BoundingSize.X / 2 && worldPosition.X <= item.Position.X + item.BoundingSize.X / 2
+                            && worldPosition.Y >= item.Position.Y - item.BoundingSize.Y / 2 && worldPosition.Y <= item.Position.Y + item.BoundingSize.Y / 2)
+                        {
+                            SelectGameObject(item);
+
+                            Num.Vector2 mousePosition = new Num.Vector2(mouseState.X, mouseState.Y);
+                            Num.Vector2 goPosition = WorldToUI(item.Position);
+
+                            Num.Vector2 direction = mousePosition - goPosition;
+                            if (direction.Length() < 10)
+                            {
+                                _selectState = SelectedState.Drag;
+                            }
+
+
+                        }
+
+                    }
+                }
+            }
+            else if (_selectState == SelectedState.Drag)
+            {
+                if (mouseState.LeftButton == ButtonState.Pressed && _selected != null)
+                {
+                    _selected.Position = GetWorldMousePosition();
+                }
+                if ( mouseState.LeftButton == ButtonState.Released)
+                {
+                    _selectState = SelectedState.None;
+                }
+            }
+        }
 
         protected override void Draw(GameTime gameTime)
         {
@@ -108,7 +173,7 @@ namespace Unify2D
             _imGuiRenderer.AfterLayout();
         }
 
-        public Vector2 GetMousePosition()
+        public Vector2 GetWorldMousePosition()
         {
             var mouseState = Mouse.GetState();
             Num.Vector2 mousePosition = new Num.Vector2(mouseState.X, mouseState.Y);
@@ -161,14 +226,14 @@ namespace Unify2D
                     {
                         Asset asset = Clipboard.Content as Asset;
                         GameObject go = new GameObject();
-                        _selected = go;
+                        SelectGameObject(go);
                         SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
                         renderer.Initialize(this, go, asset.FullPath);
                     }
                 }
             }
             ImGui.EndDragDropTarget();
-            var mouseState = GetMousePosition();
+            var mouseState = GetWorldMousePosition();
             var mouse = Mouse.GetState();
             Num.Vector2 mousePosition = new Num.Vector2(mouse.X, mouse.Y);
             ImGui.Text($" {mouseState.X}:{mouseState.Y} /  {mousePosition.X}:{mousePosition.Y}");
@@ -176,18 +241,7 @@ namespace Unify2D
 
             ImGui.End();
 
-            ImGui.Begin("Inspector");
-            if (_selected != null)
-            {
-                string name = _selected.Name;
 
-                ImGui.InputText("name", ref name, 40);
-                _selected.Name = name;
-                Num.Vector2 position = new Num.Vector2(_selected.Position.X, _selected.Position.Y);
-                ImGui.InputFloat2("position", ref position);
-                _selected.Position = new Vector2(position.X, position.Y);
-            }
-            ImGui.End();
 
             ImGui.Begin("Hierarchy");
 
@@ -202,7 +256,7 @@ namespace Unify2D
                     }
 
                     _hierarchy[i] = true;
-                    _selected = item;
+                    SelectGameObject(item);
                 }
             }
 
@@ -243,8 +297,15 @@ namespace Unify2D
             var drawList = ImGui.GetWindowDrawList();
             drawList.PushClipRect(p0, p1);
 
+            uint color = MakeColor32(50, 255, 50, 255);
+
+            if ( _selectState == SelectedState.Drag)
+            {
+                color = MakeColor32(255, 255, 50, 255);
+            }
+ 
             drawList.AddCircle( WorldToUI(_selected.Position),
-                      8, MakeColor32(50, 255, 50, 255), 64, 3);
+                      8, color, 64, 3);
             drawList.PopClipRect();
         }
 
@@ -266,6 +327,7 @@ namespace Unify2D
         {
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
+            settings.Formatting = Formatting.Indented;
             string text = JsonConvert.SerializeObject(_core.GameObjects ,settings);
 
             File.WriteAllText("./test.scene", text);
@@ -274,7 +336,8 @@ namespace Unify2D
         void Load()
         {
             _core.GameObjects.Clear();
-            _selected = null;
+
+            SelectGameObject(null);
 
             string text = File.ReadAllText("./test.scene");
             JsonSerializerSettings settings = new JsonSerializerSettings();

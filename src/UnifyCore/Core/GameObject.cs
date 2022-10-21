@@ -15,6 +15,9 @@ namespace Unify2D.Core
         public string Name { get; set; }
         public Vector2 BoundingSize{ get; set; }
 
+        [JsonIgnore]
+        public IEnumerable<Component> Components => _components;
+
         List<Renderer> _renderers;
 
         [JsonProperty]

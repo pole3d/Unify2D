@@ -12,7 +12,6 @@ namespace Unify2D.Core.Graphics
     public class SpriteRenderer : Renderer
     {
         public Color Color { get; set; } = Color.White;
-        public string Type { get; } = "SpriteRenderer";
 
         [JsonProperty]
         GameAsset _asset;
