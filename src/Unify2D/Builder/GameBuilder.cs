@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
+using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,14 +17,16 @@ namespace Unify2D.Builder
     {
         const string TemplatePath = "./GameTemplate";
         const string AssetsPath = "./Assets";
-        const string BuildPath = "./Build";
+        string BuildPath => Path.Combine( _editor.ProjectPath,  "./Build");
         const string ExeName = "UnifyGame.exe";
 
         GameCore _core;
+        GameEditor _editor;
 
-        public void Build( GameCore core)
+        public void Build( GameCore core , GameEditor editor)
         {
             _core = core;
+            _editor = editor;
 
             if (Directory.Exists(BuildPath) == false)
                 Directory.CreateDirectory(BuildPath);
@@ -44,7 +49,56 @@ namespace Unify2D.Builder
             }
 
             Save();
+
+            CreateDll();
         }
+
+        void CreateDll()
+        {
+            List<SyntaxTree> syntaxes = new List<SyntaxTree>();
+
+            foreach (var item in Directory.GetFiles(_editor.AssetsPath, "*.cs"))
+            {
+                string content = File.ReadAllText(item);
+                SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(content);
+                syntaxes.Add(syntaxTree);
+            }
+
+            string assemblyName = "GameAssembly";
+            List<MetadataReference> references = new();
+
+            foreach (var r in ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")).Split(Path.PathSeparator))
+            {
+                references.Add(MetadataReference.CreateFromFile(r));
+            }
+
+            CSharpCompilation compilation = CSharpCompilation.Create(
+            assemblyName,
+            syntaxTrees: syntaxes,
+            references: references,
+            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+            string dllPath = Path.Combine(BuildPath, "GameAssembly.dll");
+
+            EmitResult result = compilation.Emit(dllPath);
+
+            if (!result.Success)
+            {
+                IEnumerable<Diagnostic> failures = result.Diagnostics.Where(diagnostic =>
+                    diagnostic.IsWarningAsError ||
+                    diagnostic.Severity == DiagnosticSeverity.Error);
+
+                foreach (Diagnostic diagnostic in failures)
+                {
+                    Console.Error.WriteLine("{0}: {1}", diagnostic.Id, diagnostic.GetMessage());
+                }
+            }
+            else
+            {
+
+            }
+        }
+    
 
         void Save()
         {

@@ -13,7 +13,6 @@ namespace Unify2D.Toolbox
 {
     internal class AssetsToolbox : Toolbox
     {
-        const string PathAssets = "./Assets";
 
 
         string _path;
@@ -30,7 +29,7 @@ namespace Unify2D.Toolbox
         internal override void Reset()
         {
             _assets.Clear();
-            _path = Path.Combine(_editor.ProjectPath, PathAssets);
+            _path = _editor.AssetsPath;
 
             if (Directory.Exists(_path) == false)
                 Directory.CreateDirectory(_path);

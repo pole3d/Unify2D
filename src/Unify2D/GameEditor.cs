@@ -22,12 +22,18 @@ namespace Unify2D
     /// </summary>
     public class GameEditor : Game
     {
+        const string AssetsFolder = "./Assets";
+
         public string ProjectPath => _projectPath;
+        public string AssetsPath => Path.Combine(_projectPath, AssetsFolder);
+
+        public Scripting.Scripting Scripting => _scripting;
 
 
         private GraphicsDeviceManager _graphics;
         private ImGuiRenderer.Renderer _imGuiRenderer;
 
+        Scripting.Scripting _scripting;
         GameEditorSettings _editorSettings;
 
         string _projectPath = @"C:\Users\aesteves\Documents\TestUnify\Project1";
@@ -70,7 +76,8 @@ namespace Unify2D
             _core = new GameCore();
             GameCore.SetCurrent(_core);
 
-
+            _scripting = new Unify2D.Scripting.Scripting();
+            _scripting.Load(this);
 
             LoadSettings();
 
@@ -352,7 +359,7 @@ namespace Unify2D
         private void Build()
         {
             GameBuilder builder = new GameBuilder();
-            builder.Build(_core);
+            builder.Build(_core , this);
             builder.StartBuild();
         }
 
@@ -417,9 +424,9 @@ namespace Unify2D
                 settings.TypeNameHandling = TypeNameHandling.Auto;
                 gameObjects = JsonConvert.DeserializeObject<List<GameObject>>(text, settings);
             }
-            catch
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
             }
 
             if ( gameObjects != null)

@@ -20,7 +20,6 @@ namespace UnifyGame
         private GraphicsDeviceManager _graphics;
         private Unify2D.ImGuiRenderer.Renderer _imGuiRenderer;
 
-
         GameCore _core;
 
 

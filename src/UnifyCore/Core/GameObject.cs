@@ -71,6 +71,14 @@ namespace Unify2D.Core
             }
         }
 
- 
+        public void AddComponent(Component component)
+        {
+            if (component is Renderer renderer)
+            {
+                _renderers.Add(renderer);
+            }
+
+            _components.Add(component);
+        }
     }
 }

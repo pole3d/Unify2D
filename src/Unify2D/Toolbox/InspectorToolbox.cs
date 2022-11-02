@@ -16,13 +16,12 @@ namespace Unify2D.Toolbox
 {
     internal class InspectorToolbox : Toolbox
     {
-
-
+        GameEditor _editor;
         GameObject _gameObject;
 
         public override void Initialize(GameEditor editor)
         {
-   
+            _editor = editor;
         }
 
         public void SetGameObject(GameObject go)
@@ -49,11 +48,27 @@ namespace Unify2D.Toolbox
                         if (ImGui.TreeNode(component.GetType().Name))
                         {
                             ShowComponent(component);
+                            ImGui.TreePop();
+
                         }
                     }
-
                 }
             }
+
+            ImGui.Separator();
+
+            if (ImGui.CollapsingHeader("Add Component"))
+            {
+                foreach (var item in _editor.Scripting.GetTypes())
+                {
+                    if ( ImGui.Button(item.Name))
+                    {
+                        var component = Activator.CreateInstance(item);
+                        _gameObject.AddComponent(component as Component);
+                    }
+                }
+            }
+
             ImGui.End();
         }
 
@@ -63,10 +78,10 @@ namespace Unify2D.Toolbox
             PropertyInfo[] properties = component.GetType().GetProperties();
             foreach (PropertyInfo property in properties)
             {
-                if ( property.PropertyType == typeof(Color))
+                if (property.PropertyType == typeof(Color))
                 {
                     Color color = (Color)property.GetValue(component);
-                    System.Numerics.Vector4 vector = new System.Numerics.Vector4(color.R / 255f, color.G / 255f, color.B/255f, color.A/255f);
+                    System.Numerics.Vector4 vector = new System.Numerics.Vector4(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
 
                     if (ImGui.ColorEdit4(property.Name, ref vector))
                     {
@@ -75,7 +90,14 @@ namespace Unify2D.Toolbox
                     }
 
                 }
-
+                else if (property.PropertyType == typeof(int))
+                {
+                    int value = (int)property.GetValue(component);
+                    if (ImGui.InputInt(property.Name, ref value))
+                    {
+                        property.SetValue(component, value);
+                    }
+                }
             }
         }
     }
