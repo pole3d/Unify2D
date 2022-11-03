@@ -32,39 +32,58 @@ namespace Unify2D.Toolbox
         public override void Show()
         {
             ImGui.Begin("Inspector");
-            {
-                if (_gameObject != null)
-                {
-                    string name = _gameObject.Name;
 
-                    ImGui.InputText("name", ref name, 40);
-                    _gameObject.Name = name;
-                    System.Numerics.Vector2 position = new System.Numerics.Vector2(_gameObject.Position.X, _gameObject.Position.Y);
-                    ImGui.InputFloat2("position", ref position);
-                    _gameObject.Position = new Vector2(position.X, position.Y);
-                    foreach (var component in _gameObject.Components)
+            if (_gameObject != null)
+            {
+                string name = _gameObject.Name;
+
+                ImGui.InputText("name", ref name, 40);
+                _gameObject.Name = name;
+                System.Numerics.Vector2 position = new System.Numerics.Vector2(_gameObject.Position.X, _gameObject.Position.Y);
+                ImGui.InputFloat2("position", ref position);
+                _gameObject.Position = new Vector2(position.X, position.Y);
+
+
+                List<Component> toRemove = new List<Component>();
+                foreach (var component in _gameObject.Components)
+                {
+                    ImGui.SetNextItemOpen(true, ImGuiCond.Once);
+                    if (ImGui.TreeNode(component.GetType().Name))
                     {
-                        ImGui.SetNextItemOpen(true, ImGuiCond.Once);
-                        if (ImGui.TreeNode(component.GetType().Name))
+                        ShowComponent(component);
+                        ImGui.PushStyleColor(ImGuiCol.Button, Tools.Tools.ToColor32(230, 50, 60, 255));
+                        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Tools.Tools.ToColor32(250, 70, 80, 255));
+                        ImGui.PushStyleColor(ImGuiCol.ButtonActive, Tools.Tools.ToColor32(255, 90, 100, 255));
+
+                        if (ImGui.Button("Delete"))
                         {
-                            ShowComponent(component);
-                            ImGui.TreePop();
-
+                            toRemove.Add(component);
                         }
+                        ImGui.PopStyleColor(3);
+
+                        ImGui.TreePop();
                     }
+
+                    ImGui.Separator();
                 }
-            }
 
-            ImGui.Separator();
-
-            if (ImGui.CollapsingHeader("Add Component"))
-            {
-                foreach (var item in _editor.Scripting.GetTypes())
+                foreach (var item in toRemove)
                 {
-                    if ( ImGui.Button(item.Name))
+                    _gameObject.RemoveComponent(item);
+                }
+
+                if (_gameObject.Components.Count() == 0)
+                    ImGui.Separator();
+
+                if (ImGui.CollapsingHeader("Add Component"))
+                {
+                    foreach (var item in _editor.Scripting.GetTypes())
                     {
-                        var component = Activator.CreateInstance(item);
-                        _gameObject.AddComponent(component as Component);
+                        if (ImGui.Button(item.Name))
+                        {
+                            var component = Activator.CreateInstance(item);
+                            _gameObject.AddComponent(component as Component);
+                        }
                     }
                 }
             }
@@ -74,7 +93,6 @@ namespace Unify2D.Toolbox
 
         private void ShowComponent(Component component)
         {
-
             PropertyInfo[] properties = component.GetType().GetProperties();
             foreach (PropertyInfo property in properties)
             {
@@ -99,6 +117,8 @@ namespace Unify2D.Toolbox
                     }
                 }
             }
+
+     
         }
     }
 }

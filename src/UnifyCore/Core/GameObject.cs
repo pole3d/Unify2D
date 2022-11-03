@@ -36,7 +36,9 @@ namespace Unify2D.Core
         {
             foreach (var component in _components)
             {
+                component.Initialize(this);
                 component.Load(game,this);
+
                 if (component is Renderer renderer)
                 {
                     _renderers.Add(renderer);
@@ -48,12 +50,7 @@ namespace Unify2D.Core
         public T AddComponent<T>() where T : Component,new()
         {
             T component = new();
-            if ( component is Renderer renderer)
-            {
-                _renderers.Add(renderer);
-            }
-
-            _components.Add(component);
+            AddComponent(component);
 
             return component;
         }
@@ -78,7 +75,22 @@ namespace Unify2D.Core
                 _renderers.Add(renderer);
             }
 
+            component.Initialize(this);
+
             _components.Add(component);
+        }
+
+        internal void Update(GameCore core)
+        {
+            foreach (var item in _components)
+            {
+                item.Update(core);
+            }
+        }
+
+        public void RemoveComponent(Component item)
+        {
+            _components.Remove(item);
         }
     }
 }

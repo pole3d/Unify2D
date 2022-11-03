@@ -65,6 +65,12 @@ namespace UnifyGame
             base.LoadContent();
         }
 
+        protected override void Update(GameTime gameTime)
+        {
+            _core.Update();
+
+        }
+
         protected override void Draw(GameTime gameTime)
         {
 

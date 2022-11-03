@@ -64,5 +64,13 @@ namespace Unify2D.Core
                 item.Load(game);
             }
         }
+
+        public void Update()
+        {
+            foreach (var item in _gameObjects)
+            {
+                item.Update(this);
+            }
+        }
     }
 }

@@ -9,18 +9,13 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\FNA\FNA.csproj" />
+		<ProjectReference Include="..\GameAssembly\GameAssembly.csproj" />
 		<ProjectReference Include="..\ImGui.NET\ImGui.NET.csproj" />
 		<ProjectReference Include="..\UnifyCore\UnifyCore.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Content Include="$(RepositoryRootDirectory)/deps/cimgui/win-x64/cimgui.dll" CopyToOutputDirectory="PreserveNewest" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Reference Include="GameAssembly">
-	    <HintPath>..\..\deps\GameAssembly.dll</HintPath>
-	  </Reference>
 	</ItemGroup>
 
 </Project>

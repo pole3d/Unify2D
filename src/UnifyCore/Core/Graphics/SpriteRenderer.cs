@@ -36,5 +36,7 @@ namespace Unify2D.Core.Graphics
         {
             GameCore.Current.SpriteBatch.Draw(_texture, _go.Position - _go.BoundingSize / 2, Color);
         }
+
+   
     }
 }
