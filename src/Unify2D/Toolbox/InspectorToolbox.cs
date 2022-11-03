@@ -116,6 +116,14 @@ namespace Unify2D.Toolbox
                         property.SetValue(component, value);
                     }
                 }
+                else if (property.PropertyType == typeof(float))
+                {
+                    float value = (float)property.GetValue(component);
+                    if (ImGui.InputFloat(property.Name, ref value))
+                    {
+                        property.SetValue(component, value);
+                    }
+                }
             }
 
      

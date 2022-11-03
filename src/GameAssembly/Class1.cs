@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Unify2D.Core;
+using Input = Microsoft.Xna.Framework.Input;
 
 namespace GameAssembly
 {
@@ -10,7 +11,8 @@ namespace GameAssembly
 
 		public override void Update(GameCore core)
 		{
-			_gameObject.Position += Vector2.UnitX * 12;
+
+
 
 		}
 
