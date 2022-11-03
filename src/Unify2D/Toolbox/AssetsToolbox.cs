@@ -38,7 +38,7 @@ namespace Unify2D.Toolbox
 
             foreach (var file in files)
             {
-                _assets.Add(new Asset(Path.GetFileNameWithoutExtension(file),
+                _assets.Add(new Asset(Path.GetFileName(file),
                     Path.GetExtension(file), Path.GetDirectoryName(file)));
             }
 

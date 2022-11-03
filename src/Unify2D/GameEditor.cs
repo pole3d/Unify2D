@@ -144,7 +144,7 @@ namespace Unify2D
             _selected = go;
 
             if (_inspector != null)
-                _inspector.SetGameObject(go);
+                _inspector.SetObject(go);
         }
 
         protected override void Update(GameTime gameTime)
