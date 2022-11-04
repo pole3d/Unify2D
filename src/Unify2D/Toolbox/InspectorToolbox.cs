@@ -1,16 +1,11 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Unify2D.Assets;
 using Unify2D.Core;
-using Unify2D.Tools;
 
 namespace Unify2D.Toolbox
 {
@@ -55,9 +50,17 @@ namespace Unify2D.Toolbox
 
         private void ShowAsset()
         {
-            if ( _asset.Extension == ".cs")
+            if ( _asset.AssetContent is ScriptAssetContent scriptAsset)
             {
-                //ImGui.Text();
+                if (scriptAsset.IsLoaded == false)
+                    scriptAsset.Load();
+
+                ImGui.InputTextMultiline("##source", ref scriptAsset.Content ,ushort.MaxValue, new System.Numerics.Vector2(340,550));
+                if ( ImGui.Button("Save"))
+                {
+                    scriptAsset.Save();
+                    _editor.Scripting.Reload();
+                }
             }
         }
 

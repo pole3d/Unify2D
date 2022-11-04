@@ -19,13 +19,30 @@ namespace Unify2D.Scripting
         List<Type> _types = new();
         GameEditor _editor;
 
-        public void Load(GameEditor editor )
+        public void Reload()
         {
-            _editor = editor;
+            _types.Clear();
 
+            if (_context != null)
+            {
+                _context.Unloading += ContextUnloaded;
+                _context.Unload();
+                _context = null;
+            }
+            else
+            {
+                LoadScripts();
+            }
+        }
+
+        private void LoadScripts()
+        {
             List<SyntaxTree> syntaxes = new List<SyntaxTree>();
 
-            foreach (var item in Directory.GetFiles( editor.AssetsPath,"*.cs" ))
+            if (Directory.Exists(_editor.AssetsPath) == false)
+                return;
+
+            foreach (var item in Directory.GetFiles(_editor.AssetsPath, "*.cs"))
             {
                 string content = File.ReadAllText(item);
                 SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(content);
@@ -34,7 +51,6 @@ namespace Unify2D.Scripting
 
             string assemblyName = "GameAssembly";
             List<MetadataReference> references = new();
-
 
             foreach (var r in ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")).Split(Path.PathSeparator))
             {
@@ -76,6 +92,19 @@ namespace Unify2D.Scripting
 
                 }
             }
+        }
+
+        private void ContextUnloaded(AssemblyLoadContext obj)
+        {
+            Console.WriteLine("context unload");
+            LoadScripts();
+        }
+
+        public void Load(GameEditor editor )
+        {
+            _editor = editor;
+            Reload();
+           
         }
 
         public void Build()

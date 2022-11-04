@@ -13,8 +13,6 @@ namespace Unify2D.Toolbox
 {
     internal class AssetsToolbox : Toolbox
     {
-
-
         string _path;
         bool[] _selected;
         List<Asset> _assets = new List<Asset>();
@@ -31,6 +29,9 @@ namespace Unify2D.Toolbox
             _assets.Clear();
             _path = _editor.AssetsPath;
 
+            if (String.IsNullOrEmpty(_path))
+                return;
+
             if (Directory.Exists(_path) == false)
                 Directory.CreateDirectory(_path);
 
@@ -38,7 +39,7 @@ namespace Unify2D.Toolbox
 
             foreach (var file in files)
             {
-                _assets.Add(new Asset(Path.GetFileName(file),
+                _assets.Add(new Asset(Path.GetFileNameWithoutExtension(file),
                     Path.GetExtension(file), Path.GetDirectoryName(file)));
             }
 
@@ -63,6 +64,7 @@ namespace Unify2D.Toolbox
                         }
                     }
 
+                    _editor.SelectObject(_assets[n]);
                     _selected[n] = !_selected[n];
                 }
 

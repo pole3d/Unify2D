@@ -19,7 +19,7 @@
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-	  <Exec Command="xcopy &quot;$(OutDir)\*&quot; &quot;$(OutDir)\..\Unify2D\GameTemplate\&quot; /S /Y " />
+	  <Exec Command="XCOPY &quot;$(OutDir)&quot; &quot;../Unify2D/GameTemplate/&quot; /S /Y" />
 	</Target>
 
 </Project>

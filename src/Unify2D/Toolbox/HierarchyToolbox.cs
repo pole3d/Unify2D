@@ -31,7 +31,7 @@ namespace Unify2D.Toolbox
                     }
 
                     _hierarchy[i] = true;
-                    _editor.SelectGameObject(item);
+                    _editor.SelectObject(item);
                 }
                 ImGui.PopID();
 

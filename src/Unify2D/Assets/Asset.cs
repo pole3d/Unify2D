@@ -11,6 +11,7 @@ namespace Unify2D.Assets
         public string Name => _name;
         public string Extension => _extension;  
         public string Path  => _path; 
+        public AssetContent AssetContent  => _content;
 
         public string FullPath => _fullPath; 
 
@@ -18,6 +19,7 @@ namespace Unify2D.Assets
         private string _extension;
         private string _path;
         string _fullPath;
+        AssetContent _content;
 
 
         public Asset(string name, string extension, string path)
@@ -25,6 +27,11 @@ namespace Unify2D.Assets
             _name = name;
             _extension = extension;
             _path = path;
+
+            if ( _extension == ".cs")
+            {
+                _content = new ScriptAssetContent(this);
+            }
 
             _fullPath = System.IO.Path.Combine(path, name + extension);
         }

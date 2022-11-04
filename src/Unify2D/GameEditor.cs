@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Input;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Unify2D.Assets;
 using Unify2D.Builder;
@@ -24,8 +25,8 @@ namespace Unify2D
     {
         const string AssetsFolder = "./Assets";
 
-        public string ProjectPath => _projectPath;
-        public string AssetsPath => Path.Combine(_projectPath, AssetsFolder);
+        public string ProjectPath => _settings.Data.CurrentProjectPath;
+        public string AssetsPath => !String.IsNullOrEmpty(ProjectPath) ? Path.Combine(ProjectPath, AssetsFolder) : String.Empty;
 
         public Scripting.Scripting Scripting => _scripting;
 
@@ -34,9 +35,7 @@ namespace Unify2D
         private ImGuiRenderer.Renderer _imGuiRenderer;
 
         Scripting.Scripting _scripting;
-        GameEditorSettings _editorSettings;
 
-        string _projectPath = @"C:\Users\aesteves\Documents\TestUnify\Project1";
 
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
 
@@ -51,9 +50,12 @@ namespace Unify2D
 
         GameObject _selected;
         InspectorToolbox _inspector;
+        ScriptToolbox _scriptToolbox;
+
 
         SelectedState _selectState;
         bool _showSelectPath;
+        GameEditorSettings _settings;
 
         enum SelectedState
         {
@@ -69,6 +71,7 @@ namespace Unify2D
             _graphics.PreferMultiSampling = true;
 
             IsMouseVisible = true;
+
         }
 
         protected override void Initialize()
@@ -76,17 +79,21 @@ namespace Unify2D
             _core = new GameCore();
             GameCore.SetCurrent(_core);
 
+            _settings = new GameEditorSettings();
+            _settings.Load(this);
+
             _scripting = new Unify2D.Scripting.Scripting();
             _scripting.Load(this);
 
-            LoadSettings();
 
             Load();
 
+            _scriptToolbox = new ScriptToolbox();
             _inspector = new InspectorToolbox();
             _toolboxes.Add(new AssetsToolbox());
             _toolboxes.Add(new HierarchyToolbox());
 
+            _toolboxes.Add(_scriptToolbox);
             _toolboxes.Add(_inspector);
 
             foreach (var item in _toolboxes)
@@ -108,25 +115,7 @@ namespace Unify2D
             base.Initialize();
         }
 
-        void LoadSettings()
-        {
 
-            try
-            {
-                _editorSettings = new GameEditorSettings();
-                string text = File.ReadAllText(Path.Combine(_projectPath, "./unify.settings"));
-              //  GameEditorSettings editorSettings = new() { CurrentProjectPath = _projectPath };
-
-                JsonSerializerSettings settings = new JsonSerializerSettings();
-                settings.TypeNameHandling = TypeNameHandling.Auto;
-                GameEditorSettings editorSettings = JsonConvert.DeserializeObject<GameEditorSettings>(text, settings);
-                
-            }
-            catch
-            {
-
-            }
-        }
 
         protected override void LoadContent()
         {
@@ -139,9 +128,19 @@ namespace Unify2D
         RenderTarget2D _sceneRenderTarget;
 
 
-        public void SelectGameObject(GameObject go)
+        public void SelectObject(object go)
         {
-            _selected = go;
+            if ( go is Asset asset)
+            {
+                if ( asset.AssetContent is ScriptAssetContent script)
+                {
+                    _scriptToolbox.SetObject(asset);
+                    return;
+                }
+            }
+
+            if ( go is GameObject)
+                _selected = go as GameObject;
 
             if (_inspector != null)
                 _inspector.SetObject(go);
@@ -164,7 +163,7 @@ namespace Unify2D
                         if (worldPosition.X >= item.Position.X - item.BoundingSize.X / 2 && worldPosition.X <= item.Position.X + item.BoundingSize.X / 2
                             && worldPosition.Y >= item.Position.Y - item.BoundingSize.Y / 2 && worldPosition.Y <= item.Position.Y + item.BoundingSize.Y / 2)
                         {
-                            SelectGameObject(item);
+                            SelectObject(item);
 
                             Num.Vector2 mousePosition = new Num.Vector2(mouseState.X, mouseState.Y);
                             Num.Vector2 goPosition = WorldToUI(item.Position);
@@ -210,6 +209,10 @@ namespace Unify2D
                     {
                         _showSelectPath = true;
                     }
+                    if (ImGui.MenuItem("Show Explorer"))
+                    {
+                        Process.Start("explorer.exe",_settings.Data.CurrentProjectPath);
+                    }
                     if (ImGui.MenuItem("Build"))
                         Build();
                     if (ImGui.MenuItem("Save"))
@@ -249,12 +252,12 @@ namespace Unify2D
 
             if (ImGui.BeginPopupModal("open-project"))
             {
-                var picker = FilePicker.GetFolderPicker(this, _projectPath);
+                var picker = FilePicker.GetFolderPicker(this, ProjectPath);
                 picker.RootFolder = "C:\\";
                 picker.OnlyAllowFolders = true;
                 if (picker.Draw())
                 {
-                    _projectPath = picker.SelectedFile;
+                    _settings.Data.CurrentProjectPath = picker.SelectedFile;
                     Load();
                     foreach (var item in _toolboxes)
                     {
@@ -341,7 +344,7 @@ namespace Unify2D
                     {
                         Asset asset = Clipboard.Content as Asset;
                         GameObject go = new GameObject() { Name = asset.Name };
-                        SelectGameObject(go);
+                        SelectObject(go);
                         SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
                         renderer.Initialize(this, go, asset.FullPath);
                     }
@@ -407,19 +410,19 @@ namespace Unify2D
             settings.Formatting = Formatting.Indented;
             string text = JsonConvert.SerializeObject(_core.GameObjects, settings);
 
-            File.WriteAllText(Path.Combine(_projectPath, "./test.scene"), text);
+            File.WriteAllText(Path.Combine(ProjectPath, "./test.scene"), text);
         }
 
         void Load()
         {
             _core.GameObjects.Clear();
 
-            SelectGameObject(null);
+            SelectObject(null);
 
             List<GameObject> gameObjects = null;
             try
             {
-                string text = File.ReadAllText(Path.Combine(_projectPath, "./test.scene"));
+                string text = File.ReadAllText(Path.Combine(ProjectPath, "./test.scene"));
                 JsonSerializerSettings settings = new JsonSerializerSettings();
                 settings.TypeNameHandling = TypeNameHandling.Auto;
                 gameObjects = JsonConvert.DeserializeObject<List<GameObject>>(text, settings);
@@ -431,6 +434,11 @@ namespace Unify2D
 
             if ( gameObjects != null)
                 _core.LoadScene(this, gameObjects);
+        }
+
+        protected override void UnloadContent()
+        {
+            _settings.Save();
         }
 
         public static uint MakeColor32(byte r, byte g, byte b, byte a) { uint ret = a; ret <<= 8; ret += b; ret <<= 8; ret += g; ret <<= 8; ret += r; return ret; }
