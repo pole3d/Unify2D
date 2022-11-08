@@ -21,10 +21,19 @@ namespace Unify2D.Core.Graphics
         public void Initialize( Game game, GameObject go, string path)
         {
             _go = go;
-            _texture = game.Content.Load<Texture2D>(path);
 
-            _asset = new GameAsset(_texture, _texture.Name);
-            _go.BoundingSize = new Vector2(_texture.Width, _texture.Height);
+            try
+            {
+                _texture = game.Content.Load<Texture2D>(path);
+                _asset = new GameAsset(_texture, _texture.Name);
+                _go.BoundingSize = new Vector2(_texture.Width, _texture.Height);
+            }
+            catch (Exception e)
+            {
+
+                Console.WriteLine(e.ToString());
+            }
+
         }
 
         public override void Load(Game game , GameObject go)
@@ -34,6 +43,9 @@ namespace Unify2D.Core.Graphics
 
         public override void Draw()
         {
+            if (_texture == null)
+                return;
+
             GameCore.Current.SpriteBatch.Draw(_texture, _go.Position - _go.BoundingSize / 2, Color);
         }
 

@@ -13,7 +13,7 @@ namespace Unify2D.Core
     {
         public Vector2 Position{ get; set; }
         public string Name { get; set; }
-        public Vector2 BoundingSize{ get; set; }
+        public Vector2 BoundingSize { get; set; } = new Vector2(30, 30);
 
         [JsonIgnore]
         public IEnumerable<Component> Components => _components;
