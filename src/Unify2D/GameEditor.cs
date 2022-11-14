@@ -432,8 +432,11 @@ namespace Unify2D
                 Console.WriteLine(ex.Message);
             }
 
-            if ( gameObjects != null)
+            if (gameObjects != null)
+            {
+                Content.RootDirectory = ProjectPath;
                 _core.LoadScene(this, gameObjects);
+            }
         }
 
         protected override void UnloadContent()

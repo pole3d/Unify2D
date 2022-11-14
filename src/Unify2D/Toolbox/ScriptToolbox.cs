@@ -30,14 +30,17 @@ namespace Unify2D.Toolbox
             if (_asset == null)
                 return;
 
-            ImGui.Begin("Script");
+            ImGui.Begin($"Script : {_asset.Name}##script");
 
             if (_asset.AssetContent is ScriptAssetContent scriptAsset)
             {
                 if (scriptAsset.IsLoaded == false)
                     scriptAsset.Load();
 
-                ImGui.InputTextMultiline("##source", ref scriptAsset.Content, ushort.MaxValue, new System.Numerics.Vector2(800, 550));
+                 System.Numerics.Vector2 size =  ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin();
+                size.Y -= 20;
+
+                ImGui.InputTextMultiline("##source", ref scriptAsset.Content, ushort.MaxValue, size);
                 if (ImGui.Button("Save"))
                 {
                     scriptAsset.Save();

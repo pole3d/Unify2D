@@ -4,7 +4,7 @@
       {
         "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
         "_asset": {
-          "_name": "C:\\Users\\MoD DiB\\Documents\\Pole3D\\Unify\\TestUnify\\Project1\\.\\Assets\\ship_0000.png"
+          "_name": ".\\Assets\\ship_0000.png"
         },
         "Color": "255, 255, 255, 255"
       },
@@ -13,7 +13,7 @@
         "Speed": 20.0
       }
     ],
-    "Position": "815, 805",
+    "Position": "837, 821",
     "Name": "ship_0000",
     "BoundingSize": "32, 32"
   },
@@ -22,7 +22,7 @@
       {
         "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
         "_asset": {
-          "_name": "C:\\Users\\MoD DiB\\Documents\\Pole3D\\Unify\\TestUnify\\Project1\\.\\Assets\\ship_0001.png"
+          "_name": ".\\Assets\\ship_0001.png"
         },
         "Color": "255, 255, 255, 255"
       }

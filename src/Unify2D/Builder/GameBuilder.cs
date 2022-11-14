@@ -16,7 +16,7 @@ namespace Unify2D.Builder
     internal class GameBuilder
     {
         const string TemplatePath = "./GameTemplate";
-        const string AssetsPath = "./Assets";
+        string AssetsPath  => Path.Combine(_editor.ProjectPath,  "./Assets");
         string BuildPath => Path.Combine( _editor.ProjectPath,  "./Build");
         const string ExeName = "UnifyGame.exe";
 
@@ -44,8 +44,11 @@ namespace Unify2D.Builder
             foreach (var file in Directory.GetFiles(AssetsPath))
             {
                 string fileName = Path.GetFileName(file);
-                string newPath = Path.Combine(BuildPath,AssetsPath, fileName);
-                File.Copy(file, newPath, true);
+                string newPath = Path.Combine(BuildPath, "./Assets", fileName);
+
+                var sourceFile = new FileInfo(file);
+                sourceFile.CopyTo(newPath, true);
+
             }
 
             Save();
