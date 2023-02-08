@@ -29,6 +29,7 @@ namespace Unify2D.Core
         static GameCore s_current;
 
         List<GameObject> _gameObjects;
+        List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
 
         public GameCore()
         {
@@ -52,6 +53,16 @@ namespace Unify2D.Core
             SpriteBatch.End();
         }
 
+        public void Destroy(GameObject item)
+        {
+            _gameObjectsToDestroy.Remove(item);
+        }
+
+        public void DestroyImmediate(GameObject item)
+        {
+            _gameObjects.Remove(item);
+        }
+
         public void Initialize(GraphicsDevice graphicsDevice)
         {
             SpriteBatch = new SpriteBatch(graphicsDevice);
@@ -71,6 +82,13 @@ namespace Unify2D.Core
             {
                 item.Update(this);
             }
+
+            foreach (var item in _gameObjectsToDestroy)
+            {
+                _gameObjects.Remove(item);
+            }
+
+            _gameObjectsToDestroy.Clear();
         }
     }
 }

@@ -19,12 +19,15 @@ namespace Unify2D.Toolbox
         {
             ImGui.Begin("Hierarchy");
 
+            GameObject goToDestroy = null;
+
             int i = 0;
             foreach (var item in GameCore.Current.GameObjects)
             {
                 ImGui.PushID(i++);
                 if (ImGui.Selectable($"{item.Name}", _hierarchy[i]))
-                {
+                {      
+
                     for (int j = 0; j < _hierarchy.Length; j++)
                     {
                         _hierarchy[j] = false;
@@ -33,15 +36,31 @@ namespace Unify2D.Toolbox
                     _hierarchy[i] = true;
                     _editor.SelectObject(item);
                 }
+
+                if (ImGui.BeginPopupContextItem())
+                {
+                    if (ImGui.Button("Destroy"))
+                    {
+                        ImGui.CloseCurrentPopup();
+
+                        goToDestroy = item;
+                    }
+
+                    ImGui.EndPopup();
+                }
                 ImGui.PopID();
 
             }
 
 
-
-
-
             ImGui.End();
+
+            if (goToDestroy != null)
+            {
+                GameCore.Current.DestroyImmediate(goToDestroy);
+                _editor.UnSelectObject();
+            }
+
         }
     }
 }
