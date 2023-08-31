@@ -12,6 +12,7 @@ namespace ImGuiNET
         public int TexDesiredWidth;
         public int TexGlyphPadding;
         public byte Locked;
+        public void* UserData;
         public byte TexReady;
         public byte TexPixelsUseColors;
         public byte* TexPixelsAlpha8;
@@ -105,6 +106,7 @@ namespace ImGuiNET
         public ref int TexDesiredWidth => ref Unsafe.AsRef<int>(&NativePtr->TexDesiredWidth);
         public ref int TexGlyphPadding => ref Unsafe.AsRef<int>(&NativePtr->TexGlyphPadding);
         public ref bool Locked => ref Unsafe.AsRef<bool>(&NativePtr->Locked);
+        public IntPtr UserData { get => (IntPtr)NativePtr->UserData; set => NativePtr->UserData = (void*)value; }
         public ref bool TexReady => ref Unsafe.AsRef<bool>(&NativePtr->TexReady);
         public ref bool TexPixelsUseColors => ref Unsafe.AsRef<bool>(&NativePtr->TexPixelsUseColors);
         public IntPtr TexPixelsAlpha8 { get => (IntPtr)NativePtr->TexPixelsAlpha8; set => NativePtr->TexPixelsAlpha8 = (byte*)value; }
@@ -157,7 +159,11 @@ namespace ImGuiNET
             ImFont* ret = ImGuiNative.ImFontAtlas_AddFontDefault((ImFontAtlas*)(NativePtr), native_font_cfg);
             return new ImFontPtr(ret);
         }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        public ImFontPtr AddFontFromFileTTF(ReadOnlySpan<char> filename, float size_pixels)
+#else
         public ImFontPtr AddFontFromFileTTF(string filename, float size_pixels)
+#endif
         {
             byte* native_filename;
             int filename_byteCount = 0;
@@ -186,7 +192,11 @@ namespace ImGuiNET
             }
             return new ImFontPtr(ret);
         }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        public ImFontPtr AddFontFromFileTTF(ReadOnlySpan<char> filename, float size_pixels, ImFontConfigPtr font_cfg)
+#else
         public ImFontPtr AddFontFromFileTTF(string filename, float size_pixels, ImFontConfigPtr font_cfg)
+#endif
         {
             byte* native_filename;
             int filename_byteCount = 0;
@@ -215,7 +225,11 @@ namespace ImGuiNET
             }
             return new ImFontPtr(ret);
         }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        public ImFontPtr AddFontFromFileTTF(ReadOnlySpan<char> filename, float size_pixels, ImFontConfigPtr font_cfg, IntPtr glyph_ranges)
+#else
         public ImFontPtr AddFontFromFileTTF(string filename, float size_pixels, ImFontConfigPtr font_cfg, IntPtr glyph_ranges)
+#endif
         {
             byte* native_filename;
             int filename_byteCount = 0;
@@ -244,7 +258,11 @@ namespace ImGuiNET
             }
             return new ImFontPtr(ret);
         }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        public ImFontPtr AddFontFromMemoryCompressedBase85TTF(ReadOnlySpan<char> compressed_font_data_base85, float size_pixels)
+#else
         public ImFontPtr AddFontFromMemoryCompressedBase85TTF(string compressed_font_data_base85, float size_pixels)
+#endif
         {
             byte* native_compressed_font_data_base85;
             int compressed_font_data_base85_byteCount = 0;
@@ -273,7 +291,11 @@ namespace ImGuiNET
             }
             return new ImFontPtr(ret);
         }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        public ImFontPtr AddFontFromMemoryCompressedBase85TTF(ReadOnlySpan<char> compressed_font_data_base85, float size_pixels, ImFontConfigPtr font_cfg)
+#else
         public ImFontPtr AddFontFromMemoryCompressedBase85TTF(string compressed_font_data_base85, float size_pixels, ImFontConfigPtr font_cfg)
+#endif
         {
             byte* native_compressed_font_data_base85;
             int compressed_font_data_base85_byteCount = 0;
@@ -302,7 +324,11 @@ namespace ImGuiNET
             }
             return new ImFontPtr(ret);
         }
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        public ImFontPtr AddFontFromMemoryCompressedBase85TTF(ReadOnlySpan<char> compressed_font_data_base85, float size_pixels, ImFontConfigPtr font_cfg, IntPtr glyph_ranges)
+#else
         public ImFontPtr AddFontFromMemoryCompressedBase85TTF(string compressed_font_data_base85, float size_pixels, ImFontConfigPtr font_cfg, IntPtr glyph_ranges)
+#endif
         {
             byte* native_compressed_font_data_base85;
             int compressed_font_data_base85_byteCount = 0;
@@ -438,6 +464,11 @@ namespace ImGuiNET
         public IntPtr GetGlyphRangesDefault()
         {
             ushort* ret = ImGuiNative.ImFontAtlas_GetGlyphRangesDefault((ImFontAtlas*)(NativePtr));
+            return (IntPtr)ret;
+        }
+        public IntPtr GetGlyphRangesGreek()
+        {
+            ushort* ret = ImGuiNative.ImFontAtlas_GetGlyphRangesGreek((ImFontAtlas*)(NativePtr));
             return (IntPtr)ret;
         }
         public IntPtr GetGlyphRangesJapanese()

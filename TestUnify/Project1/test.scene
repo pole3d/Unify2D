@@ -4,18 +4,27 @@
       {
         "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
         "_asset": {
-          "_name": "C:\\Users\\aesteves\\Documents\\Unify2D\\TestUnify\\Project1\\.\\Assets\\ship_0006.png"
+          "_name": "C:\\Users\\aurelien.esteves\\Documents\\projects\\TestUnify\\Project1\\Assets\\ship_0006.png"
         },
-        "Color": "255, 255, 255, 255"
-      },
-      {
-        "$type": "GameAssembly.TestA, GameAssembly",
-        "Speed": 120.0,
-        "SpeedO": 30.0
+        "Color": "252, 89, 89, 255"
       }
     ],
-    "Position": "1006, 681",
-    "Name": "ship_0006",
+    "Position": "1215, 347",
+    "Name": "GameObject",
+    "BoundingSize": "30, 30"
+  },
+  {
+    "_components": [
+      {
+        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
+        "_asset": {
+          "_name": "C:\\Users\\aurelien.esteves\\Documents\\projects\\TestUnify\\Project1\\Assets\\ship_0003.png"
+        },
+        "Color": "186, 233, 108, 255"
+      }
+    ],
+    "Position": "730, 384",
+    "Name": "ship_0003",
     "BoundingSize": "32, 32"
   }
 ]
