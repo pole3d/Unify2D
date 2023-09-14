@@ -209,6 +209,22 @@ namespace Unify2D
             // Call BeforeLayout first to set things up
             _imGuiRenderer.BeforeLayout(gameTime);
 
+            DrawMainMenuBarUI();
+
+            // Draw our UI
+            ImGuiLayout();
+
+            Popups();
+
+            GraphicsDevice.SetRenderTarget(null);
+            GraphicsDevice.Clear(Color.Black);
+
+            // Call AfterLayout now to finish up and draw all the things
+            _imGuiRenderer.AfterLayout();
+        }
+
+        private void DrawMainMenuBarUI()
+        {
             if (ImGui.BeginMainMenuBar())
             {
                 if (ImGui.BeginMenu("File"))
@@ -219,7 +235,7 @@ namespace Unify2D
                     }
                     if (ImGui.MenuItem("Show Explorer"))
                     {
-                        Process.Start("explorer.exe",_settings.Data.CurrentProjectPath);
+                        Process.Start("explorer.exe", _settings.Data.CurrentProjectPath);
                     }
                     if (ImGui.MenuItem("Build"))
                         Build();
@@ -236,18 +252,6 @@ namespace Unify2D
 
                 ImGui.EndMainMenuBar();
             }
-
-
-            // Draw our UI
-            ImGuiLayout();
-
-            Popups();
-
-            GraphicsDevice.SetRenderTarget(null);
-            GraphicsDevice.Clear(Color.Black);
-
-            // Call AfterLayout now to finish up and draw all the things
-            _imGuiRenderer.AfterLayout();
         }
 
         void Popups()
