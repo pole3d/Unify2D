@@ -152,6 +152,20 @@ namespace Unify2D.Toolbox
                         property.SetValue(component, value);
                     }
                 }
+                else if (property.PropertyType == typeof(GameAsset))
+                {
+                    GameAsset value = property.GetValue(component) as GameAsset;
+                    string name = "none";
+
+                    if ( value != null )
+                    {
+                        name = value.Name;
+                        ImGui.InputText("path", ref name, 50);
+                    }
+
+          
+
+                }
             }
 
      

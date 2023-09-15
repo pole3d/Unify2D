@@ -39,8 +39,10 @@ namespace Unify2D.Toolbox
 
             foreach (var file in files)
             {
-                _assets.Add(new Asset(Path.GetFileNameWithoutExtension(file),
-                    Path.GetExtension(file), Path.GetDirectoryName(file)));
+                string relativeFile = file.Replace(_path, string.Empty);
+
+                _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeFile),
+                    Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile)));
             }
 
             _selected = new bool[files.Length];

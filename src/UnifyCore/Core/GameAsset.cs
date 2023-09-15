@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Unify2D.Core
 {
-    class GameAsset
+    public class GameAsset
     {
         [JsonIgnore]
         public string Name => _name;

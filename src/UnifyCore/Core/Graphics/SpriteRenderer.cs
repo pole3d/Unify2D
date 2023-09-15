@@ -2,16 +2,15 @@
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Unify2D.Core.Graphics
 {
     public class SpriteRenderer : Renderer
     {
         public Color Color { get; set; } = Color.White;
+        [JsonIgnore]
+        public GameAsset Asset => _asset;
 
         [JsonProperty]
         GameAsset _asset;
@@ -24,8 +23,8 @@ namespace Unify2D.Core.Graphics
 
             try
             {
-                _texture = game.Content.Load<Texture2D>(path);
-                _asset = new GameAsset(_texture, _texture.Name);
+                _texture = game.Content.Load<Texture2D>(   $"./Assets/{path}");
+                _asset = new GameAsset(_texture, path);
                 _go.BoundingSize = new Vector2(_texture.Width, _texture.Height);
             }
             catch (Exception e)

@@ -34,6 +34,15 @@ namespace Unify2D.Builder
             if (Directory.Exists( Path.Combine( BuildPath,AssetsPath)) == false)
                 Directory.CreateDirectory(Path.Combine(BuildPath, AssetsPath));
 
+
+            if ( Directory.Exists(TemplatePath) == false )
+            {
+
+
+
+                return;
+            }
+            
             foreach (var file in Directory.GetFiles(TemplatePath))
             {
                 string fileName = Path.GetFileName(file);
