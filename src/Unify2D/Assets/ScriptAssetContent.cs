@@ -21,7 +21,7 @@ namespace Unify2D.Assets
         {
             base.Load();
 
-            Content = File.ReadAllText(_asset.FullPath);
+            Content = File.ReadAllText(  $"{GameEditor.Instance.AssetsPath }{_asset.FullPath}" );
         }
 
         internal void Save()

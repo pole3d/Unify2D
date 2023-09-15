@@ -23,6 +23,15 @@ namespace Unify2D
     /// </summary>
     public class GameEditor : Game
     {
+        #region singleton 
+
+        public static GameEditor Instance => s_instance;
+              
+        private static GameEditor s_instance;
+
+        #endregion
+
+
         const string AssetsFolder = "./Assets";
 
         public string ProjectPath => _settings.Data.CurrentProjectPath;
@@ -66,6 +75,8 @@ namespace Unify2D
 
         public GameEditor()
         {
+            s_instance = this;
+
             _graphics = new GraphicsDeviceManager(this);
 
             _graphics.PreferMultiSampling = true;

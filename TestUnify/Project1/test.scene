@@ -21,6 +21,11 @@
           "_name": "\\ship_0007.png"
         },
         "Color": "255, 255, 255, 255"
+      },
+      {
+        "$type": "GameAssembly.TestA, GameAssembly",
+        "Speed": 10.0,
+        "SpeedO": 10.0
       }
     ],
     "Position": "812, 675",
