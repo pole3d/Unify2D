@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,7 +41,7 @@ namespace Unify2D.Toolbox
             {
                 ShowGameObject();
             }
-            else if ( _asset != null)
+            else if (_asset != null)
             {
                 ShowAsset();
             }
@@ -50,13 +51,13 @@ namespace Unify2D.Toolbox
 
         private void ShowAsset()
         {
-            if ( _asset.AssetContent is ScriptAssetContent scriptAsset)
+            if (_asset.AssetContent is ScriptAssetContent scriptAsset)
             {
                 if (scriptAsset.IsLoaded == false)
                     scriptAsset.Load();
 
-                ImGui.InputTextMultiline("##source", ref scriptAsset.Content ,ushort.MaxValue, new System.Numerics.Vector2(340,550));
-                if ( ImGui.Button("Save"))
+                ImGui.InputTextMultiline("##source", ref scriptAsset.Content, ushort.MaxValue, new System.Numerics.Vector2(340, 550));
+                if (ImGui.Button("Save"))
                 {
                     scriptAsset.Save();
                     _editor.Scripting.Reload();
@@ -119,6 +120,7 @@ namespace Unify2D.Toolbox
             }
         }
 
+        IntPtr handle;
         private void ShowComponent(Component component)
         {
             PropertyInfo[] properties = component.GetType().GetProperties();
@@ -157,18 +159,23 @@ namespace Unify2D.Toolbox
                     GameAsset value = property.GetValue(component) as GameAsset;
                     string name = "none";
 
-                    if ( value != null )
+                    if (value != null)
                     {
                         name = value.Name;
                         ImGui.InputText("path", ref name, 50);
                     }
+                    
+                    Texture2D texture = value.Asset as Texture2D;
 
-          
+                    IntPtr ptr = GameEditor.Instance.Renderer.BindTexture(texture);
+                    ImGui.Image(ptr, new System.Numerics.Vector2(40, 40));
+
+
 
                 }
             }
 
-     
+
         }
     }
 }

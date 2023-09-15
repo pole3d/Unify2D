@@ -38,7 +38,7 @@ namespace Unify2D
         public string AssetsPath => !String.IsNullOrEmpty(ProjectPath) ? Path.Combine(ProjectPath, AssetsFolder) : String.Empty;
 
         public Scripting.Scripting Scripting => _scripting;
-
+        public ImGuiRenderer.Renderer Renderer => _imGuiRenderer;
 
         private GraphicsDeviceManager _graphics;
         private ImGuiRenderer.Renderer _imGuiRenderer;
