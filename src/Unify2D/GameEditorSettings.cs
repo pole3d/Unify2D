@@ -8,12 +8,18 @@ using System.Threading.Tasks;
 
 namespace Unify2D
 {
+    /// <summary>
+    /// Data saved by the editor
+    /// </summary>
     [Serializable]
     public class GameEditorSettingsData
     {
         public string CurrentProjectPath;
     }
 
+    /// <summary>
+    /// Save / load settings of the editor
+    /// </summary>
     public class GameEditorSettings
     {
         readonly string SettingsFilename = "./unify.settings";

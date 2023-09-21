@@ -86,9 +86,9 @@ namespace Unify2D.Scripting
                     Assembly assembly = _context.LoadFromStream(ms);
 
                     _types.AddRange(typeof(Core.Component).Assembly.GetTypes()
-                        .Where(type => type.IsSubclassOf(typeof(Core.Component))));
+                        .Where(type => type.IsSubclassOf(typeof(Core.Component)) && type.IsAbstract == false));
                     _types.AddRange(assembly.GetTypes()
-                        .Where(type => type.IsSubclassOf(typeof(Core.Component))));
+                        .Where(type => type.IsSubclassOf(typeof(Core.Component)) && type.IsAbstract == false  ));
 
                 }
             }
