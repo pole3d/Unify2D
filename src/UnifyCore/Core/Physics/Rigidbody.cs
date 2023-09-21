@@ -1,5 +1,7 @@
 ﻿using ChipmunkSharp;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +36,7 @@ namespace Unify2D.Physics
 
             m_cpBody.SetBodyType(m_type);
             m_cpBody.SetMass(m_mass);
+            m_cpBody.SetPosition(ChipmunkConverter.Vector2ToCpVect(_gameObject.Position));
         }
 
         public override void Update(GameCore game)
@@ -47,9 +50,8 @@ namespace Unify2D.Physics
 
             cpVect cpGravity = ChipmunkConverter.Vector2ToCpVect(gravity);
 
-
             m_cpBody.UpdateVelocity(cpGravity, m_damper, deltaTime);
-            m_cpBody.UpdatePosition(deltaTime);
+            //m_cpBody.UpdatePosition(deltaTime);
 
 
             _gameObject.Position = ChipmunkConverter.CpVectToVector2(m_cpBody.GetPosition());

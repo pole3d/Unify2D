@@ -57,6 +57,9 @@ namespace Unify2D.Builder
                 string fileName = Path.GetFileName(file);
                 string newPath = Path.Combine(BuildPath, "./Assets", fileName);
 
+                if (File.Exists(newPath))
+                    File.Delete(newPath);
+
                 var sourceFile = new FileInfo(file);
                 sourceFile.CopyTo(newPath, true);
 
