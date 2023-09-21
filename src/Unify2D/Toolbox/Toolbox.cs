@@ -9,9 +9,14 @@ namespace Unify2D.Toolbox
 {
     abstract class Toolbox
     {
+        protected GameEditor _editor;
+
         public abstract void Show();
 
-        public abstract void Initialize(GameEditor editor);
+        public virtual void Initialize(GameEditor editor)
+        {
+            _editor = editor;
+        }
 
         internal virtual void Reset()
         {
