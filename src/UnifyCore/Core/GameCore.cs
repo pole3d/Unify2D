@@ -24,7 +24,9 @@ namespace Unify2D.Core
         }
 
         public SpriteBatch SpriteBatch { get; private set; }
-        public List<GameObject> GameObjects => _gameObjects; 
+        public List<GameObject> GameObjects => _gameObjects;
+        public GameTime GameTime => _gameTime;
+        private GameTime _gameTime;
 
         static GameCore s_current;
 
@@ -76,8 +78,11 @@ namespace Unify2D.Core
             }
         }
 
-        public void Update()
+        public void Update(GameTime gameTime)
         {
+            if (_gameTime != gameTime)
+                _gameTime = gameTime;
+
             foreach (var item in _gameObjects)
             {
                 item.Update(this);

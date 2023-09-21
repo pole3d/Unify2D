@@ -42,7 +42,7 @@ namespace Unify2D.Builder
 
                 return;
             }
-            
+
             foreach (var file in Directory.GetFiles(TemplatePath))
             {
                 string fileName = Path.GetFileName(file);
