@@ -1,10 +1,5 @@
 ﻿using ImGuiNET;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 using Unify2D.Toolbox.Popup;
 
 namespace Unify2D.Toolbox
@@ -15,18 +10,20 @@ namespace Unify2D.Toolbox
 
         protected override void DrawInternal(GameEditor editor)
         {
-            DrawExistingProject();
+            DrawExistingProject(editor);
             ImGui.NewLine();
-            DrawNewProject();
+           DrawNewProject(editor);
 
         }
 
-        private static void DrawNewProject()
+        private static void DrawNewProject(GameEditor editor)
         {
             ImGui.SeparatorText("New Project");
 
+            ImGui.BeginDisabled();
             string name = "NEW";
             ImGui.InputText("Name", ref name, 50);
+
             if (ImGui.Button("Choose folder"))
             {
 
@@ -35,19 +32,44 @@ namespace Unify2D.Toolbox
             {
 
             }
+
+            ImGui.EndDisabled();
+
         }
 
-        private static void DrawExistingProject()
+        private static void DrawExistingProject(GameEditor editor)
         {
-            ImGui.SeparatorText("Existing projects");
-            if (ImGui.Button("Open"))
-            {
+            ImGui.SeparatorText("Recent projects");
 
+            ImGui.BeginChildFrame( 12,new System.Numerics.Vector2(140,80));
+            if (string.IsNullOrEmpty(editor.Settings.Data.CurrentProjectPath) == false)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Button, Tools.Tools.ToColor32(225, 70, 50, 255));
+                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Tools.Tools.ToColor32(255, 90, 60, 255));
+                ImGui.PushStyleColor(ImGuiCol.ButtonActive, Tools.Tools.ToColor32(255, 70, 50, 255));
+                if (ImGui.Button(  Path.GetFileName(editor.Settings.Data.CurrentProjectPath)))
+                {
+                    editor.LoadScene();
+                    editor.HidePopup();
+                }
+                ImGui.PopStyleColor();
+                ImGui.PopStyleColor();
+                ImGui.PopStyleColor();
+            }
+            ImGui.EndChildFrame();
+
+
+            ImGui.NewLine();
+  
+
+
+            if (ImGui.Button("Open from disk"))
+            {
+                editor.ShowPopup(new FilePickerPopup());
             }
 
             ImGui.NewLine();
 
-            ImGui.Text("Recent Projects");
         }
     }
 }

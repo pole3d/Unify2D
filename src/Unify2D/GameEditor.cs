@@ -41,6 +41,8 @@ namespace Unify2D
         public Scripting.Scripting Scripting => _scripting;
         public ImGuiRenderer.Renderer Renderer => _imGuiRenderer;
 
+        public GameEditorSettings Settings { get => _settings;  }
+
         GraphicsDeviceManager _graphics;
         ImGuiRenderer.Renderer _imGuiRenderer;
         bool _projectLoaded;
@@ -90,7 +92,7 @@ namespace Unify2D
 
         protected override void Initialize()
         {
-            _core = new GameCore();
+            _core = new GameCore(this);
             GameCore.SetCurrent(_core);
 
             _settings = new GameEditorSettings();
@@ -306,10 +308,15 @@ namespace Unify2D
             }
         }
 
-        void ShowPopup( PopupBase popup )
+        public void ShowPopup( PopupBase popup )
         {
 
             _currentPopup = popup;  
+        }
+
+        internal void HidePopup()
+        {
+            _currentPopup = null;
         }
 
 
@@ -458,8 +465,11 @@ namespace Unify2D
             File.WriteAllText(Path.Combine(ProjectPath, "./test.scene"), text);
         }
 
-        void LoadScene()
+        public void LoadScene()
         {
+            _projectLoaded = true;
+            InitializeToolBoxes();
+
             _core.GameObjects.Clear();
 
             SelectObject(null);
@@ -490,6 +500,8 @@ namespace Unify2D
         }
 
         public static uint MakeColor32(byte r, byte g, byte b, byte a) { uint ret = a; ret <<= 8; ret += b; ret <<= 8; ret += g; ret <<= 8; ret += r; return ret; }
+
+
     }
 
 

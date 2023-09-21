@@ -23,6 +23,8 @@ namespace Unify2D.Core
             s_current = core;
         }
 
+        public Game Game => _game;
+
         public SpriteBatch SpriteBatch { get; private set; }
         public List<GameObject> GameObjects => _gameObjects; 
 
@@ -30,9 +32,11 @@ namespace Unify2D.Core
 
         List<GameObject> _gameObjects;
         List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
+        Game _game;
 
-        public GameCore()
+        public GameCore(Game game)
         {
+            _game = game;
             _gameObjects = new List<GameObject>();
         }
 
@@ -78,6 +82,8 @@ namespace Unify2D.Core
 
         public void Update()
         {
+            
+
             foreach (var item in _gameObjects)
             {
                 item.Update(this);

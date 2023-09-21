@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Unify2D.Toolbox.Popup
 {
-    internal abstract class PopupBase
+    public abstract class PopupBase
     {
         public abstract string Name{  get;  }
 

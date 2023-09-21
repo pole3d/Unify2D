@@ -37,7 +37,7 @@ namespace UnifyGame
 
         protected override void Initialize()
         {
-            _core = new GameCore();
+            _core = new GameCore(this);
             GameCore.SetCurrent(_core);
 
             _imGuiRenderer = new Unify2D.ImGuiRenderer.Renderer(this);
