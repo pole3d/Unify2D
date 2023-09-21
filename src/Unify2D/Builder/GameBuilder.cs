@@ -50,6 +50,8 @@ namespace Unify2D.Builder
                 File.Copy(file, newPath, true);
             }
 
+            Directory.CreateDirectory(BuildPath + "./Assets");
+
             foreach (var file in Directory.GetFiles(AssetsPath))
             {
                 string fileName = Path.GetFileName(file);
