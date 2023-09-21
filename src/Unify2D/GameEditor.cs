@@ -13,6 +13,7 @@ using Unify2D.Core;
 using Unify2D.Core.Graphics;
 using Unify2D.ImGuiRenderer;
 using Unify2D.Toolbox;
+using Unify2D.Toolbox.Popup;
 using Unify2D.Tools;
 using Num = System.Numerics;
 
@@ -40,10 +41,12 @@ namespace Unify2D
         public Scripting.Scripting Scripting => _scripting;
         public ImGuiRenderer.Renderer Renderer => _imGuiRenderer;
 
-        private GraphicsDeviceManager _graphics;
-        private ImGuiRenderer.Renderer _imGuiRenderer;
+        GraphicsDeviceManager _graphics;
+        ImGuiRenderer.Renderer _imGuiRenderer;
+        bool _projectLoaded;
 
         Scripting.Scripting _scripting;
+        PopupBase _currentPopup;
 
 
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
@@ -97,8 +100,26 @@ namespace Unify2D
             _scripting.Load(this);
 
 
-            Load();
+            _imGuiRenderer = new ImGuiRenderer.Renderer(this);
+            _imGuiRenderer.RebuildFontAtlas();
+            ImGui.GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
 
+            Window.AllowUserResizing = true;
+            _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+            _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 60;
+            _graphics.ApplyChanges();
+
+            _sceneRenderTarget = new RenderTarget2D(GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
+
+            //LoadScene();
+
+            ShowPopup(new LauncherPopup());
+
+            base.Initialize();
+        }
+
+        void InitializeToolBoxes()
+        {
             _scriptToolbox = new ScriptToolbox();
             _inspector = new InspectorToolbox();
             _toolboxes.Add(new AssetsToolbox());
@@ -111,19 +132,6 @@ namespace Unify2D
             {
                 item.Initialize(this);
             }
-
-            _imGuiRenderer = new ImGuiRenderer.Renderer(this);
-            _imGuiRenderer.RebuildFontAtlas();
-            ImGui.GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
-
-            Window.AllowUserResizing = true;
-            _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
-            _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 60;
-            _graphics.ApplyChanges();
-
-            _sceneRenderTarget = new RenderTarget2D(GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
-
-            base.Initialize();
         }
 
 
@@ -256,7 +264,7 @@ namespace Unify2D
                     }
                     if (ImGui.MenuItem("Load"))
                     {
-                        Load();
+                        LoadScene();
                     }
                     ImGui.EndMenu();
                 }
@@ -281,7 +289,7 @@ namespace Unify2D
                 if (picker.Draw())
                 {
                     _settings.Data.CurrentProjectPath = picker.SelectedFile;
-                    Load();
+                    LoadScene();
                     foreach (var item in _toolboxes)
                     {
                         item.Reset();
@@ -291,6 +299,17 @@ namespace Unify2D
                 }
                 ImGui.EndPopup();
             }
+
+            if (_currentPopup != null )
+            {
+                _currentPopup.Draw(this);
+            }
+        }
+
+        void ShowPopup( PopupBase popup )
+        {
+
+            _currentPopup = popup;  
         }
 
 
@@ -347,6 +366,9 @@ namespace Unify2D
 
         private void GameWindow()
         {
+            if (_projectLoaded == false)
+                return;
+
             _renderTargetId = _imGuiRenderer.BindTexture(_sceneRenderTarget);
 
             ImGui.Begin("GAME", ImGuiWindowFlags.None);
@@ -436,7 +458,7 @@ namespace Unify2D
             File.WriteAllText(Path.Combine(ProjectPath, "./test.scene"), text);
         }
 
-        void Load()
+        void LoadScene()
         {
             _core.GameObjects.Clear();
 

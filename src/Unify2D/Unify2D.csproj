@@ -34,4 +34,8 @@
       </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="src\unify2d\toolbox\popup\" />
+    </ItemGroup>
+
 </Project>
