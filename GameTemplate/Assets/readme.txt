@@ -1,0 +1,1 @@
+Used to keep the folder inside git 
