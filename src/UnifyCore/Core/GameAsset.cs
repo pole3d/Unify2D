@@ -12,6 +12,7 @@ namespace Unify2D.Core
         [JsonIgnore]
         public string Name => _name;
 
+        [JsonIgnore]
         public object Asset => _asset;
 
         [JsonIgnore]
