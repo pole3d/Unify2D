@@ -48,18 +48,19 @@ namespace Unify2D
 
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
 
-        Num.Vector2 _gameWindowPosition;
-        Num.Vector2 _gameWindowSize;
-        readonly Num.Vector2 _gameWindowOffset = new Num.Vector2(8, 27);
-        const float _bottomOffset = 20;
-
-        Vector2 _gameResolution = new Vector2(1920, 1080);
+        public Vector2 GameResolution { get; private set; } = new Vector2(1920, 1080);
 
         GameCore _core;
 
         GameObject _selected;
-        InspectorToolbox _inspector;
+        InspectorToolbox _inspectorToolbox;
         ScriptToolbox _scriptToolbox;
+        GameToolbox _gameToolbox;
+
+
+        RenderTarget2D _sceneRenderTarget;
+        public RenderTarget2D SceneRenderTarget => _sceneRenderTarget;
+
 
 
         SelectedState _selectState;
@@ -100,12 +101,15 @@ namespace Unify2D
             Load();
 
             _scriptToolbox = new ScriptToolbox();
-            _inspector = new InspectorToolbox();
+            _inspectorToolbox = new InspectorToolbox();
+            _gameToolbox = new GameToolbox();
+
             _toolboxes.Add(new AssetsToolbox());
             _toolboxes.Add(new HierarchyToolbox());
 
             _toolboxes.Add(_scriptToolbox);
-            _toolboxes.Add(_inspector);
+            _toolboxes.Add(_inspectorToolbox);
+            _toolboxes.Add(_gameToolbox);
 
             foreach (var item in _toolboxes)
             {
@@ -121,7 +125,7 @@ namespace Unify2D
             _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 60;
             _graphics.ApplyChanges();
 
-            _sceneRenderTarget = new RenderTarget2D(GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
+            _sceneRenderTarget = new RenderTarget2D(GraphicsDevice, (int)GameResolution.X, (int)GameResolution.Y);
 
             base.Initialize();
         }
@@ -134,9 +138,6 @@ namespace Unify2D
 
             base.LoadContent();
         }
-
-        IntPtr _renderTargetId = IntPtr.Zero;
-        RenderTarget2D _sceneRenderTarget;
 
 
         public void SelectObject(object go)
@@ -153,16 +154,16 @@ namespace Unify2D
             if ( go is GameObject)
                 _selected = go as GameObject;
 
-            if (_inspector != null)
-                _inspector.SetObject(go);
+            if (_inspectorToolbox != null)
+                _inspectorToolbox.SetObject(go);
         }
 
         public void UnSelectObject()
         {
             _selected = null;
 
-            if (_inspector != null)
-                _inspector.SetObject(null);
+            if (_inspectorToolbox != null)
+                _inspectorToolbox.SetObject(null);
         }
 
         protected override void Update(GameTime gameTime)
@@ -296,90 +297,23 @@ namespace Unify2D
 
         public bool IsMouseInGameWindow()
         {
-            var mouseState = Mouse.GetState();
-            Num.Vector2 mousePosition = new Num.Vector2(mouseState.X, mouseState.Y);
-            mousePosition -= (_gameWindowPosition + _gameWindowOffset);
-
-            Vector2 size = new Vector2(_gameWindowSize.X, _gameWindowSize.Y);
-            Vector2 result = new Vector2(mousePosition.X, mousePosition.Y);
-            result /= size;
-
-            return result.X >= 0 && result.X <= 1 && result.Y >= 0 && result.Y <= 1;
+            return _gameToolbox.IsMouseInWindow();
         }
 
         public Vector2 GetWorldMousePosition()
         {
-            var mouseState = Mouse.GetState();
-            Num.Vector2 mousePosition = new Num.Vector2(mouseState.X, mouseState.Y);
-            mousePosition -= (_gameWindowPosition + _gameWindowOffset);
-
-            Vector2 size = new Vector2(_gameWindowSize.X, _gameWindowSize.Y);
-            Vector2 result = new Vector2(mousePosition.X, mousePosition.Y);
-            result /= size;
-
-            result.X = MathHelper.Clamp(result.X, 0, 1);
-            result.Y = MathHelper.Clamp(result.Y, 0, 1);
-
-            result *= _gameResolution;
-
-            result.X = MathF.Round(result.X);
-            result.Y = MathF.Round(result.Y);
-
-            return result;
+            return _gameToolbox.GetMousePosition();
         }
 
 
         protected virtual void ImGuiLayout()
         {
-
             foreach (var item in _toolboxes)
             {
                 item.Show();
             }
 
             ImGui.ShowDemoWindow();
-
-            GameWindow();
-
-
-
-        }
-
-        private void GameWindow()
-        {
-            _renderTargetId = _imGuiRenderer.BindTexture(_sceneRenderTarget);
-
-            ImGui.Begin("GAME", ImGuiWindowFlags.None);
-            _gameWindowPosition = ImGui.GetWindowPos();
-            _gameWindowSize = ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin();
-            _gameWindowSize.Y -= _bottomOffset;
-
-            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Num.Vector2.Zero);
-            ImGui.Image(_renderTargetId, ImGui.GetContentRegionAvail() - new Num.Vector2(0, _bottomOffset));
-            Circle();
-
-            if (ImGui.BeginDragDropTarget())
-            {
-                unsafe
-                {
-                    var ptr = ImGui.AcceptDragDropPayload("ASSET");
-                    if (ptr.NativePtr != null)
-                    {
-                        Asset asset = Clipboard.Content as Asset;
-                        GameObject go = new GameObject() { Name = asset.Name };
-                        SelectObject(go);
-                        SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
-                        renderer.Initialize(this, go, asset.FullPath);
-                    }
-                }
-            }
-            ImGui.EndDragDropTarget();
-            var mouseState = GetWorldMousePosition();
-            var mouse = Mouse.GetState();
-            ImGui.Text($" {mouseState.X}:{mouseState.Y}");
-            ImGui.PopStyleVar();
-
-            ImGui.End();
         }
 
         private void Build()
@@ -389,7 +323,7 @@ namespace Unify2D
             builder.StartBuild();
         }
 
-        private void Circle()
+        public void Circle()
         {
             if (_selected == null)
                 return;
@@ -416,13 +350,13 @@ namespace Unify2D
         {
             Num.Vector2 result = new Num.Vector2(world.X, world.Y);
 
-            float x = world.X / _gameResolution.X;
-            float y = world.Y / _gameResolution.Y;
+            float x = world.X / GameResolution.X;
+            float y = world.Y / GameResolution.Y;
 
-            x *= _gameWindowSize.X;
-            y *= _gameWindowSize.Y;
+            x *= _gameToolbox.Size.X;
+            y *= _gameToolbox.Size.Y;
 
-            result = _gameWindowPosition + _gameWindowOffset + new Num.Vector2(x, y);
+            result = _gameToolbox.Position + _gameToolbox.WindowOffset + new Num.Vector2(x, y);
             return result;
         }
 
