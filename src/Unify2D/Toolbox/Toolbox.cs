@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Unify2D.Toolbox
 {
+    /// <summary>
+    /// Base class for a tool window in the game editor
+    /// </summary>
     abstract class Toolbox
     {
         public abstract void Show();
