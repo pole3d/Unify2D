@@ -136,7 +136,6 @@ namespace Unify2D.Toolbox
             }
         }
 
-        IntPtr handle;
         private void ShowComponent(Component component)
         {
             PropertyInfo[] properties = component.GetType().GetProperties();

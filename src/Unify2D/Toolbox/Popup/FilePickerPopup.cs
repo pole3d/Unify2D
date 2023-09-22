@@ -13,6 +13,7 @@ namespace Unify2D.Toolbox
     internal class FilePickerPopup : PopupBase
     {
         public override string Name => "FilePicker";
+        public Action<string> OnPathSelected;
 
         protected override void DrawInternal(GameEditor editor)
         {
@@ -21,12 +22,11 @@ namespace Unify2D.Toolbox
             picker.OnlyAllowFolders = true;
             if (picker.Draw())
             {
-                editor.Settings.Data.CurrentProjectPath = picker.SelectedFile;
-                editor.LoadScene();
+                OnPathSelected?.Invoke(picker.SelectedFile);
 
                 FilePicker.RemoveFilePicker(this);
-
                 editor.HidePopup();
+
             }
         }
 

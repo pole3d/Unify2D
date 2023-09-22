@@ -45,7 +45,6 @@ namespace Unify2D.Core
             _gameObjects.Add(go);
         }
 
-        BlendState _blendState;
   
         public void Draw()
         {

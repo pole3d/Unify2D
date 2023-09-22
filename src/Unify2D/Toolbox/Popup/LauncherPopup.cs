@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using System;
 using System.IO;
 using Unify2D.Toolbox.Popup;
 
@@ -8,49 +9,62 @@ namespace Unify2D.Toolbox
     {
         public override string Name => "Launcher";
 
+        GameEditor _editor;
+        string _newProjectPath = String.Empty;
+        string _newProjectName = "NEW_PROJECT";
+
         protected override void DrawInternal(GameEditor editor)
         {
+            _editor = editor;
+
             DrawExistingProject(editor);
             ImGui.NewLine();
-           DrawNewProject(editor);
+            DrawNewProject(editor);
 
         }
 
-        private static void DrawNewProject(GameEditor editor)
+        private void DrawNewProject(GameEditor editor)
         {
             ImGui.SeparatorText("New Project");
 
-            ImGui.BeginDisabled();
-            string name = "NEW";
-            ImGui.InputText("Name", ref name, 50);
+            ImGui.InputText("Name", ref _newProjectName, 30);
 
-            if (ImGui.Button("Choose folder"))
+            if (ImGui.Button("..."))
             {
+                FilePickerPopup filePicker = new FilePickerPopup();
+                filePicker.OnPathSelected += OnNewProjectPathSelected;
 
+                editor.ShowPopup(filePicker);
             }
+            ImGui.SameLine();
+
+            ImGui.InputText("Path", ref _newProjectPath, 70);
+
             if (ImGui.Button("Create"))
             {
+                _newProjectPath = Path.Combine(_newProjectPath, _newProjectName);
 
+                Directory.CreateDirectory(_newProjectPath);
+
+                OnOpenProjectPathSelected(_newProjectPath);
             }
 
-            ImGui.EndDisabled();
 
         }
 
-        private static void DrawExistingProject(GameEditor editor)
+        private void DrawExistingProject(GameEditor editor)
         {
             ImGui.SeparatorText("Recent projects");
 
-            ImGui.BeginChildFrame( 12,new System.Numerics.Vector2(140,80));
+            ImGui.BeginChildFrame(12, new System.Numerics.Vector2(140, 80));
             if (string.IsNullOrEmpty(editor.Settings.Data.CurrentProjectPath) == false)
             {
                 ImGui.PushStyleColor(ImGuiCol.Button, ToolsUI.ToColor32(225, 70, 50, 255));
                 ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ToolsUI.ToColor32(255, 90, 60, 255));
                 ImGui.PushStyleColor(ImGuiCol.ButtonActive, ToolsUI.ToColor32(255, 70, 50, 255));
-                if (ImGui.Button(  Path.GetFileName(editor.Settings.Data.CurrentProjectPath)))
+                if (ImGui.Button(Path.GetFileName(editor.Settings.Data.CurrentProjectPath)))
                 {
-                    editor.LoadScene();
-                    editor.HidePopup();
+                    LoadProject();
                 }
                 ImGui.PopStyleColor();
                 ImGui.PopStyleColor();
@@ -60,16 +74,40 @@ namespace Unify2D.Toolbox
 
 
             ImGui.NewLine();
-  
 
 
             if (ImGui.Button("Open from disk"))
             {
-                editor.ShowPopup(new FilePickerPopup());
+                FilePickerPopup filePicker = new FilePickerPopup();
+                filePicker.OnPathSelected += OnOpenProjectPathSelected;
+
+                editor.ShowPopup(filePicker);
             }
 
             ImGui.NewLine();
 
         }
+
+
+
+        private void OnOpenProjectPathSelected(string path)
+        {
+            _editor.Settings.Data.CurrentProjectPath = path;
+            LoadProject();
+        }
+
+        private void OnNewProjectPathSelected(string path)
+        {
+            _newProjectPath = path;
+        }
+
+        void LoadProject()
+        {
+            _editor.LoadScene();
+
+            _editor.HidePopup();
+        }
+
+
     }
 }

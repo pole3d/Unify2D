@@ -51,7 +51,7 @@ namespace Unify2D
         bool _projectLoaded;
 
         Scripting.Scripting _scripting;
-        PopupBase _currentPopup;
+        Stack<PopupBase> _popups = new Stack<PopupBase>();
 
 
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
@@ -305,21 +305,20 @@ namespace Unify2D
                 ImGui.EndPopup();
             }
 
-            if (_currentPopup != null )
+            if (_popups.Count > 0)
             {
-                _currentPopup.Draw(this);
+                _popups.Peek().Draw(this);
             }
         }
 
         public void ShowPopup( PopupBase popup )
         {
-
-            _currentPopup = popup;  
+            _popups.Push(popup);  
         }
 
         internal void HidePopup()
         {
-            _currentPopup = null;
+            _popups.Pop();
         }
 
 
