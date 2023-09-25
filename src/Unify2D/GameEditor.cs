@@ -48,19 +48,14 @@ namespace Unify2D
 
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
 
-        public Vector2 GameResolution { get; private set; } = new Vector2(1920, 1080);
 
-        GameCore _core;
+        private GameCore _core;
+        public GameCore GameCore => _core;
 
         GameObject _selected;
         InspectorToolbox _inspectorToolbox;
         ScriptToolbox _scriptToolbox;
         GameToolbox _gameToolbox;
-
-
-        RenderTarget2D _sceneRenderTarget;
-        public RenderTarget2D SceneRenderTarget => _sceneRenderTarget;
-
 
 
         SelectedState _selectState;
@@ -125,7 +120,6 @@ namespace Unify2D
             _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 60;
             _graphics.ApplyChanges();
 
-            _sceneRenderTarget = new RenderTarget2D(GraphicsDevice, (int)GameResolution.X, (int)GameResolution.Y);
 
             base.Initialize();
         }
@@ -186,7 +180,7 @@ namespace Unify2D
                             SelectObject(item);
 
                             Num.Vector2 mousePosition = new Num.Vector2(mouseState.X, mouseState.Y);
-                            Num.Vector2 goPosition = WorldToUI(item.Position);
+                            Num.Vector2 goPosition = _gameToolbox.WorldToUI(item.Position);
 
                             Num.Vector2 direction = mousePosition - goPosition;
                             if (direction.Length() < 10)
@@ -212,19 +206,8 @@ namespace Unify2D
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.SetRenderTarget(_sceneRenderTarget);
-
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            _core.Draw();
-
-            // Call BeforeLayout first to set things up
-            _imGuiRenderer.BeforeLayout(gameTime);
-
-            DrawMainMenuBarUI();
-
             // Draw our UI
-            ImGuiLayout();
+            ImGuiLayout(gameTime);
 
             Popups();
 
@@ -305,9 +288,13 @@ namespace Unify2D
             return _gameToolbox.GetMousePosition();
         }
 
-
-        protected virtual void ImGuiLayout()
+        protected virtual void ImGuiLayout(GameTime gameTime)
         {
+            // Call BeforeLayout first to set things up
+            _imGuiRenderer.BeforeLayout(gameTime);
+
+            DrawMainMenuBarUI();
+
             foreach (var item in _toolboxes)
             {
                 item.Show();
@@ -341,24 +328,11 @@ namespace Unify2D
                 color = MakeColor32(255, 255, 50, 255);
             }
 
-            drawList.AddCircle(WorldToUI(_selected.Position),
+            drawList.AddCircle(_gameToolbox.WorldToUI(_selected.Position),
                       8, color, 64, 3);
             drawList.PopClipRect();
         }
 
-        Num.Vector2 WorldToUI(Vector2 world)
-        {
-            Num.Vector2 result = new Num.Vector2(world.X, world.Y);
-
-            float x = world.X / GameResolution.X;
-            float y = world.Y / GameResolution.Y;
-
-            x *= _gameToolbox.Size.X;
-            y *= _gameToolbox.Size.Y;
-
-            result = _gameToolbox.Position + _gameToolbox.WindowOffset + new Num.Vector2(x, y);
-            return result;
-        }
 
         void Save()
         {

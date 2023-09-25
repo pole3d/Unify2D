@@ -19,17 +19,31 @@ namespace Unify2D.Toolbox
 {
     internal class GameToolbox : Toolbox
     {
+        readonly Vector2 _gameResolution = new Vector2(1920, 1080);
+
+
         readonly Vector2 _bottomOffset = new Vector2(0, 20);
         public readonly Vector2 WindowOffset = new Vector2(8, 27);
 
         public Vector2 Position { get; private set; }
         public Vector2 Size { get; private set; }
 
+        public RenderTarget2D _sceneRenderTarget;
+
+        public override void Initialize(GameEditor editor)
+        {
+            base.Initialize(editor);
+            
+            _sceneRenderTarget = new RenderTarget2D(editor.GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
+        }
         public override void Show()
         {
-            //todo separate SceneRenderTarget from GameEditor
-            IntPtr renderTargetId = _editor.Renderer.BindTexture(_editor.SceneRenderTarget);
+            _editor.GraphicsDevice.SetRenderTarget(_sceneRenderTarget);
+            _editor.GraphicsDevice.Clear(XnaF.Color.CornflowerBlue);
 
+            _editor.GameCore.Draw();
+
+            // clear la texture de render de la scéne
             ImGui.Begin("GAME", ImGuiWindowFlags.None);
 
             Position = ImGui.GetWindowPos();
@@ -37,7 +51,10 @@ namespace Unify2D.Toolbox
             
 
             ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
+            
+            IntPtr renderTargetId = _editor.Renderer.BindTexture(_sceneRenderTarget);
             ImGui.Image(renderTargetId, ImGui.GetContentRegionAvail() - _bottomOffset);
+            
             _editor.Circle();
 
             if (ImGui.BeginDragDropTarget())
@@ -84,17 +101,27 @@ namespace Unify2D.Toolbox
 
             float x = mousePosition.X / Size.X;
             float y = mousePosition.Y / Size.Y;
-
+            /*
             x = XnaF.MathHelper.Clamp(x, 0, 1);
             y = XnaF.MathHelper.Clamp(y, 0, 1);
-
-            x *= _editor.GameResolution.X;
-            y *= _editor.GameResolution.Y;
+            */
+            x *= _gameResolution.X;
+            y *= _gameResolution.Y;
 
             x = MathF.Round(x);
             y = MathF.Round(y);
 
             return new XnaF.Vector2(x, y);
+        }
+        public Vector2 WorldToUI(XnaF.Vector2 world)
+        {
+            float x = world.X / _gameResolution.X;
+            float y = world.Y / _gameResolution.Y;
+
+            x *= Size.X;
+            y *= Size.Y;
+            Console.WriteLine(Position + WindowOffset + new Vector2(x, y));
+            return Position + WindowOffset + new Vector2(x, y);
         }
 
     }
