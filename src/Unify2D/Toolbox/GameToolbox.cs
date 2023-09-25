@@ -20,28 +20,36 @@ namespace Unify2D.Toolbox
     internal class GameToolbox : Toolbox
     {
         readonly Vector2 _gameResolution = new Vector2(1920, 1080);
-
-
         readonly Vector2 _bottomOffset = new Vector2(0, 20);
+
         public readonly Vector2 WindowOffset = new Vector2(8, 27);
 
         public Vector2 Position { get; private set; }
         public Vector2 Size { get; private set; }
 
-        public RenderTarget2D _sceneRenderTarget;
+        private RenderTarget2D _sceneRenderTarget;
+        private Camera2D _gameCamera;
 
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
             
             _sceneRenderTarget = new RenderTarget2D(editor.GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
+            _gameCamera = new Camera2D(new XnaF.Vector2(-1920/2, -540), 0.5f);
         }
         public override void Draw()
         {
+            // Render target
             _editor.GraphicsDevice.SetRenderTarget(_sceneRenderTarget);
             _editor.GraphicsDevice.Clear(XnaF.Color.CornflowerBlue);
 
-            _editor.GameCore.Draw();
+            // Cam movement
+            var mouseState = Mouse.GetState();
+
+
+
+
+            _editor.GameCore.Draw(_gameCamera.Matrix);
 
             // clear la texture de render de la scéne
             ImGui.Begin("GAME", ImGuiWindowFlags.None);
@@ -73,9 +81,10 @@ namespace Unify2D.Toolbox
                 }
             }
             ImGui.EndDragDropTarget();
-            var mouseState = GetMousePosition();
-            var mouse = Mouse.GetState();
-            ImGui.Text($" {mouseState.X}:{mouseState.Y}");
+
+            // Write position in world
+            var mousePosition = GetMousePosition();
+            ImGui.Text($" {mousePosition.X}:{mousePosition.Y}");
             ImGui.PopStyleVar();
 
             ImGui.End();
@@ -120,9 +129,8 @@ namespace Unify2D.Toolbox
 
             x *= Size.X;
             y *= Size.Y;
-            Console.WriteLine(Position + WindowOffset + new Vector2(x, y));
+
             return Position + WindowOffset + new Vector2(x, y);
         }
-
     }
 }

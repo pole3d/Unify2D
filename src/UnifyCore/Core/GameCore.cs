@@ -42,10 +42,25 @@ namespace Unify2D.Core
         }
 
         BlendState _blendState;
-  
+
         public void Draw()
         {
-            SpriteBatch.Begin( SpriteSortMode.Deferred, BlendState.NonPremultiplied);
+            Draw(Matrix.Identity);
+        }
+        public void Draw(Matrix matrix)
+        {
+            //SpriteBatch.Begin( SpriteSortMode.Deferred, BlendState.NonPremultiplied);
+            
+            SpriteBatch.Begin(SpriteSortMode.Deferred,
+                        BlendState.NonPremultiplied,
+                        null,
+                        null,
+                        null,
+                        null,
+                        matrix);
+            
+
+
             foreach (var item in _gameObjects)
             {
                 item.Draw();
