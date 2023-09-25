@@ -9,7 +9,7 @@ namespace Unify2D.Toolbox
         bool[] _hierarchy = new bool[100];
 
 
-        public override void Show()
+        public override void Draw()
         {
             ImGui.Begin("Hierarchy");
 

@@ -28,7 +28,7 @@ namespace Unify2D.Toolbox
 
         }
 
-        public override void Show()
+        public override void Draw()
         {
             ImGui.Begin("Inspector");
 

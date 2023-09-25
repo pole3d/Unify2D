@@ -207,7 +207,7 @@ namespace Unify2D
         protected override void Draw(GameTime gameTime)
         {
             // Draw our UI
-            ImGuiLayout(gameTime);
+            DrawImGuiLayout(gameTime);
 
             Popups();
 
@@ -288,7 +288,7 @@ namespace Unify2D
             return _gameToolbox.GetMousePosition();
         }
 
-        protected virtual void ImGuiLayout(GameTime gameTime)
+        protected virtual void DrawImGuiLayout(GameTime gameTime)
         {
             // Call BeforeLayout first to set things up
             _imGuiRenderer.BeforeLayout(gameTime);
@@ -297,7 +297,7 @@ namespace Unify2D
 
             foreach (var item in _toolboxes)
             {
-                item.Show();
+                item.Draw();
             }
 
             ImGui.ShowDemoWindow();
@@ -310,7 +310,7 @@ namespace Unify2D
             builder.StartBuild();
         }
 
-        public void Circle()
+        public void CircleSelected()
         {
             if (_selected == null)
                 return;

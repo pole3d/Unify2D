@@ -36,7 +36,7 @@ namespace Unify2D.Toolbox
             
             _sceneRenderTarget = new RenderTarget2D(editor.GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
         }
-        public override void Show()
+        public override void Draw()
         {
             _editor.GraphicsDevice.SetRenderTarget(_sceneRenderTarget);
             _editor.GraphicsDevice.Clear(XnaF.Color.CornflowerBlue);
@@ -55,7 +55,7 @@ namespace Unify2D.Toolbox
             IntPtr renderTargetId = _editor.Renderer.BindTexture(_sceneRenderTarget);
             ImGui.Image(renderTargetId, ImGui.GetContentRegionAvail() - _bottomOffset);
             
-            _editor.Circle();
+            _editor.CircleSelected();
 
             if (ImGui.BeginDragDropTarget())
             {

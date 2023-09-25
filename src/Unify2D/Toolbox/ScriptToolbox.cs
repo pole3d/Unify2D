@@ -20,7 +20,7 @@ namespace Unify2D.Toolbox
             _asset = asset;
         }
 
-        public override void Show()
+        public override void Draw()
         {
             if (_asset == null)
                 return;
