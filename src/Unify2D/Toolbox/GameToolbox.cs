@@ -44,7 +44,8 @@ namespace Unify2D.Toolbox
             base.Initialize(editor);
             
             _sceneRenderTarget = new RenderTarget2D(editor.GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
-            _gameCamera = new Camera2D(editor.GraphicsDevice, new XnaF.Vector2(0, 0));
+
+            _gameCamera = new Camera2D(new XnaF.Vector2(_gameResolution.X, _gameResolution.Y), new XnaF.Vector2(_gameResolution.X / 2, _gameResolution.Y / 2));
         }
         public override void Draw()
         {

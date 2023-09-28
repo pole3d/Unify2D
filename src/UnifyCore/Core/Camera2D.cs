@@ -15,12 +15,12 @@ namespace Unify2D.Core
         protected float _zoom;
         protected float _rotation;
         protected Vector2 _position;
+        protected Vector2 _resolution;
         private bool _hasChanged = false;
 
-        protected GraphicsDevice _graphicsDevice;
-        public Camera2D(GraphicsDevice graphicsDevice, Vector2 position, float zoom = 1, float rotation = 0)
+        public Camera2D(Vector2 resolution, Vector2 position, float zoom = 1, float rotation = 0)
         {
-            _graphicsDevice = graphicsDevice;
+            _resolution = resolution;
             _position = position;
             _zoom = zoom;
             _rotation = rotation;
@@ -56,11 +56,20 @@ namespace Unify2D.Core
                 _hasChanged = true;
             }
         }
+        public Vector2 Resolution
+        {
+            get { return _resolution; }
+            set
+            {
+                _resolution = value;
+                _hasChanged = true;
+            }
+        }
         public Vector2 Position
         {
             get { return _position; }
             set
-            { 
+            {
                 _position = value;
                 _hasChanged = true;
             }
@@ -88,15 +97,18 @@ namespace Unify2D.Core
             _matrix =
             Matrix.CreateTranslation(new Vector3(-_position.X, -_position.Y, 0)) *
             Matrix.CreateRotationZ(Rotation) *
-            Matrix.CreateScale(new Vector3(Zoom, Zoom, 1));// *
-            //Matrix.CreateTranslation(new Vector3(_graphicsDevice.Viewport.Width * 0.5f, _graphicsDevice.Viewport.Height * 0.5f, 0));
+            Matrix.CreateScale(new Vector3(Zoom, Zoom, 1)) *
+            Matrix.CreateTranslation(new Vector3(_resolution.X * 0.5f, _resolution.Y * 0.5f, 0));
 
         }
 
         public Vector2 LocalToWorld(System.Numerics.Vector2 local)
         {
-            local /= Zoom;
-            
+            local -= new System.Numerics.Vector2(_resolution.X * 0.5f, _resolution.Y * 0.5f);
+
+            local /= Zoom; 
+
+
             // on divise par le zoom car Matrix.Up est calculé avec.
             Vector3 up = Matrix.Up / Zoom;
             float sin = -up.X;
@@ -125,6 +137,7 @@ namespace Unify2D.Core
             // on multiplie pas par le zoom car Matrix.Up en prends deja compte
             //local *= Zoom;
 
+            local += new System.Numerics.Vector2(_resolution.X * 0.5f, _resolution.Y * 0.5f);
 
             return local;
         }
