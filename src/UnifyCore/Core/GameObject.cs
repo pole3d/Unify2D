@@ -68,6 +68,19 @@ namespace Unify2D.Core
             }
         }
 
+        public T GetComponent<T>() where T : Component
+        {
+            foreach (var item in Components)
+            {
+                if (item is T)
+                {
+                    return (item as T);
+                }
+            }
+
+            return null;
+        }
+
         public void AddComponent(Component component)
         {
             if (component is Renderer renderer)
