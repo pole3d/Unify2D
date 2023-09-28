@@ -28,7 +28,7 @@ namespace Unify2D.Toolbox
                     }
 
                     _hierarchy[i] = true;
-                    _editor.SelectObject(item);
+                    Selection.SelectObject(item);
                 }
 
                 if (ImGui.BeginPopupContextItem())
@@ -52,7 +52,7 @@ namespace Unify2D.Toolbox
             if (goToDestroy != null)
             {
                 GameCore.Current.DestroyImmediate(goToDestroy);
-                _editor.UnSelectObject();
+                Selection.UnSelectObject();
             }
 
         }

@@ -65,7 +65,7 @@ namespace Unify2D.Toolbox
                         }
                     }
 
-                    _editor.SelectObject(_assets[n]);
+                    Selection.SelectObject(_assets[n]);
                     _selected[n] = !_selected[n];
                 }
 

@@ -60,22 +60,13 @@ namespace Unify2D
         private GameCore _core;
         public GameCore GameCore => _core;
 
-        GameObject _selected;
-        InspectorToolbox _inspectorToolbox;
-        ScriptToolbox _scriptToolbox;
-        GameToolbox _gameToolbox;
+        internal InspectorToolbox InspectorToolbox { get; private set; }
+        internal ScriptToolbox ScriptToolbox { get; private set; }
+        internal GameToolbox GameToolbox { get; private set; }
 
 
-        SelectedState _selectState;
         bool _showSelectPath;
         GameEditorSettings _settings;
-
-        enum SelectedState
-        {
-            None,
-            Select,
-            Drag
-        }
 
         public GameEditor()
         {
@@ -119,17 +110,17 @@ namespace Unify2D
 
         void InitializeToolBoxes()
         {
-            _scriptToolbox = new ScriptToolbox();
-            _inspectorToolbox = new InspectorToolbox();
-            _gameToolbox = new GameToolbox();
+            ScriptToolbox = new ScriptToolbox();
+            InspectorToolbox = new InspectorToolbox();
+            GameToolbox = new GameToolbox();
 
 
             _toolboxes.Add(new AssetsToolbox());
             _toolboxes.Add(new HierarchyToolbox());
 
-            _toolboxes.Add(_scriptToolbox);
-            _toolboxes.Add(_inspectorToolbox);
-            _toolboxes.Add(_gameToolbox);
+            _toolboxes.Add(ScriptToolbox);
+            _toolboxes.Add(InspectorToolbox);
+            _toolboxes.Add(GameToolbox);
 
 
             foreach (var item in _toolboxes)
@@ -147,77 +138,13 @@ namespace Unify2D
             base.LoadContent();
         }
 
-
-        public void SelectObject(object go)
-        {
-            if (go is Asset asset)
-            {
-                if (asset.AssetContent is ScriptAssetContent script)
-                {
-                    _scriptToolbox.SetObject(asset);
-                    return;
-                }
-            }
-
-            if (go is GameObject)
-                _selected = go as GameObject;
-
-            if (_inspectorToolbox != null)
-                _inspectorToolbox.SetObject(go);
-        }
-
-        public void UnSelectObject()
-        {
-            _selected = null;
-
-            if (_inspectorToolbox != null)
-                _inspectorToolbox.SetObject(null);
-        }
-
         protected override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
 
-            if (_gameToolbox == null) return;
+            if (GameToolbox == null) return;
 
-            var mouseState = Mouse.GetState();
-
-            if (_selectState == SelectedState.None && IsMouseInGameWindow())
-            {
-                if (mouseState.LeftButton == ButtonState.Pressed)
-                {
-                    Vector2 worldPosition = GetWorldMousePosition();
-
-                    foreach (var item in _core.GameObjects)
-                    {
-                        if (worldPosition.X >= item.Position.X - item.BoundingSize.X / 2 && worldPosition.X <= item.Position.X + item.BoundingSize.X / 2
-                            && worldPosition.Y >= item.Position.Y - item.BoundingSize.Y / 2 && worldPosition.Y <= item.Position.Y + item.BoundingSize.Y / 2)
-                        {
-                            SelectObject(item);
-
-                            Num.Vector2 mousePosition = new Num.Vector2(mouseState.X, mouseState.Y);
-                            Num.Vector2 goPosition = _gameToolbox.WorldToUI(item.Position);
-
-                            Num.Vector2 direction = mousePosition - goPosition;
-                            if (direction.Length() < 10)
-                            {
-                                _selectState = SelectedState.Drag;
-                            }
-                        }
-                    }
-                }
-            }
-            else if (_selectState == SelectedState.Drag)
-            {
-                if (mouseState.LeftButton == ButtonState.Pressed && _selected != null)
-                {
-                    _selected.Position = GetWorldMousePosition();
-                }
-                if (mouseState.LeftButton == ButtonState.Released)
-                {
-                    _selectState = SelectedState.None;
-                }
-            }
+            Selection.Update();
         }
 
         protected override void Draw(GameTime gameTime)
@@ -311,12 +238,12 @@ namespace Unify2D
 
         public bool IsMouseInGameWindow()
         {
-            return _gameToolbox.IsMouseInWindow();
+            return GameToolbox.IsMouseInWindow();
         }
 
         public Vector2 GetWorldMousePosition()
         {
-            return _gameToolbox.GetMousePosition();
+            return GameToolbox.GetMousePosition();
         }
 
         protected virtual void DrawImGuiLayout(GameTime gameTime)
@@ -341,30 +268,6 @@ namespace Unify2D
             builder.StartBuild();
         }
 
-        public void CircleSelected()
-        {
-            if (_selected == null)
-                return;
-
-            var p0 = ImGui.GetItemRectMin();
-            var p1 = ImGui.GetItemRectMax();
-
-            var drawList = ImGui.GetWindowDrawList();
-            drawList.PushClipRect(p0, p1);
-
-            uint color = ToolsUI.ToColor32(50, 255, 50, 255);
-
-            if (_selectState == SelectedState.Drag)
-            {
-                color = ToolsUI.ToColor32(255, 255, 50, 255);
-            }
-
-            drawList.AddCircle(_gameToolbox.WorldToUI(_selected.Position),
-                      8, color, 64, 3);
-            drawList.PopClipRect();
-        }
-
-
         void Save()
         {
             JsonSerializerSettings settings = new JsonSerializerSettings();
@@ -382,7 +285,7 @@ namespace Unify2D
 
             _core.GameObjects.Clear();
 
-            SelectObject(null);
+            Selection.SelectObject(null);
 
             List<GameObject> gameObjects = null;
             try
