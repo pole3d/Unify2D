@@ -12,14 +12,9 @@ namespace Unify2D.Toolbox
 {
     internal class InspectorToolbox : Toolbox
     {
-        GameEditor _editor;
         GameObject _gameObject;
         Asset _asset;
 
-        public override void Initialize(GameEditor editor)
-        {
-            _editor = editor;
-        }
 
         public void SetObject(object obj)
         {
@@ -33,7 +28,7 @@ namespace Unify2D.Toolbox
 
         }
 
-        public override void Show()
+        public override void Draw()
         {
             ImGui.Begin("Inspector");
 

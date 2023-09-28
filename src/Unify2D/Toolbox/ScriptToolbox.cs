@@ -11,21 +11,16 @@ namespace Unify2D.Toolbox
 {
     internal class ScriptToolbox : Toolbox
     {
-        GameEditor _editor;
         GameObject _gameObject;
         Asset _asset;
 
-        public override void Initialize(GameEditor editor)
-        {
-            _editor = editor;
-        }
 
         public void SetObject(Asset asset)
         {
             _asset = asset;
         }
 
-        public override void Show()
+        public override void Draw()
         {
             if (_asset == null)
                 return;
