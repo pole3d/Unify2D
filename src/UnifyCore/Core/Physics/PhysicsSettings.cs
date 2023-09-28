@@ -18,7 +18,7 @@ namespace Unify2D.Physics
         public static void Init()
         {
             SolverIterations = 6;
-            Gravity = new Vector2(0, 20f);
+            Gravity = new Vector2(0, 100f);
 
             if (World != null ) 
                 World = null;

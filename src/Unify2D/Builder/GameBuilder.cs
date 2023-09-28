@@ -38,8 +38,6 @@ namespace Unify2D.Builder
             if ( Directory.Exists(TemplatePath) == false )
             {
 
-
-
                 return;
             }
 
@@ -63,7 +61,7 @@ namespace Unify2D.Builder
                 var sourceFile = new FileInfo(file);
                 sourceFile.CopyTo(newPath, true);
 
-            }
+            }       
 
             Save();
 

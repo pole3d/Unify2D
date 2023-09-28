@@ -11,12 +11,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Unify2D.Core;
 
-
-
 namespace Unify2D.Physics
 {
-
-
     internal class Rigidbody : Component 
     {
         public BodyType Type { get{ return m_type; } set { m_type = value; } }
@@ -56,7 +52,6 @@ namespace Unify2D.Physics
             m_velcroBody = BodyFactory.CreateBody(PhysicsSettings.World, _gameObject.Position, 0, m_type);
             m_velcroBody.Mass = m_mass;
             m_velcroBody.LinearDamping = m_linearDamper;
-            m_velcroBody.Restitution = 1;
             m_velcroBody.GravityScale = m_gravityScale;
         }
 
