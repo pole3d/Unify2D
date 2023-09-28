@@ -7,6 +7,9 @@ using Num = System.Numerics;
 
 namespace Unify2D.Toolbox
 {
+	/// <summary>
+	/// Render a file picker
+	/// </summary>
 	public class FilePicker
 	{
 		static readonly Dictionary<object, FilePicker> _filePickers = new Dictionary<object, FilePicker>();

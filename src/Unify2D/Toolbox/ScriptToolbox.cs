@@ -9,9 +9,12 @@ using Unify2D.Core;
 
 namespace Unify2D.Toolbox
 {
+    /// <summary>
+    /// Script Editor
+    /// Allow the user to modify C# script directly inside the editor
+    /// </summary>
     internal class ScriptToolbox : Toolbox
     {
-        GameObject _gameObject;
         Asset _asset;
 
 

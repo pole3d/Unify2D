@@ -13,6 +13,7 @@ using Unify2D.Core;
 using Unify2D.Core.Graphics;
 using Unify2D.ImGuiRenderer;
 using Unify2D.Toolbox;
+using Unify2D.Toolbox.Popup;
 using Unify2D.Tools;
 using Num = System.Numerics;
 
@@ -20,13 +21,16 @@ namespace Unify2D
 {
     /// <summary>
     /// The main editor of Unify2D
+    /// This class inherits from Game which creates the Game window, handles the gameloop, the assets...
+    /// This class handles the different windows of the game editor
+    /// 
     /// </summary>
     public class GameEditor : Game
     {
         #region singleton 
 
         public static GameEditor Instance => s_instance;
-              
+
         private static GameEditor s_instance;
 
         #endregion
@@ -40,10 +44,14 @@ namespace Unify2D
         public Scripting.Scripting Scripting => _scripting;
         public ImGuiRenderer.Renderer Renderer => _imGuiRenderer;
 
-        private GraphicsDeviceManager _graphics;
-        private ImGuiRenderer.Renderer _imGuiRenderer;
+        public GameEditorSettings Settings { get => _settings;  }
+
+        GraphicsDeviceManager _graphics;
+        ImGuiRenderer.Renderer _imGuiRenderer;
+        bool _projectLoaded;
 
         Scripting.Scripting _scripting;
+        Stack<PopupBase> _popups = new Stack<PopupBase>();
 
 
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
@@ -83,7 +91,7 @@ namespace Unify2D
 
         protected override void Initialize()
         {
-            _core = new GameCore();
+            _core = new GameCore(this);
             GameCore.SetCurrent(_core);
 
             _settings = new GameEditorSettings();
@@ -91,25 +99,6 @@ namespace Unify2D
 
             _scripting = new Unify2D.Scripting.Scripting();
             _scripting.Load(this);
-
-
-            Load();
-
-            _scriptToolbox = new ScriptToolbox();
-            _inspectorToolbox = new InspectorToolbox();
-            _gameToolbox = new GameToolbox();
-
-            _toolboxes.Add(new AssetsToolbox());
-            _toolboxes.Add(new HierarchyToolbox());
-
-            _toolboxes.Add(_scriptToolbox);
-            _toolboxes.Add(_inspectorToolbox);
-            _toolboxes.Add(_gameToolbox);
-
-            foreach (var item in _toolboxes)
-            {
-                item.Initialize(this);
-            }
 
             _imGuiRenderer = new ImGuiRenderer.Renderer(this);
             _imGuiRenderer.RebuildFontAtlas();
@@ -121,7 +110,32 @@ namespace Unify2D
             _graphics.ApplyChanges();
 
 
+            //LoadScene();
+
+            ShowPopup(new LauncherPopup());
+
             base.Initialize();
+        }
+
+        void InitializeToolBoxes()
+        {
+            _scriptToolbox = new ScriptToolbox();
+            _inspectorToolbox = new InspectorToolbox();
+            _gameToolbox = new GameToolbox();
+
+
+            _toolboxes.Add(new AssetsToolbox());
+            _toolboxes.Add(new HierarchyToolbox());
+
+            _toolboxes.Add(_scriptToolbox);
+            _toolboxes.Add(_inspectorToolbox);
+            _toolboxes.Add(_gameToolbox);
+
+
+            foreach (var item in _toolboxes)
+            {
+                item.Initialize(this);
+            }
         }
 
 
@@ -136,16 +150,16 @@ namespace Unify2D
 
         public void SelectObject(object go)
         {
-            if ( go is Asset asset)
+            if (go is Asset asset)
             {
-                if ( asset.AssetContent is ScriptAssetContent script)
+                if (asset.AssetContent is ScriptAssetContent script)
                 {
                     _scriptToolbox.SetObject(asset);
                     return;
                 }
             }
 
-            if ( go is GameObject)
+            if (go is GameObject)
                 _selected = go as GameObject;
 
             if (_inspectorToolbox != null)
@@ -163,6 +177,8 @@ namespace Unify2D
         protected override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+
+            if (_gameToolbox == null) return;
 
             var mouseState = Mouse.GetState();
 
@@ -240,7 +256,7 @@ namespace Unify2D
                     }
                     if (ImGui.MenuItem("Load"))
                     {
-                        Load();
+                        LoadScene();
                     }
                     ImGui.EndMenu();
                 }
@@ -265,7 +281,7 @@ namespace Unify2D
                 if (picker.Draw())
                 {
                     _settings.Data.CurrentProjectPath = picker.SelectedFile;
-                    Load();
+                    LoadScene();
                     foreach (var item in _toolboxes)
                     {
                         item.Reset();
@@ -275,6 +291,21 @@ namespace Unify2D
                 }
                 ImGui.EndPopup();
             }
+
+            if (_popups.Count > 0)
+            {
+                _popups.Peek().Draw(this);
+            }
+        }
+
+        public void ShowPopup( PopupBase popup )
+        {
+            _popups.Push(popup);  
+        }
+
+        internal void HidePopup()
+        {
+            _popups.Pop();
         }
 
 
@@ -306,7 +337,7 @@ namespace Unify2D
         private void Build()
         {
             GameBuilder builder = new GameBuilder();
-            builder.Build(_core , this);
+            builder.Build(_core, this);
             builder.StartBuild();
         }
 
@@ -321,11 +352,11 @@ namespace Unify2D
             var drawList = ImGui.GetWindowDrawList();
             drawList.PushClipRect(p0, p1);
 
-            uint color = MakeColor32(50, 255, 50, 255);
+            uint color = ToolsUI.ToColor32(50, 255, 50, 255);
 
             if (_selectState == SelectedState.Drag)
             {
-                color = MakeColor32(255, 255, 50, 255);
+                color = ToolsUI.ToColor32(255, 255, 50, 255);
             }
 
             drawList.AddCircle(_gameToolbox.WorldToUI(_selected.Position),
@@ -344,8 +375,11 @@ namespace Unify2D
             File.WriteAllText(Path.Combine(ProjectPath, "./test.scene"), text);
         }
 
-        void Load()
+        public void LoadScene()
         {
+            _projectLoaded = true;
+            InitializeToolBoxes();
+
             _core.GameObjects.Clear();
 
             SelectObject(null);
@@ -375,7 +409,8 @@ namespace Unify2D
             _settings.Save();
         }
 
-        public static uint MakeColor32(byte r, byte g, byte b, byte a) { uint ret = a; ret <<= 8; ret += b; ret <<= 8; ret += g; ret <<= 8; ret += r; return ret; }
+    
+
     }
 
 

@@ -16,8 +16,17 @@ namespace Unify2D.Toolbox
         Asset _asset;
 
 
+        List<TextureBound> _texturesBound = new List<TextureBound>();
+
+        public override void Initialize(GameEditor editor)
+        {
+            _editor = editor;
+        }
+
         public void SetObject(object obj)
         {
+            UnSelect();
+
             _asset = null;
             _gameObject = null;
 
@@ -27,6 +36,19 @@ namespace Unify2D.Toolbox
                 _asset = obj as Asset;
 
         }
+
+        private void UnSelect()
+        {
+
+            foreach (var item in _texturesBound)
+            {
+                GameEditor.Instance.Renderer.UnbindTexture(item.IntPtr);
+            }
+
+            _texturesBound.Clear();
+
+        }
+        
 
         public override void Draw()
         {
@@ -78,9 +100,9 @@ namespace Unify2D.Toolbox
                 if (ImGui.TreeNode(component.GetType().Name))
                 {
                     ShowComponent(component);
-                    ImGui.PushStyleColor(ImGuiCol.Button, Tools.Tools.ToColor32(230, 50, 60, 255));
-                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Tools.Tools.ToColor32(250, 70, 80, 255));
-                    ImGui.PushStyleColor(ImGuiCol.ButtonActive, Tools.Tools.ToColor32(255, 90, 100, 255));
+                    ImGui.PushStyleColor(ImGuiCol.Button, ToolsUI.ToColor32(230, 50, 60, 255));
+                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ToolsUI.ToColor32(250, 70, 80, 255));
+                    ImGui.PushStyleColor(ImGuiCol.ButtonActive, ToolsUI.ToColor32(255, 90, 100, 255));
 
                     if (ImGui.Button("Delete"))
                     {
@@ -115,7 +137,6 @@ namespace Unify2D.Toolbox
             }
         }
 
-        IntPtr handle;
         private void ShowComponent(Component component)
         {
             PropertyInfo[] properties = component.GetType().GetProperties();
@@ -159,18 +180,41 @@ namespace Unify2D.Toolbox
                         name = value.Name;
                         ImGui.InputText("path", ref name, 50);
                     }
-                    
-                    Texture2D texture = value.Asset as Texture2D;
 
-                    IntPtr ptr = GameEditor.Instance.Renderer.BindTexture(texture);
-                    ImGui.Image(ptr, new System.Numerics.Vector2(40, 40));
+                    if (value != null)
+                    {
+                        Texture2D texture = value.Asset as Texture2D;
+                        TextureBound textureBound = GetTextureBound(texture);
+                        if (textureBound == null)
+                        {
+                            IntPtr ptr = GameEditor.Instance.Renderer.BindTexture(texture);
 
+                            textureBound = new TextureBound { IntPtr = ptr, Texture = texture };
+                            _texturesBound.Add(textureBound);
+                        }
 
-
+                        ImGui.Image(textureBound.IntPtr, new System.Numerics.Vector2(40, 40));
+                    }
                 }
             }
-
-
         }
+
+        TextureBound GetTextureBound(Texture2D texture)
+        {
+            foreach (var item in _texturesBound)
+            {
+                if (item.Texture == texture)
+                    return item;
+            }
+
+            return null;
+        }
+
+        class TextureBound
+        {
+            public Texture2D Texture { get; set; }
+            public IntPtr IntPtr { get; set; }
+        }
+
     }
 }
