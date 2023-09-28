@@ -121,7 +121,16 @@ namespace Unify2D.Toolbox
             PropertyInfo[] properties = component.GetType().GetProperties();
             foreach (PropertyInfo property in properties)
             {
-                if (property.PropertyType == typeof(Color))
+                if (property.PropertyType == typeof(bool))
+                {
+                    bool value = (bool)property.GetValue(component);
+
+                    if (ImGui.Checkbox(property.Name, ref value))
+                    {
+                        property.SetValue(component, value);
+                    }
+                }
+                else if (property.PropertyType == typeof(Color))
                 {
                     Color color = (Color)property.GetValue(component);
                     System.Numerics.Vector4 vector = new System.Numerics.Vector4(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
@@ -164,9 +173,6 @@ namespace Unify2D.Toolbox
 
                     IntPtr ptr = GameEditor.Instance.Renderer.BindTexture(texture);
                     ImGui.Image(ptr, new System.Numerics.Vector2(40, 40));
-
-
-
                 }
             }
 
