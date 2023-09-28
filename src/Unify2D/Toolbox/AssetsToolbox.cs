@@ -16,11 +16,10 @@ namespace Unify2D.Toolbox
         string _path;
         bool[] _selected;
         List<Asset> _assets = new List<Asset>();
-        GameEditor _editor;
 
         public override void Initialize(GameEditor editor)
         {
-            _editor = editor;
+            base.Initialize(editor);
             Reset();
         }
 
@@ -49,7 +48,7 @@ namespace Unify2D.Toolbox
         }
 
 
-        public override void Show()
+        public override void Draw()
         {
             ImGui.Begin("Assets");
 

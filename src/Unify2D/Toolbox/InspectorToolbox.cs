@@ -12,9 +12,9 @@ namespace Unify2D.Toolbox
 {
     internal class InspectorToolbox : Toolbox
     {
-        GameEditor _editor;
         GameObject _gameObject;
         Asset _asset;
+
 
         List<TextureBound> _texturesBound = new List<TextureBound>();
         List<TextureBound> _texturesToUnbind = new List<TextureBound>();
@@ -49,8 +49,9 @@ namespace Unify2D.Toolbox
             _texturesBound.Clear();
 
         }
+        
 
-        public override void Show()
+        public override void Draw()
         {
             foreach (var item in _texturesToUnbind)
             {

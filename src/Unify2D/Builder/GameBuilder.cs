@@ -33,13 +33,11 @@ namespace Unify2D.Builder
             if (Directory.Exists(BuildPathFull) == false)
                 Directory.CreateDirectory(BuildPathFull);
 
-            if (Directory.Exists(ToolsEditor.CombinePath(BuildPathFull,AssetsPathFull)) == false)
-                Directory.CreateDirectory(ToolsEditor.CombinePath(BuildPathFull, AssetsPathFull));
-
+            if (Directory.Exists(ToolsEditor.CombinePath(BuildPathFull,AssetsPath)) == false)
+                Directory.CreateDirectory(ToolsEditor.CombinePath(BuildPathFull, AssetsPath));
 
             if ( Directory.Exists(TemplatePath) == false )
             {
-
                 return;
             }
             

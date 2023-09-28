@@ -1,0 +1,35 @@
+[
+  {
+    "_components": [
+      {
+        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
+        "_asset": {
+          "_name": "\\ship_0001.png"
+        },
+        "Color": "255, 255, 255, 255"
+      }
+    ],
+    "Position": "1263, 450",
+    "Name": "ship_0001",
+    "BoundingSize": "32, 32"
+  },
+  {
+    "_components": [
+      {
+        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
+        "_asset": {
+          "_name": "\\ship_0007.png"
+        },
+        "Color": "255, 255, 255, 255"
+      },
+      {
+        "$type": "GameAssembly.TestA, GameAssembly",
+        "Speed": 10.0,
+        "SpeedO": 10.0
+      }
+    ],
+    "Position": "812, 675",
+    "Name": "ship_0007",
+    "BoundingSize": "32, 32"
+  }
+]

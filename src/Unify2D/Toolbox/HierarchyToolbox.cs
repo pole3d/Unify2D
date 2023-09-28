@@ -7,15 +7,9 @@ namespace Unify2D.Toolbox
     {
 
         bool[] _hierarchy = new bool[100];
-        GameEditor _editor;
-
-        public override void Initialize(GameEditor editor)
-        {
-            _editor = editor;
-        }
 
 
-        public override void Show()
+        public override void Draw()
         {
             ImGui.Begin("Hierarchy");
 
