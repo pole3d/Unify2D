@@ -1,14 +1,11 @@
 ﻿using ImGuiNET;
+using System;
 using Unify2D.Core;
 
 namespace Unify2D.Toolbox
 {
     internal class HierarchyToolbox : Toolbox
     {
-
-        bool[] _hierarchy = new bool[100];
-
-
         public override void Draw()
         {
             ImGui.Begin("Hierarchy");
@@ -16,18 +13,15 @@ namespace Unify2D.Toolbox
             GameObject goToDestroy = null;
 
             int i = 0;
+
+            Selection.TryGameObject(out GameObject selectedGameObject);
+
             foreach (var item in GameCore.Current.GameObjects)
             {
+                
                 ImGui.PushID(i++);
-                if (ImGui.Selectable($"{item.Name}", _hierarchy[i]))
+                if (ImGui.Selectable($"{item.Name}", selectedGameObject == item))
                 {      
-
-                    for (int j = 0; j < _hierarchy.Length; j++)
-                    {
-                        _hierarchy[j] = false;
-                    }
-
-                    _hierarchy[i] = true;
                     Selection.SelectObject(item);
                 }
 
