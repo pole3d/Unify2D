@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Num = System.Numerics;
 
 namespace Unify2D.Core
 {
@@ -102,9 +103,9 @@ namespace Unify2D.Core
 
         }
 
-        public Vector2 LocalToWorld(System.Numerics.Vector2 local)
+        public Vector2 LocalToWorld(Num.Vector2 local)
         {
-            local -= new System.Numerics.Vector2(_resolution.X * 0.5f, _resolution.Y * 0.5f);
+            local -= new Num.Vector2(_resolution.X * 0.5f, _resolution.Y * 0.5f);
 
             local /= Zoom; 
 
@@ -122,7 +123,7 @@ namespace Unify2D.Core
 
             return worldPosition;
         }
-        public System.Numerics.Vector2 WorldToLocal(Vector2 world)
+        public Num.Vector2 WorldToViewport(Vector2 world)
         {
             world -= Position;
 
@@ -130,14 +131,14 @@ namespace Unify2D.Core
             float sin = -up.X;
             float cos = up.Y;
 
-            System.Numerics.Vector2 local = new System.Numerics.Vector2(
+            Num.Vector2 local = new Num.Vector2(
                 (world.X * cos) - (world.Y * sin),
                 (world.X * sin) + (world.Y * cos));
 
             // on multiplie pas par le zoom car Matrix.Up en prends deja compte
             //local *= Zoom;
 
-            local += new System.Numerics.Vector2(_resolution.X * 0.5f, _resolution.Y * 0.5f);
+            local += new Num.Vector2(_resolution.X * 0.5f, _resolution.Y * 0.5f);
 
             return local;
         }
