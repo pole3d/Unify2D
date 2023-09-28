@@ -1,5 +1,7 @@
-﻿using ImGuiNET;
+﻿using System;
+using ImGuiNET;
 using Unify2D.Core;
+using Unify2D.Tools;
 
 namespace Unify2D.Toolbox
 {
@@ -42,8 +44,15 @@ namespace Unify2D.Toolbox
 
                     ImGui.EndPopup();
                 }
+                
+                if (ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
+                {
+                    Clipboard.DragContent = item;
+                    ImGui.Text(item.Name);
+                        
+                    ImGui.EndDragDropSource();
+                }
                 ImGui.PopID();
-
             }
 
 

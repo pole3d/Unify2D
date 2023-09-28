@@ -11,6 +11,6 @@ namespace Unify2D.Tools
     /// </summary>
     static class Clipboard
     {
-        public static object Content;
+        public static object DragContent;
     }
 }

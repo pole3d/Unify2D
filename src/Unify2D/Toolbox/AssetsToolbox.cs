@@ -6,7 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Unify2D.Assets;
+using Unify2D.Core;
 using Unify2D.Tools;
 
 namespace Unify2D.Toolbox
@@ -77,13 +79,33 @@ namespace Unify2D.Toolbox
                         ImGui.SetDragDropPayload("ASSET", (IntPtr)(&n), sizeof(int));
                     }
 
-                    Clipboard.Content = _assets[n];
+                    Clipboard.DragContent = _assets[n];
 
                     ImGui.Text(_assets[n].ToString());
 
                     ImGui.EndDragDropSource();
                 }
             }
+            
+            if (ImGui.BeginDragDropTarget() && Clipboard.DragContent is GameObject draggedGO)
+            {
+                StringBuilder nameSb = new StringBuilder(draggedGO.Name);
+                if (File.Exists(Path.Combine(_editor.AssetsPath, nameSb + ".prefab")))
+                {
+                    char lastChar = nameSb[nameSb.Length - 1];
+                    if (char.IsDigit(lastChar))
+                    {
+                        nameSb.Length--;
+                        if (lastChar == '9')
+                            nameSb.Append("10");
+                        else
+                            nameSb.Append((char)(lastChar + 1));
+                    }
+                }
+                File.WriteAllText(Path.Combine(_editor.AssetsPath, nameSb + ".prefab"), JsonConvert.SerializeObject(draggedGO, new JsonSerializerSettings()));
+                Reset();
+            }
+            
             ImGui.End();
         }
     }

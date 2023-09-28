@@ -78,11 +78,9 @@ namespace Unify2D.Toolbox
                     var ptr = ImGui.AcceptDragDropPayload("ASSET");
                     if (ptr.NativePtr != null)
                     {
-                        Asset asset = Clipboard.Content as Asset;
-                        GameObject go = new GameObject() { Name = asset.Name };
-                        _editor.SelectObject(go);
-                        SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
-                        renderer.Initialize(_editor, go, asset.FullPath);
+                        Asset asset = Clipboard.DragContent as Asset;
+                        asset?.AssetContent.OnDragDroppedInGame(_editor);
+                        //
                     }
                 }
             }
