@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Unify2D.Tools;
 
 namespace Unify2D
 {
@@ -66,7 +67,7 @@ namespace Unify2D
         string GetFilePath()
         {
             string exePath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            return Path.Combine(exePath, SettingsFilename);
+            return ToolsEditor.CombinePath(exePath, SettingsFilename);
         }
     }
 }

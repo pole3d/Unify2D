@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using Unify2D.Toolbox.Popup;
+using Unify2D.Tools;
 
 namespace Unify2D.Toolbox
 {
@@ -42,7 +43,7 @@ namespace Unify2D.Toolbox
 
             if (ImGui.Button("Create"))
             {
-                _newProjectPath = Path.Combine(_newProjectPath, _newProjectName);
+                _newProjectPath = ToolsEditor.CombinePath(_newProjectPath, _newProjectName);
 
                 Directory.CreateDirectory(_newProjectPath);
 

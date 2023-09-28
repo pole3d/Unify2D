@@ -39,7 +39,7 @@ namespace Unify2D
         const string AssetsFolder = "./Assets";
 
         public string ProjectPath => _settings.Data.CurrentProjectPath;
-        public string AssetsPath => !String.IsNullOrEmpty(ProjectPath) ? Path.Combine(ProjectPath, AssetsFolder) : String.Empty;
+        public string AssetsPath => !String.IsNullOrEmpty(ProjectPath) ? ToolsEditor.CombinePath(ProjectPath, AssetsFolder) : String.Empty;
 
         public Scripting.Scripting Scripting => _scripting;
         public ImGuiRenderer.Renderer Renderer => _imGuiRenderer;
@@ -115,6 +115,7 @@ namespace Unify2D
             _graphics.ApplyChanges();
 
             _sceneRenderTarget = new RenderTarget2D(GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
+            _renderTargetId = _imGuiRenderer.BindTexture(_sceneRenderTarget);
 
             //LoadScene();
 
@@ -378,7 +379,6 @@ namespace Unify2D
             if (_projectLoaded == false)
                 return;
 
-            _renderTargetId = _imGuiRenderer.BindTexture(_sceneRenderTarget);
 
             ImGui.Begin("GAME", ImGuiWindowFlags.None);
             _gameWindowPosition = ImGui.GetWindowPos();
@@ -464,7 +464,7 @@ namespace Unify2D
             settings.Formatting = Formatting.Indented;
             string text = JsonConvert.SerializeObject(_core.GameObjects, settings);
 
-            File.WriteAllText(Path.Combine(ProjectPath, "./test.scene"), text);
+            File.WriteAllText(ToolsEditor.CombinePath(ProjectPath, "./test.scene"), text);
         }
 
         public void LoadScene()
@@ -479,7 +479,7 @@ namespace Unify2D
             List<GameObject> gameObjects = null;
             try
             {
-                string text = File.ReadAllText(Path.Combine(ProjectPath, "./test.scene"));
+                string text = File.ReadAllText(ToolsEditor.CombinePath(ProjectPath, "./test.scene"));
                 JsonSerializerSettings settings = new JsonSerializerSettings();
                 settings.TypeNameHandling = TypeNameHandling.Auto;
                 gameObjects = JsonConvert.DeserializeObject<List<GameObject>>(text, settings);
