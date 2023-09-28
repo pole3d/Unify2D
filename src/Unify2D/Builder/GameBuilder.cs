@@ -37,11 +37,8 @@ namespace Unify2D.Builder
 
 
             if ( Directory.Exists(TemplatePath) == false )
-            {
+                throw new Exception("ERROR > GameTemplate is missing! (paste the folder in /bin/Debug/Unify2D)");
 
-                return;
-            }
-            
             foreach (var file in Directory.GetFiles(TemplatePath))
             {
                 string fileName = Path.GetFileName(file);
