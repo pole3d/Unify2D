@@ -27,14 +27,7 @@ namespace Unify2D.Physics
         public bool IsKinematic { 
             get 
             { 
-                if (m_velcroBody != null) 
-                { 
-                    return m_velcroBody.IsKinematic; 
-                } 
-                else 
-                {
-                    return false; 
-                } 
+                return (m_type == BodyType.Kinematic);
             }  
 
             set
