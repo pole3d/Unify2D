@@ -85,6 +85,8 @@ namespace Unify2D.Toolbox
                     {
                         Asset asset = Clipboard.Content as Asset;
                         GameObject go = new GameObject() { Name = asset.Name };
+                        go.Position = GetMousePosition();
+
                         _editor.SelectObject(go);
                         SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
                         renderer.Initialize(_editor, go, asset.FullPath);
