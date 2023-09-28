@@ -43,6 +43,7 @@ namespace Unify2D
         static GameObject _gameObject;
         static Asset _asset;
         static Vector2 _dragOffset;
+        private static float _timeAtLastClick;
 
         public static bool TryGameObject(out GameObject go)
         {
@@ -93,7 +94,7 @@ namespace Unify2D
             }
         }
 
-        internal static void Update()
+        internal static void Update(GameTime gameTime)
         {
             var mouseState = Mouse.GetState();
 
@@ -106,11 +107,16 @@ namespace Unify2D
                     if (worldPosition.X >= item.Position.X - item.BoundingSize.X / 2 && worldPosition.X <= item.Position.X + item.BoundingSize.X / 2
                         && worldPosition.Y >= item.Position.Y - item.BoundingSize.Y / 2 && worldPosition.Y <= item.Position.Y + item.BoundingSize.Y / 2)
                     {
-                        SelectObject(item);
+                        if(item == _gameObject && gameTime.TotalGameTime.Seconds - _timeAtLastClick < 0.5f)
+                        {// Double click, focus
+                            GameEditor.Instance.GameToolbox.GoTo(item.Position);
+                        }
 
+                        SelectObject(item);
                         _selectState = SelectedState.Drag;
                         _dragOffset = GameEditor.Instance.GetWorldMousePosition() - item.Position;
 
+                        _timeAtLastClick = gameTime.TotalGameTime.Seconds;
                         break;
                     }
                 }

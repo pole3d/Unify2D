@@ -144,7 +144,7 @@ namespace Unify2D
 
             if (GameToolbox == null) return;
 
-            Selection.Update();
+            Selection.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)

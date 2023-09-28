@@ -222,5 +222,10 @@ namespace Unify2D.Toolbox
            
             return Position + WindowOffset + uiPos;
         }
+
+        internal void GoTo(Vector2 position)
+        {
+            _gameCamera.Position = position;
+        }
     }
 }
