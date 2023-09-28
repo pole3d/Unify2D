@@ -1,76 +1,85 @@
-﻿using ChipmunkSharp;
+﻿using Genbox.VelcroPhysics.Dynamics;
+using Genbox.VelcroPhysics.Factories;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using Unify2D.Core;
 
+
+
 namespace Unify2D.Physics
 {
+
+
     internal class Rigidbody : Component 
     {
-        public cpBodyType Type { get { return m_type; } set { m_type = value; } }
+        public BodyType Type { get{ return m_type; } set { m_type = value; } }
         public float Mass { get { return m_mass; } set { m_mass = value; } }
-        public float Damper { get { return m_damper; } set { m_damper = value; } }
-        public bool UseGravity { get { return m_useGravity; } set { m_useGravity = value; } }
-        public bool IsKinematic { get { return m_isKinematic; } set { m_isKinematic = value; } }
-        public float Velocity { get { return m_velocity; } }
+        public float LinearDamper { get { return m_linearDamper; } set { m_linearDamper = value; } }
+        public float GravityScale{ get { return m_gravityScale; } set { m_gravityScale = value; } }
 
-        private cpBodyType m_type;
-        private float m_mass;
-        private float m_damper;
+        public bool IsKinematic { 
+            get 
+            { 
+                if (m_velcroBody != null) 
+                { 
+                    return m_velcroBody.IsKinematic; 
+                } 
+                else 
+                {
+                    return false; 
+                } 
+            }  
 
-        private bool m_useGravity;
-        private bool m_isKinematic;
+            set
+            {
+                if (value) 
+                {
+                    m_type = BodyType.Kinematic;
+                }
+                else
+                {
+                    m_type = BodyType.Dynamic;
+                }
+            }
+        }
 
-        private float m_velocity;
-        private cpBody m_cpBody;
+        private float m_mass = 1f;
+        private float m_linearDamper = 0.1f;
+        private BodyType m_type = BodyType.Dynamic;
+        
+        private float  m_gravityScale = 1;
+
+        private Body m_velcroBody;
 
         public override void Load(Game game, GameObject go)
         {
-            m_cpBody = new cpBody(m_mass, m_velocity);
-
-            m_cpBody.SetBodyType(m_type);
-            m_cpBody.SetMass(m_mass);
-            m_cpBody.SetPosition(ChipmunkConverter.Vector2ToCpVect(_gameObject.Position));
+            m_velcroBody = BodyFactory.CreateBody(PhysicsSettings.World, _gameObject.Position, 0, m_type);
+            m_velcroBody.Mass = m_mass;
+            m_velcroBody.LinearDamping = m_linearDamper;
+            m_velcroBody.Restitution = 1;
+            m_velcroBody.GravityScale = m_gravityScale;
         }
 
         public override void Update(GameCore game)
         {
-            float deltaTime = (float)game.GameTime.ElapsedGameTime.TotalSeconds;
-
-            Vector2 gravity = Vector2.Zero;
-
-            if (m_useGravity)
-                gravity = PhysicsSettings.Gravity;
-
-            cpVect cpGravity = ChipmunkConverter.Vector2ToCpVect(gravity);
-
-            m_cpBody.UpdateVelocity(cpGravity, m_damper, deltaTime);
-            //m_cpBody.UpdatePosition(deltaTime);
-
-
-            _gameObject.Position = ChipmunkConverter.CpVectToVector2(m_cpBody.GetPosition());
+            _gameObject.Position = m_velcroBody.Position;
         }
 
         public void AddForce(Vector2 force)
         {
-            cpVect cpForce = ChipmunkConverter.Vector2ToCpVect(force);
-            cpVect cpPos = new cpVect(_gameObject.Position.X, _gameObject.Position.Y);
-
-            m_cpBody.ApplyForce(cpForce, cpPos);
+            m_velcroBody.ApplyForce(force);
         }
 
         public void AddForceAtPosition(Vector2 force, Vector2 position)
         {
-            cpVect cpForce = ChipmunkConverter.Vector2ToCpVect(force);
-            cpVect cpPos = ChipmunkConverter.Vector2ToCpVect(position);
-
-            m_cpBody.ApplyForce(cpForce, cpPos);
+            m_velcroBody.ApplyLinearImpulse(force, position);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using ChipmunkSharp;
+﻿
+using Genbox.VelcroPhysics.Dynamics;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -8,9 +9,21 @@ using System.Threading.Tasks;
 
 namespace Unify2D.Physics
 {
-    internal class PhysicsSettings
+    public class PhysicsSettings
     {
         public static int SolverIterations;
         public static Vector2 Gravity;
+        public static World World;
+
+        public static void Init()
+        {
+            SolverIterations = 6;
+            Gravity = new Vector2(0, 20f);
+
+            if (World != null ) 
+                World = null;
+
+            World = new World(Gravity);
+        }
     }
 }

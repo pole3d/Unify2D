@@ -1,10 +1,12 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Genbox.VelcroPhysics.Dynamics;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Unify2D.Physics;
 
 namespace Unify2D.Core
 {
@@ -27,6 +29,7 @@ namespace Unify2D.Core
         public List<GameObject> GameObjects => _gameObjects;
         public GameTime GameTime => _gameTime;
         private GameTime _gameTime;
+        public PhysicsSettings PhysicsSettings { get; private set; }
 
         static GameCore s_current;
 
@@ -41,6 +44,12 @@ namespace Unify2D.Core
         internal void AddGameObject(GameObject go)
         {
             _gameObjects.Add(go);
+        }
+
+        public void InitPhysics()
+        {
+            PhysicsSettings = new PhysicsSettings();
+            PhysicsSettings.Init();
         }
 
         BlendState _blendState;
@@ -97,6 +106,10 @@ namespace Unify2D.Core
         {
             if (_gameTime != gameTime)
                 _gameTime = gameTime;
+
+            float deltaTime = (float)_gameTime.ElapsedGameTime.TotalSeconds;
+
+            PhysicsSettings.World.Step(deltaTime);
 
             foreach (var item in _gameObjects)
             {

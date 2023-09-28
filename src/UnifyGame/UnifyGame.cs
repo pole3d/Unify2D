@@ -53,6 +53,7 @@ namespace UnifyGame
         protected override void LoadContent()
         {
             _core.Initialize(GraphicsDevice);
+            _core.InitPhysics();
 
             _core.GameObjects.Clear();
 
