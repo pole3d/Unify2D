@@ -92,6 +92,12 @@ namespace Unify2D.Core
 
         public void RemoveComponent(Component item)
         {
+            if ( item is Renderer renderer)
+            {
+                _renderers.Remove(renderer);
+            }
+
+            item.Destroy();
             _components.Remove(item);
         }
     }
