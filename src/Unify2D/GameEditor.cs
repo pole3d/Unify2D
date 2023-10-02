@@ -114,6 +114,9 @@ namespace Unify2D
 
             //LoadScene();
 
+            InitializeToolBoxes();
+
+
             ShowPopup(new LauncherPopup());
 
             base.Initialize();
@@ -381,7 +384,6 @@ namespace Unify2D
         public void LoadScene()
         {
             _projectLoaded = true;
-            InitializeToolBoxes();
 
             _core.GameObjects.Clear();
 

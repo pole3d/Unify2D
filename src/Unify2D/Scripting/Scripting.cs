@@ -10,6 +10,7 @@ using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
 using Unify2D.Toolbox;
+using Unify2D.Core;
 
 namespace Unify2D.Scripting
 {
@@ -88,7 +89,7 @@ namespace Unify2D.Scripting
                     _types.AddRange(typeof(Core.Component).Assembly.GetTypes()
                         .Where(type => type.IsSubclassOf(typeof(Core.Component)) && type.IsAbstract == false));
                     _types.AddRange(assembly.GetTypes()
-                        .Where(type => type.IsSubclassOf(typeof(Core.Component)) && type.IsAbstract == false  ));
+                        .Where(type => type.IsSubclassOf(typeof(Core.Component)) && type.IsAbstract == false));
 
                 }
             }
@@ -96,20 +97,44 @@ namespace Unify2D.Scripting
 
         private void ContextUnloaded(AssemblyLoadContext obj)
         {
+
             Console.WriteLine("context unload");
+            for (int i = 0; (i < 10); i++)
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
+
             LoadScripts();
+
+            _editor.LoadScene();
+            foreach (var go in _editor.GameCore.GameObjects)
+            {
+                List<Component> components = new List<Component>();
+                foreach (var item in go.Components)
+                {
+                    var newComp = Activator.CreateInstance(GetNewType(item.GetType())) as Component;
+                    components.Add(newComp);
+
+                    var fields = item.GetType().GetFields(
+    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+                }
+
+            }
+
         }
 
-        public void Load(GameEditor editor )
+        public void Load(GameEditor editor)
         {
             _editor = editor;
             Reload();
-           
+
         }
 
         public void Build()
         {
-       
+
         }
 
         public void Unload()
@@ -122,6 +147,19 @@ namespace Unify2D.Scripting
         public List<Type> GetTypes()
         {
             return _types;
+        }
+
+        Type GetNewType(Type oldType)
+        {
+            foreach (var type in _types)
+            {
+                if (type.ToString() == oldType.ToString())
+                {
+                    return type;
+                }
+            }
+
+            return null;
         }
 
     }
