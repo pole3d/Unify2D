@@ -395,6 +395,7 @@ namespace Unify2D
                 string text = File.ReadAllText(ToolsEditor.CombinePath(ProjectPath, "./test.scene"));
                 JsonSerializerSettings settings = new JsonSerializerSettings();
                 settings.TypeNameHandling = TypeNameHandling.Auto;
+                settings.Error += SilentErrors;
                 gameObjects = JsonConvert.DeserializeObject<List<GameObject>>(text, settings);
             }
             catch (Exception ex)
@@ -407,6 +408,11 @@ namespace Unify2D
                 Content.RootDirectory = ProjectPath;
                 _core.LoadScene(this, gameObjects);
             }
+        }
+
+        private void SilentErrors(object sender, Newtonsoft.Json.Serialization.ErrorEventArgs e)
+        {
+            e.ErrorContext.Handled = true;   
         }
 
         protected override void UnloadContent()

@@ -7,9 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
-using System.Text;
-using System.Threading.Tasks;
-using Unify2D.Toolbox;
 using Unify2D.Core;
 
 namespace Unify2D.Scripting
@@ -90,14 +87,12 @@ namespace Unify2D.Scripting
                         .Where(type => type.IsSubclassOf(typeof(Core.Component)) && type.IsAbstract == false));
                     _types.AddRange(assembly.GetTypes()
                         .Where(type => type.IsSubclassOf(typeof(Core.Component)) && type.IsAbstract == false));
-
                 }
             }
         }
 
         private void ContextUnloaded(AssemblyLoadContext obj)
         {
-
             Console.WriteLine("context unload");
             for (int i = 0; (i < 10); i++)
             {
@@ -107,22 +102,44 @@ namespace Unify2D.Scripting
 
             LoadScripts();
 
-            _editor.LoadScene();
+            ReplaceComponents();
+        }
+
+        private void ReplaceComponents()
+        {
             foreach (var go in _editor.GameCore.GameObjects)
             {
-                List<Component> components = new List<Component>();
-                foreach (var item in go.Components)
+                List<Component> newComponents = new List<Component>();
+                foreach (var oldComponent in go.Components)
                 {
-                    var newComp = Activator.CreateInstance(GetNewType(item.GetType())) as Component;
-                    components.Add(newComp);
+                    var newComp = Activator.CreateInstance(GetNewType(oldComponent.GetType())) as Component;
+                    newComponents.Add(newComp);
 
-                    var fields = item.GetType().GetFields(
-    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                    var oldFields = oldComponent.GetType().GetFields(
+                     BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+                    foreach (var oldField in oldFields)
+                    {
+                        var newFields = newComp.GetType().GetFields(
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+                        foreach (var newField in newFields)
+                        {
+                            if (newField.Name == oldField.Name)
+                                newField.SetValue(newComp, oldField.GetValue(oldComponent));
+                        }
+
+                    }
 
                 }
 
-            }
+                go.ClearComponents();
 
+                foreach (var item in newComponents)
+                {
+                    go.AddComponent(item);
+                }
+            }
         }
 
         public void Load(GameEditor editor)
@@ -141,8 +158,6 @@ namespace Unify2D.Scripting
         {
             _context.Unload();
         }
-
-
 
         public List<Type> GetTypes()
         {

@@ -15,6 +15,7 @@ namespace Unify2D.Core
         public string Name { get; set; }
         public Vector2 BoundingSize { get; set; } = new Vector2(30, 30);
 
+
         [JsonIgnore]
         public IEnumerable<Component> Components => _components;
 
@@ -99,6 +100,21 @@ namespace Unify2D.Core
 
             item.Destroy();
             _components.Remove(item);
+        }
+
+        public void ClearComponents()
+        {
+            foreach (var item in _components)
+            {
+                if (item is Renderer renderer)
+                {
+                    _renderers.Remove(renderer);
+                }
+
+                item.Destroy();
+            }
+
+            _components.Clear();
         }
     }
 }
