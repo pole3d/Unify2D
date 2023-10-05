@@ -27,6 +27,7 @@ namespace Unify2D.Core
 
         public SpriteBatch SpriteBatch { get; private set; }
         public List<GameObject> GameObjects => _gameObjects; 
+        public float DeltaTime { get; private set; }
 
         static GameCore s_current;
 
@@ -93,8 +94,10 @@ namespace Unify2D.Core
             }
         }
 
-        public void Update()
+        public void Update(GameTime gameTime)
         {
+            DeltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             foreach (var item in _gameObjects)
             {
                 item.Update(this);

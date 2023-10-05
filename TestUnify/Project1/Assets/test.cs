@@ -13,19 +13,19 @@ namespace GameAssembly
         {
             if (Input.Keyboard.GetState().IsKeyDown(Input.Keys.Up) )
             {
-                _gameObject.Position -= Microsoft.Xna.Framework.Vector2.UnitY * Speed;
+                _gameObject.Position -= Microsoft.Xna.Framework.Vector2.UnitY * Speed * game.DeltaTime;
             }
             if (Input.Keyboard.GetState().IsKeyDown(Input.Keys.Down) )
             {
-                _gameObject.Position += Microsoft.Xna.Framework.Vector2.UnitY * Speed;
+                _gameObject.Position += Microsoft.Xna.Framework.Vector2.UnitY * Speed * game.DeltaTime;
             }
             if (Input.Keyboard.GetState().IsKeyDown(Input.Keys.Right) )
             {
-                _gameObject.Position += Microsoft.Xna.Framework.Vector2.UnitX * Speed;
+                _gameObject.Position += Microsoft.Xna.Framework.Vector2.UnitX * Speed * game.DeltaTime;
             }
             if (Input.Keyboard.GetState().IsKeyDown(Input.Keys.Left) )
             {
-                _gameObject.Position -= Microsoft.Xna.Framework.Vector2.UnitX * Speed;
+                _gameObject.Position -= Microsoft.Xna.Framework.Vector2.UnitX * Speed * game.DeltaTime;
             }
 
         }
