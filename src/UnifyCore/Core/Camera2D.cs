@@ -23,19 +23,27 @@ namespace Unify2D.Core
         {
             _resolution = resolution;
             _position = position;
-            _zoom = zoom;
+            ZoomLevel = zoom;
             _rotation = rotation;
 
             UpdateMatrix();
         }
 
+        private float _zoomLevel;
+        public float ZoomLevel
+        {
+            get { return _zoomLevel; }
+            set { 
+                _zoomLevel = value;
+                Zoom = _zoomLevel >= 1 ? 1 / _zoomLevel : 2 - _zoomLevel;
+            }
+        }
         public float Zoom
         {
             get { return _zoom; }
-            set 
+            private set 
             { 
                 _zoom = value;
-                if (_zoom < 0.1f) _zoom = 0.1f;
                 _hasChanged = true;
             }
         }
@@ -81,7 +89,6 @@ namespace Unify2D.Core
             {
                 if (_hasChanged)
                 {
-                    _hasChanged = false;
                     UpdateMatrix();
                 }
                 return _matrix;
@@ -95,6 +102,8 @@ namespace Unify2D.Core
 
         private void UpdateMatrix()
         {
+            _hasChanged = false;
+
             _matrix =
             Matrix.CreateTranslation(new Vector3(-_position.X, -_position.Y, 0)) *
             Matrix.CreateRotationZ(Rotation) *

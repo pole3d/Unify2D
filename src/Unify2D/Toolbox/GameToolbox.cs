@@ -37,7 +37,6 @@ namespace Unify2D.Toolbox
         private Vector2 _lastMousePosition;
 
         private int _lastMouseSroll;
-        private int _zoomLevel = 10;
         private int _rotationAngle;
 
 
@@ -113,7 +112,7 @@ namespace Unify2D.Toolbox
             #endregion
 
             // Write position in world
-            ImGui.Text($"(X.{_lastMousePosition.X} Y.{_lastMousePosition.Y}) (Zoom.{MathF.Round(_gameCamera.Zoom * 100) / 100}) (Angle.{_rotationAngle}°) (Pixel / Square : {_pixelPerGridSquare})");
+            ImGui.Text($"(X.{_lastMousePosition.X} Y.{_lastMousePosition.Y}) (Zoom.{MathF.Round(_gameCamera.ZoomLevel * 100) / 100}) (Angle.{_rotationAngle}°) (Pixel / Square : {_pixelPerGridSquare})");
 
             // Close
             ImGui.PopStyleVar();
@@ -228,16 +227,12 @@ namespace Unify2D.Toolbox
             {
                 if (IsMouseInWindow())
                 {
-                    _zoomLevel += (mouseState.ScrollWheelValue - _lastMouseSroll) / 120;
-                    if(_zoomLevel < 0) _zoomLevel = 0;
-
-
                     // cache zoom and position of mous before zooming
                     float lastZoom = _gameCamera.Zoom;
                     Vector2 targetMove = GetMousePosition();
 
                     // zoom
-                    _gameCamera.Zoom = (_zoomLevel < 1 ? -1f / (_zoomLevel - 2) : _zoomLevel) * 0.1f;
+                    _gameCamera.ZoomLevel -= (mouseState.ScrollWheelValue - _lastMouseSroll) / 120 * 0.1f;
 
                     // difference between last zoom
                     float difference = (_gameCamera.Zoom - lastZoom) / lastZoom;
