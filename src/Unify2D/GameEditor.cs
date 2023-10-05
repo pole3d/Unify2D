@@ -48,7 +48,6 @@ namespace Unify2D
 
         GraphicsDeviceManager _graphics;
         ImGuiRenderer.Renderer _imGuiRenderer;
-        bool _projectLoaded;
 
         Scripting.Scripting _scripting;
         Stack<PopupBase> _popups = new Stack<PopupBase>();
@@ -383,7 +382,7 @@ namespace Unify2D
 
         public void LoadScene()
         {
-            _projectLoaded = true;
+            //_projectLoaded = true;
 
             _core.GameObjects.Clear();
 

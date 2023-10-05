@@ -67,7 +67,7 @@ namespace UnifyGame
 
         protected override void Update(GameTime gameTime)
         {
-            _core.Update();
+            _core.Update(gameTime);
 
         }
 

@@ -24,8 +24,8 @@
       },
       {
         "$type": "GameAssembly.TestA, GameAssembly",
-        "Speed": 10.0,
-        "SpeedO": 10.0
+        "Speed": 200.0,
+        "Speed7": 0.0
       }
     ],
     "Position": "812, 675",
