@@ -39,7 +39,7 @@ namespace Unify2D
         const string AssetsFolder = "./Assets";
 
         public string ProjectPath => _settings.Data.CurrentProjectPath;
-        public string AssetsPath => !String.IsNullOrEmpty(ProjectPath) ? Path.Combine(ProjectPath, AssetsFolder) : String.Empty;
+        public string AssetsPath => !String.IsNullOrEmpty(ProjectPath) ? ToolsEditor.CombinePath(ProjectPath, AssetsFolder) : String.Empty;
 
         public Scripting.Scripting Scripting => _scripting;
         public ImGuiRenderer.Renderer Renderer => _imGuiRenderer;
@@ -110,7 +110,12 @@ namespace Unify2D
             _graphics.ApplyChanges();
 
 
+
+
             //LoadScene();
+
+            InitializeToolBoxes();
+
 
             ShowPopup(new LauncherPopup());
 
@@ -332,6 +337,7 @@ namespace Unify2D
             }
 
             ImGui.ShowDemoWindow();
+
         }
 
         private void Build()
@@ -372,13 +378,12 @@ namespace Unify2D
             settings.Formatting = Formatting.Indented;
             string text = JsonConvert.SerializeObject(_core.GameObjects, settings);
 
-            File.WriteAllText(Path.Combine(ProjectPath, "./test.scene"), text);
+            File.WriteAllText(ToolsEditor.CombinePath(ProjectPath, "./test.scene"), text);
         }
 
         public void LoadScene()
         {
             _projectLoaded = true;
-            InitializeToolBoxes();
 
             _core.GameObjects.Clear();
 
@@ -387,9 +392,10 @@ namespace Unify2D
             List<GameObject> gameObjects = null;
             try
             {
-                string text = File.ReadAllText(Path.Combine(ProjectPath, "./test.scene"));
+                string text = File.ReadAllText(ToolsEditor.CombinePath(ProjectPath, "./test.scene"));
                 JsonSerializerSettings settings = new JsonSerializerSettings();
                 settings.TypeNameHandling = TypeNameHandling.Auto;
+                settings.Error += SilentErrors;
                 gameObjects = JsonConvert.DeserializeObject<List<GameObject>>(text, settings);
             }
             catch (Exception ex)
@@ -402,6 +408,11 @@ namespace Unify2D
                 Content.RootDirectory = ProjectPath;
                 _core.LoadScene(this, gameObjects);
             }
+        }
+
+        private void SilentErrors(object sender, Newtonsoft.Json.Serialization.ErrorEventArgs e)
+        {
+            e.ErrorContext.Handled = true;   
         }
 
         protected override void UnloadContent()

@@ -40,7 +40,8 @@ namespace Unify2D.Toolbox
                 string relativeFile = file.Replace(_path, string.Empty);
 
                 _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeFile),
-                    Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile)));
+                    Path.GetExtension(relativeFile),
+                    Path.GetDirectoryName(relativeFile)));
             }
 
             _selected = new bool[files.Length];
@@ -123,9 +124,9 @@ namespace Unify2D.Toolbox
                     File.WriteAllText(Path.Combine(_editor.AssetsPath, nameSb.ToString()), JsonConvert.SerializeObject(draggedGO, new JsonSerializerSettings()));
                     Reset();
                 }
+                ImGui.EndDragDropTarget();
             }
-            ImGui.EndDragDropTarget();
-
+            
             ImGui.End();
         }
     }

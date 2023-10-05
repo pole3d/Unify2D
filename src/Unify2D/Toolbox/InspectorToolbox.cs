@@ -17,6 +17,7 @@ namespace Unify2D.Toolbox
 
 
         List<TextureBound> _texturesBound = new List<TextureBound>();
+        List<TextureBound> _texturesToUnbind = new List<TextureBound>();
 
         public override void Initialize(GameEditor editor)
         {
@@ -42,7 +43,7 @@ namespace Unify2D.Toolbox
 
             foreach (var item in _texturesBound)
             {
-                GameEditor.Instance.Renderer.UnbindTexture(item.IntPtr);
+                _texturesToUnbind.Add(item);
             }
 
             _texturesBound.Clear();
@@ -52,6 +53,13 @@ namespace Unify2D.Toolbox
 
         public override void Draw()
         {
+            foreach (var item in _texturesToUnbind)
+            {
+                GameEditor.Instance.Renderer.UnbindTexture(item.IntPtr);
+            }
+
+            _texturesToUnbind.Clear();
+
             ImGui.Begin("Inspector");
 
             if (_gameObject != null)
@@ -139,6 +147,10 @@ namespace Unify2D.Toolbox
 
         private void ShowComponent(Component component)
         {
+
+
+
+
             PropertyInfo[] properties = component.GetType().GetProperties();
             foreach (PropertyInfo property in properties)
             {
@@ -191,13 +203,19 @@ namespace Unify2D.Toolbox
 
                             textureBound = new TextureBound { IntPtr = ptr, Texture = texture };
                             _texturesBound.Add(textureBound);
+
+
+                        }
+                        else
+                        {
+                            ImGui.Image(textureBound.IntPtr, new System.Numerics.Vector2(40, 40));
                         }
 
-                        ImGui.Image(textureBound.IntPtr, new System.Numerics.Vector2(40, 40));
                     }
                 }
             }
         }
+
 
         TextureBound GetTextureBound(Texture2D texture)
         {

@@ -24,5 +24,10 @@ namespace Unify2D.Core
         public virtual void Update(GameCore game)
         {
         }
+
+        internal virtual void Destroy()
+        {
+            
+        }
     }
 }

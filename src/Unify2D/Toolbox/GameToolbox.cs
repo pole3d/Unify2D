@@ -28,6 +28,7 @@ namespace Unify2D.Toolbox
         public Num.Vector2 Size { get; private set; }
 
         private RenderTarget2D _sceneRenderTarget;
+        IntPtr _renderTargetId;
         private Camera2D _gameCamera;
 
 
@@ -39,6 +40,8 @@ namespace Unify2D.Toolbox
         private int _zoomLevel = 10;
         private int _rotationAngle;
 
+
+
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
@@ -46,6 +49,9 @@ namespace Unify2D.Toolbox
             _sceneRenderTarget = new RenderTarget2D(editor.GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
 
             _gameCamera = new Camera2D(new Vector2(_gameResolution.X, _gameResolution.Y), new Vector2(_gameResolution.X / 2, _gameResolution.Y / 2));
+
+            _sceneRenderTarget = new RenderTarget2D(_editor.GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
+            _renderTargetId = _editor.Renderer.BindTexture(_sceneRenderTarget);
         }
         public override void Draw()
         {
@@ -64,8 +70,7 @@ namespace Unify2D.Toolbox
             ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Num.Vector2.Zero);
             
             // Bind and give pointer to Scene render texture
-            IntPtr renderTargetId = _editor.Renderer.BindTexture(_sceneRenderTarget);
-            ImGui.Image(renderTargetId, ImGui.GetContentRegionAvail() - _bottomOffset);
+            ImGui.Image(_renderTargetId, ImGui.GetContentRegionAvail() - _bottomOffset);
             
             // Circle Gizmo around selected Game Object
             _editor.CircleSelected();
@@ -80,7 +85,6 @@ namespace Unify2D.Toolbox
                     {
                         Asset asset = Clipboard.DragContent as Asset;
                         asset?.AssetContent.OnDragDroppedInGame(_editor);
-                        //
                     }
                 }
             }

@@ -8,7 +8,7 @@ namespace GameAssembly
     class TestA : Component
     {
         public float Speed { get; set; }
-        public float SpeedO { get; set; }
+        public float Speed7 { get; set; }
         public override void Update(GameCore game)
         {
             if (Input.Keyboard.GetState().IsKeyDown(Input.Keys.Up) )

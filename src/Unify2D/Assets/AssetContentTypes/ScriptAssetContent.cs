@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Unify2D.Core;
+using Unify2D.Tools;
 
 namespace Unify2D.Assets
 {
@@ -18,7 +19,7 @@ namespace Unify2D.Assets
         {
             base.Load();
 
-            Content = File.ReadAllText(  $"{GameEditor.Instance.AssetsPath }{_asset.FullPath}" );
+            Content = File.ReadAllText($"{GameEditor.Instance.AssetsPath}{_asset.FullPath}");
         }
 
         public override void OnDragDroppedInGame(GameEditor editor)
@@ -29,7 +30,8 @@ namespace Unify2D.Assets
 
         internal void Save()
         {
-            File.WriteAllText(_asset.FullPath, Content);
+            string path = ToolsEditor.CombinePath(GameEditor.Instance.AssetsPath, _asset.FullPath);
+            File.WriteAllText(path, Content);
         }
     }
 }

@@ -1,10 +1,32 @@
-﻿namespace Unify2D
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Unify2D.Tools
 {
-
-    class ToolsUI
+    internal class ToolsEditor
     {
-        public static uint ToColor32(byte r, byte g, byte b, byte a) { uint ret = a; ret <<= 8; ret += b; ret <<= 8; ret += g; ret <<= 8; ret += r; return ret; }
-        //   public static uint MakeColor32(byte r, byte g, byte b, byte a) { uint ret = a; ret <<= 8; ret += b; ret <<= 8; ret += g; ret <<= 8; ret += r; return ret; }
+        public static string CombinePath(string a, string b)
+        {
+            if (string.IsNullOrEmpty(a))
+            {
+                if (string.IsNullOrEmpty(b))
+                    return string.Empty;
 
+                return b;
+            }
+            else if (string.IsNullOrEmpty(b))
+            {
+                return a;
+            }
+
+            a = a.TrimEnd('/', '\\');
+            b = b.TrimStart('/', '\\');
+
+            return a + "/" + b;
+
+        }
     }
 }

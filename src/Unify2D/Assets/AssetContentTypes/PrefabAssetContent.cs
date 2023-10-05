@@ -11,14 +11,9 @@ namespace Unify2D.Assets
         
         public PrefabAssetContent(Asset asset) : base(asset) { }
 
-        public override void Load()
-        {
-            base.Load();
-            _serializedText = File.ReadAllText(_asset.FullPath);
-        }
-
         public override void OnDragDroppedInGame(GameEditor editor)
         {
+            _serializedText = File.ReadAllText(_asset.FullPath);
             GameObject go = JsonConvert.DeserializeObject<GameObject>(_serializedText, new JsonSerializerSettings());
             editor.SelectObject(go);
         }
