@@ -4,7 +4,8 @@ using Input = Microsoft.Xna.Framework.Input;
 namespace GameAssembly
 {
 
- 
+
+ 
     class TestA : Component
     {
         public float Speed { get; set; }
