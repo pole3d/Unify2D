@@ -76,7 +76,9 @@ namespace UnifyGame
 
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
+            _core.BeginDraw();
             _core.Draw();
+            _core.EndDraw();
 
             // Call BeforeLayout first to set things up
             _imGuiRenderer.BeforeLayout(gameTime);
