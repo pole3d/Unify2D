@@ -97,9 +97,45 @@ namespace Unify2D.Toolbox
             // Draw all game assets
             _editor.GameCore.Draw(_gameCamera.Matrix);
 
+            DrawGrid();
+
+            _editor.GameCore.EndDraw();
+
             // Close
             ImGui.PopStyleVar();
             ImGui.End();
+        }
+
+        private void DrawGrid()
+        {
+            Texture2D texture1px = new Texture2D(_editor.GraphicsDevice, 1, 1);
+            texture1px.SetData(new Color[] { Color.White });
+
+            Vector2 viewPort = _gameCamera.Resolution / _gameCamera.Zoom;
+
+            int step = 100;
+            int lineWidth = 5;
+
+            int rowX = (int)MathF.Round(viewPort.X / step + 1);
+            int rowY = (int)MathF.Round(viewPort.Y / step + 1);
+
+            int rootX = (int)(MathF.Round((_gameCamera.Position.X - viewPort.X / 2) / step) * step) - step;
+            int rootY = (int)(MathF.Round((_gameCamera.Position.Y - viewPort.Y / 2) / step) * step) - step;
+
+            Console.WriteLine($"Root : x.{rootX} y.{rootY}");
+
+            for (int x = 0; x <= rowX; x++)
+            {
+                Rectangle rectangle = new Rectangle((rootX + x * step), rootY, lineWidth, (int)viewPort.Y + step * 2);
+                GameCore.Current.SpriteBatch.Draw(texture1px, rectangle, Color.Red);
+            }
+            
+            for (int y = 0; y <= rowY; y++)
+            {
+                Rectangle rectangle = new Rectangle(rootX, (rootY + y * step), (int)viewPort.X + step * 2, lineWidth);
+                GameCore.Current.SpriteBatch.Draw(texture1px, rectangle, Color.Red);
+            }
+            
         }
         private void UpdateCamera()
         {

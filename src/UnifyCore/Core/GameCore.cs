@@ -60,13 +60,16 @@ namespace Unify2D.Core
                         null,
                         null,
                         matrix);
-            
+
 
 
             foreach (var item in _gameObjects)
             {
                 item.Draw();
             }
+        }
+        public void EndDraw()
+        {
             SpriteBatch.End();
         }
 
