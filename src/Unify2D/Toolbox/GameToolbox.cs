@@ -39,6 +39,8 @@ namespace Unify2D.Toolbox
         private int _zoomLevel = 10;
         private int _rotationAngle;
 
+        private int _pixelPerGridSquare;
+
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
@@ -89,17 +91,23 @@ namespace Unify2D.Toolbox
             ImGui.EndDragDropTarget();
             #endregion
 
+            //updates camera movement ect...
             UpdateCamera();
 
-            // Write position in world
-            ImGui.Text($"(X.{_lastMousePosition.X} Y.{_lastMousePosition.Y}) (Zoom.{MathF.Round(_gameCamera.Zoom * 100) / 100}) (Angle.{_rotationAngle}°)");
+            #region Drawing
+            _editor.GameCore.BeginDraw(_gameCamera.Matrix);
 
-            // Draw all game assets
-            _editor.GameCore.Draw(_gameCamera.Matrix);
-
+            //Draw the editor only grid
             DrawGrid();
 
+            // Draw all game assets
+            _editor.GameCore.Draw();
+
             _editor.GameCore.EndDraw();
+            #endregion
+
+            // Write position in world
+            ImGui.Text($"(X.{_lastMousePosition.X} Y.{_lastMousePosition.Y}) (Zoom.{MathF.Round(_gameCamera.Zoom * 100) / 100}) (Angle.{_rotationAngle}°) (Pixel / Square : {_pixelPerGridSquare})");
 
             // Close
             ImGui.PopStyleVar();
@@ -108,35 +116,75 @@ namespace Unify2D.Toolbox
 
         private void DrawGrid()
         {
-            Texture2D texture1px = new Texture2D(_editor.GraphicsDevice, 1, 1);
-            texture1px.SetData(new Color[] { Color.White });
-
             Vector2 viewPort = _gameCamera.Resolution / _gameCamera.Zoom;
 
-            int step = 100;
-            int lineWidth = 5;
+            int step = 20;
+            int width = 1;
 
-            int rowX = (int)MathF.Round(viewPort.X / step + 1);
-            int rowY = (int)MathF.Round(viewPort.Y / step + 1);
+            int rowX = (int)MathF.Round(viewPort.X / step);
+            int rowY = (int)MathF.Round(viewPort.Y / step);
 
-            int rootX = (int)(MathF.Round((_gameCamera.Position.X - viewPort.X / 2) / step) * step) - step;
-            int rootY = (int)(MathF.Round((_gameCamera.Position.Y - viewPort.Y / 2) / step) * step) - step;
+            int lowRowX = 0;
+            int lowRowY = 0;
+            int lowStep = 0;
+            int lowWidth = 0;
 
-            Console.WriteLine($"Root : x.{rootX} y.{rootY}");
+            int multiple = 5;
+
+            while (rowX > 16 || rowY > 9)
+            {
+                lowRowX = rowX + 1;
+                lowRowY = rowY + 1;
+                lowStep = step;
+                lowWidth = width;
+
+                step *= multiple;
+                width *= multiple;
+                
+                rowX /= multiple;
+                rowY /= multiple;
+            }
+            _pixelPerGridSquare = step;
+            rowX++;
+            rowY++;
+
+
+            int startX = (int)MathF.Round((_gameCamera.Position.X - viewPort.X / 2) / step);
+            int startY = (int)MathF.Round((_gameCamera.Position.Y - viewPort.Y / 2) / step);
+
+            if (lowRowX != 0 && lowRowX < 80)
+            {
+                int lowStartX = (int)MathF.Round((_gameCamera.Position.X - viewPort.X / 2) / lowStep);
+                int lowStartY = (int)MathF.Round((_gameCamera.Position.Y - viewPort.Y / 2) / lowStep);
+
+                DrawGrid(1 - (lowRowX / (32f * multiple)), lowStartX, lowStartY, lowRowX, lowRowY, lowStep, lowWidth, (int)viewPort.X, (int)viewPort.Y, multiple);
+            }
+            DrawGrid(rowX / 16f, startX, startY, rowX, rowY, step, width, (int)viewPort.X, (int)viewPort.Y);
+        }
+        private void DrawGrid(float opacity, int startX, int startY, int rowX, int rowY, int step, int width, int viewX, int viewY, int ignore = 1)
+        {
+            Texture2D texture1px = new Texture2D(_editor.GraphicsDevice, 1, 1);
+            texture1px.SetData(new Color[] { new Color(1, 1, 1, opacity) });
 
             for (int x = 0; x <= rowX; x++)
             {
-                Rectangle rectangle = new Rectangle((rootX + x * step), rootY, lineWidth, (int)viewPort.Y + step * 2);
-                GameCore.Current.SpriteBatch.Draw(texture1px, rectangle, Color.Red);
+                if(ignore == 1 || (x + startX) % ignore != 0)
+                {
+                    Rectangle rectangle = new Rectangle(((startX + x) * step) - (width / 2), (startY - 1) * step, width, viewY + step * 2);
+                    GameCore.Current.SpriteBatch.Draw(texture1px, rectangle, Color.Gray);
+                }
             }
-            
+
             for (int y = 0; y <= rowY; y++)
             {
-                Rectangle rectangle = new Rectangle(rootX, (rootY + y * step), (int)viewPort.X + step * 2, lineWidth);
-                GameCore.Current.SpriteBatch.Draw(texture1px, rectangle, Color.Red);
+                if (ignore == 1 || (y + startY) % ignore != 0)
+                {
+                    Rectangle rectangle = new Rectangle((startX - 1) * step, ((startY + y) * step) - (width / 2), viewX + step * 2, width);
+                    GameCore.Current.SpriteBatch.Draw(texture1px, rectangle, Color.Gray);
+                }
             }
-            
         }
+
         private void UpdateCamera()
         {
             MouseState mouseState = Mouse.GetState();

@@ -45,14 +45,12 @@ namespace Unify2D.Core
             _gameObjects.Add(go);
         }
 
-        public void Draw()
+        public void BeginDraw()
         {
-            Draw(Matrix.Identity);
+            BeginDraw(Matrix.Identity);
         }
-        public void Draw(Matrix matrix)
+        public void BeginDraw(Matrix matrix)
         {
-            //SpriteBatch.Begin( SpriteSortMode.Deferred, BlendState.NonPremultiplied);
-            
             SpriteBatch.Begin(SpriteSortMode.Deferred,
                         BlendState.NonPremultiplied,
                         null,
@@ -60,9 +58,9 @@ namespace Unify2D.Core
                         null,
                         null,
                         matrix);
-
-
-
+        }
+        public void Draw()
+        {
             foreach (var item in _gameObjects)
             {
                 item.Draw();

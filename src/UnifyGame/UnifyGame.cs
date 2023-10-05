@@ -76,6 +76,7 @@ namespace UnifyGame
 
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
+            _core.BeginDraw();
             _core.Draw();
             _core.EndDraw();
 
