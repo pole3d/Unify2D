@@ -7,6 +7,7 @@
         <RootNamespace>Unify2D</RootNamespace>
         <TargetFramework>net6.0</TargetFramework>
         <OutputType>Exe</OutputType>
+        <ApplicationIcon>UnifyLogo.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
@@ -17,6 +18,7 @@
 
     <ItemGroup>
         <Content Include="$(RepositoryRootDirectory)/deps/cimgui/win-x64/cimgui.dll" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="UnifyLogo.ico" />
        </ItemGroup>
 
     <ItemGroup>

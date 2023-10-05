@@ -69,6 +69,9 @@ namespace Unify2D.Toolbox
             // Circle Gizmo around selected Game Object
             _editor.CircleSelected();
 
+            //Draw Component Gizmos for selected Game Object
+            _editor.DrawComponentGizmoSelected();
+
             #region Drag & Drop Asset
             if (ImGui.BeginDragDropTarget())
             {

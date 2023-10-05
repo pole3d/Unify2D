@@ -86,6 +86,8 @@ namespace Unify2D
             _core = new GameCore();
             GameCore.SetCurrent(_core);
 
+            _core.InitPhysics();
+
             _settings = new GameEditorSettings();
             _settings.Load(this);
 
@@ -216,6 +218,8 @@ namespace Unify2D
 
             // Call AfterLayout now to finish up and draw all the things
             _imGuiRenderer.AfterLayout();
+
+            
         }
 
         private void DrawMainMenuBarUI()
@@ -331,6 +335,19 @@ namespace Unify2D
             drawList.AddCircle(_gameToolbox.WorldToUI(_selected.Position),
                       8, color, 64, 3);
             drawList.PopClipRect();
+        }
+
+        public void DrawComponentGizmoSelected()
+        {
+            if (_selected == null)
+                return;
+
+            var p0 = ImGui.GetItemRectMin();
+            var p1 = ImGui.GetItemRectMax();
+            var drawList = ImGui.GetWindowDrawList();
+            drawList.PushClipRect(p0, p1);
+
+            _selected.DrawComponentGizmosSelected(drawList);
         }
 
 

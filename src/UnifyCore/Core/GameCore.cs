@@ -48,7 +48,9 @@ namespace Unify2D.Core
 
         public void InitPhysics()
         {
-            PhysicsSettings = new PhysicsSettings();
+            if (PhysicsSettings == null)
+                PhysicsSettings = new PhysicsSettings();
+
             PhysicsSettings.Init();
         }
 
@@ -109,8 +111,6 @@ namespace Unify2D.Core
 
             float deltaTime = (float)_gameTime.ElapsedGameTime.TotalSeconds;
 
-            PhysicsSettings.World.Step(deltaTime);
-
             foreach (var item in _gameObjects)
             {
                 item.Update(this);
@@ -120,6 +120,8 @@ namespace Unify2D.Core
             {
                 _gameObjects.Remove(item);
             }
+
+            PhysicsSettings.World.Step(deltaTime);
 
             _gameObjectsToDestroy.Clear();
         }

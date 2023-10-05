@@ -10,6 +10,7 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using Unify2D.Core;
+using UnifyCore.Core.Physics;
 
 namespace Unify2D.Physics
 {
@@ -39,20 +40,42 @@ namespace Unify2D.Physics
             }
         }
 
-        private float m_mass = 1f;
+        private float m_mass = 100f;
         private float m_linearDamper = 0.1f;
         private BodyType m_type = BodyType.Dynamic;
         
-        private float  m_gravityScale = 1;
+        private float  m_gravityScale = 100f;
 
         private Body m_velcroBody;
 
         public override void Load(Game game, GameObject go)
         {
-            m_velcroBody = BodyFactory.CreateBody(PhysicsSettings.World, _gameObject.Position, 0, m_type);
+            BoxCollider boxCol = _gameObject.GetComponent<BoxCollider>();
+            CircleCollider cirCol = _gameObject.GetComponent<CircleCollider>();
+            CapsuleCollider capsuleCol = _gameObject.GetComponent<CapsuleCollider>();
+
+            if (boxCol != null)
+            {
+                m_velcroBody = BodyFactory.CreateRectangle(PhysicsSettings.World, boxCol.Width, boxCol.Height, 1, _gameObject.Position, 0, m_type);
+                
+            }
+            else if (cirCol!= null)
+            {
+                m_velcroBody = BodyFactory.CreateCircle(PhysicsSettings.World, cirCol.Radius, 1, _gameObject.Position, 0, m_type);
+            }
+            else if (capsuleCol != null)
+            {
+                m_velcroBody = BodyFactory.CreateCapsule(PhysicsSettings.World, capsuleCol.Height, capsuleCol.Radius, 1, _gameObject.Position, 0, BodyType.Static);
+            }
+            else 
+            {
+                m_velcroBody = BodyFactory.CreateBody(PhysicsSettings.World, _gameObject.Position, 0, m_type);
+            }
+            
             m_velcroBody.Mass = m_mass;
             m_velcroBody.LinearDamping = m_linearDamper;
             m_velcroBody.GravityScale = m_gravityScale;
+            m_velcroBody.AngularDamping = 1;
         }
 
         public override void Update(GameCore game)
@@ -69,5 +92,6 @@ namespace Unify2D.Physics
         {
             m_velcroBody.ApplyLinearImpulse(force, position);
         }
+
     }
 }

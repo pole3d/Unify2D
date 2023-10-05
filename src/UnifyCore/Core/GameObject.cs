@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using ImGuiNET;
+using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -104,6 +105,14 @@ namespace Unify2D.Core
         public void RemoveComponent(Component item)
         {
             _components.Remove(item);
+        }
+
+        public void DrawComponentGizmosSelected(ImDrawListPtr drawList)
+        {
+            foreach (var c in Components)
+            {
+                c.DrawGizmoOnSelected(drawList);
+            }
         }
     }
 }

@@ -18,12 +18,10 @@ namespace Unify2D.Physics
         public static void Init()
         {
             SolverIterations = 6;
-            Gravity = new Vector2(0, 100f);
-
-            if (World != null ) 
-                World = null;
+            Gravity = new Vector2(0, 80f);
 
             World = new World(Gravity);
+            World.Enabled = true;
         }
     }
 }

@@ -1,11 +1,8 @@
 ﻿using Genbox.VelcroPhysics.Dynamics;
 using Genbox.VelcroPhysics.Factories;
-using ImGuiNET;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.IO.Pipes;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,16 +11,15 @@ using Unify2D.Physics;
 
 namespace UnifyCore.Core.Physics
 {
-    internal class BoxCollider : Component
+    internal class CircleCollider: Component
     {
-        public float Width { get { return m_width; } set { m_width = value; } }
-        public float Height { get { return m_height; } set { m_height = value; } }
+        public float Radius{ get { return m_radius; } set { m_radius = value; } }
 
         private Vector2 m_size;
 
         private Body staticBody;
 
-        private float m_width = 10f, m_height = 10f;
+        private float m_radius = 10f;
 
         public override void Load(Game game, GameObject go)
         {
@@ -31,7 +27,7 @@ namespace UnifyCore.Core.Physics
 
             if (rb == null)
             {
-                staticBody = BodyFactory.CreateRectangle(PhysicsSettings.World, m_width, m_height, 1, _gameObject.Position, 0, BodyType.Static);
+                staticBody = BodyFactory.CreateCircle(PhysicsSettings.World, m_radius, 1, _gameObject.Position, 0, BodyType.Static);
             }
         }
 
