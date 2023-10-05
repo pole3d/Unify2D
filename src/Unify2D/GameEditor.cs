@@ -10,8 +10,6 @@ using System.IO;
 using Unify2D.Assets;
 using Unify2D.Builder;
 using Unify2D.Core;
-using Unify2D.Core.Graphics;
-using Unify2D.ImGuiRenderer;
 using Unify2D.Toolbox;
 using Unify2D.Toolbox.Popup;
 using Unify2D.Tools;
@@ -44,7 +42,8 @@ namespace Unify2D
         public Scripting.Scripting Scripting => _scripting;
         public ImGuiRenderer.Renderer Renderer => _imGuiRenderer;
 
-        public GameEditorSettings Settings { get => _settings;  }
+        public GameEditorSettings Settings => _settings;
+        public List<GameCore> GameCores => _cores;
 
         GraphicsDeviceManager _graphics;
         ImGuiRenderer.Renderer _imGuiRenderer;
@@ -56,10 +55,9 @@ namespace Unify2D
 
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
 
-
-        private GameCore _core;
-        public GameCore GameCore => _core;
-
+        GameCore _coreScene;
+        List<GameCore> _cores = new List<GameCore>();
+        
         GameObject _selected;
         InspectorToolbox _inspectorToolbox;
         ScriptToolbox _scriptToolbox;
@@ -91,8 +89,9 @@ namespace Unify2D
 
         protected override void Initialize()
         {
-            _core = new GameCore(this);
-            GameCore.SetCurrent(_core);
+            _coreScene = new GameCore(this);
+            _cores.Add(_coreScene);
+            GameCore.SetCurrent(_coreScene);
 
             _settings = new GameEditorSettings();
             _settings.Load(this);
@@ -127,7 +126,7 @@ namespace Unify2D
             _scriptToolbox = new ScriptToolbox();
             _inspectorToolbox = new InspectorToolbox();
             _gameToolbox = new GameToolbox();
-
+            _gameToolbox.SetCore(_coreScene);
 
             _toolboxes.Add(new AssetsToolbox());
             _toolboxes.Add(new HierarchyToolbox());
@@ -147,7 +146,7 @@ namespace Unify2D
 
         protected override void LoadContent()
         {
-            _core.Initialize(GraphicsDevice);
+            _coreScene.Initialize(GraphicsDevice);
 
             base.LoadContent();
         }
@@ -192,24 +191,26 @@ namespace Unify2D
                 if (mouseState.LeftButton == ButtonState.Pressed)
                 {
                     Vector2 worldPosition = GetWorldMousePosition();
-
-                    foreach (var item in _core.GameObjects)
-                    {
-                        if (worldPosition.X >= item.Position.X - item.BoundingSize.X / 2 && worldPosition.X <= item.Position.X + item.BoundingSize.X / 2
-                            && worldPosition.Y >= item.Position.Y - item.BoundingSize.Y / 2 && worldPosition.Y <= item.Position.Y + item.BoundingSize.Y / 2)
+                    
+                        foreach (var item in _coreScene.GameObjects)
                         {
-                            SelectObject(item);
-
-                            Num.Vector2 mousePosition = new Num.Vector2(mouseState.X, mouseState.Y);
-                            Num.Vector2 goPosition = _gameToolbox.WorldToUI(item.Position);
-
-                            Num.Vector2 direction = mousePosition - goPosition;
-                            if (direction.Length() < 10)
+                            if (worldPosition.X >= item.Position.X - item.BoundingSize.X / 2
+                                && worldPosition.X <= item.Position.X + item.BoundingSize.X / 2
+                                && worldPosition.Y >= item.Position.Y - item.BoundingSize.Y / 2
+                                && worldPosition.Y <= item.Position.Y + item.BoundingSize.Y / 2)
                             {
-                                _selectState = SelectedState.Drag;
+                                SelectObject(item);
+
+                                Num.Vector2 mousePosition = new Num.Vector2(mouseState.X, mouseState.Y);
+                                Num.Vector2 goPosition = _gameToolbox.WorldToUI(item.Position);
+
+                                Num.Vector2 direction = mousePosition - goPosition;
+                                if (direction.Length() < 10)
+                                {
+                                    _selectState = SelectedState.Drag;
+                                }
                             }
                         }
-                    }
                 }
             }
             else if (_selectState == SelectedState.Drag)
@@ -343,7 +344,7 @@ namespace Unify2D
         private void Build()
         {
             GameBuilder builder = new GameBuilder();
-            builder.Build(_core, this);
+            builder.Build(_coreScene, this);
             builder.StartBuild();
         }
 
@@ -376,7 +377,7 @@ namespace Unify2D
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
             settings.Formatting = Formatting.Indented;
-            string text = JsonConvert.SerializeObject(_core.GameObjects, settings);
+            string text = JsonConvert.SerializeObject(_coreScene.GameObjects, settings);
 
             File.WriteAllText(ToolsEditor.CombinePath(ProjectPath, "./test.scene"), text);
         }
@@ -385,7 +386,7 @@ namespace Unify2D
         {
             _projectLoaded = true;
 
-            _core.GameObjects.Clear();
+            _coreScene.GameObjects.Clear();
 
             SelectObject(null);
 
@@ -406,7 +407,7 @@ namespace Unify2D
             if (gameObjects != null)
             {
                 Content.RootDirectory = ProjectPath;
-                _core.LoadScene(this, gameObjects);
+                _coreScene.LoadScene(this, gameObjects);
             }
         }
 
@@ -420,13 +421,19 @@ namespace Unify2D
             _settings.Save();
         }
 
-    
-
+        internal void OpenPrefab(PrefabAssetContent content)
+        {
+            GameCore prefabCore = new GameCore(this);
+            _cores.Add(prefabCore);
+            prefabCore.Initialize(GraphicsDevice);
+            _gameToolbox.Tag = prefabCore;
+            
+            GameCore.SetCurrent(prefabCore);
+            
+            content.CreateGameObject(this);
+            prefabCore.LoadScene(this, prefabCore.GameObjects);
+        }
     }
-
-
-
-
 }
 
 

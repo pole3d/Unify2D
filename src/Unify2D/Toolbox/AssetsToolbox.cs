@@ -84,6 +84,22 @@ namespace Unify2D.Toolbox
 
                     ImGui.EndDragDropSource();
                 }
+                
+                if (ImGui.BeginPopupContextItem())
+                {
+                    if (_assets[n].AssetContent is PrefabAssetContent prefabContent)
+                    {
+                        if (ImGui.Button("Open Prefab"))
+                        {
+                            GameEditor.Instance.OpenPrefab(prefabContent);
+                        }
+                    }
+                    if (ImGui.Button("Delete"))
+                    {
+                        //delete code
+                    }
+                    ImGui.EndPopup();
+                }
             }
             
             ImGui.EndChild();
@@ -109,6 +125,7 @@ namespace Unify2D.Toolbox
                         if (++safeguard > 99999)
                             throw new Exception("Too many files with the same name, or potentially stuck in an infinite loop. Prefab save failed.");
                         
+                        // TODO: Fix number assignement. this currently goes from "19" to "110" (and "119" to "1110", etc...)
                         char lastChar = nameSb[nameSb.Length - 1];
                         if (char.IsDigit(lastChar))
                         {

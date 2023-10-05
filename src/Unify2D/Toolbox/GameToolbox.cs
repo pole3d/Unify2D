@@ -31,7 +31,6 @@ namespace Unify2D.Toolbox
         IntPtr _renderTargetId;
         private Camera2D _gameCamera;
 
-
         private bool _movingCamera;
         private bool _dragInput;
         private Vector2 _lastMousePosition;
@@ -39,9 +38,7 @@ namespace Unify2D.Toolbox
         private int _lastMouseSroll;
         private int _zoomLevel = 10;
         private int _rotationAngle;
-
-
-
+        
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
@@ -53,6 +50,12 @@ namespace Unify2D.Toolbox
             _sceneRenderTarget = new RenderTarget2D(_editor.GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
             _renderTargetId = _editor.Renderer.BindTexture(_sceneRenderTarget);
         }
+
+        public void SetCore(GameCore core)
+        {
+            _tag = core;
+        }
+        
         public override void Draw()
         {
             // Render target
@@ -87,8 +90,8 @@ namespace Unify2D.Toolbox
                         asset?.AssetContent.OnDragDroppedInGame(_editor);
                     }
                 }
+                ImGui.EndDragDropTarget();
             }
-            ImGui.EndDragDropTarget();
             #endregion
 
             UpdateCamera();
@@ -97,7 +100,7 @@ namespace Unify2D.Toolbox
             ImGui.Text($"(X.{_lastMousePosition.X} Y.{_lastMousePosition.Y}) (Zoom.{MathF.Round(_gameCamera.Zoom * 100) / 100}) (Angle.{_rotationAngle}°)");
 
             // Draw all game assets
-            _editor.GameCore.Draw(_gameCamera.Matrix);
+            ((GameCore)_tag).Draw(_gameCamera.Matrix);
 
             // Close
             ImGui.PopStyleVar();

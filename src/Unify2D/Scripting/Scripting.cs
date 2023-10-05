@@ -107,37 +107,40 @@ namespace Unify2D.Scripting
 
         private void ReplaceComponents()
         {
-            foreach (var go in _editor.GameCore.GameObjects)
+            foreach (var core in _editor.GameCores)
             {
-                List<Component> newComponents = new List<Component>();
-                foreach (var oldComponent in go.Components)
+                foreach (var go in core.GameObjects)
                 {
-                    var newComp = Activator.CreateInstance(GetNewType(oldComponent.GetType())) as Component;
-                    newComponents.Add(newComp);
-
-                    var oldFields = oldComponent.GetType().GetFields(
-                     BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-
-                    foreach (var oldField in oldFields)
+                    List<Component> newComponents = new List<Component>();
+                    foreach (var oldComponent in go.Components)
                     {
-                        var newFields = newComp.GetType().GetFields(
-                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                        var newComp = Activator.CreateInstance(GetNewType(oldComponent.GetType())) as Component;
+                        newComponents.Add(newComp);
 
-                        foreach (var newField in newFields)
+                        var oldFields = oldComponent.GetType().GetFields(
+                         BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+                        foreach (var oldField in oldFields)
                         {
-                            if (newField.Name == oldField.Name)
-                                newField.SetValue(newComp, oldField.GetValue(oldComponent));
+                            var newFields = newComp.GetType().GetFields(
+                            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+                            foreach (var newField in newFields)
+                            {
+                                if (newField.Name == oldField.Name)
+                                    newField.SetValue(newComp, oldField.GetValue(oldComponent));
+                            }
+
                         }
 
                     }
 
-                }
+                    go.ClearComponents();
 
-                go.ClearComponents();
-
-                foreach (var item in newComponents)
-                {
-                    go.AddComponent(item);
+                    foreach (var item in newComponents)
+                    {
+                        go.AddComponent(item);
+                    }
                 }
             }
         }

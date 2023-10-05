@@ -25,6 +25,7 @@ namespace Unify2D.Assets
         public override void OnDragDroppedInGame(GameEditor editor)
         {
             GameObject go = new GameObject() { Name = _asset.Name };
+            //TODO : Add component to the gameObject
             editor.SelectObject(go);
         }
 

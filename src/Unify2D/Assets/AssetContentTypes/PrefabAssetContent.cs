@@ -12,6 +12,11 @@ namespace Unify2D.Assets
 
         public override void OnDragDroppedInGame(GameEditor editor)
         {
+            CreateGameObject(editor);
+        }
+
+        public void CreateGameObject(GameEditor editor)
+        {
             // Get serialized text
             _serializedText = File.ReadAllText($"{GameEditor.Instance.AssetsPath}{_asset.FullPath}");
             // Make so type name should be read
