@@ -47,6 +47,12 @@ namespace Unify2D.Toolbox
                 
                 if (ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
                 {
+                    unsafe
+                    {
+                        // Set payload to carry the index of our item (could be anything)
+                        ImGui.SetDragDropPayload("HIERARCHY", (IntPtr)(&i), sizeof(int));
+                    }
+                    
                     Clipboard.DragContent = item;
                     ImGui.Text(item.Name);
                         

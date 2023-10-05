@@ -1,12 +1,9 @@
-﻿using ImGuiNET;
-using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
+using ImGuiNET;
 using Unify2D.Assets;
 using Unify2D.Core;
 using Unify2D.Tools;
@@ -53,6 +50,7 @@ namespace Unify2D.Toolbox
         public override void Draw()
         {
             ImGui.Begin("Assets");
+            ImGui.BeginChild("assetList");
 
             for (int n = 0; n < _assets.Count; n++)
             {
@@ -87,25 +85,47 @@ namespace Unify2D.Toolbox
                 }
             }
             
-            if (ImGui.BeginDragDropTarget() && Clipboard.DragContent is GameObject draggedGO)
-            {
-                StringBuilder nameSb = new StringBuilder(draggedGO.Name);
-                if (File.Exists(Path.Combine(_editor.AssetsPath, nameSb + ".prefab")))
-                {
-                    char lastChar = nameSb[nameSb.Length - 1];
-                    if (char.IsDigit(lastChar))
-                    {
-                        nameSb.Length--;
-                        if (lastChar == '9')
-                            nameSb.Append("10");
-                        else
-                            nameSb.Append((char)(lastChar + 1));
-                    }
-                }
-                File.WriteAllText(Path.Combine(_editor.AssetsPath, nameSb + ".prefab"), JsonConvert.SerializeObject(draggedGO, new JsonSerializerSettings()));
-                Reset();
-            }
+            ImGui.EndChild();
             
+            if (ImGui.BeginDragDropTarget())
+            {
+                GameObject draggedGO = null;
+                
+                unsafe
+                {
+                    var ptr = ImGui.AcceptDragDropPayload("HIERARCHY");
+                    if (ptr.NativePtr != null)
+                        draggedGO = Clipboard.DragContent as GameObject;
+                }
+
+                if (draggedGO != null)
+                {
+                    StringBuilder nameSb = new StringBuilder(draggedGO.Name);
+                    int safeguard = 0;
+                    while (File.Exists(Path.Combine(_editor.AssetsPath, nameSb + ".prefab")))
+                    {
+                        if (++safeguard > 99999)
+                            throw new Exception("Too many files with the name, or potentially stuck in an infinite loop. Prefab save failed.");
+                        
+                        char lastChar = nameSb[nameSb.Length - 1];
+                        if (char.IsDigit(lastChar))
+                        {
+                            nameSb.Length--;
+                            if (lastChar == '9')
+                                nameSb.Append("10");
+                            else
+                                nameSb.Append((char)(lastChar + 1));
+                        }
+                        else
+                            nameSb.Append('1');
+                    }
+                    nameSb.Append(".prefab");
+                    File.WriteAllText(Path.Combine(_editor.AssetsPath, nameSb.ToString()), JsonConvert.SerializeObject(draggedGO, new JsonSerializerSettings()));
+                    Reset();
+                }
+            }
+            ImGui.EndDragDropTarget();
+
             ImGui.End();
         }
     }
