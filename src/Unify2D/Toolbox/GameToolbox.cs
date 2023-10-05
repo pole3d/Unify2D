@@ -103,6 +103,7 @@ namespace Unify2D.Toolbox
             ImGui.PopStyleVar();
             ImGui.End();
         }
+        
         private void UpdateCamera()
         {
             MouseState mouseState = Mouse.GetState();

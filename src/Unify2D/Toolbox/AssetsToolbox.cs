@@ -103,10 +103,11 @@ namespace Unify2D.Toolbox
                 {
                     StringBuilder nameSb = new StringBuilder(draggedGO.Name);
                     int safeguard = 0;
+                    // Append number in filename if file already exists
                     while (File.Exists(Path.Combine(_editor.AssetsPath, nameSb + ".prefab")))
                     {
                         if (++safeguard > 99999)
-                            throw new Exception("Too many files with the name, or potentially stuck in an infinite loop. Prefab save failed.");
+                            throw new Exception("Too many files with the same name, or potentially stuck in an infinite loop. Prefab save failed.");
                         
                         char lastChar = nameSb[nameSb.Length - 1];
                         if (char.IsDigit(lastChar))
@@ -121,7 +122,12 @@ namespace Unify2D.Toolbox
                             nameSb.Append('1');
                     }
                     nameSb.Append(".prefab");
-                    File.WriteAllText(Path.Combine(_editor.AssetsPath, nameSb.ToString()), JsonConvert.SerializeObject(draggedGO, new JsonSerializerSettings()));
+                    // Make so type name should be written in serialized data
+                    JsonSerializerSettings settings = new JsonSerializerSettings();
+                    settings.TypeNameHandling = TypeNameHandling.Auto;
+                    // Write serialized data to file
+                    File.WriteAllText(Path.Combine(_editor.AssetsPath, nameSb.ToString()), JsonConvert.SerializeObject(draggedGO, settings));
+                    // Refresh toolbox
                     Reset();
                 }
                 ImGui.EndDragDropTarget();

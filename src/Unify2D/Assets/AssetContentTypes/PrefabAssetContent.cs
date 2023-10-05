@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using Newtonsoft.Json;
 using Unify2D.Core;
 
@@ -13,8 +12,13 @@ namespace Unify2D.Assets
 
         public override void OnDragDroppedInGame(GameEditor editor)
         {
-            _serializedText = File.ReadAllText(_asset.FullPath);
-            GameObject go = JsonConvert.DeserializeObject<GameObject>(_serializedText, new JsonSerializerSettings());
+            // Get serialized text
+            _serializedText = File.ReadAllText($"{GameEditor.Instance.AssetsPath}{_asset.FullPath}");
+            // Make so type name should be read
+            JsonSerializerSettings settings = new JsonSerializerSettings();
+            settings.TypeNameHandling = TypeNameHandling.Auto;
+            // Create gameObject
+            GameObject go = JsonConvert.DeserializeObject<GameObject>(_serializedText, settings);
             editor.SelectObject(go);
         }
     }

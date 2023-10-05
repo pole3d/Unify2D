@@ -65,52 +65,6 @@ namespace Unify2D.Toolbox
             }
 
             ImGui.EndChild();
-            
-            // if (ImGui.BeginDragDropTarget())
-            // {
-            //     GameObject draggedGO = null;
-            //     
-            //     unsafe
-            //     {
-            //         var ptr = ImGui.AcceptDragDropPayload("HIERARCHY");
-            //         if (ptr.NativePtr != null)
-            //             draggedGO = Clipboard.DragContent as GameObject;
-            //     }
-            //
-            //     if (draggedGO != null)
-            //     {
-            //         StringBuilder nameSb = new StringBuilder(draggedGO.Name);
-            //         int safeguard = 0;
-            //
-            //         GameObject sameNameGO = null;
-            //         foreach (GameObject go in GameCore.Current.GameObjects)
-            //         {
-            //             if (go.Name == draggedGO.)
-            //         }
-            //
-            //         while (File.Exists(Path.Combine(_editor.AssetsPath, nameSb + ".prefab")))
-            //         {
-            //             if (++safeguard > 99999)
-            //                 throw new Exception("Too many files with the name, or potentially stuck in an infinite loop. Prefab save failed.");
-            //             
-            //             char lastChar = nameSb[nameSb.Length - 1];
-            //             if (char.IsDigit(lastChar))
-            //             {
-            //                 nameSb.Length--;
-            //                 if (lastChar == '9')
-            //                     nameSb.Append("10");
-            //                 else
-            //                     nameSb.Append((char)(lastChar + 1));
-            //             }
-            //             else
-            //                 nameSb.Append('1');
-            //         }
-            //         nameSb.Append(".prefab");
-            //         File.WriteAllText(Path.Combine(_editor.AssetsPath, nameSb.ToString()), JsonConvert.SerializeObject(draggedGO, new JsonSerializerSettings()));
-            //         Reset();
-            //     }
-            //     ImGui.EndDragDropTarget();
-            // }
 
             ImGui.End();
 
