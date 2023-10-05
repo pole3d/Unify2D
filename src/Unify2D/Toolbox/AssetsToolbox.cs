@@ -22,10 +22,8 @@ namespace Unify2D.Toolbox
         bool[] _selected;
         List<Asset> _assets = new List<Asset>();
         GameEditor _editor;
-<<<<<<< Updated upstream
-=======
+
         int treeFilesIndex = 0;
->>>>>>> Stashed changes
 
         public override void Initialize(GameEditor editor)
         {
