@@ -1,7 +1,6 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -10,19 +9,18 @@ using System.IO;
 using Unify2D.Assets;
 using Unify2D.Builder;
 using Unify2D.Core;
-using Unify2D.Core.Graphics;
-using Unify2D.ImGuiRenderer;
 using Unify2D.Toolbox;
 using Unify2D.Toolbox.Popup;
 using Unify2D.Tools;
-using Num = System.Numerics;
 
 namespace Unify2D
 {
     /// <summary>
-    /// The main editor of Unify2D
+    /// The main class of Unify2D
+    /// It represents the whole editor window 
     /// This class inherits from Game which creates the Game window, handles the gameloop, the assets...
     /// This class handles the different windows of the game editor
+    /// 
     /// 
     /// </summary>
     public class GameEditor : Game
@@ -39,53 +37,41 @@ namespace Unify2D
         const string AssetsFolder = "./Assets";
 
         public string ProjectPath => _settings.Data.CurrentProjectPath;
-        public string AssetsPath => !String.IsNullOrEmpty(ProjectPath) ? ToolsEditor.CombinePath(ProjectPath, AssetsFolder) : String.Empty;
+        public string AssetsPath => !string.IsNullOrEmpty(ProjectPath) ? ToolsEditor.CombinePath(ProjectPath, AssetsFolder) : string.Empty;
 
+        public GameCore GameCore => _core;
         public Scripting.Scripting Scripting => _scripting;
         public ImGuiRenderer.Renderer Renderer => _imGuiRenderer;
+        public GameObject Selected => _selected;
+        public GameEditorSettings Settings => _settings;
 
-        public GameEditorSettings Settings { get => _settings;  }
 
+        GameCore _core;
         GraphicsDeviceManager _graphics;
         ImGuiRenderer.Renderer _imGuiRenderer;
 
         Scripting.Scripting _scripting;
         Stack<PopupBase> _popups = new Stack<PopupBase>();
 
-
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
 
-
-        private GameCore _core;
-        public GameCore GameCore => _core;
 
         GameObject _selected;
         InspectorToolbox _inspectorToolbox;
         ScriptToolbox _scriptToolbox;
         GameToolbox _gameToolbox;
 
-
-        SelectedState _selectState;
-        bool _showSelectPath;
         GameEditorSettings _settings;
 
-        enum SelectedState
-        {
-            None,
-            Select,
-            Drag
-        }
 
         public GameEditor()
         {
             s_instance = this;
 
             _graphics = new GraphicsDeviceManager(this);
-
             _graphics.PreferMultiSampling = true;
 
             IsMouseVisible = true;
-
         }
 
         protected override void Initialize()
@@ -96,7 +82,7 @@ namespace Unify2D
             _settings = new GameEditorSettings();
             _settings.Load(this);
 
-            _scripting = new Unify2D.Scripting.Scripting();
+            _scripting = new Scripting.Scripting();
             _scripting.Load(this);
 
             _imGuiRenderer = new ImGuiRenderer.Renderer(this);
@@ -108,13 +94,7 @@ namespace Unify2D
             _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 60;
             _graphics.ApplyChanges();
 
-
-
-
-            //LoadScene();
-
             InitializeToolBoxes();
-
 
             ShowPopup(new LauncherPopup());
 
@@ -127,7 +107,6 @@ namespace Unify2D
             _inspectorToolbox = new InspectorToolbox();
             _gameToolbox = new GameToolbox();
 
-
             _toolboxes.Add(new AssetsToolbox());
             _toolboxes.Add(new HierarchyToolbox());
 
@@ -135,14 +114,11 @@ namespace Unify2D
             _toolboxes.Add(_inspectorToolbox);
             _toolboxes.Add(_gameToolbox);
 
-
             foreach (var item in _toolboxes)
             {
                 item.Initialize(this);
             }
         }
-
-
 
         protected override void LoadContent()
         {
@@ -150,7 +126,6 @@ namespace Unify2D
 
             base.LoadContent();
         }
-
 
         public void SelectObject(object go)
         {
@@ -182,45 +157,9 @@ namespace Unify2D
         {
             base.Update(gameTime);
 
-            if (_gameToolbox == null) return;
-
-            var mouseState = Mouse.GetState();
-
-            if (_selectState == SelectedState.None && IsMouseInGameWindow())
+            foreach (var item in _toolboxes)
             {
-                if (mouseState.LeftButton == ButtonState.Pressed)
-                {
-                    Vector2 worldPosition = GetWorldMousePosition();
-
-                    foreach (var item in _core.GameObjects)
-                    {
-                        if (worldPosition.X >= item.Position.X - item.BoundingSize.X / 2 && worldPosition.X <= item.Position.X + item.BoundingSize.X / 2
-                            && worldPosition.Y >= item.Position.Y - item.BoundingSize.Y / 2 && worldPosition.Y <= item.Position.Y + item.BoundingSize.Y / 2)
-                        {
-                            SelectObject(item);
-
-                            Num.Vector2 mousePosition = new Num.Vector2(mouseState.X, mouseState.Y);
-                            Num.Vector2 goPosition = _gameToolbox.WorldToUI(item.Position);
-
-                            Num.Vector2 direction = mousePosition - goPosition;
-                            if (direction.Length() < 10)
-                            {
-                                _selectState = SelectedState.Drag;
-                            }
-                        }
-                    }
-                }
-            }
-            else if (_selectState == SelectedState.Drag)
-            {
-                if (mouseState.LeftButton == ButtonState.Pressed && _selected != null)
-                {
-                    _selected.Position = GetWorldMousePosition();
-                }
-                if (mouseState.LeftButton == ButtonState.Released)
-                {
-                    _selectState = SelectedState.None;
-                }
+                item.Update();
             }
         }
 
@@ -246,7 +185,7 @@ namespace Unify2D
                 {
                     if (ImGui.MenuItem("Load project"))
                     {
-                        _showSelectPath = true;
+                        ShowPopup(new LauncherPopup());
                     }
                     if (ImGui.MenuItem("Show Explorer"))
                     {
@@ -264,6 +203,10 @@ namespace Unify2D
                     }
                     ImGui.EndMenu();
                 }
+                if (ImGui.MenuItem("Play"))
+                {
+                    Build();
+                }
 
                 ImGui.EndMainMenuBar();
             }
@@ -271,56 +214,20 @@ namespace Unify2D
 
         void Popups()
         {
-            if (_showSelectPath)
-            {
-                ImGui.OpenPopup("open-project");
-                _showSelectPath = false;
-            }
-
-            if (ImGui.BeginPopupModal("open-project"))
-            {
-                var picker = FilePicker.GetFolderPicker(this, ProjectPath);
-                picker.RootFolder = "C:\\";
-                picker.OnlyAllowFolders = true;
-                if (picker.Draw())
-                {
-                    _settings.Data.CurrentProjectPath = picker.SelectedFile;
-                    LoadScene();
-                    foreach (var item in _toolboxes)
-                    {
-                        item.Reset();
-                    }
-
-                    FilePicker.RemoveFilePicker(this);
-                }
-                ImGui.EndPopup();
-            }
-
             if (_popups.Count > 0)
             {
                 _popups.Peek().Draw(this);
             }
         }
 
-        public void ShowPopup( PopupBase popup )
+        public void ShowPopup(PopupBase popup)
         {
-            _popups.Push(popup);  
+            _popups.Push(popup);
         }
 
         internal void HidePopup()
         {
             _popups.Pop();
-        }
-
-
-        public bool IsMouseInGameWindow()
-        {
-            return _gameToolbox.IsMouseInWindow();
-        }
-
-        public Vector2 GetWorldMousePosition()
-        {
-            return _gameToolbox.GetMousePosition();
         }
 
         protected virtual void DrawImGuiLayout(GameTime gameTime)
@@ -346,28 +253,7 @@ namespace Unify2D
             builder.StartBuild();
         }
 
-        public void CircleSelected()
-        {
-            if (_selected == null)
-                return;
 
-            var p0 = ImGui.GetItemRectMin();
-            var p1 = ImGui.GetItemRectMax();
-
-            var drawList = ImGui.GetWindowDrawList();
-            drawList.PushClipRect(p0, p1);
-
-            uint color = ToolsUI.ToColor32(50, 255, 50, 255);
-
-            if (_selectState == SelectedState.Drag)
-            {
-                color = ToolsUI.ToColor32(255, 255, 50, 255);
-            }
-
-            drawList.AddCircle(_gameToolbox.WorldToUI(_selected.Position),
-                      8, color, 64, 3);
-            drawList.PopClipRect();
-        }
 
 
         void Save()
@@ -382,8 +268,6 @@ namespace Unify2D
 
         public void LoadScene()
         {
-            //_projectLoaded = true;
-
             _core.GameObjects.Clear();
 
             SelectObject(null);
@@ -411,7 +295,7 @@ namespace Unify2D
 
         private void SilentErrors(object sender, Newtonsoft.Json.Serialization.ErrorEventArgs e)
         {
-            e.ErrorContext.Handled = true;   
+            e.ErrorContext.Handled = true;
         }
 
         protected override void UnloadContent()
@@ -419,7 +303,8 @@ namespace Unify2D
             _settings.Save();
         }
 
-    
+
+
 
     }
 

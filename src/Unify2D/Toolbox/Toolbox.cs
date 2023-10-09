@@ -24,5 +24,9 @@ namespace Unify2D.Toolbox
         internal virtual void Reset()
         {
         }
+
+        public virtual void Update()
+        {
+        }
     }
 }

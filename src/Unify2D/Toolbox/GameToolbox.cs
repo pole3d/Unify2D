@@ -14,6 +14,7 @@ using Unify2D.Tools;
 using Microsoft.Xna.Framework;
 
 using Num = System.Numerics;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Unify2D.Toolbox
 {
@@ -43,6 +44,15 @@ namespace Unify2D.Toolbox
 
         private int _pixelPerGridSquare;
 
+
+        SelectedState _selectState;
+        enum SelectedState
+        {
+            None,
+            Select,
+            Drag
+        }
+
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
@@ -54,6 +64,73 @@ namespace Unify2D.Toolbox
             _sceneRenderTarget = new RenderTarget2D(_editor.GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
             _renderTargetId = _editor.Renderer.BindTexture(_sceneRenderTarget);
         }
+
+
+        public override void Update()
+        {
+            var mouseState = Mouse.GetState();
+
+            if (_selectState == SelectedState.None && IsMouseInWindow())
+            {
+                if (mouseState.LeftButton == ButtonState.Pressed)
+                {
+                    Vector2 worldPosition = GetMousePosition();
+
+                    foreach (var item in _editor.GameCore.GameObjects)
+                    {
+                        if (worldPosition.X >= item.Position.X - item.BoundingSize.X / 2 && worldPosition.X <= item.Position.X + item.BoundingSize.X / 2
+                            && worldPosition.Y >= item.Position.Y - item.BoundingSize.Y / 2 && worldPosition.Y <= item.Position.Y + item.BoundingSize.Y / 2)
+                        {
+                            _editor.SelectObject(item);
+
+                            Num.Vector2 mousePosition = new Num.Vector2(mouseState.X, mouseState.Y);
+                            Num.Vector2 goPosition = WorldToUI(item.Position);
+
+                            Num.Vector2 direction = mousePosition - goPosition;
+                            if (direction.Length() < 10)
+                            {
+                                _selectState = SelectedState.Drag;
+                            }
+                        }
+                    }
+                }
+            }
+            else if (_selectState == SelectedState.Drag)
+            {
+                if (mouseState.LeftButton == ButtonState.Pressed && _editor.Selected != null)
+                {
+                    _editor.Selected.Position = GetMousePosition();
+                }
+                if (mouseState.LeftButton == ButtonState.Released)
+                {
+                    _selectState = SelectedState.None;
+                }
+            }
+        }
+
+        public void CircleSelected()
+        {
+            if (_editor.Selected == null)
+                return;
+
+            var p0 = ImGui.GetItemRectMin();
+            var p1 = ImGui.GetItemRectMax();
+
+            var drawList = ImGui.GetWindowDrawList();
+            drawList.PushClipRect(p0, p1);
+
+            uint color = ToolsUI.ToColor32(50, 255, 50, 255);
+
+            if (_selectState == SelectedState.Drag)
+            {
+                color = ToolsUI.ToColor32(255, 255, 50, 255);
+            }
+
+            drawList.AddCircle(WorldToUI(_editor.Selected.Position),
+                      8, color, 64, 3);
+            drawList.PopClipRect();
+        }
+
         public override void Draw()
         {
             // Render target
@@ -74,7 +151,7 @@ namespace Unify2D.Toolbox
             ImGui.Image(_renderTargetId, ImGui.GetContentRegionAvail() - _bottomOffset);
             
             // Circle Gizmo around selected Game Object
-            _editor.CircleSelected();
+            CircleSelected();
 
             #region Drag & Drop Asset
             if (ImGui.BeginDragDropTarget())
@@ -119,6 +196,7 @@ namespace Unify2D.Toolbox
             ImGui.PopStyleVar();
             ImGui.End();
         }
+
 
         private void DrawGrid()
         {
