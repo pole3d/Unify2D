@@ -55,7 +55,7 @@ namespace Unify2D.Toolbox
         {
             foreach (var item in _texturesToUnbind)
             {
-                GameEditor.Instance.Renderer.UnbindTexture(item.IntPtr);
+                GameEditor.Instance.GuiRenderer.UnbindTexture(item.IntPtr);
             }
 
             _texturesToUnbind.Clear();
@@ -199,7 +199,7 @@ namespace Unify2D.Toolbox
                         TextureBound textureBound = GetTextureBound(texture);
                         if (textureBound == null)
                         {
-                            IntPtr ptr = GameEditor.Instance.Renderer.BindTexture(texture);
+                            IntPtr ptr = GameEditor.Instance.GuiRenderer.BindTexture(texture);
 
                             textureBound = new TextureBound { IntPtr = ptr, Texture = texture };
                             _texturesBound.Add(textureBound);

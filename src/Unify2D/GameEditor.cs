@@ -33,36 +33,44 @@ namespace Unify2D
 
         #endregion
 
-
         const string AssetsFolder = "./Assets";
+
+        #region Properties
 
         public string ProjectPath => _settings.Data.CurrentProjectPath;
         public string AssetsPath => !string.IsNullOrEmpty(ProjectPath) ? ToolsEditor.CombinePath(ProjectPath, AssetsFolder) : string.Empty;
 
         public GameCore GameCore => _core;
-        public Scripting.Scripting Scripting => _scripting;
-        public ImGuiRenderer.Renderer Renderer => _imGuiRenderer;
-        public GameObject Selected => _selected;
         public GameEditorSettings Settings => _settings;
+        public Scripting.Scripting Scripting => _scripting;
+        public ImGuiRenderer.Renderer GuiRenderer => _imGuiRenderer;
+
+        public GameObject Selected => _selected;
+
+        public SceneEditorManager SceneEditorManager => _sceneEditorManager;
 
 
+        #endregion
+
+        #region Fields
         GameCore _core;
         GraphicsDeviceManager _graphics;
+        GameEditorUI _gameEditorUI;
         ImGuiRenderer.Renderer _imGuiRenderer;
-
         Scripting.Scripting _scripting;
+        GameEditorSettings _settings;
+        SceneEditorManager _sceneEditorManager;
+
         Stack<PopupBase> _popups = new Stack<PopupBase>();
-
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
-
-
-        GameObject _selected;
         InspectorToolbox _inspectorToolbox;
         ScriptToolbox _scriptToolbox;
         GameToolbox _gameToolbox;
 
-        GameEditorSettings _settings;
+        GameObject _selected;
+        #endregion
 
+        #region Initialization
 
         public GameEditor()
         {
@@ -72,6 +80,9 @@ namespace Unify2D
             _graphics.PreferMultiSampling = true;
 
             IsMouseVisible = true;
+
+            _gameEditorUI = new GameEditorUI(this);
+            _sceneEditorManager = new SceneEditorManager(this);
         }
 
         protected override void Initialize()
@@ -82,6 +93,8 @@ namespace Unify2D
             _settings = new GameEditorSettings();
             _settings.Load(this);
 
+            Content.RootDirectory = ProjectPath;
+
             _scripting = new Scripting.Scripting();
             _scripting.Load(this);
 
@@ -90,8 +103,8 @@ namespace Unify2D
             ImGui.GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
 
             Window.AllowUserResizing = true;
-            _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
-            _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 60;
+            _graphics.PreferredBackBufferWidth = 1920; // GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+            _graphics.PreferredBackBufferHeight = 1080; // GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 60;
             _graphics.ApplyChanges();
 
             InitializeToolBoxes();
@@ -127,6 +140,52 @@ namespace Unify2D
             base.LoadContent();
         }
 
+        #endregion
+
+        #region Update / Draw 
+
+        protected override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+
+            foreach (var item in _toolboxes)
+            {
+                item.Update();
+            }
+        }
+
+        protected override void Draw(GameTime gameTime)
+        {
+            // Draw our UI
+            DrawImGuiLayout(gameTime);
+
+            GraphicsDevice.SetRenderTarget(null);
+            GraphicsDevice.Clear(Color.Black);
+
+            // Call AfterLayout now to finish up and draw all the things
+            _imGuiRenderer.AfterLayout();
+        }
+
+
+        protected virtual void DrawImGuiLayout(GameTime gameTime)
+        {
+            // Call BeforeLayout first to set things up
+            _imGuiRenderer.BeforeLayout(gameTime);
+
+            _gameEditorUI.DrawMainMenuBarUI();
+
+            foreach (var item in _toolboxes)
+            {
+                item.Draw();
+            }
+
+            _gameEditorUI.DrawPopup();
+        }
+
+        #endregion
+
+        #region Selection
+
         public void SelectObject(object go)
         {
             if (go is Asset asset)
@@ -153,159 +212,35 @@ namespace Unify2D
                 _inspectorToolbox.SetObject(null);
         }
 
-        protected override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
+        #endregion
 
-            foreach (var item in _toolboxes)
-            {
-                item.Update();
-            }
-        }
 
-        protected override void Draw(GameTime gameTime)
-        {
-            // Draw our UI
-            DrawImGuiLayout(gameTime);
 
-            Popups();
-
-            GraphicsDevice.SetRenderTarget(null);
-            GraphicsDevice.Clear(Color.Black);
-
-            // Call AfterLayout now to finish up and draw all the things
-            _imGuiRenderer.AfterLayout();
-        }
-
-        private void DrawMainMenuBarUI()
-        {
-            if (ImGui.BeginMainMenuBar())
-            {
-                if (ImGui.BeginMenu("File"))
-                {
-                    if (ImGui.MenuItem("Load project"))
-                    {
-                        ShowPopup(new LauncherPopup());
-                    }
-                    if (ImGui.MenuItem("Show Explorer"))
-                    {
-                        Process.Start("explorer.exe", _settings.Data.CurrentProjectPath);
-                    }
-                    if (ImGui.MenuItem("Build"))
-                        Build();
-                    if (ImGui.MenuItem("Save"))
-                    {
-                        Save();
-                    }
-                    if (ImGui.MenuItem("Load"))
-                    {
-                        LoadScene();
-                    }
-                    ImGui.EndMenu();
-                }
-                if (ImGui.MenuItem("Play"))
-                {
-                    Build();
-                }
-
-                ImGui.EndMainMenuBar();
-            }
-        }
-
-        void Popups()
-        {
-            if (_popups.Count > 0)
-            {
-                _popups.Peek().Draw(this);
-            }
-        }
+        #region Tools
 
         public void ShowPopup(PopupBase popup)
         {
-            _popups.Push(popup);
+            _gameEditorUI.ShowPopup(popup);
         }
 
-        internal void HidePopup()
+        public void HidePopup()
         {
-            _popups.Pop();
+            _gameEditorUI.HidePopup();
         }
 
-        protected virtual void DrawImGuiLayout(GameTime gameTime)
-        {
-            // Call BeforeLayout first to set things up
-            _imGuiRenderer.BeforeLayout(gameTime);
-
-            DrawMainMenuBarUI();
-
-            foreach (var item in _toolboxes)
-            {
-                item.Draw();
-            }
-
-            ImGui.ShowDemoWindow();
-
-        }
-
-        private void Build()
+        public void Build()
         {
             GameBuilder builder = new GameBuilder();
             builder.Build(_core, this);
             builder.StartBuild();
         }
 
-
-
-
-        void Save()
-        {
-            JsonSerializerSettings settings = new JsonSerializerSettings();
-            settings.TypeNameHandling = TypeNameHandling.Auto;
-            settings.Formatting = Formatting.Indented;
-            string text = JsonConvert.SerializeObject(_core.GameObjects, settings);
-
-            File.WriteAllText(ToolsEditor.CombinePath(ProjectPath, "./test.scene"), text);
-        }
-
-        public void LoadScene()
-        {
-            _core.GameObjects.Clear();
-
-            SelectObject(null);
-
-            List<GameObject> gameObjects = null;
-            try
-            {
-                string text = File.ReadAllText(ToolsEditor.CombinePath(ProjectPath, "./test.scene"));
-                JsonSerializerSettings settings = new JsonSerializerSettings();
-                settings.TypeNameHandling = TypeNameHandling.Auto;
-                settings.Error += SilentErrors;
-                gameObjects = JsonConvert.DeserializeObject<List<GameObject>>(text, settings);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            if (gameObjects != null)
-            {
-                Content.RootDirectory = ProjectPath;
-                _core.LoadScene(this, gameObjects);
-            }
-        }
-
-        private void SilentErrors(object sender, Newtonsoft.Json.Serialization.ErrorEventArgs e)
-        {
-            e.ErrorContext.Handled = true;
-        }
+        #endregion
 
         protected override void UnloadContent()
         {
             _settings.Save();
         }
-
-
-
-
     }
 
 

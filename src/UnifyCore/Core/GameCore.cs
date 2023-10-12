@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace Unify2D.Core
 {
+    /// <summary>
+    /// Represents the core game engine
+    /// This core is used for the game and the editor
+    /// It manages the components and the helps the rendering 
+    /// </summary>
     public class GameCore
     {
         public static GameCore Current

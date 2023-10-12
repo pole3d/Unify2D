@@ -62,7 +62,7 @@ namespace Unify2D.Toolbox
             _gameCamera = new Camera2D(new Vector2(_gameResolution.X, _gameResolution.Y), new Vector2(_gameResolution.X / 2, _gameResolution.Y / 2));
 
             _sceneRenderTarget = new RenderTarget2D(_editor.GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
-            _renderTargetId = _editor.Renderer.BindTexture(_sceneRenderTarget);
+            _renderTargetId = _editor.GuiRenderer.BindTexture(_sceneRenderTarget);
         }
 
 
