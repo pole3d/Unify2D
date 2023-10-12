@@ -7,6 +7,7 @@
         <RootNamespace>Unify2D</RootNamespace>
         <TargetFramework>net6.0</TargetFramework>
         <OutputType>Exe</OutputType>
+        <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     </PropertyGroup>
 
     <ItemGroup>
@@ -37,5 +38,9 @@
     <ItemGroup>
       <Folder Include="src\unify2d\tools\" />
     </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+      <Exec Command="xcopy &quot;$(SolutionDir)..\GameAssemblyProject\&quot; &quot;$(OutDir)GameAssemblyProject\&quot; /s /y  &#xD;&#xA;" />
+    </Target>
 
 </Project>
