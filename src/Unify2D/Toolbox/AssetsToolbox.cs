@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime;
@@ -46,14 +47,14 @@ namespace Unify2D.Toolbox
             var folders = Directory.GetDirectories(_path);
            
 
-            treeFiles.Add(new TreeNode() { name = "Root", type = "Folder", childType = "sprite", nodeIndex = treeFilesIndex, childCount = files.Length + folders.Length });
+            treeFiles.Add(new TreeNode() { name = "Root", type = "Root", childType = "null", nodeIndex = treeFilesIndex, childCount = files.Length + folders.Length });
             treeFilesIndex++;
             foreach (var folder in folders)
             {
                 string relativeFolder = folder.Replace(_path, string.Empty);
                 string folderName = Path.GetFileName(relativeFolder);
 
-                treeFiles.Add(new TreeNode() { name = folderName, type = "Folder", childType = "null", nodeIndex = treeFilesIndex, childCount = 2 });
+                treeFiles.Add(new TreeNode() { name = folderName, type = "Folder", childType = "file", nodeIndex = treeFilesIndex, childCount = 2 });
                 treeFilesIndex++;
             }
             foreach (var file in files)
@@ -63,9 +64,9 @@ namespace Unify2D.Toolbox
                 _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeFile), Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile)));
 
                 string fileName = Path.GetFileNameWithoutExtension(relativeFile).ToString();
-                string extension = Path.GetExtension(relativeFile).ToString();
+                //string extension = Path.GetExtension(relativeFile).ToString();
 
-                treeFiles.Add(new TreeNode() { name = fileName, type = extension, childType = "null", nodeIndex = treeFilesIndex, childCount = -1 });
+                treeFiles.Add(new TreeNode() { name = fileName, type = "file", childType = "null", nodeIndex = treeFilesIndex, childCount = -1 });
                 //treeFiles[treeFilesIndex] = new TreeNode() { name = fileName, type = extension, childType = "null", nodeIndex = treeFilesIndex, childCount = -1 };
                 treeFilesIndex++;
 
@@ -129,8 +130,9 @@ namespace Unify2D.Toolbox
             string currentPath = Directory.GetCurrentDirectory();
             Console.WriteLine(currentPath);
             CheckNewFolder(0);
-           
+            
         }
+        
         public void CheckNewFolder(int newIndex)
         {
             if (Directory.Exists(Path.Combine(_editor.AssetsPath, "New Folder" + newIndex)))
@@ -140,8 +142,26 @@ namespace Unify2D.Toolbox
             else
             {
                 Directory.CreateDirectory(Path.Combine(_editor.AssetsPath, "New Folder" + newIndex));
-                treeFiles.Add(new TreeNode() { name = "New Folder " + newIndex, type = "Folder", childType = "files", nodeIndex = treeFilesIndex, childCount = 10 });
+                treeFiles.Add(new TreeNode() { name = "New Folder " + newIndex, type = "Folder", childType = "file", nodeIndex = treeFilesIndex, childCount = 10 });
             }
+        }
+
+        public void DeleteFolder(string pathDirectory)
+        {
+            if (Directory.Exists(pathDirectory))
+            {
+                Directory.Delete(pathDirectory, true);
+            }
+           
+        }
+
+        public void DeleteFile(string pathFile)
+        {
+            if(File.Exists(pathFile))
+            {
+                File.Delete(pathFile);
+            }
+           
         }
         public struct TreeNode
         {
@@ -171,7 +191,17 @@ namespace Unify2D.Toolbox
                     {
                         for (int i = 0; i < allNodes.Count; i++)
                         {
-                            if (allNodes[i].type == node.childType || allNodes[i].type == ".png" || allNodes[i].type == ".cs" || allNodes[i].type == "Folder")
+                            // display toute les node sauf le root
+                            if(node.type == "Root")
+                            {
+                                if (allNodes[i].type != "Root")
+                                {
+                                    DisplayNode(allNodes[i], allNodes);
+                                }
+                            }
+
+
+                            if (allNodes[i].type == node.childType)
                             {
                                 DisplayNode(allNodes[i], allNodes);
                             }
@@ -189,5 +219,7 @@ namespace Unify2D.Toolbox
         };
         public List<TreeNode> treeFiles = new List<TreeNode>();
     }
+
+
 
 }
