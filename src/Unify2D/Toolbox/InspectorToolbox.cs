@@ -192,7 +192,5 @@ namespace Unify2D.Toolbox
             public Texture2D Texture { get; set; }
             public IntPtr IntPtr { get; set; }
         }
-
-
     }
 }

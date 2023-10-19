@@ -61,12 +61,15 @@ namespace Unify2D.Scripting
             references: references,
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
+            bool success = true;
+
             using (var ms = new MemoryStream())
             {
                 EmitResult result = compilation.Emit(ms);
 
                 if (!result.Success)
                 {
+                    success = false;
                     IEnumerable<Diagnostic> failures = result.Diagnostics.Where(diagnostic =>
                         diagnostic.IsWarningAsError ||
                         diagnostic.Severity == DiagnosticSeverity.Error);
