@@ -44,6 +44,7 @@ namespace Unify2D
         public GameEditorSettings Settings => _settings;
         public Scripting.Scripting Scripting => _scripting;
         public ImGuiRenderer.Renderer GuiRenderer => _imGuiRenderer;
+        public InspectorToolbox Inspector => _inspectorToolbox;
 
         public GameObject Selected => _selected;
 

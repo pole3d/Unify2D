@@ -12,6 +12,7 @@ namespace GameAssembly
     {
         public float Speed { get; set; }
         public float Speed7 { get; set; }
+        public string Text { get; set; }
         public override void Update(GameCore game)
         {
             Vector2 direction = new Vector2();

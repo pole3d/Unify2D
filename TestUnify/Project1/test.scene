@@ -25,7 +25,8 @@
       {
         "$type": "GameAssembly.TestA, GameAssembly",
         "Speed": 200.0,
-        "Speed7": 0.0
+        "Speed7": 0.0,
+        "Text": "mpm"
       }
     ],
     "Position": "812, 675",

@@ -36,6 +36,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="src\unify2d\toolbox\propertyviewer\" />
       <Folder Include="src\unify2d\tools\" />
     </ItemGroup>
 
