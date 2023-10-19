@@ -123,8 +123,8 @@ namespace Unify2D.Toolbox
         {
             Vector2 viewPort = _gameCamera.Resolution / _gameCamera.Zoom;
 
-            int step = 20;
-            int width = 1;
+            int step = 50;
+            int width = (int)MathF.Round(5 * MathF.Max(_gameCamera.ZoomLevel, 0.2f));
 
             int rowX = (int)MathF.Round(viewPort.X / step);
             int rowY = (int)MathF.Round(viewPort.Y / step);
@@ -132,7 +132,6 @@ namespace Unify2D.Toolbox
             int lowRowX = 0;
             int lowRowY = 0;
             int lowStep = 0;
-            int lowWidth = 0;
 
             int multiple = 5;
 
@@ -141,10 +140,8 @@ namespace Unify2D.Toolbox
                 lowRowX = rowX + 1;
                 lowRowY = rowY + 1;
                 lowStep = step;
-                lowWidth = width;
 
                 step *= multiple;
-                width *= multiple;
                 
                 rowX /= multiple;
                 rowY /= multiple;
@@ -162,9 +159,9 @@ namespace Unify2D.Toolbox
                 int lowStartX = (int)MathF.Round((_gameCamera.Position.X - viewPort.X / 2) / lowStep);
                 int lowStartY = (int)MathF.Round((_gameCamera.Position.Y - viewPort.Y / 2) / lowStep);
 
-                DrawGrid(1 - (lowRowX / (32f * multiple)), lowStartX, lowStartY, lowRowX, lowRowY, lowStep, lowWidth, (int)viewPort.X, (int)viewPort.Y, multiple);
+                DrawGrid(.1f, lowStartX, lowStartY, lowRowX, lowRowY, lowStep, width, (int)viewPort.X, (int)viewPort.Y, multiple);
             }
-            DrawGrid(rowX / 16f, startX, startY, rowX, rowY, step, width, (int)viewPort.X, (int)viewPort.Y);
+            DrawGrid(.5f, startX, startY, rowX, rowY, step, width, (int)viewPort.X, (int)viewPort.Y);
         }
         private void DrawGrid(float opacity, int startX, int startY, int rowX, int rowY, int step, int width, int viewX, int viewY, int ignore = 1)
         {
