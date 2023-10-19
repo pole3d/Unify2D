@@ -73,10 +73,11 @@ namespace UnifyGame
 
         protected override void Draw(GameTime gameTime)
         {
+            Camera camera = Camera.Main;
 
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(camera.Background);
 
-            _core.BeginDraw();
+            _core.BeginDraw(camera.Matrix);
             _core.Draw();
             _core.EndDraw();
 

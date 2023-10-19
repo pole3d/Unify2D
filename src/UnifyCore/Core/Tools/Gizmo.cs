@@ -12,7 +12,7 @@ namespace Unify2D.Core.Tools
     public static class Gizmo
     {
         private static Texture2D _texture = new Texture2D(GameCore.Current.Game.GraphicsDevice, 1, 1);
-        public static void Update(Color color)
+        public static void SetColor(Color color)
         {
             _texture.SetData(new Color[] { color });
         }

@@ -23,7 +23,17 @@ namespace Unify2D.Core.Graphics
         protected bool _hasChanged = false;
 
         [JsonIgnore]
-        public bool HasChanged { get { return _hasChanged || _lastPosition != _gameObject.Position; } set { _lastPosition = _gameObject.Position; _hasChanged = value; } }
+        public bool HasChanged 
+        { 
+            get { return _hasChanged || _lastPosition != _gameObject.Position; } 
+            set {
+                if (_gameObject != null)
+                {
+                    _lastPosition = _gameObject.Position;
+                }
+                _hasChanged = value; 
+            }
+        }
         public Color Background { get; set; } = Color.CornflowerBlue;
         public float ZoomLevel
         {
@@ -98,6 +108,8 @@ namespace Unify2D.Core.Graphics
             set { _matrix = value; }
         }
 
+        public static Camera Main;
+
         internal Vector2 LocalToWorld(Num.Vector2 mousePosition)
         {
             return ((ICamera2D)this).LocalToWorld(mousePosition);
@@ -111,6 +123,8 @@ namespace Unify2D.Core.Graphics
         public override void Initialize(GameObject go)
         {
             base.Initialize(go);
+
+            if (Main == null) Main = this;
             
             ((ICamera2D)this).UpdateMatrix();
         }
@@ -118,7 +132,7 @@ namespace Unify2D.Core.Graphics
 
         internal override void DrawGizmo()
         {
-            Gizmo.Update(Color.White);
+            Gizmo.SetColor(Color.White);
             Gizmo.DrawWireSquare(TopLeft, BottomRight, (int)MathF.Max(5 * ZoomLevel, 5));
         }
 
