@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.VisualBasic.FileIO;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -43,36 +44,55 @@ namespace Unify2D.Toolbox
             if (Directory.Exists(_path) == false)
                 Directory.CreateDirectory(_path);
 
-            var files = Directory.GetFiles(_path);
             var folders = Directory.GetDirectories(_path);
+            var rootFiles = Directory.GetFiles(_path);
            
-
-            treeFiles.Add(new TreeNode() { name = "Root", type = "Root", childType = "null", nodeIndex = treeFilesIndex, childCount = files.Length + folders.Length });
+            // root
+            treeFiles.Add(new TreeNode() { name = "Root", type = "Root", childType = "null", nodeIndex = treeFilesIndex, childCount = rootFiles.Length + folders.Length, path = _editor.AssetsPath });
             treeFilesIndex++;
-            foreach (var folder in folders)
-            {
-                string relativeFolder = folder.Replace(_path, string.Empty);
-                string folderName = Path.GetFileName(relativeFolder);
 
-                treeFiles.Add(new TreeNode() { name = folderName, type = "Folder", childType = "file", nodeIndex = treeFilesIndex, childCount = 2 });
-                treeFilesIndex++;
-            }
-            foreach (var file in files)
+            // files in root
+            foreach (var file in rootFiles)
             {
                 string relativeFile = file.Replace(_path, string.Empty);
 
                 _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeFile), Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile)));
 
                 string fileName = Path.GetFileNameWithoutExtension(relativeFile).ToString();
-                //string extension = Path.GetExtension(relativeFile).ToString();
 
-                treeFiles.Add(new TreeNode() { name = fileName, type = "file", childType = "null", nodeIndex = treeFilesIndex, childCount = -1 });
-                //treeFiles[treeFilesIndex] = new TreeNode() { name = fileName, type = extension, childType = "null", nodeIndex = treeFilesIndex, childCount = -1 };
+                treeFiles.Add(new TreeNode() { name = fileName, type = "file", childType = "null", nodeIndex = treeFilesIndex, childCount = -1, folderPath = _editor.AssetsPath, path = Path.Combine(_editor.AssetsPath, Path.GetDirectoryName(relativeFile), relativeFile) }); ;
                 treeFilesIndex++;
 
             }
 
-            _selected = new bool[files.Length];
+            // folder in root
+            foreach (var folder in folders)
+            {
+                string relativeFolder = folder.Replace(_path, string.Empty);
+                string folderName = Path.GetFileName(relativeFolder);
+
+                treeFiles.Add(new TreeNode() { name = folderName, type = "Folder", childType = "file", nodeIndex = treeFilesIndex, childCount = 2, folderPath = _editor.AssetsPath, path = Path.Combine(_editor.AssetsPath, folderName) });
+                treeFilesIndex++;
+
+                var files = Directory.GetFiles(Path.Combine(_editor.AssetsPath, folderName));
+
+                // files in each folders
+                foreach (var file in files)
+                {
+                    string relativeFile = file.Replace(Path.Combine(_editor.AssetsPath, folderName), string.Empty);
+
+                    _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeFile), Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile)));
+
+                    string fileName = Path.GetFileNameWithoutExtension(relativeFile).ToString();
+                    string extension = Path.GetExtension(relativeFile).ToString();
+
+                    treeFiles.Add(new TreeNode() { name = fileName, type = "file", childType = "null", nodeIndex = treeFilesIndex, childCount = -1, folderPath = Path.Combine(_editor.AssetsPath, folderName), path = Path.Combine(_editor.AssetsPath, Path.GetDirectoryName(relativeFile), relativeFile) });
+
+                    treeFilesIndex++;
+                }
+            }
+
+            //_selected = new bool[files.Length];
         }
 
 
@@ -89,16 +109,17 @@ namespace Unify2D.Toolbox
                     if (ImGui.MenuItem("New Folder", null))
                     {
                         CreateDirectoryTreeNode();
-
-                        //TreeNode.DisplayNode(treeFiles[0], treeFiles);
-
-
                     }
 
                     ImGui.EndMenu();
                 }
-                if (ImGui.BeginMenu("Test"))
+                if (ImGui.BeginMenu("Delete"))
                 {
+                    if (ImGui.MenuItem("Delete Folder 1", null))
+                    {
+                        
+                        DeleteFolder(1, "New Folder0");
+                    }
                     ImGui.EndMenu();
                 }
                 ImGui.EndMenuBar();
@@ -107,10 +128,11 @@ namespace Unify2D.Toolbox
             if (ImGui.TreeNode("Tree View"))
             {
                 ImGuiTableFlags flags = ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.Resizable | ImGuiTableFlags.RowBg | ImGuiTableFlags.NoBordersInBody;
-                if (ImGui.BeginTable("3 ways", 2, flags))
+                if (ImGui.BeginTable("3 ways", 3, flags))
                 {
                     ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.NoHide);
                     ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.WidthFixed, 18f);
+                    ImGui.TableSetupColumn("Index", ImGuiTableColumnFlags.WidthFixed, 18f);
                     ImGui.TableHeadersRow();
 
                     
@@ -142,17 +164,23 @@ namespace Unify2D.Toolbox
             else
             {
                 Directory.CreateDirectory(Path.Combine(_editor.AssetsPath, "New Folder" + newIndex));
-                treeFiles.Add(new TreeNode() { name = "New Folder " + newIndex, type = "Folder", childType = "file", nodeIndex = treeFilesIndex, childCount = 10 });
+                string folderName = "New Folder" + newIndex.ToString();
+                treeFiles.Add(new TreeNode() { name = "New Folder " + newIndex, type = "Folder", childType = "file", nodeIndex = treeFilesIndex, childCount = 10, folderPath = _editor.AssetsPath, path = Path.Combine(_editor.AssetsPath, folderName) });
             }
         }
 
-        public void DeleteFolder(string pathDirectory)
+        public void DeleteFolder(int index, string folderName)
         {
-            if (Directory.Exists(pathDirectory))
+            if (treeFiles[index].type != "Folder")
+                return;
+
+            string folderPath = Path.Combine(_editor.AssetsPath, folderName);
+            treeFiles.RemoveAt(index);
+            if (Directory.Exists(folderPath))
             {
-                Directory.Delete(pathDirectory, true);
+                Directory.Delete(folderPath, true);
             }
-           
+            
         }
 
         public void DeleteFile(string pathFile)
@@ -163,6 +191,8 @@ namespace Unify2D.Toolbox
             }
            
         }
+        
+
         public struct TreeNode
         {
             public string name;
@@ -170,6 +200,8 @@ namespace Unify2D.Toolbox
             public string childType;
             public int nodeIndex;
             public int childCount;
+            public string folderPath;
+            public string path;
 
             public static void DisplayNode(TreeNode node, List<TreeNode> allNodes)
             {
@@ -186,24 +218,28 @@ namespace Unify2D.Toolbox
                     bool open = ImGui.TreeNodeEx(node.name, ImGuiTreeNodeFlags.SpanFullWidth);
                     ImGui.TableNextColumn();
                     ImGui.TextUnformatted(node.type);
+                    ImGui.TableNextColumn();
+                    ImGui.TextUnformatted(node.nodeIndex.ToString());
 
                     if (open)
                     {
+
                         for (int i = 0; i < allNodes.Count; i++)
                         {
-                            // display toute les node sauf le root
-                            if(node.type == "Root")
+                            if (node.type == "Root")
                             {
-                                if (allNodes[i].type != "Root")
+                                if (node.path == allNodes[i].folderPath)
                                 {
                                     DisplayNode(allNodes[i], allNodes);
                                 }
                             }
-
-
-                            if (allNodes[i].type == node.childType)
+                            if (node.type == "Folder")
                             {
-                                DisplayNode(allNodes[i], allNodes);
+                                if (allNodes[i].folderPath == node.path)
+                                {
+                                    DisplayNode(allNodes[i], allNodes);
+                                }
+
                             }
                         }
                         ImGui.TreePop();
@@ -214,6 +250,8 @@ namespace Unify2D.Toolbox
                     ImGui.TreeNodeEx(node.name, ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.Bullet | ImGuiTreeNodeFlags.NoTreePushOnOpen | ImGuiTreeNodeFlags.SpanFullWidth);
                     ImGui.TableNextColumn();
                     ImGui.TextUnformatted(node.type);
+                    ImGui.TableNextColumn();
+                    ImGui.TextUnformatted(node.nodeIndex.ToString());
                 }
             }
         };
