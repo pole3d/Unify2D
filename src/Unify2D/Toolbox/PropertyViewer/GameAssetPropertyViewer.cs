@@ -27,13 +27,13 @@ namespace Unify2D.Toolbox
             if (value != null)
             {
                 Texture2D texture = value.Asset as Texture2D;
-                TextureBound textureBound = GameEditor.Instance.Inspector.GetTextureBound(texture);
+                TextureBound textureBound = GameEditor.Instance.InspectorToolbox.GetTextureBound(texture);
                 if (textureBound == null)
                 {
                     IntPtr ptr = GameEditor.Instance.GuiRenderer.BindTexture(texture);
 
                     textureBound = new TextureBound { IntPtr = ptr, Texture = texture };
-                    GameEditor.Instance.Inspector.AddTextureBound(textureBound);
+                    GameEditor.Instance.InspectorToolbox.AddTextureBound(textureBound);
 
                 }
                 else

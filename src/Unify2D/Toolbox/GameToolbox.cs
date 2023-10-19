@@ -151,7 +151,7 @@ namespace Unify2D.Toolbox
             ImGui.Image(_renderTargetId, ImGui.GetContentRegionAvail() - _bottomOffset);
             
             // Circle Gizmo around selected Game Object
-            CircleSelected();
+            Selection.CircleSelected();
 
             #region Drag & Drop Asset
             if (ImGui.BeginDragDropTarget())
@@ -165,7 +165,8 @@ namespace Unify2D.Toolbox
                         GameObject go = new GameObject() { Name = asset.Name };
                         go.Position = GetMousePosition();
 
-                        _editor.SelectObject(go);
+                        Selection.SelectObject(go);
+
                         SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
                         renderer.Initialize(_editor, go, asset.FullPath);
                     }
@@ -387,6 +388,11 @@ namespace Unify2D.Toolbox
             uiPos *= Size;
            
             return Position + WindowOffset + uiPos;
+        }
+
+        internal void GoTo(Vector2 position)
+        {
+            _gameCamera.Position = position;
         }
     }
 }
