@@ -20,13 +20,16 @@ namespace Unify2D
 {
     /// <summary>
     /// The main editor of Unify2D
+    /// This class inherits from Game which creates the Game window, handles the gameloop, the assets...
+    /// This class handles the different windows of the game editor
+    /// 
     /// </summary>
     public class GameEditor : Game
     {
         #region singleton 
 
         public static GameEditor Instance => s_instance;
-              
+
         private static GameEditor s_instance;
 
         #endregion
@@ -138,16 +141,16 @@ namespace Unify2D
 
         public void SelectObject(object go)
         {
-            if ( go is Asset asset)
+            if (go is Asset asset)
             {
-                if ( asset.AssetContent is ScriptAssetContent script)
+                if (asset.AssetContent is ScriptAssetContent script)
                 {
                     _scriptToolbox.SetObject(asset);
                     return;
                 }
             }
 
-            if ( go is GameObject)
+            if (go is GameObject)
                 _selected = go as GameObject;
 
             if (_inspectorToolbox != null)
@@ -310,7 +313,7 @@ namespace Unify2D
         private void Build()
         {
             GameBuilder builder = new GameBuilder();
-            builder.Build(_core , this);
+            builder.Build(_core, this);
             builder.StartBuild();
         }
 
@@ -325,11 +328,11 @@ namespace Unify2D
             var drawList = ImGui.GetWindowDrawList();
             drawList.PushClipRect(p0, p1);
 
-            uint color = MakeColor32(50, 255, 50, 255);
+            uint color = ToolsUI.ToColor32(50, 255, 50, 255);
 
             if (_selectState == SelectedState.Drag)
             {
-                color = MakeColor32(255, 255, 50, 255);
+                color = ToolsUI.ToColor32(255, 255, 50, 255);
             }
 
             drawList.AddCircle(_gameToolbox.WorldToUI(_selected.Position),
@@ -392,7 +395,6 @@ namespace Unify2D
             _settings.Save();
         }
 
-        public static uint MakeColor32(byte r, byte g, byte b, byte a) { uint ret = a; ret <<= 8; ret += b; ret <<= 8; ret += g; ret <<= 8; ret += r; return ret; }
     }
 
 

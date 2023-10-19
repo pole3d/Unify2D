@@ -50,13 +50,7 @@ namespace Unify2D.Core
         }
 
 
-        public T AddComponent<T>() where T : Component,new()
-        {
-            T component = new();
-            AddComponent(component);
 
-            return component;
-        }
 
         public bool HasRenderer()
         {
@@ -82,6 +76,14 @@ namespace Unify2D.Core
             }
 
             return null;
+        }
+
+        public T AddComponent<T>() where T : Component, new()
+        {
+            T component = new();
+            AddComponent(component);
+
+            return component;
         }
 
         public void AddComponent(Component component)
