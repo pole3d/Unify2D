@@ -10,7 +10,7 @@ using Unify2D.Core;
 
 namespace Unify2D.Toolbox
 {
-    internal class InspectorToolbox : Toolbox
+    public class InspectorToolbox : Toolbox
     {
         GameObject _gameObject;
         Asset _asset;
@@ -19,9 +19,17 @@ namespace Unify2D.Toolbox
         List<TextureBound> _texturesBound = new List<TextureBound>();
         List<TextureBound> _texturesToUnbind = new List<TextureBound>();
 
+        Dictionary<Type,PropertyViewer> _propertyViewers = new Dictionary<Type,PropertyViewer>();
+
         public override void Initialize(GameEditor editor)
         {
             _editor = editor;
+
+            _propertyViewers.Add(typeof(Color), new ColorPropertyViewer());
+            _propertyViewers.Add(typeof(int), new IntPropertyViewer());
+            _propertyViewers.Add(typeof(float), new FloatPropertyViewer());
+            _propertyViewers.Add(typeof(string), new StringPropertyViewer());
+            _propertyViewers.Add(typeof(GameAsset), new GameAssetPropertyViewer());
         }
 
         public void SetObject(object obj)
@@ -55,7 +63,7 @@ namespace Unify2D.Toolbox
         {
             foreach (var item in _texturesToUnbind)
             {
-                GameEditor.Instance.Renderer.UnbindTexture(item.IntPtr);
+                GameEditor.Instance.GuiRenderer.UnbindTexture(item.IntPtr);
             }
 
             _texturesToUnbind.Clear();
@@ -147,77 +155,28 @@ namespace Unify2D.Toolbox
 
         private void ShowComponent(Component component)
         {
-
-
-
-
             PropertyInfo[] properties = component.GetType().GetProperties();
             foreach (PropertyInfo property in properties)
             {
-                if (property.PropertyType == typeof(Color))
+                try
                 {
-                    Color color = (Color)property.GetValue(component);
-                    System.Numerics.Vector4 vector = new System.Numerics.Vector4(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
-
-                    if (ImGui.ColorEdit4(property.Name, ref vector))
-                    {
-                        color = new Color(vector.X, vector.Y, vector.Z, vector.W);
-                        property.SetValue(component, color);
-                    }
-
+                    _propertyViewers[property.PropertyType].Draw(property, component);
                 }
-                else if (property.PropertyType == typeof(int))
-                {
-                    int value = (int)property.GetValue(component);
-                    if (ImGui.InputInt(property.Name, ref value))
-                    {
-                        property.SetValue(component, value);
-                    }
-                }
-                else if (property.PropertyType == typeof(float))
-                {
-                    float value = (float)property.GetValue(component);
-                    if (ImGui.InputFloat(property.Name, ref value))
-                    {
-                        property.SetValue(component, value);
-                    }
-                }
-                else if (property.PropertyType == typeof(GameAsset))
-                {
-                    GameAsset value = property.GetValue(component) as GameAsset;
-                    string name = "none";
-
-                    if (value != null)
-                    {
-                        name = value.Name;
-                        ImGui.InputText("path", ref name, 50);
-                    }
-
-                    if (value != null)
-                    {
-                        Texture2D texture = value.Asset as Texture2D;
-                        TextureBound textureBound = GetTextureBound(texture);
-                        if (textureBound == null)
-                        {
-                            IntPtr ptr = GameEditor.Instance.Renderer.BindTexture(texture);
-
-                            textureBound = new TextureBound { IntPtr = ptr, Texture = texture };
-                            _texturesBound.Add(textureBound);
-
-
-                        }
-                        else
-                        {
-                            ImGui.Image(textureBound.IntPtr, new System.Numerics.Vector2(40, 40));
-                        }
-
-                    }
-                }
+                catch { }
             }
         }
 
+        public void AddTextureBound( TextureBound textureBound)
+        {
+            _texturesBound.Add(textureBound);
+        }
 
-        TextureBound GetTextureBound(Texture2D texture)
+        /// <summary>
+        /// TODO : move bound textures in a dedicated class
+        /// </summary>
+        /// <param name="texture"></param>
+        /// <returns></returns>
+        public TextureBound GetTextureBound(Texture2D texture)
         {
             foreach (var item in _texturesBound)
             {
@@ -228,11 +187,12 @@ namespace Unify2D.Toolbox
             return null;
         }
 
-        class TextureBound
+        public class TextureBound
         {
             public Texture2D Texture { get; set; }
             public IntPtr IntPtr { get; set; }
         }
+
 
     }
 }

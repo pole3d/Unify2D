@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace Unify2D.Core
 {
+    /// <summary>
+    /// Represents the core game engine
+    /// This core is used for the game and the editor
+    /// It manages the components and the helps the rendering 
+    /// </summary>
     public class GameCore
     {
         public static GameCore Current
@@ -27,6 +32,7 @@ namespace Unify2D.Core
 
         public SpriteBatch SpriteBatch { get; private set; }
         public List<GameObject> GameObjects => _gameObjects; 
+        public float DeltaTime { get; private set; }
 
         static GameCore s_current;
 
@@ -34,10 +40,10 @@ namespace Unify2D.Core
         List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
         Game _game;
 
-        public GameCore(Game game)
+        public GameCore(Game game, IEnumerable<GameObject> gameObjects = null)
         {
             _game = game;
-            _gameObjects = new List<GameObject>();
+            _gameObjects = gameObjects == null ? new List<GameObject>() : new List<GameObject>(gameObjects);
         }
 
         public void AddGameObject(GameObject go)
@@ -45,14 +51,12 @@ namespace Unify2D.Core
             _gameObjects.Add(go);
         }
 
-        public void Draw()
+        public void BeginDraw()
         {
-            Draw(Matrix.Identity);
+            BeginDraw(Matrix.Identity);
         }
-        public void Draw(Matrix matrix)
+        public void BeginDraw(Matrix matrix)
         {
-            //SpriteBatch.Begin( SpriteSortMode.Deferred, BlendState.NonPremultiplied);
-            
             SpriteBatch.Begin(SpriteSortMode.Deferred,
                         BlendState.NonPremultiplied,
                         null,
@@ -60,13 +64,16 @@ namespace Unify2D.Core
                         null,
                         null,
                         matrix);
-            
-
-
+        }
+        public void Draw()
+        {
             foreach (var item in _gameObjects)
             {
                 item.Draw();
             }
+        }
+        public void EndDraw()
+        {
             SpriteBatch.End();
         }
 
@@ -94,8 +101,10 @@ namespace Unify2D.Core
             }
         }
 
-        public void Update()
+        public void Update(GameTime gameTime)
         {
+            DeltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             foreach (var item in _gameObjects)
             {
                 item.Update(this);

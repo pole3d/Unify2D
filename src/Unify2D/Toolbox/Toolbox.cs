@@ -3,7 +3,7 @@
     /// <summary>
     /// Base class for a tool window in the game editor
     /// </summary>
-    abstract class Toolbox
+    public abstract class Toolbox
     {
         public object Tag { set => _tag = value; }
 
@@ -18,6 +18,10 @@
         }
 
         internal virtual void Reset()
+        {
+        }
+
+        public virtual void Update()
         {
         }
     }

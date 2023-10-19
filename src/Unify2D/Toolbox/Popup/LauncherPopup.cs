@@ -90,7 +90,6 @@ namespace Unify2D.Toolbox
         }
 
 
-
         private void OnOpenProjectPathSelected(string path)
         {
             _editor.Settings.Data.CurrentProjectPath = path;
@@ -104,7 +103,7 @@ namespace Unify2D.Toolbox
 
         void LoadProject()
         {
-            _editor.LoadScene();
+            _editor.SceneEditorManager.LoadScene("test");
 
             _editor.HidePopup();
         }
