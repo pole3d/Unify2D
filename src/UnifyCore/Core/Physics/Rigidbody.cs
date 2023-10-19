@@ -65,7 +65,7 @@ namespace Unify2D.Physics
             }
             else if (capsuleCol != null)
             {
-                m_velcroBody = BodyFactory.CreateCapsule(PhysicsSettings.World, capsuleCol.Height * _gameObject.Scale.Y, capsuleCol.Radius * _gameObject.Scale.X, 1, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, 0, BodyType.Static);
+                m_velcroBody = BodyFactory.CreateCapsule(PhysicsSettings.World, capsuleCol.Height * _gameObject.Scale.Y, capsuleCol.Radius * _gameObject.Scale.X, 1, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, 0, m_type);
             }
             else 
             {
