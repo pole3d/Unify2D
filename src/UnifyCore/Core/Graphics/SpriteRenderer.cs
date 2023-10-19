@@ -49,7 +49,11 @@ namespace Unify2D.Core.Graphics
         {
             if (_texture == null)
                 return;
-            GameCore.Current.SpriteBatch.Draw(_texture, _gameObject.Position - _gameObject.BoundingSize / 2, null, Color, _gameObject.Rotation, _gameObject.BoundingSize / 2, _gameObject.Scale, SpriteEffects.None, LayerDepth);
+
+            // Please bear with me this is necessary
+            GameCore.Current.SpriteBatch.Draw(_texture, _gameObject.Position - _gameObject.BoundingSize / 2, 
+                null, Color, _gameObject.Rotation, _gameObject.BoundingSize / 2, _gameObject.Scale, 
+                SpriteEffects.None, LayerDepth);
         }
     }
 }

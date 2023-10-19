@@ -68,8 +68,9 @@ namespace UnifyGame
 
         protected override void Update(GameTime gameTime)
         {
-            _core.Update(gameTime);
-
+            _core.Update(gameTime);        
+            
+            //Oumuamua
         }
 
         protected override void Draw(GameTime gameTime)
