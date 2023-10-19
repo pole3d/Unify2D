@@ -47,6 +47,10 @@ namespace Unify2D
                     {
                         _editor.SceneEditorManager.LoadScene("test");
                     }
+                    if (ImGui.MenuItem("Quit"))
+                    {
+                        _editor.Exit();
+                    }
                     ImGui.EndMenu();
                 }
                 if (ImGui.MenuItem("Play"))
