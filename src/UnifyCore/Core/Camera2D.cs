@@ -13,6 +13,7 @@ namespace Unify2D.Core
     {
         protected Matrix _matrix;
 
+        public Color Background = Color.CornflowerBlue;
         protected float _zoom;
         protected float _rotation;
         protected Vector2 _position;

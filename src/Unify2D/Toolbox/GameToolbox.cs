@@ -57,7 +57,7 @@ namespace Unify2D.Toolbox
         {
             // Render target
             _editor.GraphicsDevice.SetRenderTarget(_sceneRenderTarget);
-            _editor.GraphicsDevice.Clear(Color.CornflowerBlue);
+            _editor.GraphicsDevice.Clear(_gameCamera.Background);
 
             // clear la texture de render de la scéne
             ImGui.Begin("GAME", ImGuiWindowFlags.None);
