@@ -11,46 +11,131 @@ using Unify2D.Assets;
 using Unify2D.Core.Graphics;
 using Unify2D.Core;
 using Unify2D.Tools;
-using System.Numerics;
+using Microsoft.Xna.Framework;
 
-using XnaF = Microsoft.Xna.Framework;
+using Num = System.Numerics;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Unify2D.Toolbox
 {
     internal class GameToolbox : Toolbox
     {
-        readonly Vector2 _gameResolution = new Vector2(1920, 1080);
-        readonly Vector2 _bottomOffset = new Vector2(0, 20);
+        readonly Num.Vector2 _gameResolution = new Num.Vector2(1920, 1080);
+        readonly Num.Vector2 _bottomOffset   = new Num.Vector2(0, 20);
 
-        public readonly Vector2 WindowOffset = new Vector2(8, 27);
+        public readonly Num.Vector2 WindowOffset = new Num.Vector2(8, 27);
 
-        public Vector2 Position { get; private set; }
-        public Vector2 Size { get; private set; }
+        public Num.Vector2 Position { get; private set; }
+        public Num.Vector2 Size { get; private set; }
 
         private RenderTarget2D _sceneRenderTarget;
+        IntPtr _renderTargetId;
         private Camera2D _gameCamera;
 
 
         private bool _movingCamera;
         private bool _dragInput;
-        private XnaF.Vector2 _lastMousePosition;
+        private Vector2 _lastMousePosition;
 
         private int _lastMouseSroll;
-        private int _zoomLevel;
+        private int _zoomLevel = 10;
         private int _rotationAngle;
+
+
+        private int _pixelPerGridSquare;
+
+
+        SelectedState _selectState;
+        enum SelectedState
+        {
+            None,
+            Select,
+            Drag
+        }
 
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
             
             _sceneRenderTarget = new RenderTarget2D(editor.GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
-            _gameCamera = new Camera2D(editor.GraphicsDevice, new XnaF.Vector2(0, 0));
+
+            _gameCamera = new Camera2D(new Vector2(_gameResolution.X, _gameResolution.Y), new Vector2(_gameResolution.X / 2, _gameResolution.Y / 2));
+
+            _sceneRenderTarget = new RenderTarget2D(_editor.GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
+            _renderTargetId = _editor.GuiRenderer.BindTexture(_sceneRenderTarget);
         }
+
+
+        public override void Update()
+        {
+            var mouseState = Mouse.GetState();
+
+            if (_selectState == SelectedState.None && IsMouseInWindow())
+            {
+                if (mouseState.LeftButton == ButtonState.Pressed)
+                {
+                    Vector2 worldPosition = GetMousePosition();
+
+                    foreach (var item in _editor.GameCore.GameObjects)
+                    {
+                        if (worldPosition.X >= item.Position.X - item.BoundingSize.X / 2 && worldPosition.X <= item.Position.X + item.BoundingSize.X / 2
+                            && worldPosition.Y >= item.Position.Y - item.BoundingSize.Y / 2 && worldPosition.Y <= item.Position.Y + item.BoundingSize.Y / 2)
+                        {
+                            _editor.SelectObject(item);
+
+                            Num.Vector2 mousePosition = new Num.Vector2(mouseState.X, mouseState.Y);
+                            Num.Vector2 goPosition = WorldToUI(item.Position);
+
+                            Num.Vector2 direction = mousePosition - goPosition;
+                            if (direction.Length() < 10)
+                            {
+                                _selectState = SelectedState.Drag;
+                            }
+                        }
+                    }
+                }
+            }
+            else if (_selectState == SelectedState.Drag)
+            {
+                if (mouseState.LeftButton == ButtonState.Pressed && _editor.Selected != null)
+                {
+                    _editor.Selected.Position = GetMousePosition();
+                }
+                if (mouseState.LeftButton == ButtonState.Released)
+                {
+                    _selectState = SelectedState.None;
+                }
+            }
+        }
+
+        public void CircleSelected()
+        {
+            if (_editor.Selected == null)
+                return;
+
+            var p0 = ImGui.GetItemRectMin();
+            var p1 = ImGui.GetItemRectMax();
+
+            var drawList = ImGui.GetWindowDrawList();
+            drawList.PushClipRect(p0, p1);
+
+            uint color = ToolsUI.ToColor32(50, 255, 50, 255);
+
+            if (_selectState == SelectedState.Drag)
+            {
+                color = ToolsUI.ToColor32(255, 255, 50, 255);
+            }
+
+            drawList.AddCircle(WorldToUI(_editor.Selected.Position),
+                      8, color, 64, 3);
+            drawList.PopClipRect();
+        }
+
         public override void Draw()
         {
             // Render target
             _editor.GraphicsDevice.SetRenderTarget(_sceneRenderTarget);
-            _editor.GraphicsDevice.Clear(XnaF.Color.CornflowerBlue);
+            _editor.GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // clear la texture de render de la scéne
             ImGui.Begin("GAME", ImGuiWindowFlags.None);
@@ -60,14 +145,13 @@ namespace Unify2D.Toolbox
             Size = ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin() - _bottomOffset;
 
             // Declare style
-            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
+            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Num.Vector2.Zero);
             
             // Bind and give pointer to Scene render texture
-            IntPtr renderTargetId = _editor.Renderer.BindTexture(_sceneRenderTarget);
-            ImGui.Image(renderTargetId, ImGui.GetContentRegionAvail() - _bottomOffset);
+            ImGui.Image(_renderTargetId, ImGui.GetContentRegionAvail() - _bottomOffset);
             
             // Circle Gizmo around selected Game Object
-            _editor.CircleSelected();
+            CircleSelected();
 
             //Draw Component Gizmos for selected Game Object
             _editor.DrawComponentGizmoSelected();
@@ -82,6 +166,8 @@ namespace Unify2D.Toolbox
                     {
                         Asset asset = Clipboard.Content as Asset;
                         GameObject go = new GameObject() { Name = asset.Name };
+                        go.Position = GetMousePosition();
+
                         _editor.SelectObject(go);
                         SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
                         renderer.Initialize(_editor, go, asset.FullPath);
@@ -91,18 +177,101 @@ namespace Unify2D.Toolbox
             ImGui.EndDragDropTarget();
             #endregion
 
+            //updates camera movement ect...
             UpdateCamera();
 
-            // Write position in world
-            ImGui.Text($"(X.{_lastMousePosition.X} Y.{_lastMousePosition.Y}) (Zoom.{MathF.Round(_gameCamera.Zoom * 100) / 100}) (Angle.{_rotationAngle}°)");
+            #region Drawing
+            _editor.GameCore.BeginDraw(_gameCamera.Matrix);
+
+            //Draw the editor only grid
+            DrawGrid();
 
             // Draw all game assets
-            _editor.GameCore.Draw(_gameCamera.Matrix);
+            _editor.GameCore.Draw();
+
+            _editor.GameCore.EndDraw();
+            #endregion
+
+            // Write position in world
+            ImGui.Text($"(X.{_lastMousePosition.X} Y.{_lastMousePosition.Y}) (Zoom.{MathF.Round(_gameCamera.Zoom * 100) / 100}) (Angle.{_rotationAngle}°) (Pixel / Square : {_pixelPerGridSquare})");
 
             // Close
             ImGui.PopStyleVar();
             ImGui.End();
         }
+
+
+        private void DrawGrid()
+        {
+            Vector2 viewPort = _gameCamera.Resolution / _gameCamera.Zoom;
+
+            int step = 20;
+            int width = 1;
+
+            int rowX = (int)MathF.Round(viewPort.X / step);
+            int rowY = (int)MathF.Round(viewPort.Y / step);
+
+            int lowRowX = 0;
+            int lowRowY = 0;
+            int lowStep = 0;
+            int lowWidth = 0;
+
+            int multiple = 5;
+
+            while (rowX > 16 || rowY > 9)
+            {
+                lowRowX = rowX + 1;
+                lowRowY = rowY + 1;
+                lowStep = step;
+                lowWidth = width;
+
+                step *= multiple;
+                width *= multiple;
+                
+                rowX /= multiple;
+                rowY /= multiple;
+            }
+            _pixelPerGridSquare = step;
+            rowX++;
+            rowY++;
+
+
+            int startX = (int)MathF.Round((_gameCamera.Position.X - viewPort.X / 2) / step);
+            int startY = (int)MathF.Round((_gameCamera.Position.Y - viewPort.Y / 2) / step);
+
+            if (lowRowX != 0 && lowRowX < 80)
+            {
+                int lowStartX = (int)MathF.Round((_gameCamera.Position.X - viewPort.X / 2) / lowStep);
+                int lowStartY = (int)MathF.Round((_gameCamera.Position.Y - viewPort.Y / 2) / lowStep);
+
+                DrawGrid(1 - (lowRowX / (32f * multiple)), lowStartX, lowStartY, lowRowX, lowRowY, lowStep, lowWidth, (int)viewPort.X, (int)viewPort.Y, multiple);
+            }
+            DrawGrid(rowX / 16f, startX, startY, rowX, rowY, step, width, (int)viewPort.X, (int)viewPort.Y);
+        }
+        private void DrawGrid(float opacity, int startX, int startY, int rowX, int rowY, int step, int width, int viewX, int viewY, int ignore = 1)
+        {
+            Texture2D texture1px = new Texture2D(_editor.GraphicsDevice, 1, 1);
+            texture1px.SetData(new Color[] { new Color(1, 1, 1, opacity) });
+
+            for (int x = 0; x <= rowX; x++)
+            {
+                if(ignore == 1 || (x + startX) % ignore != 0)
+                {
+                    Rectangle rectangle = new Rectangle(((startX + x) * step) - (width / 2), (startY - 1) * step, width, viewY + step * 2);
+                    GameCore.Current.SpriteBatch.Draw(texture1px, rectangle, Color.Gray);
+                }
+            }
+
+            for (int y = 0; y <= rowY; y++)
+            {
+                if (ignore == 1 || (y + startY) % ignore != 0)
+                {
+                    Rectangle rectangle = new Rectangle((startX - 1) * step, ((startY + y) * step) - (width / 2), viewX + step * 2, width);
+                    GameCore.Current.SpriteBatch.Draw(texture1px, rectangle, Color.Gray);
+                }
+            }
+        }
+
         private void UpdateCamera()
         {
             MouseState mouseState = Mouse.GetState();
@@ -141,9 +310,27 @@ namespace Unify2D.Toolbox
                 if (IsMouseInWindow())
                 {
                     _zoomLevel += (mouseState.ScrollWheelValue - _lastMouseSroll) / 120;
-                }
+                    if(_zoomLevel < 0) _zoomLevel = 0;
 
-                _gameCamera.Zoom = _zoomLevel < 1 ? -1f / (_zoomLevel - 2) : _zoomLevel;
+
+                    // cache zoom and position of mous before zooming
+                    float lastZoom = _gameCamera.Zoom;
+                    Vector2 targetMove = GetMousePosition();
+
+                    // zoom
+                    _gameCamera.Zoom = (_zoomLevel < 1 ? -1f / (_zoomLevel - 2) : _zoomLevel) * 0.1f;
+
+                    // difference between last zoom
+                    float difference = (_gameCamera.Zoom - lastZoom) / lastZoom;
+
+                    //relative to camera
+                    targetMove -= _gameCamera.Position;
+
+                    //move is equivalent to zoom
+                    targetMove *= difference;
+
+                    _gameCamera.Move(targetMove);
+                }
             }
 
             #endregion
@@ -173,31 +360,31 @@ namespace Unify2D.Toolbox
         public bool IsMouseInWindow()
         {
             var mouseState = Mouse.GetState();
-            Vector2 mousePosition = new Vector2(mouseState.X, mouseState.Y);
+            Num.Vector2 mousePosition = new Num.Vector2(mouseState.X, mouseState.Y);
             mousePosition -= (Position + WindowOffset);
 
-            Vector2 result = new Vector2(mousePosition.X, mousePosition.Y);
+            Num.Vector2 result = new Num.Vector2(mousePosition.X, mousePosition.Y);
             result /= Size;
 
             return result.X >= 0 && result.X <= 1 && result.Y >= 0 && result.Y <= 1;
         }
-        public XnaF.Vector2 GetMousePosition()
+        public Vector2 GetMousePosition()
         {
             var mouseState = Mouse.GetState();
 
-            Vector2 mousePosition = new Vector2(mouseState.X, mouseState.Y);
+            Num.Vector2 mousePosition = new Num.Vector2(mouseState.X, mouseState.Y);
 
             mousePosition -= (Position + WindowOffset);
             mousePosition /= Size;
             mousePosition *= _gameResolution;
 
-            XnaF.Vector2 localPosition = _gameCamera.LocalToWorld(mousePosition);
+            Vector2 localPosition = _gameCamera.LocalToWorld(mousePosition);
 
-            return new XnaF.Vector2(MathF.Round(localPosition.X), MathF.Round(localPosition.Y));
+            return new Vector2(MathF.Round(localPosition.X), MathF.Round(localPosition.Y));
         }
-        public Vector2 WorldToUI(XnaF.Vector2 world)
+        public Num.Vector2 WorldToUI(Vector2 world)
         {
-            Vector2 uiPos = _gameCamera.WorldToLocal(world);
+            Num.Vector2 uiPos = _gameCamera.WorldToViewport(world);
 
             uiPos /= _gameResolution;
             uiPos *= Size;

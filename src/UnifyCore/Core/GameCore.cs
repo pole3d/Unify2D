@@ -10,6 +10,11 @@ using Unify2D.Physics;
 
 namespace Unify2D.Core
 {
+    /// <summary>
+    /// Represents the core game engine
+    /// This core is used for the game and the editor
+    /// It manages the components and the helps the rendering 
+    /// </summary>
     public class GameCore
     {
         public static GameCore Current
@@ -25,19 +30,24 @@ namespace Unify2D.Core
             s_current = core;
         }
 
+        public Game Game => _game;
+
         public SpriteBatch SpriteBatch { get; private set; }
         public List<GameObject> GameObjects => _gameObjects;
         public GameTime GameTime => _gameTime;
         private GameTime _gameTime;
         public PhysicsSettings PhysicsSettings { get; private set; }
+        public float DeltaTime { get; private set; }
 
         static GameCore s_current;
 
         List<GameObject> _gameObjects;
         List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
+        Game _game;
 
-        public GameCore()
+        public GameCore(Game game)
         {
+            _game = game;
             _gameObjects = new List<GameObject>();
         }
 
@@ -56,14 +66,12 @@ namespace Unify2D.Core
 
         BlendState _blendState;
 
-        public void Draw()
+        public void BeginDraw()
         {
-            Draw(Matrix.Identity);
+            BeginDraw(Matrix.Identity);
         }
-        public void Draw(Matrix matrix)
+        public void BeginDraw(Matrix matrix)
         {
-            //SpriteBatch.Begin( SpriteSortMode.Deferred, BlendState.NonPremultiplied);
-            
             SpriteBatch.Begin(SpriteSortMode.Deferred,
                         BlendState.NonPremultiplied,
                         null,
@@ -71,13 +79,16 @@ namespace Unify2D.Core
                         null,
                         null,
                         matrix);
-            
-
-
+        }
+        public void Draw()
+        {
             foreach (var item in _gameObjects)
             {
                 item.Draw();
             }
+        }
+        public void EndDraw()
+        {
             SpriteBatch.End();
         }
 
@@ -109,7 +120,7 @@ namespace Unify2D.Core
             if (_gameTime != gameTime)
                 _gameTime = gameTime;
 
-            float deltaTime = (float)_gameTime.ElapsedGameTime.TotalSeconds;
+            DeltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             foreach (var item in _gameObjects)
             {
@@ -121,7 +132,7 @@ namespace Unify2D.Core
                 _gameObjects.Remove(item);
             }
 
-            PhysicsSettings.World.Step(deltaTime);
+            PhysicsSettings.World.Step(DeltaTime);
 
             _gameObjectsToDestroy.Clear();
         }

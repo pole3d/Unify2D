@@ -30,5 +30,10 @@ namespace Unify2D.Core
         {
 
         }
+
+        internal virtual void Destroy()
+        {
+            
+        }
     }
 }

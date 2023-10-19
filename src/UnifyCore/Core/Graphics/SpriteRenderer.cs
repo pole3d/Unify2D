@@ -15,18 +15,16 @@ namespace Unify2D.Core.Graphics
 
         [JsonProperty]
         GameAsset _asset;
-        GameObject _go;
         Texture2D _texture;
 
         public void Initialize( Game game, GameObject go, string path)
         {
-            _go = go;
-
+            _gameObject = go;
             try
             {
                 _texture = game.Content.Load<Texture2D>(   $"./Assets/{path}");
                 _asset = new GameAsset(_texture, path);
-                _go.BoundingSize = new Vector2(_texture.Width, _texture.Height);
+                _gameObject.BoundingSize = new Vector2(_texture.Width, _texture.Height);
             }
             catch (Exception e)
             {
@@ -34,6 +32,12 @@ namespace Unify2D.Core.Graphics
                 Console.WriteLine(e.ToString());
             }
 
+        }
+
+        internal override void Destroy()
+        {
+            _texture = null;
+            _asset.Release();
         }
 
         public override void Load(Game game , GameObject go)
@@ -45,12 +49,7 @@ namespace Unify2D.Core.Graphics
         {
             if (_texture == null)
                 return;
-
-
-            
-            GameCore.Current.SpriteBatch.Draw(_texture, _go.Position - _go.BoundingSize / 2, null, Color, _go.Rotation, _go.BoundingSize / 2, _go.Scale, SpriteEffects.None, LayerDepth);
+            GameCore.Current.SpriteBatch.Draw(_texture, _gameObject.Position - _gameObject.BoundingSize / 2, null, Color, _gameObject.Rotation, _gameObject.BoundingSize / 2, _gameObject.Scale, SpriteEffects.None, LayerDepth);
         }
-
-   
     }
 }

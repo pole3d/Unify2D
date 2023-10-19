@@ -10,7 +10,7 @@ namespace Unify2D.Toolbox
     /// <summary>
     /// Base class for a tool window in the game editor
     /// </summary>
-    abstract class Toolbox
+    public abstract class Toolbox
     {
         protected GameEditor _editor;
 
@@ -22,6 +22,10 @@ namespace Unify2D.Toolbox
         }
 
         internal virtual void Reset()
+        {
+        }
+
+        public virtual void Update()
         {
         }
     }

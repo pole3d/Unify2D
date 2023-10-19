@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Unify2D.Tools;
 
 namespace Unify2D.Assets
 {
@@ -33,7 +34,7 @@ namespace Unify2D.Assets
                 _content = new ScriptAssetContent(this);
             }
 
-            _fullPath = System.IO.Path.Combine(path, name + extension);
+            _fullPath = ToolsEditor.CombinePath(path, name + extension);
         }
 
 

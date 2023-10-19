@@ -28,8 +28,9 @@
       },
       {
         "$type": "GameAssembly.TestA, GameAssembly",
-        "Speed": 10.0,
-        "SpeedO": 10.0
+        "Speed": 200.0,
+        "Speed7": 0.0,
+        "Text": "mpm"
       }
     ],
     "Position": "2213, 646",
@@ -43,6 +44,7 @@
       {
         "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
         "_asset": {
+<<<<<<< HEAD
           "_name": "\\Cube100100.png"
         },
         "Color": "255, 255, 255, 255",
@@ -67,12 +69,23 @@
     "Scale": "1, 1",
     "Name": "Cube100100",
     "BoundingSize": "100, 100"
+=======
+          "_name": "/ship_0009.png"
+        },
+        "Color": "255, 255, 255, 255"
+      }
+    ],
+    "Position": "436, 134",
+    "Name": "ship_0009",
+    "BoundingSize": "32, 32"
+>>>>>>> origin/main
   },
   {
     "_components": [
       {
         "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
         "_asset": {
+<<<<<<< HEAD
           "_name": "\\Cube100100_2.png"
         },
         "Color": "255, 255, 255, 255",
@@ -89,5 +102,43 @@
     "Scale": "1, 1",
     "Name": "Cube100100_2",
     "BoundingSize": "100, 100"
+=======
+          "_name": "/ship_0010.png"
+        },
+        "Color": "255, 255, 255, 255"
+      }
+    ],
+    "Position": "1421, 641",
+    "Name": "ship_0010",
+    "BoundingSize": "32, 32"
+  },
+  {
+    "_components": [
+      {
+        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
+        "_asset": {
+          "_name": "/ship_0007.png"
+        },
+        "Color": "255, 255, 255, 255"
+      }
+    ],
+    "Position": "649, 813",
+    "Name": "ship_0007",
+    "BoundingSize": "32, 32"
+  },
+  {
+    "_components": [
+      {
+        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
+        "_asset": {
+          "_name": "/ship_0004.png"
+        },
+        "Color": "255, 255, 255, 255"
+      }
+    ],
+    "Position": "1332, 245",
+    "Name": "ship_0004",
+    "BoundingSize": "32, 32"
+>>>>>>> origin/main
   }
 ]

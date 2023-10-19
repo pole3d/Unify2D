@@ -10,14 +10,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Unify2D.Core;
+using Unify2D.Tools;
 
 namespace Unify2D.Builder
 {
     internal class GameBuilder
     {
+        const string AssetsPath = "./Assets";
         const string TemplatePath = "./GameTemplate";
-        string AssetsPath  => Path.Combine(_editor.ProjectPath,  "./Assets");
-        string BuildPath => Path.Combine( _editor.ProjectPath,  "./Build");
+        string AssetsPathFull  => ToolsEditor.CombinePath(_editor.ProjectPath, AssetsPath);
+        string BuildPathFull => ToolsEditor.CombinePath(_editor.ProjectPath,  "./Build");
         const string ExeName = "UnifyGame.exe";
 
         GameCore _core;
@@ -28,32 +30,30 @@ namespace Unify2D.Builder
             _core = core;
             _editor = editor;
 
-            if (Directory.Exists(BuildPath) == false)
-                Directory.CreateDirectory(BuildPath);
+            if (Directory.Exists(BuildPathFull) == false)
+                Directory.CreateDirectory(BuildPathFull);
 
-            if (Directory.Exists( Path.Combine( BuildPath,AssetsPath)) == false)
-                Directory.CreateDirectory(Path.Combine(BuildPath, AssetsPath));
-
+            if (Directory.Exists(ToolsEditor.CombinePath(BuildPathFull,AssetsPath)) == false)
+                Directory.CreateDirectory(ToolsEditor.CombinePath(BuildPathFull, AssetsPath));
 
             if ( Directory.Exists(TemplatePath) == false )
             {
-
                 return;
             }
 
             foreach (var file in Directory.GetFiles(TemplatePath))
             {
                 string fileName = Path.GetFileName(file);
-                string newPath = Path.Combine( BuildPath , fileName );
+                string newPath = ToolsEditor.CombinePath  ( BuildPathFull , fileName );
                 File.Copy(file, newPath, true);
             }
 
-            Directory.CreateDirectory(BuildPath + "./Assets");
+            Directory.CreateDirectory(BuildPathFull + AssetsPath);
 
-            foreach (var file in Directory.GetFiles(AssetsPath))
+            foreach (var file in Directory.GetFiles(AssetsPathFull))
             {
                 string fileName = Path.GetFileName(file);
-                string newPath = Path.Combine(BuildPath, "./Assets", fileName);
+                string newPath = ToolsEditor.CombinePath(ToolsEditor.CombinePath(BuildPathFull, AssetsPath)   , fileName);
 
                 if (File.Exists(newPath))
                     File.Delete(newPath);
@@ -93,7 +93,7 @@ namespace Unify2D.Builder
             references: references,
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-            string dllPath = Path.Combine(BuildPath, "GameAssembly.dll");
+            string dllPath = ToolsEditor.CombinePath(BuildPathFull, "GameAssembly.dll");
 
             EmitResult result = compilation.Emit(dllPath);
 
@@ -121,14 +121,14 @@ namespace Unify2D.Builder
             settings.TypeNameHandling = TypeNameHandling.Auto;
             string text = JsonConvert.SerializeObject(_core.GameObjects, settings);
 
-            File.WriteAllText(Path.Combine(BuildPath,"test.scene"), text);
+            File.WriteAllText(ToolsEditor.CombinePath(BuildPathFull,"test.scene"), text);
         }
 
         public void StartBuild()
         {
             var startInfo = new ProcessStartInfo();
-            startInfo.FileName = Path.Combine(BuildPath, ExeName);
-            startInfo.WorkingDirectory = BuildPath;
+            startInfo.FileName = ToolsEditor.CombinePath(BuildPathFull, ExeName);
+            startInfo.WorkingDirectory = BuildPathFull;
 
             Process.Start(startInfo);
         }

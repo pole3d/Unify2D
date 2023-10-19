@@ -1,9 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Unify2D.Core
 {
@@ -25,6 +21,16 @@ namespace Unify2D.Core
         {
             _asset = asset;
             _name = name;
+        }
+
+        public void Release()
+        {
+
+        }
+
+        public void Acquire()
+        {
+
         }
 
     }

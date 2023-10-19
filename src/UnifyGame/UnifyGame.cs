@@ -37,7 +37,7 @@ namespace UnifyGame
 
         protected override void Initialize()
         {
-            _core = new GameCore();
+            _core = new GameCore(this);
             GameCore.SetCurrent(_core);
 
             _imGuiRenderer = new Unify2D.ImGuiRenderer.Renderer(this);
@@ -77,7 +77,9 @@ namespace UnifyGame
 
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
+            _core.BeginDraw();
             _core.Draw();
+            _core.EndDraw();
 
             // Call BeforeLayout first to set things up
             _imGuiRenderer.BeforeLayout(gameTime);
