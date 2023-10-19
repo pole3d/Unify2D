@@ -13,7 +13,7 @@ namespace UnifyCore.Core.Physics
 {
     internal class CircleCollider: Component
     {
-        public float Radius{ get { return m_radius * PhysicsSettings.UnitToPixelRatio; } set { m_radius = value / PhysicsSettings.UnitToPixelRatio; } }
+        public float Radius{ get { return m_radius; } set { m_radius = value; } }
 
         private Vector2 m_size;
 
