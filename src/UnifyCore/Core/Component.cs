@@ -12,7 +12,7 @@ namespace Unify2D.Core
     {
         protected GameObject _gameObject;
 
-        public void Initialize(GameObject go)
+        public virtual void Initialize(GameObject go)
         {
             _gameObject = go;
         }
@@ -26,6 +26,11 @@ namespace Unify2D.Core
         }
 
         internal virtual void Destroy()
+        {
+            
+        }
+
+        internal virtual void DrawGizmo()
         {
             
         }

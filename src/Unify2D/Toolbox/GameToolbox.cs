@@ -29,7 +29,7 @@ namespace Unify2D.Toolbox
 
         private RenderTarget2D _sceneRenderTarget;
         IntPtr _renderTargetId;
-        private Camera2D _gameCamera;
+        private CameraEditor _gameCamera;
 
 
         private bool _movingCamera;
@@ -41,17 +41,24 @@ namespace Unify2D.Toolbox
 
 
         private int _pixelPerGridSquare;
-
+        private Texture2D _gridTexture;
+        private Texture2D _smallGridTexture;
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
             
             _sceneRenderTarget = new RenderTarget2D(editor.GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
 
-            _gameCamera = new Camera2D(new Vector2(_gameResolution.X, _gameResolution.Y), new Vector2(_gameResolution.X / 2, _gameResolution.Y / 2));
+            _gameCamera = new CameraEditor(new Vector2(_gameResolution.X, _gameResolution.Y), new Vector2(_gameResolution.X / 2, _gameResolution.Y / 2));
 
             _sceneRenderTarget = new RenderTarget2D(_editor.GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
             _renderTargetId = _editor.Renderer.BindTexture(_sceneRenderTarget);
+
+            _gridTexture = new Texture2D(_editor.GraphicsDevice, 1, 1);
+            _gridTexture.SetData(new Color[] { new Color(1, 1, 1, .5f) });
+
+            _smallGridTexture = new Texture2D(_editor.GraphicsDevice, 1, 1);
+            _smallGridTexture.SetData(new Color[] { new Color(1, 1, 1, .1f) });
         }
         public override void Draw()
         {
@@ -107,6 +114,8 @@ namespace Unify2D.Toolbox
 
             // Draw all game assets
             _editor.GameCore.Draw();
+            // Draw all debutg gizmo
+            _editor.GameCore.DrawGizmo();
 
             _editor.GameCore.EndDraw();
             #endregion
@@ -159,21 +168,18 @@ namespace Unify2D.Toolbox
                 int lowStartX = (int)MathF.Round((_gameCamera.Position.X - viewPort.X / 2) / lowStep);
                 int lowStartY = (int)MathF.Round((_gameCamera.Position.Y - viewPort.Y / 2) / lowStep);
 
-                DrawGrid(.1f, lowStartX, lowStartY, lowRowX, lowRowY, lowStep, width, (int)viewPort.X, (int)viewPort.Y, multiple);
+                DrawGrid(_smallGridTexture, lowStartX, lowStartY, lowRowX, lowRowY, lowStep, width, (int)viewPort.X, (int)viewPort.Y, multiple);
             }
-            DrawGrid(.5f, startX, startY, rowX, rowY, step, width, (int)viewPort.X, (int)viewPort.Y);
+            DrawGrid(_gridTexture, startX, startY, rowX, rowY, step, width, (int)viewPort.X, (int)viewPort.Y);
         }
-        private void DrawGrid(float opacity, int startX, int startY, int rowX, int rowY, int step, int width, int viewX, int viewY, int ignore = 1)
+        private void DrawGrid(Texture2D texture, int startX, int startY, int rowX, int rowY, int step, int width, int viewX, int viewY, int ignore = 1)
         {
-            Texture2D texture1px = new Texture2D(_editor.GraphicsDevice, 1, 1);
-            texture1px.SetData(new Color[] { new Color(1, 1, 1, opacity) });
-
             for (int x = 0; x <= rowX; x++)
             {
                 if(ignore == 1 || (x + startX) % ignore != 0)
                 {
                     Rectangle rectangle = new Rectangle(((startX + x) * step) - (width / 2), (startY - 1) * step, width, viewY + step * 2);
-                    GameCore.Current.SpriteBatch.Draw(texture1px, rectangle, Color.Gray);
+                    GameCore.Current.SpriteBatch.Draw(texture, rectangle, Color.Gray);
                 }
             }
 
@@ -182,7 +188,7 @@ namespace Unify2D.Toolbox
                 if (ignore == 1 || (y + startY) % ignore != 0)
                 {
                     Rectangle rectangle = new Rectangle((startX - 1) * step, ((startY + y) * step) - (width / 2), viewX + step * 2, width);
-                    GameCore.Current.SpriteBatch.Draw(texture1px, rectangle, Color.Gray);
+                    GameCore.Current.SpriteBatch.Draw(texture, rectangle, Color.Gray);
                 }
             }
         }
@@ -213,7 +219,7 @@ namespace Unify2D.Toolbox
             if (_movingCamera)
             {
                 // move camera
-                _gameCamera.Move(_lastMousePosition - GetMousePosition());
+                _gameCamera.Position += _lastMousePosition - GetMousePosition();
             }
 
             #endregion
@@ -229,7 +235,13 @@ namespace Unify2D.Toolbox
                     Vector2 targetMove = GetMousePosition();
 
                     // zoom
-                    _gameCamera.ZoomLevel -= (mouseState.ScrollWheelValue - _lastMouseSroll) / 120 * 0.1f;
+                    float zoomLevel = _gameCamera.ZoomLevel;
+                    float delta = (mouseState.ScrollWheelValue - _lastMouseSroll) / 120 * 0.1f;
+                    if (zoomLevel < 1)
+                    {
+                        delta *= zoomLevel * zoomLevel;
+                    }
+                    _gameCamera.ZoomLevel -= delta;
 
                     // difference between last zoom
                     float difference = (_gameCamera.Zoom - lastZoom) / lastZoom;
@@ -240,7 +252,7 @@ namespace Unify2D.Toolbox
                     //move is equivalent to zoom
                     targetMove *= difference;
 
-                    _gameCamera.Move(targetMove);
+                    _gameCamera.Position += targetMove;
                 }
             }
 
