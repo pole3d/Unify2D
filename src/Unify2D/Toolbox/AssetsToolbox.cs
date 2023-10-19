@@ -46,9 +46,9 @@ namespace Unify2D.Toolbox
 
             var folders = Directory.GetDirectories(_path);
             var rootFiles = Directory.GetFiles(_path);
-           
+
             // root
-            treeFiles.Add(new TreeNode() { name = "Root", type = "Root", childType = "null", nodeIndex = treeFilesIndex, childCount = rootFiles.Length + folders.Length, path = _editor.AssetsPath });
+            treeFiles.Add(new TreeNode() { name = "Root", type = "Root", childType = "null", nodeIndex = treeFilesIndex, childCount = rootFiles.Length + folders.Length, path = _editor.AssetsPath, isSelected = false }) ;
             treeFilesIndex++;
 
             // files in root
@@ -60,7 +60,7 @@ namespace Unify2D.Toolbox
 
                 string fileName = Path.GetFileNameWithoutExtension(relativeFile).ToString();
 
-                treeFiles.Add(new TreeNode() { name = fileName, type = "file", childType = "null", nodeIndex = treeFilesIndex, childCount = -1, folderPath = _editor.AssetsPath, path = Path.Combine(_editor.AssetsPath, Path.GetDirectoryName(relativeFile), relativeFile) }); ;
+                treeFiles.Add(new TreeNode() { name = fileName, type = "file", childType = "null", nodeIndex = treeFilesIndex, childCount = -1, folderPath = _editor.AssetsPath, path = Path.Combine(_editor.AssetsPath, Path.GetDirectoryName(relativeFile), relativeFile), isSelected = false }); ;
                 treeFilesIndex++;
 
             }
@@ -71,7 +71,7 @@ namespace Unify2D.Toolbox
                 string relativeFolder = folder.Replace(_path, string.Empty);
                 string folderName = Path.GetFileName(relativeFolder);
 
-                treeFiles.Add(new TreeNode() { name = folderName, type = "Folder", childType = "file", nodeIndex = treeFilesIndex, childCount = 2, folderPath = _editor.AssetsPath, path = Path.Combine(_editor.AssetsPath, folderName) });
+                treeFiles.Add(new TreeNode() { name = folderName, type = "Folder", childType = "file", nodeIndex = treeFilesIndex, childCount = 2, folderPath = _editor.AssetsPath, path = Path.Combine(_editor.AssetsPath, folderName), isSelected = false });
                 treeFilesIndex++;
 
                 var files = Directory.GetFiles(Path.Combine(_editor.AssetsPath, folderName));
@@ -86,7 +86,7 @@ namespace Unify2D.Toolbox
                     string fileName = Path.GetFileNameWithoutExtension(relativeFile).ToString();
                     string extension = Path.GetExtension(relativeFile).ToString();
 
-                    treeFiles.Add(new TreeNode() { name = fileName, type = "file", childType = "null", nodeIndex = treeFilesIndex, childCount = -1, folderPath = Path.Combine(_editor.AssetsPath, folderName), path = Path.Combine(_editor.AssetsPath, Path.GetDirectoryName(relativeFile), relativeFile) });
+                    treeFiles.Add(new TreeNode() { name = fileName, type = "file", childType = "null", nodeIndex = treeFilesIndex, childCount = -1, folderPath = Path.Combine(_editor.AssetsPath, folderName), path = Path.Combine(_editor.AssetsPath, Path.GetDirectoryName(relativeFile), relativeFile), isSelected = false }); ;
 
                     treeFilesIndex++;
                 }
@@ -117,7 +117,6 @@ namespace Unify2D.Toolbox
                 {
                     if (ImGui.MenuItem("Delete Folder 1", null))
                     {
-                        
                         DeleteFolder(1, "New Folder0");
                     }
                     ImGui.EndMenu();
@@ -127,7 +126,7 @@ namespace Unify2D.Toolbox
 
             if (ImGui.TreeNode("Tree View"))
             {
-                ImGuiTableFlags flags = ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.Resizable | ImGuiTableFlags.RowBg | ImGuiTableFlags.NoBordersInBody;
+                ImGuiTableFlags flags = ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.Resizable | ImGuiTableFlags.RowBg | ImGuiTableFlags.NoBordersInBody | ImGuiTableFlags.Reorderable;
                 if (ImGui.BeginTable("3 ways", 3, flags))
                 {
                     ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.NoHide);
@@ -202,11 +201,24 @@ namespace Unify2D.Toolbox
             public int childCount;
             public string folderPath;
             public string path;
+            public bool isSelected;
+            
 
             public static void DisplayNode(TreeNode node, List<TreeNode> allNodes)
             {
+                if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+                {
+                    node.isSelected = !node.isSelected;
+                    if (node.isSelected)
+                    {
+                        Console.WriteLine(node.name + " is selected, her index is "+ node.nodeIndex);
+                    }
+                }
+
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
+               
+  
                 bool isFolder = false;
                 if (node.childCount > 0)
                 {
