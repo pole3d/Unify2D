@@ -40,7 +40,7 @@ namespace Unify2D.Core
             _gameObjects = new List<GameObject>();
         }
 
-        internal void AddGameObject(GameObject go)
+        public void AddGameObject(GameObject go)
         {
             _gameObjects.Add(go);
         }
@@ -85,10 +85,11 @@ namespace Unify2D.Core
             SpriteBatch = new SpriteBatch(graphicsDevice);
         }
 
-        public void LoadScene(Game game,  List<GameObject> gameObjects)
+        public void LoadScene(Game game, List<GameObject> gameObjects)
         {
             foreach (var item in gameObjects)
             {
+                AddGameObject(item);
                 item.Load(game);
             }
         }

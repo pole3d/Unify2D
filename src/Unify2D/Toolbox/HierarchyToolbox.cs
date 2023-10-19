@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Text;
 using ImGuiNET;
+using Unify2D.Assets;
 using Unify2D.Core;
 using Unify2D.Tools;
 
@@ -10,8 +10,12 @@ namespace Unify2D.Toolbox
     {
 
         bool[] _hierarchy = new bool[100];
-
-
+        
+        public void SetCore(GameCoreInfo coreInfo)
+        {
+            _tag = coreInfo;
+        }
+        
         public override void Draw()
         {
             ImGui.Begin("Hierarchy");
@@ -21,7 +25,7 @@ namespace Unify2D.Toolbox
             ImGui.BeginChild("gameObjectList");
 
             int i = 0;
-            foreach (var item in GameCore.Current.GameObjects)
+            foreach (var item in ((GameCoreInfo)_tag).GameCore.GameObjects)
             {
                 ImGui.PushID(i++);
                 if (ImGui.Selectable($"{item.Name}", _hierarchy[i]))

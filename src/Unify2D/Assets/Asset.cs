@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Unify2D.Tools;
+﻿using Unify2D.Tools;
 
 namespace Unify2D.Assets
 {

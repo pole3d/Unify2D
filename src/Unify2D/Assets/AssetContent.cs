@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Unify2D.Core;
-
-namespace Unify2D.Assets
+﻿namespace Unify2D.Assets
 {
     internal abstract class AssetContent
     {
         public bool IsLoaded { get; set; }
+        public Asset Asset => _asset;
         
         protected Asset _asset;
 

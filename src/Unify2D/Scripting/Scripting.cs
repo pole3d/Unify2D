@@ -107,9 +107,9 @@ namespace Unify2D.Scripting
 
         private void ReplaceComponents()
         {
-            foreach (var core in _editor.GameCores)
+            foreach (var core in _editor.GameCoresInfo)
             {
-                foreach (var go in core.GameObjects)
+                foreach (var go in core.GameCore.GameObjects)
                 {
                     List<Component> newComponents = new List<Component>();
                     foreach (var oldComponent in go.Components)

@@ -2,13 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unify2D.Assets;
-using Unify2D.Core.Graphics;
 using Unify2D.Core;
 using Unify2D.Tools;
 using Microsoft.Xna.Framework;
@@ -51,9 +45,9 @@ namespace Unify2D.Toolbox
             _renderTargetId = _editor.Renderer.BindTexture(_sceneRenderTarget);
         }
 
-        public void SetCore(GameCore core)
+        public void SetCore(GameCoreInfo coreInfo)
         {
-            _tag = core;
+            _tag = coreInfo;
         }
         
         public override void Draw()
@@ -63,7 +57,7 @@ namespace Unify2D.Toolbox
             _editor.GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // clear la texture de render de la scéne
-            ImGui.Begin("GAME", ImGuiWindowFlags.None);
+            ImGui.Begin($"GAME - {((GameCoreInfo)_tag).AssetPath}", ImGuiWindowFlags.None);
 
             // Windows property
             Position = ImGui.GetWindowPos();
@@ -100,7 +94,7 @@ namespace Unify2D.Toolbox
             ImGui.Text($"(X.{_lastMousePosition.X} Y.{_lastMousePosition.Y}) (Zoom.{MathF.Round(_gameCamera.Zoom * 100) / 100}) (Angle.{_rotationAngle}°)");
 
             // Draw all game assets
-            ((GameCore)_tag).Draw(_gameCamera.Matrix);
+            ((GameCoreInfo)_tag).GameCore.Draw(_gameCamera.Matrix);
 
             // Close
             ImGui.PopStyleVar();

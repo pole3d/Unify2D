@@ -29,8 +29,6 @@ namespace Unify2D.Core
             _components = new List<Component>();
             _renderers = new List<Renderer>();
             Name = "GameObject";
-
-            GameCore.Current.AddGameObject(this);
         }
 
         internal void Load(Game game)

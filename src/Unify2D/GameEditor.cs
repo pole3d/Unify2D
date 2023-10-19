@@ -43,7 +43,7 @@ namespace Unify2D
         public ImGuiRenderer.Renderer Renderer => _imGuiRenderer;
 
         public GameEditorSettings Settings => _settings;
-        public List<GameCore> GameCores => _cores;
+        internal List<GameCoreInfo> GameCoresInfo => _coresInfo;
 
         GraphicsDeviceManager _graphics;
         ImGuiRenderer.Renderer _imGuiRenderer;
@@ -55,14 +55,14 @@ namespace Unify2D
 
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
 
-        GameCore _coreScene;
-        List<GameCore> _cores = new List<GameCore>();
+        GameCoreInfo _coreInfoScene;
+        List<GameCoreInfo> _coresInfo = new List<GameCoreInfo>();
         
         GameObject _selected;
         InspectorToolbox _inspectorToolbox;
         ScriptToolbox _scriptToolbox;
         GameToolbox _gameToolbox;
-
+        private HierarchyToolbox _hierarchyToolbox;
 
         SelectedState _selectState;
         bool _showSelectPath;
@@ -89,15 +89,18 @@ namespace Unify2D
 
         protected override void Initialize()
         {
-            _coreScene = new GameCore(this);
-            _cores.Add(_coreScene);
-            GameCore.SetCurrent(_coreScene);
-
             _settings = new GameEditorSettings();
             _settings.Load(this);
 
             _scripting = new Unify2D.Scripting.Scripting();
             _scripting.Load(this);
+            
+            //Create game core and load scene content
+            _coreInfoScene = new GameCoreInfo(
+                new GameCore(this),
+                ToolsEditor.CombinePath(ProjectPath, "./test.scene"));
+            _coresInfo.Add(_coreInfoScene);
+            GameCore.SetCurrent(_coreInfoScene.GameCore);
 
             _imGuiRenderer = new ImGuiRenderer.Renderer(this);
             _imGuiRenderer.RebuildFontAtlas();
@@ -126,10 +129,12 @@ namespace Unify2D
             _scriptToolbox = new ScriptToolbox();
             _inspectorToolbox = new InspectorToolbox();
             _gameToolbox = new GameToolbox();
-            _gameToolbox.SetCore(_coreScene);
+            _gameToolbox.SetCore(_coreInfoScene);
+            _hierarchyToolbox = new HierarchyToolbox();
+            _hierarchyToolbox.SetCore(_coreInfoScene);
 
             _toolboxes.Add(new AssetsToolbox());
-            _toolboxes.Add(new HierarchyToolbox());
+            _toolboxes.Add(_hierarchyToolbox);
 
             _toolboxes.Add(_scriptToolbox);
             _toolboxes.Add(_inspectorToolbox);
@@ -146,7 +151,7 @@ namespace Unify2D
 
         protected override void LoadContent()
         {
-            _coreScene.Initialize(GraphicsDevice);
+            _coreInfoScene.GameCore.Initialize(GraphicsDevice);
 
             base.LoadContent();
         }
@@ -192,7 +197,7 @@ namespace Unify2D
                 {
                     Vector2 worldPosition = GetWorldMousePosition();
                     
-                        foreach (var item in _coreScene.GameObjects)
+                        foreach (var item in _coreInfoScene.GameCore.GameObjects)
                         {
                             if (worldPosition.X >= item.Position.X - item.BoundingSize.X / 2
                                 && worldPosition.X <= item.Position.X + item.BoundingSize.X / 2
@@ -344,7 +349,7 @@ namespace Unify2D
         private void Build()
         {
             GameBuilder builder = new GameBuilder();
-            builder.Build(_coreScene, this);
+            builder.Build(_coreInfoScene.GameCore, this);
             builder.StartBuild();
         }
 
@@ -377,7 +382,7 @@ namespace Unify2D
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
             settings.Formatting = Formatting.Indented;
-            string text = JsonConvert.SerializeObject(_coreScene.GameObjects, settings);
+            string text = JsonConvert.SerializeObject(_coreInfoScene.GameCore.GameObjects, settings);
 
             File.WriteAllText(ToolsEditor.CombinePath(ProjectPath, "./test.scene"), text);
         }
@@ -386,14 +391,14 @@ namespace Unify2D
         {
             _projectLoaded = true;
 
-            _coreScene.GameObjects.Clear();
+            _coreInfoScene.GameCore.GameObjects.Clear();
 
             SelectObject(null);
 
             List<GameObject> gameObjects = null;
             try
             {
-                string text = File.ReadAllText(ToolsEditor.CombinePath(ProjectPath, "./test.scene"));
+                string text = File.ReadAllText(_coreInfoScene.AssetPath);
                 JsonSerializerSettings settings = new JsonSerializerSettings();
                 settings.TypeNameHandling = TypeNameHandling.Auto;
                 settings.Error += SilentErrors;
@@ -407,7 +412,7 @@ namespace Unify2D
             if (gameObjects != null)
             {
                 Content.RootDirectory = ProjectPath;
-                _coreScene.LoadScene(this, gameObjects);
+                _coreInfoScene.GameCore.LoadScene(this, gameObjects);
             }
         }
 
@@ -423,15 +428,18 @@ namespace Unify2D
 
         internal void OpenPrefab(PrefabAssetContent content)
         {
-            GameCore prefabCore = new GameCore(this);
-            _cores.Add(prefabCore);
-            prefabCore.Initialize(GraphicsDevice);
-            _gameToolbox.Tag = prefabCore;
+            GameCoreInfo prefabCoreInfo = new GameCoreInfo(
+                new GameCore(this),
+                ToolsEditor.CombinePath(ProjectPath, content.Asset.FullPath));
+            _coresInfo.Add(prefabCoreInfo);
+            prefabCoreInfo.GameCore.Initialize(GraphicsDevice);
             
-            GameCore.SetCurrent(prefabCore);
+            _gameToolbox.Tag = prefabCoreInfo;
+            _hierarchyToolbox.Tag = prefabCoreInfo;
+
+            GameCore.SetCurrent(prefabCoreInfo.GameCore);
             
-            content.CreateGameObject(this);
-            prefabCore.LoadScene(this, prefabCore.GameObjects);
+            prefabCoreInfo.GameCore.AddGameObject(content.InstantiateGameObject(this));
         }
     }
 }
