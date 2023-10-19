@@ -13,6 +13,8 @@ namespace Unify2D.Core
     public class GameObject
     {
         public Vector2 Position{ get; set; }
+        public float Rotation { get; set; }
+        public Vector2 Scale { get; set; } = new Vector2(1, 1);
         public string Name { get; set; }
         public Vector2 BoundingSize { get; set; } = new Vector2(30, 30);
 
