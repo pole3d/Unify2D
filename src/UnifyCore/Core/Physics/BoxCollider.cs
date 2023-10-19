@@ -16,14 +16,14 @@ namespace UnifyCore.Core.Physics
 {
     internal class BoxCollider : Component
     {
-        public float Width { get { return m_width; } set { m_width = value; } }
-        public float Height { get { return m_height; } set { m_height = value; } }
+        public float Width { get { return m_width * PhysicsSettings.UnitToPixelRatio; } set { m_width = value / PhysicsSettings.UnitToPixelRatio; } }
+        public float Height { get { return m_height * PhysicsSettings.UnitToPixelRatio; } set { m_height = value / PhysicsSettings.UnitToPixelRatio; } }
 
         private Vector2 m_size;
 
         private Body staticBody;
 
-        private float m_width = 10f, m_height = 10f;
+        private float m_width = 1f, m_height = 1f;
 
         public override void Load(Game game, GameObject go)
         {
@@ -31,7 +31,7 @@ namespace UnifyCore.Core.Physics
 
             if (rb == null)
             {
-                staticBody = BodyFactory.CreateRectangle(PhysicsSettings.World, m_width, m_height, 1, _gameObject.Position, 0, BodyType.Static);
+                staticBody = BodyFactory.CreateRectangle(PhysicsSettings.World, m_width, m_height, 1, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, 0, BodyType.Static);
             }
         }
 

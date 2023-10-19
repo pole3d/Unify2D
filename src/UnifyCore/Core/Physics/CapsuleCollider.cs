@@ -13,8 +13,8 @@ namespace UnifyCore.Core.Physics
 {
     internal class CapsuleCollider : Component
     {
-        public float Height { get{ return m_height; } set { m_height = value; } }
-        public float Radius { get { return m_radius; } set { m_radius = value; } }
+        public float Height { get{ return m_height * PhysicsSettings.UnitToPixelRatio; } set { m_height = value / PhysicsSettings.UnitToPixelRatio; } }
+        public float Radius { get { return m_radius * PhysicsSettings.UnitToPixelRatio; } set { m_radius = value / PhysicsSettings.UnitToPixelRatio; } }
 
         private Vector2 m_size;
         private Body staticBody;

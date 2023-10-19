@@ -56,20 +56,20 @@ namespace Unify2D.Physics
 
             if (boxCol != null)
             {
-                m_velcroBody = BodyFactory.CreateRectangle(PhysicsSettings.World, boxCol.Width, boxCol.Height, 1, _gameObject.Position, 0, m_type);
+                m_velcroBody = BodyFactory.CreateRectangle(PhysicsSettings.World, boxCol.Width * _gameObject.Scale.X, boxCol.Height * _gameObject.Scale.Y, 1, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, 0, m_type);
                 
             }
             else if (cirCol!= null)
             {
-                m_velcroBody = BodyFactory.CreateCircle(PhysicsSettings.World, cirCol.Radius, 1, _gameObject.Position, 0, m_type);
+                m_velcroBody = BodyFactory.CreateCircle(PhysicsSettings.World, cirCol.Radius * _gameObject.Scale.X, 1, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, m_type);
             }
             else if (capsuleCol != null)
             {
-                m_velcroBody = BodyFactory.CreateCapsule(PhysicsSettings.World, capsuleCol.Height, capsuleCol.Radius, 1, _gameObject.Position, 0, BodyType.Static);
+                m_velcroBody = BodyFactory.CreateCapsule(PhysicsSettings.World, capsuleCol.Height * _gameObject.Scale.Y, capsuleCol.Radius * _gameObject.Scale.X, 1, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, 0, BodyType.Static);
             }
             else 
             {
-                m_velcroBody = BodyFactory.CreateBody(PhysicsSettings.World, _gameObject.Position, 0, m_type);
+                m_velcroBody = BodyFactory.CreateBody(PhysicsSettings.World, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, _gameObject.Rotation, m_type);
             }
             
             m_velcroBody.Mass = m_mass;
@@ -80,7 +80,8 @@ namespace Unify2D.Physics
 
         public override void Update(GameCore game)
         {
-            _gameObject.Position = m_velcroBody.Position;
+            _gameObject.Position = m_velcroBody.Position * PhysicsSettings.UnitToPixelRatio;
+            _gameObject.Rotation = m_velcroBody.Rotation;
         }
 
         public void AddForce(Vector2 force)
