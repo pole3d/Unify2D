@@ -121,7 +121,7 @@ namespace Unify2D.Toolbox
 
         private void DrawGrid()
         {
-            Vector2 viewPort = _gameCamera.Resolution / _gameCamera.Zoom;
+            Vector2 viewPort = _gameCamera.Viewport / _gameCamera.Zoom;
 
             int step = 50;
             int width = (int)MathF.Round(5 * MathF.Max(_gameCamera.ZoomLevel, 0.2f));

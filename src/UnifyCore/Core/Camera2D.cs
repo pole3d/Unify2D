@@ -17,12 +17,12 @@ namespace Unify2D.Core
         protected float _zoom;
         protected float _rotation;
         protected Vector2 _position;
-        protected Vector2 _resolution;
+        protected Vector2 _viewport;
         private bool _hasChanged = false;
 
-        public Camera2D(Vector2 resolution, Vector2 position, float zoom = 1, float rotation = 0)
+        public Camera2D(Vector2 viewport, Vector2 position, float zoom = 1, float rotation = 0)
         {
-            _resolution = resolution;
+            _viewport = viewport;
             _position = position;
             ZoomLevel = zoom;
             _rotation = rotation;
@@ -66,12 +66,12 @@ namespace Unify2D.Core
                 _hasChanged = true;
             }
         }
-        public Vector2 Resolution
+        public Vector2 Viewport
         {
-            get { return _resolution; }
+            get { return _viewport; }
             set
             {
-                _resolution = value;
+                _viewport = value;
                 _hasChanged = true;
             }
         }
@@ -109,13 +109,13 @@ namespace Unify2D.Core
             Matrix.CreateTranslation(new Vector3(-_position.X, -_position.Y, 0)) *
             Matrix.CreateRotationZ(Rotation) *
             Matrix.CreateScale(new Vector3(Zoom, Zoom, 1)) *
-            Matrix.CreateTranslation(new Vector3(_resolution.X * 0.5f, _resolution.Y * 0.5f, 0));
+            Matrix.CreateTranslation(new Vector3(_viewport.X * 0.5f, _viewport.Y * 0.5f, 0));
 
         }
 
         public Vector2 LocalToWorld(Num.Vector2 local)
         {
-            local -= new Num.Vector2(_resolution.X * 0.5f, _resolution.Y * 0.5f);
+            local -= new Num.Vector2(_viewport.X * 0.5f, _viewport.Y * 0.5f);
 
             local /= Zoom; 
 
@@ -148,7 +148,7 @@ namespace Unify2D.Core
             // on multiplie pas par le zoom car Matrix.Up en prends deja compte
             //local *= Zoom;
 
-            local += new Num.Vector2(_resolution.X * 0.5f, _resolution.Y * 0.5f);
+            local += new Num.Vector2(_viewport.X * 0.5f, _viewport.Y * 0.5f);
 
             return local;
         }
