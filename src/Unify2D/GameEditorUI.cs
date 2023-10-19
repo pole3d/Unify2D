@@ -25,7 +25,7 @@ namespace Unify2D
 
         public void DrawMainMenuBarUI()
         {
-            if ( ImGui.BeginMainMenuBar())
+            if (ImGui.BeginMainMenuBar())
             {
                 if (ImGui.BeginMenu("File"))
                 {

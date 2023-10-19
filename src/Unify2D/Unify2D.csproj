@@ -38,6 +38,7 @@
 
     <ItemGroup>
       <Folder Include="src\unify2d\physics\" />
+      <Folder Include="src\unify2d\toolbox\propertyviewer\" />
     </ItemGroup>
 
 </Project>

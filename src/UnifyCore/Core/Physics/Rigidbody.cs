@@ -40,11 +40,11 @@ namespace Unify2D.Physics
             }
         }
 
-        private float m_mass = 100f;
+        private float m_mass = 1f;
         private float m_linearDamper = 0.1f;
         private BodyType m_type = BodyType.Dynamic;
         
-        private float  m_gravityScale = 100f;
+        private float  m_gravityScale = 1f;
 
         private Body m_velcroBody;
 
