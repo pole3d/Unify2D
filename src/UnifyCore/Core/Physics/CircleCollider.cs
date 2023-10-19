@@ -19,7 +19,7 @@ namespace UnifyCore.Core.Physics
 
         private Body staticBody;
 
-        private float m_radius = 2f;
+        private float m_radius = 1f;
 
         public override void Load(Game game, GameObject go)
         {

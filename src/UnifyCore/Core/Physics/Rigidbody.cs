@@ -71,7 +71,8 @@ namespace Unify2D.Physics
             {
                 m_velcroBody = BodyFactory.CreateBody(PhysicsSettings.World, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, _gameObject.Rotation, m_type);
             }
-            
+
+            m_velcroBody.Rotation = _gameObject.Rotation;
             m_velcroBody.Mass = m_mass;
             m_velcroBody.LinearDamping = m_linearDamper;
             m_velcroBody.GravityScale = m_gravityScale;

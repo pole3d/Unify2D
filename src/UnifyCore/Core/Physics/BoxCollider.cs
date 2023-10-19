@@ -23,7 +23,7 @@ namespace UnifyCore.Core.Physics
 
         private Body staticBody;
 
-        private float m_width = 2f, m_height = 2f;
+        private float m_width = 1f, m_height = 1f;
 
         public override void Load(Game game, GameObject go)
         {
