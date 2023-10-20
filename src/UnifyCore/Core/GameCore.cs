@@ -72,6 +72,13 @@ namespace Unify2D.Core
                 item.Draw();
             }
         }
+        public void DrawGizmo()
+        {
+            foreach (var item in _gameObjects)
+            {
+                item.DrawGizmo();
+            }
+        }
         public void EndDraw()
         {
             SpriteBatch.End();

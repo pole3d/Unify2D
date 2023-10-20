@@ -44,7 +44,6 @@ namespace Unify2D
         public GameEditorSettings Settings => _settings;
         public Scripting.Scripting Scripting => _scripting;
         public ImGuiRenderer.Renderer GuiRenderer => _imGuiRenderer;
-        public InspectorToolbox Inspector => _inspectorToolbox;
 
         public GameObject Selected => _selected;
 
@@ -64,14 +63,17 @@ namespace Unify2D
 
         Stack<PopupBase> _popups = new Stack<PopupBase>();
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
-        InspectorToolbox _inspectorToolbox;
-        ScriptToolbox _scriptToolbox;
-        GameToolbox _gameToolbox;
+        internal InspectorToolbox InspectorToolbox { get; private set; }
+        internal ScriptToolbox ScriptToolbox { get; private set; }
+        internal GameToolbox GameToolbox { get; private set; }
 
         GameObject _selected;
+        bool _projectLoaded = false;
         #endregion
 
         #region Initialization
+
+        bool _showSelectPath;
 
         public GameEditor()
         {
@@ -117,16 +119,16 @@ namespace Unify2D
 
         void InitializeToolBoxes()
         {
-            _scriptToolbox = new ScriptToolbox();
-            _inspectorToolbox = new InspectorToolbox();
-            _gameToolbox = new GameToolbox();
+            ScriptToolbox = new ScriptToolbox();
+            InspectorToolbox = new InspectorToolbox();
+            GameToolbox = new GameToolbox();
 
             _toolboxes.Add(new AssetsToolbox());
             _toolboxes.Add(new HierarchyToolbox());
 
-            _toolboxes.Add(_scriptToolbox);
-            _toolboxes.Add(_inspectorToolbox);
-            _toolboxes.Add(_gameToolbox);
+            _toolboxes.Add(ScriptToolbox);
+            _toolboxes.Add(InspectorToolbox);
+            _toolboxes.Add(GameToolbox);
 
             foreach (var item in _toolboxes)
             {
@@ -148,6 +150,10 @@ namespace Unify2D
         protected override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+
+            if (GameToolbox == null) return;
+
+            Selection.Update(gameTime);
 
             foreach (var item in _toolboxes)
             {
@@ -193,7 +199,7 @@ namespace Unify2D
             {
                 if (asset.AssetContent is ScriptAssetContent script)
                 {
-                    _scriptToolbox.SetObject(asset);
+                    ScriptToolbox.SetObject(asset);
                     return;
                 }
             }
@@ -201,16 +207,16 @@ namespace Unify2D
             if (go is GameObject)
                 _selected = go as GameObject;
 
-            if (_inspectorToolbox != null)
-                _inspectorToolbox.SetObject(go);
+            if (InspectorToolbox != null)
+                InspectorToolbox.SetObject(go);
         }
 
         public void UnSelectObject()
         {
             _selected = null;
 
-            if (_inspectorToolbox != null)
-                _inspectorToolbox.SetObject(null);
+            if (InspectorToolbox != null)
+                InspectorToolbox.SetObject(null);
         }
 
         #endregion
@@ -229,6 +235,81 @@ namespace Unify2D
             _gameEditorUI.HidePopup();
         }
 
+        private void DrawMainMenuBarUI()
+        {
+            if (ImGui.BeginMainMenuBar())
+            {
+                if (ImGui.BeginMenu("File"))
+                {
+                    if (ImGui.MenuItem("Load project"))
+                    {
+                        _showSelectPath = true;
+                    }
+                    if (ImGui.MenuItem("Show Explorer"))
+                    {
+                        Process.Start("explorer.exe", _settings.Data.CurrentProjectPath);
+                    }
+                    if (ImGui.MenuItem("Build"))
+                        Build();
+                    if (ImGui.MenuItem("Save"))
+                    {
+                        Save();
+                    }
+                    if (ImGui.MenuItem("Load"))
+                    {
+                        LoadScene();
+                    }
+                    ImGui.EndMenu();
+                }
+
+                ImGui.EndMainMenuBar();
+            }
+        }
+
+        void Popups()
+        {
+            if (_showSelectPath)
+            {
+                ImGui.OpenPopup("open-project");
+                _showSelectPath = false;
+            }
+
+            if (ImGui.BeginPopupModal("open-project"))
+            {
+                var picker = FilePicker.GetFolderPicker(this, ProjectPath);
+                picker.RootFolder = "C:\\";
+                picker.OnlyAllowFolders = true;
+                if (picker.Draw())
+                {
+                    _settings.Data.CurrentProjectPath = picker.SelectedFile;
+                    LoadScene();
+                    foreach (var item in _toolboxes)
+                    {
+                        item.Reset();
+                    }
+
+                    FilePicker.RemoveFilePicker(this);
+                }
+                ImGui.EndPopup();
+            }
+
+            if (_popups.Count > 0)
+            {
+                _popups.Peek().Draw(this);
+            }
+        }
+
+
+        public bool IsMouseInGameWindow()
+        {
+            return GameToolbox.IsMouseInWindow();
+        }
+
+        public Vector2 GetWorldMousePosition()
+        {
+            return GameToolbox.GetMousePosition();
+        }
+
         public void Build()
         {
             GameBuilder builder = new GameBuilder();
@@ -237,6 +318,44 @@ namespace Unify2D
         }
 
         #endregion
+        void Save()
+        {
+            JsonSerializerSettings settings = new JsonSerializerSettings();
+            settings.TypeNameHandling = TypeNameHandling.Auto;
+            settings.Formatting = Formatting.Indented;
+            string text = JsonConvert.SerializeObject(_core.GameObjects, settings);
+
+            File.WriteAllText(Path.Combine(ProjectPath, "./test.scene"), text);
+        }
+
+        public void LoadScene()
+        {
+            _projectLoaded = true;
+            InitializeToolBoxes();
+
+            _core.GameObjects.Clear();
+
+            Selection.SelectObject(null);
+
+            List<GameObject> gameObjects = null;
+            try
+            {
+                string text = File.ReadAllText(Path.Combine(ProjectPath, "./test.scene"));
+                JsonSerializerSettings settings = new JsonSerializerSettings();
+                settings.TypeNameHandling = TypeNameHandling.Auto;
+                gameObjects = JsonConvert.DeserializeObject<List<GameObject>>(text, settings);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            if (gameObjects != null)
+            {
+                Content.RootDirectory = ProjectPath;
+                _core.LoadScene(this, gameObjects);
+            }
+        }
 
         protected override void UnloadContent()
         {

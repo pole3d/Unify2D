@@ -62,6 +62,13 @@ namespace Unify2D.Core
                 item.Draw();
             }
         }
+        internal void DrawGizmo()
+        {
+            foreach (var item in _components)
+            {
+                item.DrawGizmo();
+            }
+        }
 
         public T AddComponent<T>() where T : Component, new()
         {
