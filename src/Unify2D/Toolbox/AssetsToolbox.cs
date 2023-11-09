@@ -24,6 +24,7 @@ namespace Unify2D.Toolbox
         bool[] _selected;
         List<Asset> _assets = new List<Asset>();
         GameEditor _editor;
+        public static TreeNode selectedNode;
 
         int treeFilesIndex = 0;
 
@@ -115,9 +116,9 @@ namespace Unify2D.Toolbox
                 }
                 if (ImGui.BeginMenu("Delete"))
                 {
-                    if (ImGui.MenuItem("Delete Folder 1", null))
+                    if (ImGui.MenuItem("Delete Folder", null))
                     {
-                        DeleteFolder(1, "New Folder0");
+                        DeleteFolder(GetSelectedNode().nodeIndex, GetSelectedNode().path);
                     }
                     ImGui.EndMenu();
                 }
@@ -145,14 +146,21 @@ namespace Unify2D.Toolbox
 
             ImGui.End();
         }
+
+        public static void SetSelectedNode(TreeNode node)
+        {
+            selectedNode = node;
+        }
+        public static TreeNode GetSelectedNode() 
+        { return selectedNode; }
         public void CreateDirectoryTreeNode()
         {
             Console.WriteLine(_editor.AssetsPath);
             string currentPath = Directory.GetCurrentDirectory();
             Console.WriteLine(currentPath);
             CheckNewFolder(0);
-            
         }
+
         
         public void CheckNewFolder(int newIndex)
         {
@@ -171,8 +179,12 @@ namespace Unify2D.Toolbox
         public void DeleteFolder(int index, string folderName)
         {
             if (treeFiles[index].type != "Folder")
+            {
+                Console.WriteLine("La node n'est pas un folder");
                 return;
+            }
 
+            Console.Write("La node est un folder");
             string folderPath = Path.Combine(_editor.AssetsPath, folderName);
             treeFiles.RemoveAt(index);
             if (Directory.Exists(folderPath))
@@ -208,10 +220,14 @@ namespace Unify2D.Toolbox
             {
                 if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
                 {
-                    node.isSelected = !node.isSelected;
-                    if (node.isSelected)
+                    Console.Write(ImGui.IsItemClicked());
+                    TreeNode selectedNode = allNodes[node.nodeIndex -1];
+                    selectedNode.isSelected = !selectedNode.isSelected;
+                  
+                    if (selectedNode.isSelected)
                     {
-                        Console.WriteLine(node.name + " is selected, her index is "+ node.nodeIndex);
+                        Console.WriteLine(selectedNode.name + " is selected, her index is "+ selectedNode.nodeIndex);
+                        SetSelectedNode(selectedNode);
                     }
                 }
 
