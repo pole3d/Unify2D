@@ -321,14 +321,23 @@ namespace Unify2D
         {
             _settings.Save();
         }
-        
-        internal void SetSceneCore()
+
+        internal void SetSceneCore(GameCoreInfo sceneCoreInfo)
+        {
+            sceneCoreInfo.GameCore.Initialize(GraphicsDevice);
+            
+            _coreInfoScene = sceneCoreInfo;
+            _gameToolbox.Tag = sceneCoreInfo;
+            _hierarchyToolbox.Tag = sceneCoreInfo;
+            
+            GameCore.SetCurrent(sceneCoreInfo.GameCore);
+        }
 
         internal void OpenPrefab(PrefabAssetContent content)
         {
             GameCoreInfo prefabCoreInfo = new GameCoreInfo(
                 new GameCore(this),
-                content.Asset.Path);
+                content.Asset.FullPath);
             _coresInfo.Add(prefabCoreInfo);
             prefabCoreInfo.GameCore.Initialize(GraphicsDevice);
             

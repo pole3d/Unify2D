@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unify2D.Core;
 using Unify2D.Tools;
 
@@ -25,6 +21,7 @@ namespace Unify2D.Assets
         public override void OnDragDroppedInGame(GameEditor editor)
         {
             GameObject go = new GameObject() { Name = _asset.Name };
+            GameCore.Current.AddGameObject(go);
             //TODO : Add component to the gameObject
             editor.SelectObject(go);
         }

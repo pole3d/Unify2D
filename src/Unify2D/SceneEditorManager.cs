@@ -50,7 +50,9 @@ namespace Unify2D
             {
                 _gameEditor.SelectObject(null);
                 _gameEditor.GameCoresInfo.Remove(_gameEditor.GameCoreInfoScene);
-                _gameEditor.GameCore.LoadScene(_gameEditor, gameObjects);
+                _gameEditor.SetSceneCore(new GameCoreInfo(
+                    new GameCore(_gameEditor, gameObjects),
+                    $"./{sceneName}.scene"));
             }
         }
 
