@@ -63,6 +63,11 @@ namespace Unify2D.Toolbox
             _smallGridTexture.SetData(new Color[] { new Color(1, 1, 1, .1f) });
         }
 
+        public override void Update(GameTime gameTime)
+        {
+            Selection.Update(gameTime);
+        }
+
 
         public override void Draw()
         {

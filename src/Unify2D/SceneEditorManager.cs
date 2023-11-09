@@ -60,7 +60,7 @@ namespace Unify2D
         {
             _gameEditor.GameCore.GameObjects.Clear();
 
-            _gameEditor.SelectObject(null);
+            Selection.UnSelectObject();
         }
     }
 }
