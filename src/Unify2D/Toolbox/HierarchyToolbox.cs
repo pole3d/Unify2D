@@ -10,6 +10,12 @@ namespace Unify2D.Toolbox
         {
             ImGui.Begin("Hierarchy");
 
+            if (ImGui.Button("Add GameObject", new System.Numerics.Vector2(-  1,0)))
+            {
+                GameObject go = new GameObject();
+                go.Name = "GameObject";
+            }
+
             GameObject goToDestroy = null;
 
             int i = 0;
@@ -18,10 +24,10 @@ namespace Unify2D.Toolbox
 
             foreach (var item in GameCore.Current.GameObjects)
             {
-                
+
                 ImGui.PushID(i++);
                 if (ImGui.Selectable($"{item.Name}", selectedGameObject == item))
-                {      
+                {
                     Selection.SelectObject(item);
                 }
 
@@ -39,7 +45,6 @@ namespace Unify2D.Toolbox
                 ImGui.PopID();
 
             }
-
 
             ImGui.End();
 
