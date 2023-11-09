@@ -106,8 +106,8 @@ namespace Unify2D
             ImGui.GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
 
             Window.AllowUserResizing = true;
-            _graphics.PreferredBackBufferWidth = 1920; // GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
-            _graphics.PreferredBackBufferHeight = 1080; // GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 60;
+            _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+            _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 60;
             _graphics.ApplyChanges();
 
             InitializeToolBoxes();
@@ -266,38 +266,38 @@ namespace Unify2D
             }
         }
 
-        void Popups()
-        {
-            if (_showSelectPath)
-            {
-                ImGui.OpenPopup("open-project");
-                _showSelectPath = false;
-            }
+        //void Popups()
+        //{
+        //    if (_showSelectPath)
+        //    {
+        //        ImGui.OpenPopup("open-project");
+        //        _showSelectPath = false;
+        //    }
 
-            if (ImGui.BeginPopupModal("open-project"))
-            {
-                var picker = FilePicker.GetFolderPicker(this, ProjectPath);
-                picker.RootFolder = "C:\\";
-                picker.OnlyAllowFolders = true;
-                if (picker.Draw())
-                {
-                    _settings.Data.CurrentProjectPath = picker.SelectedFile;
-                    LoadScene();
-                    foreach (var item in _toolboxes)
-                    {
-                        item.Reset();
-                    }
+        //    if (ImGui.BeginPopupModal("open-project"))
+        //    {
+        //        var picker = FilePicker.GetFolderPicker(this, ProjectPath);
+        //        picker.RootFolder = "C:\\";
+        //        picker.OnlyAllowFolders = true;
+        //        if (picker.Draw())
+        //        {
+        //            _settings.Data.CurrentProjectPath = picker.SelectedFile;
+        //            LoadScene();
+        //            foreach (var item in _toolboxes)
+        //            {
+        //                item.Reset();
+        //            }
 
-                    FilePicker.RemoveFilePicker(this);
-                }
-                ImGui.EndPopup();
-            }
+        //            FilePicker.RemoveFilePicker(this);
+        //        }
+        //        ImGui.EndPopup();
+        //    }
 
-            if (_popups.Count > 0)
-            {
-                _popups.Peek().Draw(this);
-            }
-        }
+        //    if (_popups.Count > 0)
+        //    {
+        //        _popups.Peek().Draw(this);
+        //    }
+        //}
 
 
         public bool IsMouseInGameWindow()
