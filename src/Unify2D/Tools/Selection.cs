@@ -32,8 +32,10 @@ namespace Unify2D
         }
         private static SelectedState _selectState = SelectedState.None;
 
-        private static object Selected 
+        public static object Selected 
         {
+            get { return _gameObject; }
+
             set
             {
                 _gameObject = value as GameObject;

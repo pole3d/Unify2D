@@ -91,6 +91,11 @@ namespace Unify2D.Core
 
         public void DestroyImmediate(GameObject item)
         {
+            if ( item.Parent != null )
+            {
+                item.Parent.Children.Remove(item);
+            }
+
             _gameObjects.Remove(item);
         }
 
@@ -118,7 +123,7 @@ namespace Unify2D.Core
 
             foreach (var item in _gameObjectsToDestroy)
             {
-                _gameObjects.Remove(item);
+                DestroyImmediate(item);
             }
 
             _gameObjectsToDestroy.Clear();

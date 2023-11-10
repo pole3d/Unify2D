@@ -11,9 +11,11 @@
         "BottomRight": "960, 540"
       }
     ],
-    "Position": "0, 0",
     "Name": "Camera",
-    "BoundingSize": "32, 32"
+    "Position": "0, 0",
+    "LocalPosition": "0, 0",
+    "BoundingSize": "32, 32",
+    "Children": null
   },
   {
     "_components": [
@@ -31,9 +33,11 @@
         "Text": "mpm"
       }
     ],
-    "Position": "130, 139",
     "Name": "ship_0007",
-    "BoundingSize": "32, 32"
+    "Position": "130, 139",
+    "LocalPosition": "130, 139",
+    "BoundingSize": "32, 32",
+    "Children": null
   },
   {
     "_components": [
@@ -45,9 +49,20 @@
         "Color": "255, 255, 255, 255"
       }
     ],
-    "Position": "436, 134",
     "Name": "ship_0009",
-    "BoundingSize": "32, 32"
+    "Position": "436, 134",
+    "LocalPosition": "436, 134",
+    "BoundingSize": "32, 32",
+    "Children": [
+      {
+        "_components": [],
+        "Name": "GameObject",
+        "Position": "436, 134",
+        "LocalPosition": "0, 0",
+        "BoundingSize": "30, 30",
+        "Children": null
+      }
+    ]
   },
   {
     "_components": [
@@ -59,9 +74,11 @@
         "Color": "255, 255, 255, 255"
       }
     ],
-    "Position": "497, 297",
     "Name": "ship_0010",
-    "BoundingSize": "32, 32"
+    "Position": "497, 297",
+    "LocalPosition": "497, 297",
+    "BoundingSize": "32, 32",
+    "Children": null
   },
   {
     "_components": [
@@ -73,9 +90,11 @@
         "Color": "255, 255, 255, 255"
       }
     ],
-    "Position": "-12, 225",
     "Name": "ship_0007",
-    "BoundingSize": "32, 32"
+    "Position": "-12, 225",
+    "LocalPosition": "-12, 225",
+    "BoundingSize": "32, 32",
+    "Children": null
   },
   {
     "_components": [
@@ -87,8 +106,18 @@
         "Color": "255, 255, 255, 255"
       }
     ],
-    "Position": "346, -17",
     "Name": "GameObject",
-    "BoundingSize": "32, 32"
+    "Position": "346, -17",
+    "LocalPosition": "346, -17",
+    "BoundingSize": "32, 32",
+    "Children": null
+  },
+  {
+    "_components": [],
+    "Name": "GameObject",
+    "Position": "436, 134",
+    "LocalPosition": "0, 0",
+    "BoundingSize": "30, 30",
+    "Children": null
   }
 ]

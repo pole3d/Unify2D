@@ -11,10 +11,20 @@ namespace Unify2D.Core
 {
     public class GameObject
     {
-        public Vector2 Position{ get; set; }
         public string Name { get; set; }
-        public Vector2 BoundingSize { get; set; } = new Vector2(30, 30);
 
+        public Vector2 Position { 
+            get { return GetParentPosition() + LocalPosition; } 
+            set { LocalPosition = value - GetParentPosition(); } 
+        }
+
+        public Vector2 LocalPosition { get; set; }
+
+        public Vector2 BoundingSize { get; set; } = new Vector2(30, 30);
+        public List<GameObject> Children { get; set; }
+
+        [JsonIgnore]
+        public GameObject Parent { get; set; }
 
         [JsonIgnore]
         public IEnumerable<Component> Components => _components;
@@ -38,7 +48,7 @@ namespace Unify2D.Core
             foreach (var component in _components)
             {
                 component.Initialize(this);
-                component.Load(game,this);
+                component.Load(game, this);
 
                 if (component is Renderer renderer)
                 {
@@ -46,9 +56,6 @@ namespace Unify2D.Core
                 }
             }
         }
-
-
-
 
         public bool HasRenderer()
         {
@@ -100,7 +107,7 @@ namespace Unify2D.Core
 
         public void RemoveComponent(Component item)
         {
-            if ( item is Renderer renderer)
+            if (item is Renderer renderer)
             {
                 _renderers.Remove(renderer);
             }
@@ -122,6 +129,29 @@ namespace Unify2D.Core
             }
 
             _components.Clear();
+        }
+
+        public void AddChild(GameObject child)
+        {
+            if (Children == null)
+                Children = new List<GameObject>();
+
+            child.Parent = this;
+            Children.Add(child);
+        }
+
+        Vector2 GetParentPosition()
+        {
+            Vector2 position = Vector2.Zero;
+            GameObject parent = Parent;
+
+            while (parent != null)
+            {
+                position += Parent.LocalPosition;
+                parent = parent.Parent;
+            }
+
+            return position;
         }
     }
 }
