@@ -75,12 +75,18 @@ namespace UnifyGame
         {
             Camera camera = Camera.Main;
 
-            GraphicsDevice.Clear(camera.Background);
+            if (camera != null)
+            {
+                GraphicsDevice.Clear(camera.Background);
 
-            _core.BeginDraw(camera.Matrix);
-            _core.Draw();
-            _core.EndDraw();
-
+                _core.BeginDraw(camera.Matrix);
+                _core.Draw();
+                _core.EndDraw();
+            }
+            else
+            {
+                GraphicsDevice.Clear(Color.Gray);
+            }
             // Call BeforeLayout first to set things up
             _imGuiRenderer.BeforeLayout(gameTime);
 
