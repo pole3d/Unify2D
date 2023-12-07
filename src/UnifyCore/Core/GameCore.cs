@@ -33,6 +33,7 @@ namespace Unify2D.Core
 
         public SpriteBatch SpriteBatch { get; private set; }
         public List<GameObject> GameObjects => _gameObjects;
+        public PhysicsSettings PhysicsSettings { get; private set; }
         public float DeltaTime { get; private set; }
 
         static GameCore s_current;
@@ -45,6 +46,14 @@ namespace Unify2D.Core
         {
             _game = game;
             _gameObjects = new List<GameObject>();
+        }
+
+        public void InitPhysics()
+        {
+            if (PhysicsSettings == null)
+                PhysicsSettings = new PhysicsSettings();
+
+            PhysicsSettings.Init();
         }
 
         internal void AddGameObject(GameObject go)
