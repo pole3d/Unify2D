@@ -9,10 +9,4 @@
     <ProjectReference Include="..\UnifyCore\UnifyCore.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="..\..\..\..\Unify2D_Projects\COOL_PROJECT\Assets\Class1.cs">
-      <Link>Class1.cs</Link>
-    </Compile>
-  </ItemGroup>
-
 </Project>

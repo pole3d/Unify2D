@@ -2,7 +2,9 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Unify2D.Core.Graphics;
@@ -19,6 +21,8 @@ namespace Unify2D.Core
         [JsonIgnore]
         public IEnumerable<Component> Components => _components;
 
+        private static JsonSerializerSettings s_serializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto }; //type name should be read
+        
         List<Renderer> _renderers;
 
         [JsonProperty]
@@ -44,10 +48,7 @@ namespace Unify2D.Core
                 }
             }
         }
-
-
-
-
+        
         public bool HasRenderer()
         {
             return _renderers.Count > 0;
@@ -120,6 +121,18 @@ namespace Unify2D.Core
             }
 
             _components.Clear();
+        }
+        
+        public static GameObject Instantiate(string originalAssetName)
+        {
+            // Get serialized text
+            string serializedText = System.IO.File.ReadAllText($"./Assets/{originalAssetName}.prefab");
+            // Create gameObject
+            GameObject go = JsonConvert.DeserializeObject<GameObject>(serializedText, s_serializerSettings);
+            go.Load(GameCore.Current.Game);
+            GameCore.Current.AddGameObject(go);
+            return go;
+            // TODO: LIST GAMEOBJECTS TO ADD
         }
     }
 }

@@ -22,7 +22,6 @@ namespace UnifyGame
 
         GameCore _core;
 
-
         public UnifyGame()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -76,7 +75,6 @@ namespace UnifyGame
         protected override void Update(GameTime gameTime)
         {
             _core.Update(gameTime);
-
         }
 
         protected override void Draw(GameTime gameTime)

@@ -21,6 +21,7 @@ namespace Unify2D.Toolbox
             if (ImGui.Button("Add GameObject", new System.Numerics.Vector2(-  1,0)))
             {
                 GameObject go = new GameObject();
+                GameCore.Current.AddGameObject(go);
                 go.Name = "GameObject";
             }
 
