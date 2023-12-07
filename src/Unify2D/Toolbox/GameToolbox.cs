@@ -20,7 +20,7 @@ namespace Unify2D.Toolbox
     internal class GameToolbox : Toolbox
     {
         readonly Num.Vector2 _gameResolution = new Num.Vector2(1920, 1080);
-        readonly Num.Vector2 _bottomOffset   = new Num.Vector2(0, 20);
+        readonly Num.Vector2 _bottomOffset = new Num.Vector2(0, 20);
 
         public readonly Num.Vector2 WindowOffset = new Num.Vector2(8, 27);
 
@@ -48,7 +48,7 @@ namespace Unify2D.Toolbox
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
-            
+
             _sceneRenderTarget = new RenderTarget2D(editor.GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
 
             _gameCamera = new CameraEditor(new Vector2(_gameResolution.X, _gameResolution.Y), new Vector2(_gameResolution.X / 2, _gameResolution.Y / 2));
@@ -84,15 +84,12 @@ namespace Unify2D.Toolbox
 
             // Declare style
             ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Num.Vector2.Zero);
-            
+
             // Bind and give pointer to Scene render texture
             ImGui.Image(_renderTargetId, ImGui.GetContentRegionAvail() - _bottomOffset);
-            
+
             // Circle Gizmo around selected Game Object
             Selection.CircleSelected();
-
-            //Draw Component Gizmos for selected Game Object
-            _editor.DrawComponentGizmoSelected();
 
             #region Drag & Drop Asset
             if (ImGui.BeginDragDropTarget())
@@ -165,7 +162,7 @@ namespace Unify2D.Toolbox
                 lowStep = step;
 
                 step *= multiple;
-                
+
                 rowX /= multiple;
                 rowY /= multiple;
             }
@@ -190,7 +187,7 @@ namespace Unify2D.Toolbox
         {
             for (int x = 0; x <= rowX; x++)
             {
-                if(ignore == 1 || (x + startX) % ignore != 0)
+                if (ignore == 1 || (x + startX) % ignore != 0)
                 {
                     Rectangle rectangle = new Rectangle(((startX + x) * step) - (width / 2), (startY - 1) * step, width, viewY + step * 2);
                     GameCore.Current.SpriteBatch.Draw(texture, rectangle, Color.Gray);
@@ -212,7 +209,7 @@ namespace Unify2D.Toolbox
             MouseState mouseState = Mouse.GetState();
 
             #region Move Camera
-            
+
             if (mouseState.RightButton == ButtonState.Pressed | mouseState.MiddleButton == ButtonState.Pressed)
             {
                 // si on viens de clicker et qu'on est dans la fenêtre
@@ -240,7 +237,7 @@ namespace Unify2D.Toolbox
 
             #region Zoom Camera
 
-            if (mouseState.ScrollWheelValue != _lastMouseSroll & ! Keyboard.GetState().IsKeyDown(Keys.LeftControl))
+            if (mouseState.ScrollWheelValue != _lastMouseSroll & !Keyboard.GetState().IsKeyDown(Keys.LeftControl))
             {
                 if (IsMouseInWindow())
                 {
@@ -325,7 +322,7 @@ namespace Unify2D.Toolbox
 
             uiPos /= _gameResolution;
             uiPos *= Size;
-           
+
             return Position + WindowOffset + uiPos;
         }
 
