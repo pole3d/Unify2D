@@ -1,7 +1,6 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -10,17 +9,13 @@ using System.IO;
 using Unify2D.Assets;
 using Unify2D.Builder;
 using Unify2D.Core;
-using Unify2D.Core.Graphics;
-using Unify2D.ImGuiRenderer;
 using Unify2D.Toolbox;
 using Unify2D.Toolbox.Popup;
 using Unify2D.Tools;
-using Num = System.Numerics;
 
 namespace Unify2D
 {
     /// <summary>
-    /// The main editor of Unify2D
     /// The main class of Unify2D
     /// It represents the whole editor window 
     /// This class inherits from Game which creates the Game window, handles the gameloop, the assets...
@@ -73,16 +68,6 @@ namespace Unify2D
 
         #endregion
 
-        SelectedState _selectState;
-        bool _showSelectPath;
-
-        enum SelectedState
-        {
-            None,
-            Select,
-            Drag
-        }
-
         #region Initialization
 
         public GameEditor()
@@ -102,8 +87,6 @@ namespace Unify2D
         {
             _core = new GameCore(this);
             GameCore.SetCurrent(_core);
-
-            _core.InitPhysics();
 
             _settings = new GameEditorSettings();
             _settings.Load(this);
@@ -229,78 +212,6 @@ namespace Unify2D
             builder.StartBuild();
         }
 
-        public void CircleSelected()
-        {
-            if (_selected == null)
-                return;
-
-            var p0 = ImGui.GetItemRectMin();
-            var p1 = ImGui.GetItemRectMax();
-
-            var drawList = ImGui.GetWindowDrawList();
-            drawList.PushClipRect(p0, p1);
-
-            uint color = ToolsUI.ToColor32(50, 255, 50, 255);
-
-            if (_selectState == SelectedState.Drag)
-            {
-                color = ToolsUI.ToColor32(255, 255, 50, 255);
-            }
-
-            drawList.AddCircle(_gameToolbox.WorldToUI(_selected.Position),
-                      8, color, 64, 3);
-            drawList.PopClipRect();
-        }
-
-        public void DrawComponentGizmoSelected()
-        {
-            if (_selected == null)
-                return;
-
-            var p0 = ImGui.GetItemRectMin();
-            var p1 = ImGui.GetItemRectMax();
-            var drawList = ImGui.GetWindowDrawList();
-            drawList.PushClipRect(p0, p1);
-
-            _selected.DrawComponentGizmosSelected(drawList);
-        }
-
-
-        void Save()
-        {
-            JsonSerializerSettings settings = new JsonSerializerSettings();
-            settings.TypeNameHandling = TypeNameHandling.Auto;
-            settings.Formatting = Formatting.Indented;
-            string text = JsonConvert.SerializeObject(_core.GameObjects, settings);
-
-            File.WriteAllText(Path.Combine(ProjectPath, "./test.scene"), text);
-        }
-
-        void Load()
-        {
-            _core.GameObjects.Clear();
-
-            SelectObject(null);
-
-            List<GameObject> gameObjects = null;
-            try
-            {
-                string text = File.ReadAllText(Path.Combine(ProjectPath, "./test.scene"));
-                JsonSerializerSettings settings = new JsonSerializerSettings();
-                settings.TypeNameHandling = TypeNameHandling.Auto;
-                gameObjects = JsonConvert.DeserializeObject<List<GameObject>>(text, settings);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            if (gameObjects != null)
-            {
-                Content.RootDirectory = ProjectPath;
-                _core.LoadScene(this, gameObjects);
-            }
-        }
         #endregion
 
         protected override void UnloadContent()

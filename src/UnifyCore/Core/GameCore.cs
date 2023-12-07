@@ -1,5 +1,4 @@
-﻿using Genbox.VelcroPhysics.Dynamics;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -34,9 +33,6 @@ namespace Unify2D.Core
 
         public SpriteBatch SpriteBatch { get; private set; }
         public List<GameObject> GameObjects => _gameObjects;
-        public GameTime GameTime => _gameTime;
-        private GameTime _gameTime;
-        public PhysicsSettings PhysicsSettings { get; private set; }
         public float DeltaTime { get; private set; }
 
         static GameCore s_current;
@@ -55,16 +51,6 @@ namespace Unify2D.Core
         {
             _gameObjects.Add(go);
         }
-
-        public void InitPhysics()
-        {
-            if (PhysicsSettings == null)
-                PhysicsSettings = new PhysicsSettings();
-
-            PhysicsSettings.Init();
-        }
-
-        BlendState _blendState;
 
         public void BeginDraw()
         {
@@ -106,7 +92,7 @@ namespace Unify2D.Core
 
         public void DestroyImmediate(GameObject item)
         {
-            if ( item.Parent != null )
+            if (item.Parent != null)
             {
                 item.Parent.Children.Remove(item);
             }
@@ -119,7 +105,7 @@ namespace Unify2D.Core
             SpriteBatch = new SpriteBatch(graphicsDevice);
         }
 
-        public void LoadScene(Game game,  List<GameObject> gameObjects)
+        public void LoadScene(Game game, List<GameObject> gameObjects)
         {
             foreach (var item in gameObjects)
             {
@@ -129,9 +115,6 @@ namespace Unify2D.Core
 
         public void Update(GameTime gameTime)
         {
-            if (_gameTime != gameTime)
-                _gameTime = gameTime;
-
             DeltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             foreach (var item in _gameObjects)
