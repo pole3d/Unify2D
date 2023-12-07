@@ -1,4 +1,6 @@
 ﻿using ImGuiNET;
+using Genbox.VelcroPhysics.Dynamics;
+using Genbox.VelcroPhysics.Factories;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;

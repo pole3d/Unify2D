@@ -1,10 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Genbox.VelcroPhysics.Dynamics;
+using Genbox.VelcroPhysics.Factories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Unify2D.Physics;
 
 namespace Unify2D.Core
 {
@@ -31,7 +34,8 @@ namespace Unify2D.Core
         public Game Game => _game;
 
         public SpriteBatch SpriteBatch { get; private set; }
-        public List<GameObject> GameObjects => _gameObjects; 
+        public List<GameObject> GameObjects => _gameObjects;
+        public PhysicsSettings PhysicsSettings { get; private set; }
         public float DeltaTime { get; private set; }
 
         static GameCore s_current;
@@ -49,6 +53,13 @@ namespace Unify2D.Core
         internal void AddGameObject(GameObject go)
         {
             _gameObjects.Add(go);
+        }
+        public void InitPhysics()
+        {
+            if (PhysicsSettings == null)
+                PhysicsSettings = new PhysicsSettings();
+
+            PhysicsSettings.Init();
         }
 
         public void BeginDraw()
@@ -97,6 +108,8 @@ namespace Unify2D.Core
         public void Initialize(GraphicsDevice graphicsDevice)
         {
             SpriteBatch = new SpriteBatch(graphicsDevice);
+
+            InitPhysics();
         }
 
         public void LoadScene(Game game,  List<GameObject> gameObjects)
@@ -120,6 +133,8 @@ namespace Unify2D.Core
             {
                 _gameObjects.Remove(item);
             }
+
+            PhysicsSettings.World.Step(DeltaTime);
 
             _gameObjectsToDestroy.Clear();
         }
