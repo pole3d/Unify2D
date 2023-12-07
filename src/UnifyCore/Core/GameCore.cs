@@ -46,7 +46,7 @@ namespace Unify2D.Core
             _gameObjects = new List<GameObject>();
         }
 
-        internal void AddGameObject(GameObject go)
+        internal void AddRootGameObject(GameObject go)
         {
             _gameObjects.Add(go);
         }
@@ -108,7 +108,11 @@ namespace Unify2D.Core
         {
             foreach (var item in gameObjects)
             {
+                AddRootGameObject(item);
                 item.Load(game);
+
+                if ( item.UID > GameObject.s_maxID)
+                    GameObject.s_maxID = item.UID + 1; 
             }
         }
 
@@ -127,6 +131,14 @@ namespace Unify2D.Core
             }
 
             _gameObjectsToDestroy.Clear();
+        }
+
+        internal void RemoveFromRoot(GameObject child)
+        {
+            if (child.Parent != null)
+                return;
+
+            _gameObjects.Remove(child);
         }
     }
 }
