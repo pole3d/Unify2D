@@ -56,7 +56,7 @@ namespace Unify2D.Physics
 
             if (boxCol != null)
             {
-                m_velcroBody = BodyFactory.CreateRectangle(PhysicsSettings.World, boxCol.Width * _gameObject.Scale.X, boxCol.Height * _gameObject.Scale.Y, 1, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, 0, m_type);
+                m_velcroBody = BodyFactory.CreateRectangle(PhysicsSettings.World, boxCol.Width * _gameObject.Scale.X, boxCol.Height * _gameObject.Scale.Y, 1, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, _gameObject.Rotation, m_type);
                 
             }
             else if (cirCol!= null)
@@ -65,14 +65,13 @@ namespace Unify2D.Physics
             }
             else if (capsuleCol != null)
             {
-                m_velcroBody = BodyFactory.CreateCapsule(PhysicsSettings.World, capsuleCol.Height * _gameObject.Scale.Y, capsuleCol.Radius * _gameObject.Scale.X, 1, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, 0, m_type);
+                m_velcroBody = BodyFactory.CreateCapsule(PhysicsSettings.World, capsuleCol.Height * _gameObject.Scale.Y, capsuleCol.Radius * _gameObject.Scale.X, 1, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, _gameObject.Rotation, m_type);
             }
             else 
             {
                 m_velcroBody = BodyFactory.CreateBody(PhysicsSettings.World, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, _gameObject.Rotation, m_type);
             }
-
-            m_velcroBody.Rotation = _gameObject.Rotation;
+;
             m_velcroBody.Mass = m_mass;
             m_velcroBody.LinearDamping = m_linearDamper;
             m_velcroBody.GravityScale = m_gravityScale;

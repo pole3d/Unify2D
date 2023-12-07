@@ -27,7 +27,7 @@ namespace UnifyCore.Core.Physics
 
             if (rb == null)
             {
-                staticBody = BodyFactory.CreateCapsule(PhysicsSettings.World, m_height * _gameObject.Scale.Y, m_radius * _gameObject.Scale.X, 1, _gameObject.Position, 0, BodyType.Static);
+                staticBody = BodyFactory.CreateCapsule(PhysicsSettings.World, m_height * _gameObject.Scale.Y, m_radius * _gameObject.Scale.X, 1, _gameObject.Position, _gameObject.Rotation, BodyType.Static);
             }
         }
 
