@@ -87,6 +87,13 @@ namespace Unify2D.Core
                 item.Draw();
             }
         }
+        public void DrawGizmo()
+        {
+            foreach (var item in _gameObjects)
+            {
+                item.DrawGizmo();
+            }
+        }
         public void EndDraw()
         {
             SpriteBatch.End();
@@ -99,6 +106,11 @@ namespace Unify2D.Core
 
         public void DestroyImmediate(GameObject item)
         {
+            if ( item.Parent != null )
+            {
+                item.Parent.Children.Remove(item);
+            }
+
             _gameObjects.Remove(item);
         }
 
@@ -129,7 +141,7 @@ namespace Unify2D.Core
 
             foreach (var item in _gameObjectsToDestroy)
             {
-                _gameObjects.Remove(item);
+                DestroyImmediate(item);
             }
 
             PhysicsSettings.World.Step(DeltaTime);

@@ -5,21 +5,22 @@ using Vector2 = Microsoft.Xna.Framework.Vector2;
 
 namespace GameAssembly
 {
-
-
-
+       
     class TestA : Component
-    {
+    {         
+  
+          
+
         public float Speed { get; set; }
-        public float Speed7 { get; set; }
+        public float Speed7 { get; set; }  
         public string Text { get; set; }
         public override void Update(GameCore game)
-        {
-            Vector2 direction = new Vector2();
+        {  
+            Vector2 direction = new Vector2();  
 
-            if (Input.Keyboard.GetState().IsKeyDown(Input.Keys.Up))
+            if (Input.Keyboard.GetState().IsKeyDown(Input.Keys.Up)) 
             {
-                direction -= Vector2.UnitY;
+                direction -= Vector2.UnitY;    
             }
             if (Input.Keyboard.GetState().IsKeyDown(Input.Keys.Down))
             {
@@ -27,7 +28,7 @@ namespace GameAssembly
             }
             if (Input.Keyboard.GetState().IsKeyDown(Input.Keys.Right))
             {
-                direction += Vector2.UnitX;
+                direction += Vector2.UnitX;  
             }
             if (Input.Keyboard.GetState().IsKeyDown(Input.Keys.Left))
             {

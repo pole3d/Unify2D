@@ -2,105 +2,122 @@
   {
     "_components": [
       {
-        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
-        "_asset": {
-          "_name": "/Cube100100_2.png"
-        },
-        "Color": "255, 255, 255, 255",
-        "LayerDepth": 0.0
-      },
-      {
-        "$type": "UnifyCore.Core.Physics.BoxCollider, UnifyCore",
-        "Width": 1.0,
-        "Height": 1.0
-      },
-      {
-        "$type": "Unify2D.Physics.Rigidbody, UnifyCore",
-        "Type": 2,
-        "Mass": 1.0,
-        "LinearDamper": 0.1,
-        "GravityScale": 1.0,
-        "IsKinematic": false
+        "$type": "Unify2D.Core.Graphics.Camera, UnifyCore",
+        "Background": "100, 149, 237, 255",
+        "ZoomLevel": 1.0,
+        "Rotation": 0.0,
+        "Viewport": "1920, 1080",
+        "TopLeft": "-960, -540",
+        "BottomRight": "960, 540"
       }
     ],
-    "Position": "859, 62",
-    "Rotation": 0.0,
-    "Scale": "1, 1",
-    "Name": "Cube100100_2",
-    "BoundingSize": "100, 100"
+    "Name": "Camera",
+    "Position": "0, 0",
+    "LocalPosition": "0, 0",
+    "BoundingSize": "32, 32",
+    "Children": null
   },
   {
     "_components": [
       {
         "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
         "_asset": {
-          "_name": "/Cube100100_2.png"
+          "_name": "\\ship_0007.png"
         },
-        "Color": "255, 255, 255, 255",
-        "LayerDepth": 0.0
+        "Color": "255, 255, 255, 255"
       },
       {
-        "$type": "UnifyCore.Core.Physics.BoxCollider, UnifyCore",
-        "Width": 1.0,
-        "Height": 1.0
+        "$type": "GameAssembly.TestA, GameAssembly",
+        "Speed": 200.0,
+        "Speed7": 0.0,
+        "Text": "mpm"
       }
     ],
-    "Position": "1000, 610",
-    "Rotation": 0.0,
-    "Scale": "1, 1",
-    "Name": "Cube100100_2",
-    "BoundingSize": "100, 100"
+    "Name": "ship_0007",
+    "Position": "130, 139",
+    "LocalPosition": "130, 139",
+    "BoundingSize": "32, 32",
+    "Children": null
   },
   {
     "_components": [
       {
         "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
         "_asset": {
-          "_name": "/Cube100100_2.png"
+          "_name": "/ship_0009.png"
         },
-        "Color": "255, 255, 255, 255",
-        "LayerDepth": 0.0
-      },
-      {
-        "$type": "UnifyCore.Core.Physics.BoxCollider, UnifyCore",
-        "Width": 1.0,
-        "Height": 1.0
-      },
-      {
-        "$type": "Unify2D.Physics.Rigidbody, UnifyCore",
-        "Type": 2,
-        "Mass": 1.0,
-        "LinearDamper": 0.1,
-        "GravityScale": 1.0,
-        "IsKinematic": false
+        "Color": "255, 255, 255, 255"
       }
     ],
-    "Position": "1008, 215",
-    "Rotation": 0.0,
-    "Scale": "5, 1",
-    "Name": "Cube100100_2",
-    "BoundingSize": "100, 100"
+    "Name": "ship_0009",
+    "Position": "436, 134",
+    "LocalPosition": "436, 134",
+    "BoundingSize": "32, 32",
+    "Children": [
+      {
+        "_components": [],
+        "Name": "GameObject",
+        "Position": "436, 134",
+        "LocalPosition": "0, 0",
+        "BoundingSize": "30, 30",
+        "Children": null
+      }
+    ]
   },
   {
     "_components": [
       {
         "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
         "_asset": {
-          "_name": "/Cube100100.png"
+          "_name": "/ship_0010.png"
         },
-        "Color": "255, 255, 255, 255",
-        "LayerDepth": 0.0
-      },
-      {
-        "$type": "UnifyCore.Core.Physics.BoxCollider, UnifyCore",
-        "Width": 1.0,
-        "Height": 1.0
+        "Color": "255, 255, 255, 255"
       }
     ],
-    "Position": "731, 600",
-    "Rotation": 0.0,
-    "Scale": "1, 1",
-    "Name": "Cube100100",
-    "BoundingSize": "100, 100"
+    "Name": "ship_0010",
+    "Position": "497, 297",
+    "LocalPosition": "497, 297",
+    "BoundingSize": "32, 32",
+    "Children": null
+  },
+  {
+    "_components": [
+      {
+        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
+        "_asset": {
+          "_name": "/ship_0007.png"
+        },
+        "Color": "255, 255, 255, 255"
+      }
+    ],
+    "Name": "ship_0007",
+    "Position": "-12, 225",
+    "LocalPosition": "-12, 225",
+    "BoundingSize": "32, 32",
+    "Children": null
+  },
+  {
+    "_components": [
+      {
+        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
+        "_asset": {
+          "_name": "/ship_0004.png"
+        },
+        "Color": "255, 255, 255, 255"
+      }
+    ],
+    "Name": "GameObject",
+    "Position": "346, -17",
+    "LocalPosition": "346, -17",
+    "BoundingSize": "32, 32",
+    "Children": null
+  },
+  {
+    "_components": [],
+    "Name": "GameObject",
+    "Position": "436, 134",
+    "LocalPosition": "0, 0",
+    "BoundingSize": "30, 30",
+    "Children": null
   }
 ]

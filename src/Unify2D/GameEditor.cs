@@ -49,12 +49,14 @@ namespace Unify2D
         public GameEditorSettings Settings => _settings;
         public Scripting.Scripting Scripting => _scripting;
         public ImGuiRenderer.Renderer GuiRenderer => _imGuiRenderer;
-        public InspectorToolbox Inspector => _inspectorToolbox;
 
         public GameObject Selected => _selected;
 
         public SceneEditorManager SceneEditorManager => _sceneEditorManager;
 
+        internal InspectorToolbox InspectorToolbox { get; private set; }
+        internal ScriptToolbox ScriptToolbox { get; private set; }
+        internal GameToolbox GameToolbox { get; private set; }
 
         #endregion
 
@@ -66,14 +68,9 @@ namespace Unify2D
         Scripting.Scripting _scripting;
         GameEditorSettings _settings;
         SceneEditorManager _sceneEditorManager;
-
-        Stack<PopupBase> _popups = new Stack<PopupBase>();
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
-        InspectorToolbox _inspectorToolbox;
-        ScriptToolbox _scriptToolbox;
-        GameToolbox _gameToolbox;
-
         GameObject _selected;
+
         #endregion
 
         SelectedState _selectState;
@@ -121,8 +118,8 @@ namespace Unify2D
             ImGui.GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
 
             Window.AllowUserResizing = true;
-            _graphics.PreferredBackBufferWidth = 1920; // GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
-            _graphics.PreferredBackBufferHeight = 1080; // GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 60;
+            _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+            _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 60;
             _graphics.ApplyChanges();
 
             InitializeToolBoxes();
@@ -134,16 +131,16 @@ namespace Unify2D
 
         void InitializeToolBoxes()
         {
-            _scriptToolbox = new ScriptToolbox();
-            _inspectorToolbox = new InspectorToolbox();
-            _gameToolbox = new GameToolbox();
+            ScriptToolbox = new ScriptToolbox();
+            InspectorToolbox = new InspectorToolbox();
+            GameToolbox = new GameToolbox();
 
             _toolboxes.Add(new AssetsToolbox());
             _toolboxes.Add(new HierarchyToolbox());
 
-            _toolboxes.Add(_scriptToolbox);
-            _toolboxes.Add(_inspectorToolbox);
-            _toolboxes.Add(_gameToolbox);
+            _toolboxes.Add(ScriptToolbox);
+            _toolboxes.Add(InspectorToolbox);
+            _toolboxes.Add(GameToolbox);
 
             foreach (var item in _toolboxes)
             {
@@ -168,7 +165,7 @@ namespace Unify2D
 
             foreach (var item in _toolboxes)
             {
-                item.Update();
+                item.Update(gameTime);
             }
         }
 
@@ -202,38 +199,6 @@ namespace Unify2D
 
         #endregion
 
-        #region Selection
-
-        public void SelectObject(object go)
-        {
-            if (go is Asset asset)
-            {
-                if (asset.AssetContent is ScriptAssetContent script)
-                {
-                    _scriptToolbox.SetObject(asset);
-                    return;
-                }
-            }
-
-            if (go is GameObject)
-                _selected = go as GameObject;
-
-            if (_inspectorToolbox != null)
-                _inspectorToolbox.SetObject(go);
-        }
-
-        public void UnSelectObject()
-        {
-            _selected = null;
-
-            if (_inspectorToolbox != null)
-                _inspectorToolbox.SetObject(null);
-        }
-
-        #endregion
-
-
-
         #region Tools
 
         public void ShowPopup(PopupBase popup)
@@ -244,6 +209,17 @@ namespace Unify2D
         public void HidePopup()
         {
             _gameEditorUI.HidePopup();
+        }
+
+
+        public bool IsMouseInGameWindow()
+        {
+            return GameToolbox.IsMouseInWindow();
+        }
+
+        public Vector2 GetWorldMousePosition()
+        {
+            return GameToolbox.GetMousePosition();
         }
 
         public void Build()

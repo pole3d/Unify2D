@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -164,6 +165,11 @@ namespace Unify2D.Toolbox
             PropertyInfo[] properties = component.GetType().GetProperties();
             foreach (PropertyInfo property in properties)
             {
+                if (Attribute.IsDefined(property, typeof(JsonIgnoreAttribute)))
+                {
+                    continue;
+                }
+
                 try
                 {
                     _propertyViewers[property.PropertyType].Draw(property, component);
