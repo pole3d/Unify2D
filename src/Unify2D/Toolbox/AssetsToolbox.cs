@@ -112,8 +112,11 @@ namespace Unify2D.Toolbox
                         CreateDirectoryTreeNode();
                     }
 
+                    //Appeared on merge and causes compilation errors, please remove if outdated   -Thomas
+                    /*
                     Selection.SelectObject(_assets[n]);
                     _selected[n] = !_selected[n];
+                    */
                     ImGui.EndMenu();
                 }
                 if (ImGui.BeginMenu("Delete"))

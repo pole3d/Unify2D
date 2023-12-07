@@ -20,6 +20,9 @@ namespace Unify2D.Core
 
         public Vector2 LocalPosition { get; set; }
 
+        public float Rotation { get; set; }
+        public Vector2 Scale { get; set; } = new Vector2(1, 1);
+
         public Vector2 BoundingSize { get; set; } = new Vector2(30, 30);
         public List<GameObject> Children { get; set; }
 
@@ -97,6 +100,19 @@ namespace Unify2D.Core
             _components.Add(component);
         }
 
+        public T GetComponent<T>() where T : Component
+        {
+            foreach (var item in Components)
+            {
+                if (item is T)
+                {
+                    return (item as T);
+                }
+            }
+
+            return null;
+        }
+
         internal void Update(GameCore core)
         {
             foreach (var item in _components)
@@ -139,6 +155,17 @@ namespace Unify2D.Core
             child.Parent = this;
             Children.Add(child);
         }
+
+        //WIP do not remove  -Thomas
+        /*
+        public void DrawComponentGizmosSelected(ImDrawListPtr drawList)
+        {
+            foreach (var c in Components)
+            {
+                c.DrawGizmoOnSelected(drawList);
+            }
+        }
+        */
 
         Vector2 GetParentPosition()
         {
