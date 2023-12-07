@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Unify2D.Core;
-using static Unify2D.Toolbox.InspectorToolbox;
 
 namespace Unify2D.Toolbox
 {
@@ -27,12 +26,12 @@ namespace Unify2D.Toolbox
             if (value != null)
             {
                 Texture2D texture = value.Asset as Texture2D;
-                TextureBound textureBound = GameEditor.Instance.InspectorToolbox.GetTextureBound(texture);
+                InspectorToolbox.TextureBound textureBound = GameEditor.Instance.InspectorToolbox.GetTextureBound(texture);
                 if (textureBound == null)
                 {
                     IntPtr ptr = GameEditor.Instance.GuiRenderer.BindTexture(texture);
 
-                    textureBound = new TextureBound { IntPtr = ptr, Texture = texture };
+                    textureBound = new InspectorToolbox.TextureBound { IntPtr = ptr, Texture = texture };
                     GameEditor.Instance.InspectorToolbox.AddTextureBound(textureBound);
 
                 }

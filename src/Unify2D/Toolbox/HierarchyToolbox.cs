@@ -46,6 +46,7 @@ namespace Unify2D.Toolbox
             {
                 GameCore.Current.DestroyImmediate(_goToDestroy);
                 Selection.UnSelectObject();
+                _goToDestroy = null;
             }
         }
 
@@ -64,7 +65,6 @@ namespace Unify2D.Toolbox
                 if (Selection.Selected == go)
                 {
                     base_flags |= ImGuiTreeNodeFlags.Selected;
-                    Console.WriteLine(  "selected");
                 }
 
                 ImGui.TreeNodeEx($"{go.Name}##{go.GetHashCode()}", base_flags);
@@ -90,7 +90,6 @@ namespace Unify2D.Toolbox
                 if (Selection.Selected == go)
                 {
                     base_flags |= ImGuiTreeNodeFlags.Selected;
-                    Console.WriteLine("selected2");
                 }
 
                 bool open = (ImGui.TreeNodeEx($"{go.Name}##{go.GetHashCode()}", base_flags));
