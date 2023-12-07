@@ -27,7 +27,7 @@ namespace Unify2D.Toolbox
         public static TreeNode selectedNode;
 
         int treeFilesIndex = 0;
-
+        string newName = "";
         public override void Initialize(GameEditor editor)
         {
             _editor = editor;
@@ -120,11 +120,30 @@ namespace Unify2D.Toolbox
                     {
                         DeleteFolder(GetSelectedNode().nodeIndex, GetSelectedNode().path);
                     }
+                    if (ImGui.MenuItem("Delete File", null))
+                    {
+                        DeleteFile(GetSelectedNode().path);
+                    }
                     ImGui.EndMenu();
                 }
+                if(ImGui.BeginMenu("Rename selected file"))
+                {
+                    if(ImGui.MenuItem("Rename file", null))
+                    {
+                        RenameFile(GetSelectedNode().path, newName);
+                    }
+                }
+                
+               
                 ImGui.EndMenuBar();
             }
-
+            
+            if(ImGui.InputTextWithHint("Rename", "Enter new name here", ref newName, 128))
+            {
+                
+                RenameFile(GetSelectedNode().path, newName);
+            }
+           
             if (ImGui.TreeNode("Tree View"))
             {
                 ImGuiTableFlags flags = ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.Resizable | ImGuiTableFlags.RowBg | ImGuiTableFlags.NoBordersInBody | ImGuiTableFlags.Reorderable;
@@ -141,8 +160,6 @@ namespace Unify2D.Toolbox
                 }
                 ImGui.TreePop();
             }
-
-
 
             ImGui.End();
         }
@@ -172,7 +189,9 @@ namespace Unify2D.Toolbox
             {
                 Directory.CreateDirectory(Path.Combine(_editor.AssetsPath, "New Folder" + newIndex));
                 string folderName = "New Folder" + newIndex.ToString();
-                treeFiles.Add(new TreeNode() { name = "New Folder " + newIndex, type = "Folder", childType = "file", nodeIndex = treeFilesIndex, childCount = 10, folderPath = _editor.AssetsPath, path = Path.Combine(_editor.AssetsPath, folderName) });
+                int newNodeIndex = treeFiles.Count-1;
+              
+                treeFiles.Add(new TreeNode() { name = "New Folder " + newIndex, type = "Folder", childType = "file", nodeIndex = newNodeIndex, childCount = 10, folderPath = _editor.AssetsPath, path = Path.Combine(_editor.AssetsPath, folderName) });
             }
         }
 
@@ -190,15 +209,38 @@ namespace Unify2D.Toolbox
             if (Directory.Exists(folderPath))
             {
                 Directory.Delete(folderPath, true);
+                Reset();
             }
             
         }
-
+        public void RenameFile(string pathFile, string newName)
+        {
+            FileInfo currentFile = new FileInfo(_editor.AssetsPath + pathFile);
+            string newFile = Path.Combine(_editor.AssetsPath + newName);
+            if (currentFile.Exists) 
+            {
+                string newPath = Path.Combine(_editor.AssetsPath, newName);
+                Console.WriteLine("Rename");
+                File.Move(currentFile.ToString(), newPath);
+                treeFiles.RemoveAt(GetSelectedNode().nodeIndex);
+                treeFiles.Add(new TreeNode() { name = newName, type = "Folder", childType = "file", nodeIndex = treeFilesIndex, childCount = 10, folderPath = _editor.AssetsPath, path = Path.Combine(_editor.AssetsPath) });
+                treeFilesIndex++;
+            } else
+            {
+                Console.WriteLine("Le fichier n'existe pas");
+            }
+          
+        }
         public void DeleteFile(string pathFile)
         {
-            if(File.Exists(pathFile))
+            string combinedPath = _editor.AssetsPath + pathFile;
+            treeFiles.RemoveAt(GetSelectedNode().nodeIndex);
+            if(File.Exists(combinedPath))
             {
-                File.Delete(pathFile);
+                File.Delete(combinedPath);
+            } else
+            {
+                Console.WriteLine(combinedPath + " doesnt exist");
             }
            
         }
