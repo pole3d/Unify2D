@@ -88,7 +88,7 @@ namespace UnifyGame
             if ( Camera.Main == null)
             {
                 Console.WriteLine( "There's no camera on this scene" );
-                GameObject go = new GameObject();
+                GameObject go = GameObject.Create();
                 go.AddComponent<Camera>();
             }
 

@@ -11,6 +11,10 @@ namespace Unify2D.Core
 {
     public class GameObject
     {
+        
+        public static ulong s_maxID = 0;
+
+        public ulong UID{ get; set; }
         public string Name { get; set; }
 
         public Vector2 Position { 
@@ -37,14 +41,38 @@ namespace Unify2D.Core
         [JsonProperty]
         List<Component> _components;
 
-        public GameObject()
+        private GameObject()
         {
+           // UID = Guid.NewGuid().ToString();
             _components = new List<Component>();
             _renderers = new List<Renderer>();
-            Name = "GameObject";
+           // Name = "GameObject";
 
-            GameCore.Current.AddGameObject(this);
+           //GameCore.Current.AddRootGameObject(this);
         }
+
+        public static GameObject Create()
+        {
+            GameObject go = new GameObject();
+            go.UID = s_maxID++;
+            GameCore.Current.AddRootGameObject(go);
+            return go;
+        }
+
+        public static GameObject CreateChild(GameObject parent)
+        {
+            GameObject child = new GameObject();
+            child.UID = s_maxID++;
+
+            if (parent.Children == null)
+                parent.Children = new List<GameObject>();
+
+            child.Parent = parent;
+            parent.Children.Add(child);
+            return child;
+        }
+
+
 
         internal void Load(Game game)
         {
@@ -149,6 +177,8 @@ namespace Unify2D.Core
 
         public void AddChild(GameObject child)
         {
+            GameCore.Current.RemoveFromRoot(child);
+
             if (Children == null)
                 Children = new List<GameObject>();
 
