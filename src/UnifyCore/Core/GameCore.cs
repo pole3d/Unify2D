@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Unify2D.Physics;
 
 namespace Unify2D.Core
 {
@@ -32,8 +31,7 @@ namespace Unify2D.Core
         public Game Game => _game;
 
         public SpriteBatch SpriteBatch { get; private set; }
-        public List<GameObject> GameObjects => _gameObjects;
-        public PhysicsSettings PhysicsSettings { get; private set; }
+        public List<GameObject> GameObjects => _gameObjects; 
         public float DeltaTime { get; private set; }
 
         static GameCore s_current;
@@ -48,15 +46,7 @@ namespace Unify2D.Core
             _gameObjects = new List<GameObject>();
         }
 
-        public void InitPhysics()
-        {
-            if (PhysicsSettings == null)
-                PhysicsSettings = new PhysicsSettings();
-
-            PhysicsSettings.Init();
-        }
-
-        internal void AddRootGameObject(GameObject go)
+        internal void AddGameObject(GameObject go)
         {
             _gameObjects.Add(go);
         }
@@ -101,11 +91,6 @@ namespace Unify2D.Core
 
         public void DestroyImmediate(GameObject item)
         {
-            if (item.Parent != null)
-            {
-                item.Parent.Children.Remove(item);
-            }
-
             _gameObjects.Remove(item);
         }
 
@@ -114,15 +99,11 @@ namespace Unify2D.Core
             SpriteBatch = new SpriteBatch(graphicsDevice);
         }
 
-        public void LoadScene(Game game, List<GameObject> gameObjects)
+        public void LoadScene(Game game,  List<GameObject> gameObjects)
         {
             foreach (var item in gameObjects)
             {
-                AddRootGameObject(item);
                 item.Load(game);
-
-                if ( item.UID > GameObject.s_maxID)
-                    GameObject.s_maxID = item.UID + 1; 
             }
         }
 
@@ -137,20 +118,10 @@ namespace Unify2D.Core
 
             foreach (var item in _gameObjectsToDestroy)
             {
-                DestroyImmediate(item);
+                _gameObjects.Remove(item);
             }
 
-            PhysicsSettings.World.Step(DeltaTime);
-
             _gameObjectsToDestroy.Clear();
-        }
-
-        internal void RemoveFromRoot(GameObject child)
-        {
-            if (child.Parent != null)
-                return;
-
-            _gameObjects.Remove(child);
         }
     }
 }

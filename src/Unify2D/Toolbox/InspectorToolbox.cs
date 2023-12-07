@@ -33,29 +33,6 @@ namespace Unify2D.Toolbox
             _propertyViewers.Add(typeof(GameAsset), new GameAssetPropertyViewer());
         }
 
-        public override void Draw()
-        {
-            foreach (var item in _texturesToUnbind)
-            {
-                GameEditor.Instance.GuiRenderer.UnbindTexture(item.IntPtr);
-            }
-
-            _texturesToUnbind.Clear();
-
-            ImGui.Begin("Inspector");
-
-            if (_gameObject != null)
-            {
-                ShowGameObject();
-            }
-            else if (_asset != null)
-            {
-                ShowAsset();
-            }
-
-            ImGui.End();
-        }
-
         public void SetObject(object obj)
         {
             UnSelect();
@@ -82,6 +59,30 @@ namespace Unify2D.Toolbox
 
         }
         
+
+        public override void Draw()
+        {
+            foreach (var item in _texturesToUnbind)
+            {
+                GameEditor.Instance.GuiRenderer.UnbindTexture(item.IntPtr);
+            }
+
+            _texturesToUnbind.Clear();
+
+            ImGui.Begin("Inspector");
+
+            if (_gameObject != null)
+            {
+                ShowGameObject();
+            }
+            else if (_asset != null)
+            {
+                ShowAsset();
+            }
+
+            ImGui.End();
+        }
+
         private void ShowAsset()
         {
             if (_asset.AssetContent is ScriptAssetContent scriptAsset)
@@ -105,16 +106,9 @@ namespace Unify2D.Toolbox
             ImGui.InputText("name", ref name, 40);
             _gameObject.Name = name;
             System.Numerics.Vector2 position = new System.Numerics.Vector2(_gameObject.Position.X, _gameObject.Position.Y);
-            float rotation = MathHelper.ToDegrees(_gameObject.Rotation);
-            System.Numerics.Vector2 scale = new System.Numerics.Vector2(_gameObject.Scale.X, _gameObject.Scale.Y);
-
             ImGui.InputFloat2("position", ref position);
-            ImGui.InputFloat("rotation", ref rotation);
-            ImGui.InputFloat2("scale", ref scale);
-
             _gameObject.Position = new Vector2(position.X, position.Y);
-            _gameObject.Rotation = MathHelper.ToRadians(rotation);
-            _gameObject.Scale = new Vector2(scale.X, scale.Y);
+
 
             List<Component> toRemove = new List<Component>();
             foreach (var component in _gameObject.Components)

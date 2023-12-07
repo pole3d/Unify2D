@@ -1,5 +1,4 @@
-﻿using ImGuiNET;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -24,11 +23,6 @@ namespace Unify2D.Core
 
         public virtual void Update(GameCore game)
         {
-        }
-
-        public virtual void DrawGizmoOnSelected(ImDrawListPtr drawList)
-        {
-
         }
 
         internal virtual void Destroy()

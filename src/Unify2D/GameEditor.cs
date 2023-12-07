@@ -63,9 +63,10 @@ namespace Unify2D
         Scripting.Scripting _scripting;
         GameEditorSettings _settings;
         SceneEditorManager _sceneEditorManager;
-        List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
-        GameObject _selected;
 
+        List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
+
+        GameObject _selected;
         #endregion
 
         #region Initialization

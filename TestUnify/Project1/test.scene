@@ -11,49 +11,84 @@
         "BottomRight": "960, 540"
       }
     ],
-    "UID": 1,
+    "Position": "0, 0",
     "Name": "Camera",
-    "Position": "0, 0",
-    "LocalPosition": "0, 0",
-    "BoundingSize": "32, 32",
-    "Children": null
+    "BoundingSize": "32, 32"
   },
   {
-    "_components": [],
-    "UID": 2,
-    "Name": "Papa",
-    "Position": "0, 0",
-    "LocalPosition": "0, 0",
-    "BoundingSize": "30, 30",
-    "Children": [
+    "_components": [
       {
-        "_components": [],
-        "UID": 3,
-        "Name": "Enfant",
-        "Position": "0, 0",
-        "LocalPosition": "0, 0",
-        "BoundingSize": "30, 30",
-        "Children": null
+        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
+        "_asset": {
+          "_name": "\\ship_0007.png"
+        },
+        "Color": "255, 255, 255, 255"
+      },
+      {
+        "$type": "GameAssembly.TestA, GameAssembly",
+        "Speed": 200.0,
+        "Speed7": 0.0,
+        "Text": "mpm"
       }
-    ]
+    ],
+    "Position": "130, 139",
+    "Name": "ship_0007",
+    "BoundingSize": "32, 32"
   },
   {
-    "_components": [],
-    "UID": 4,
-    "Name": "Maman",
-    "Position": "0, 0",
-    "LocalPosition": "0, 0",
-    "BoundingSize": "30, 30",
-    "Children": [
+    "_components": [
       {
-        "_components": [],
-        "UID": 5,
-        "Name": "bebe",
-        "Position": "0, 0",
-        "LocalPosition": "0, 0",
-        "BoundingSize": "30, 30",
-        "Children": null
+        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
+        "_asset": {
+          "_name": "/ship_0009.png"
+        },
+        "Color": "255, 255, 255, 255"
       }
-    ]
+    ],
+    "Position": "436, 134",
+    "Name": "ship_0009",
+    "BoundingSize": "32, 32"
+  },
+  {
+    "_components": [
+      {
+        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
+        "_asset": {
+          "_name": "/ship_0010.png"
+        },
+        "Color": "255, 255, 255, 255"
+      }
+    ],
+    "Position": "497, 297",
+    "Name": "ship_0010",
+    "BoundingSize": "32, 32"
+  },
+  {
+    "_components": [
+      {
+        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
+        "_asset": {
+          "_name": "/ship_0007.png"
+        },
+        "Color": "255, 255, 255, 255"
+      }
+    ],
+    "Position": "-12, 225",
+    "Name": "ship_0007",
+    "BoundingSize": "32, 32"
+  },
+  {
+    "_components": [
+      {
+        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
+        "_asset": {
+          "_name": "/ship_0004.png"
+        },
+        "Color": "255, 255, 255, 255"
+      }
+    ],
+    "Position": "346, -17",
+    "Name": "GameObject",
+    "BoundingSize": "32, 32"
   }
 ]

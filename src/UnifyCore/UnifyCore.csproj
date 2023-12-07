@@ -8,7 +8,6 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\VelcroPhysics-master\src\VelcroPhysics\VelcroPhysics.csproj" />
 		<ProjectReference Include="..\..\FNA\FNA.csproj" />
 		<ProjectReference Include="..\ImGui.NET\ImGui.NET.csproj" />
 	</ItemGroup>
@@ -19,10 +18,6 @@
 
 	<ItemGroup>
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="src\unifycore\core\physics\" />
 	</ItemGroup>
 </Project>
 

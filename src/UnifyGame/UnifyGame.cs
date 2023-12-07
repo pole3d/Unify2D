@@ -34,8 +34,6 @@ namespace UnifyGame
             _graphics.SynchronizeWithVerticalRetrace = false;
             
             IsMouseVisible = true;
-
-            //p
         }
 
         protected override void Initialize()
@@ -56,7 +54,6 @@ namespace UnifyGame
         protected override void LoadContent()
         {
             _core.Initialize(GraphicsDevice);
-            _core.InitPhysics();
 
             _core.GameObjects.Clear();
             try
@@ -78,9 +75,8 @@ namespace UnifyGame
 
         protected override void Update(GameTime gameTime)
         {
-            _core.Update(gameTime);        
-            
-            //Oumuamua
+            _core.Update(gameTime);
+
         }
 
         protected override void Draw(GameTime gameTime)
@@ -88,7 +84,7 @@ namespace UnifyGame
             if ( Camera.Main == null)
             {
                 Console.WriteLine( "There's no camera on this scene" );
-                GameObject go = GameObject.Create();
+                GameObject go = new GameObject();
                 go.AddComponent<Camera>();
             }
 

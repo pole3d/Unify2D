@@ -40,7 +40,7 @@ namespace Unify2D.Builder
             {
                 return;
             }
-
+            
             foreach (var file in Directory.GetFiles(TemplatePath))
             {
                 string fileName = Path.GetFileName(file);
@@ -55,13 +55,10 @@ namespace Unify2D.Builder
                 string fileName = Path.GetFileName(file);
                 string newPath = ToolsEditor.CombinePath(ToolsEditor.CombinePath(BuildPathFull, AssetsPath)   , fileName);
 
-                if (File.Exists(newPath))
-                    File.Delete(newPath);
-
                 var sourceFile = new FileInfo(file);
                 sourceFile.CopyTo(newPath, true);
 
-            }       
+            }
 
             Save();
 
