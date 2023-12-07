@@ -25,6 +25,9 @@ namespace Unify2D.Tools
             a = a.TrimEnd('/', '\\');
             b = b.TrimStart('/', '\\');
 
+            if ( b.StartsWith("./"))
+                b = b.Substring(2,b.Length-2);
+
             return a + "/" + b;
 
         }

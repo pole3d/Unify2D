@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,11 +11,10 @@ using Unify2D.Core;
 
 namespace Unify2D.Toolbox
 {
-    public class InspectorToolbox : Toolbox
+    internal class InspectorToolbox : ToolboxBase
     {
         GameObject _gameObject;
         Asset _asset;
-
 
         List<TextureBound> _texturesBound = new List<TextureBound>();
         List<TextureBound> _texturesToUnbind = new List<TextureBound>();
@@ -48,14 +48,12 @@ namespace Unify2D.Toolbox
 
         private void UnSelect()
         {
-
             foreach (var item in _texturesBound)
             {
                 _texturesToUnbind.Add(item);
             }
 
             _texturesBound.Clear();
-
         }
         
 
@@ -158,6 +156,11 @@ namespace Unify2D.Toolbox
             PropertyInfo[] properties = component.GetType().GetProperties();
             foreach (PropertyInfo property in properties)
             {
+                if (Attribute.IsDefined(property, typeof(JsonIgnoreAttribute)))
+                {
+                    continue;
+                }
+
                 try
                 {
                     _propertyViewers[property.PropertyType].Draw(property, component);
@@ -192,7 +195,5 @@ namespace Unify2D.Toolbox
             public Texture2D Texture { get; set; }
             public IntPtr IntPtr { get; set; }
         }
-
-
     }
 }

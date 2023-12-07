@@ -37,18 +37,17 @@ namespace Unify2D
         const string AssetsFolder = "./Assets";
 
         #region Properties
-
         public string ProjectPath => _settings.Data.CurrentProjectPath;
         public string AssetsPath => !string.IsNullOrEmpty(ProjectPath) ? ToolsEditor.CombinePath(ProjectPath, AssetsFolder) : string.Empty;
         
         public GameEditorSettings Settings => _settings;
         public Scripting.Scripting Scripting => _scripting;
         public ImGuiRenderer.Renderer GuiRenderer => _imGuiRenderer;
-        public InspectorToolbox Inspector => _inspectorToolbox;
+        internal InspectorToolbox InspectorToolbox => _inspectorToolbox;
+        internal ScriptToolbox ScriptToolbox => _scriptToolbox;
+        internal GameToolbox GameToolbox => _gameToolbox;
         public GameCoreInfo GameCoreInfoScene => _coreInfoScene; 
         public List<GameCoreInfo> GameCoresInfo => _coresInfo;
-
-        public GameObject Selected => _selected;
 
         public SceneEditorManager SceneEditorManager => _sceneEditorManager;
         #endregion
@@ -65,14 +64,12 @@ namespace Unify2D
         GameCoreInfo _coreInfoScene;
         List<GameCoreInfo> _coresInfo = new List<GameCoreInfo>();
 
-        Stack<PopupBase> _popups = new Stack<PopupBase>();
-        List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
+        List<ToolboxBase> _toolboxes = new List<ToolboxBase>();
+        
         InspectorToolbox _inspectorToolbox;
         ScriptToolbox _scriptToolbox;
         GameToolbox _gameToolbox;
         HierarchyToolbox _hierarchyToolbox;
-
-        GameObject _selected;
         #endregion
 
         #region Initialization
@@ -111,8 +108,8 @@ namespace Unify2D
             ImGui.GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
 
             Window.AllowUserResizing = true;
-            _graphics.PreferredBackBufferWidth = 1920; // GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
-            _graphics.PreferredBackBufferHeight = 1080; // GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 60;
+            _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+            _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 60;
             _graphics.ApplyChanges();
 
             InitializeToolBoxes();
@@ -134,9 +131,9 @@ namespace Unify2D
             _toolboxes.Add(new AssetsToolbox());
             _toolboxes.Add(_hierarchyToolbox);
 
-            _toolboxes.Add(_scriptToolbox);
-            _toolboxes.Add(_inspectorToolbox);
-            _toolboxes.Add(_gameToolbox);
+            _toolboxes.Add(ScriptToolbox);
+            _toolboxes.Add(InspectorToolbox);
+            _toolboxes.Add(GameToolbox);
 
             foreach (var item in _toolboxes)
             {
@@ -161,7 +158,7 @@ namespace Unify2D
 
             foreach (var item in _toolboxes)
             {
-                item.Update();
+                item.Update(gameTime);
             }
         }
 
@@ -195,38 +192,6 @@ namespace Unify2D
 
         #endregion
 
-        #region Selection
-
-        public void SelectObject(object go)
-        {
-            if (go is Asset asset)
-            {
-                if (asset.AssetContent is ScriptAssetContent script)
-                {
-                    _scriptToolbox.SetObject(asset);
-                    return;
-                }
-            }
-
-            if (go is GameObject)
-                _selected = go as GameObject;
-
-            if (_inspectorToolbox != null)
-                _inspectorToolbox.SetObject(go);
-        }
-
-        public void UnSelectObject()
-        {
-            _selected = null;
-
-            if (_inspectorToolbox != null)
-                _inspectorToolbox.SetObject(null);
-        }
-
-        #endregion
-
-
-
         #region Tools
 
         public void ShowPopup(PopupBase popup)
@@ -237,6 +202,17 @@ namespace Unify2D
         public void HidePopup()
         {
             _gameEditorUI.HidePopup();
+        }
+
+
+        public bool IsMouseInGameWindow()
+        {
+            return GameToolbox.IsMouseInWindow();
+        }
+
+        public Vector2 GetWorldMousePosition()
+        {
+            return GameToolbox.GetMousePosition();
         }
 
         public void Build()
@@ -327,8 +303,8 @@ namespace Unify2D
             sceneCoreInfo.GameCore.Initialize(GraphicsDevice);
             
             _coreInfoScene = sceneCoreInfo;
-            _gameToolbox.Tag = sceneCoreInfo;
-            _hierarchyToolbox.Tag = sceneCoreInfo;
+            _gameToolbox.SetCore(sceneCoreInfo);
+            _hierarchyToolbox.SetCore(sceneCoreInfo);
             
             GameCore.SetCurrent(sceneCoreInfo.GameCore);
         }
@@ -341,8 +317,8 @@ namespace Unify2D
             _coresInfo.Add(prefabCoreInfo);
             prefabCoreInfo.GameCore.Initialize(GraphicsDevice);
             
-            _gameToolbox.Tag = prefabCoreInfo;
-            _hierarchyToolbox.Tag = prefabCoreInfo;
+            _gameToolbox.SetCore(prefabCoreInfo);
+            _hierarchyToolbox.SetCore(prefabCoreInfo);
 
             GameCore.SetCurrent(prefabCoreInfo.GameCore);
             
@@ -352,12 +328,12 @@ namespace Unify2D
         internal void CloseGameCore(GameCoreInfo gameCoreInfo)
         {
             _coresInfo.Remove(gameCoreInfo);
-            GameCoreInfo replacementGameCore = _coresInfo.Count == 0 ? _coreInfoScene : _coresInfo[_coresInfo.Count - 1];
+            GameCoreInfo replaceCore = _coresInfo.Count == 0 ? _coreInfoScene : _coresInfo[_coresInfo.Count - 1];
             if (_gameToolbox.Tag == gameCoreInfo)
-                _gameToolbox.Tag = replacementGameCore;
+                _gameToolbox.SetCore(replaceCore);
             if (_hierarchyToolbox.Tag == gameCoreInfo)
-                _hierarchyToolbox.Tag = replacementGameCore;
-            GameCore.SetCurrent(replacementGameCore.GameCore);
+                _hierarchyToolbox.SetCore(replaceCore);
+            GameCore.SetCurrent(replaceCore.GameCore);
         }
     }
 }

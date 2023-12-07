@@ -14,7 +14,7 @@ namespace Unify2D.Assets
         {
             GameObject go = InstantiateGameObject(editor);
             GameCore.Current.AddGameObject(go);
-            GameEditor.Instance.SelectObject(go);
+            Selection.SelectObject(go);
         }
 
         public GameObject InstantiateGameObject(GameEditor editor)

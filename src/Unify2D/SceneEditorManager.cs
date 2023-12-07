@@ -48,7 +48,7 @@ namespace Unify2D
 
             if (gameObjects != null)
             {
-                _gameEditor.SelectObject(null);
+                Selection.SelectObject(null);
                 _gameEditor.GameCoresInfo.Remove(_gameEditor.GameCoreInfoScene);
                 _gameEditor.SetSceneCore(new GameCoreInfo(
                     new GameCore(_gameEditor, gameObjects),

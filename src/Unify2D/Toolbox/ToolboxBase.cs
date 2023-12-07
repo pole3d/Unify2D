@@ -1,11 +1,13 @@
-﻿namespace Unify2D.Toolbox
+using Microsoft.Xna.Framework;
+
+namespace Unify2D.Toolbox
 {
     /// <summary>
     /// Base class for a tool window in the game editor
     /// </summary>
-    public abstract class Toolbox
+    public abstract class ToolboxBase
     {
-        public object Tag { get => _tag; set => _tag = value; }
+        public object Tag { get => _tag; }
 
         protected GameEditor _editor;
         protected object _tag;
@@ -21,7 +23,7 @@
         {
         }
 
-        public virtual void Update()
+        public virtual void Update(GameTime gameTime)
         {
         }
     }

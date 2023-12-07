@@ -9,7 +9,7 @@
         "Color": "255, 255, 255, 255"
       }
     ],
-    "Position": "1263, 450",
+    "Position": "1260, 448",
     "Name": "ship_0001",
     "BoundingSize": "32, 32"
   },
@@ -26,9 +26,18 @@
         "$type": "GameAssembly.TestA, GameAssembly",
         "Speed": 10.0,
         "SpeedO": 10.0
+      },
+      {
+        "$type": "Unify2D.Core.Graphics.Camera, UnifyCore",
+        "Background": "79, 86, 107, 255",
+        "ZoomLevel": 0.5,
+        "Rotation": 0.0,
+        "Viewport": "1920, 1080",
+        "TopLeft": "340, 397",
+        "BottomRight": "1300, 937"
       }
     ],
-    "Position": "812, 675",
+    "Position": "820, 667",
     "Name": "ship_0007",
     "BoundingSize": "32, 32"
   }

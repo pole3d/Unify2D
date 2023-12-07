@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Numerics;
 using ImGuiNET;
 using Unify2D.Assets;
@@ -7,11 +7,8 @@ using Unify2D.Tools;
 
 namespace Unify2D.Toolbox
 {
-    internal class HierarchyToolbox : Toolbox
+    internal class HierarchyToolbox : ToolboxBase
     {
-
-        bool[] _hierarchy = new bool[100];
-        
         public void SetCore(GameCoreInfo coreInfo)
         {
             _tag = coreInfo;
@@ -20,6 +17,12 @@ namespace Unify2D.Toolbox
         public override void Draw()
         {
             ImGui.Begin("Hierarchy");
+
+            if (ImGui.Button("Add GameObject", new System.Numerics.Vector2(-  1,0)))
+            {
+                GameObject go = new GameObject();
+                go.Name = "GameObject";
+            }
 
             GameObject goToDestroy = null;
 
@@ -32,20 +35,16 @@ namespace Unify2D.Toolbox
 
             ImGui.BeginChild("gameObjectList");
 
+            Selection.TryGameObject(out GameObject selectedGameObject);
+            
             int i = 0;
             foreach (var item in ((GameCoreInfo)_tag).GameCore.GameObjects)
             {
+
                 ImGui.PushID(i++);
-                if (ImGui.Selectable($"{item.Name}", _hierarchy[i]))
-                {      
-
-                    for (int j = 0; j < _hierarchy.Length; j++)
-                    {
-                        _hierarchy[j] = false;
-                    }
-
-                    _hierarchy[i] = true;
-                    _editor.SelectObject(item);
+                if (ImGui.Selectable($"{item.Name}", selectedGameObject == item))
+                {
+                    Selection.SelectObject(item);
                 }
 
                 if (ImGui.BeginPopupContextItem())
@@ -75,7 +74,7 @@ namespace Unify2D.Toolbox
                 }
                 ImGui.PopID();
             }
-
+            
             ImGui.EndChild();
 
             ImGui.End();
@@ -83,7 +82,7 @@ namespace Unify2D.Toolbox
             if (goToDestroy != null)
             {
                 GameCore.Current.DestroyImmediate(goToDestroy);
-                _editor.UnSelectObject();
+                Selection.UnSelectObject();
             }
 
         }
