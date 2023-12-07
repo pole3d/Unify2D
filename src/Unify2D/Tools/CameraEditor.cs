@@ -96,18 +96,18 @@ namespace Unify2D.Core
             set { _matrix = value; }
         }
 
-        internal Vector2 LocalToWorld(Num.Vector2 mousePosition)
+        internal Vector2 LocalToWorld(Vector2 mousePosition)
         {
             return ((ICamera2D)this).LocalToWorld(mousePosition);
         }
 
-        internal Num.Vector2 WorldToViewport(Vector2 world)
+        internal Vector2 WorldToViewport(Vector2 world)
         {
             return ((ICamera2D)this).WorldToViewport(world);
         }
 
         //some shortcuts
-        public Vector2 TopLeft => ((ICamera2D)this).LocalToWorld(new Num.Vector2(0, 0));
-        public Vector2 BottomRight => ((ICamera2D)this).LocalToWorld(new Num.Vector2(Viewport.X, Viewport.Y));
+        public Vector2 TopLeft => ((ICamera2D)this).LocalToWorld(new Vector2(0, 0));
+        public Vector2 BottomRight => ((ICamera2D)this).LocalToWorld(new Vector2(Viewport.X, Viewport.Y));
     }
 }

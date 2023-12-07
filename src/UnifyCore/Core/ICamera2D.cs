@@ -31,9 +31,9 @@ namespace Unify2D.Core
             Matrix.CreateScale(new Vector3(Zoom, Zoom, 1)) *
             Matrix.CreateTranslation(new Vector3(Viewport.X * 0.5f, Viewport.Y * 0.5f, 0));
         }
-        public Vector2 LocalToWorld(Num.Vector2 local)
+        public Vector2 LocalToWorld(Vector2 local)
         {
-            local -= new Num.Vector2(Viewport.X * 0.5f, Viewport.Y * 0.5f);
+            local -= Viewport * 0.5f;
 
             local /= Zoom; 
 
@@ -51,7 +51,7 @@ namespace Unify2D.Core
 
             return worldPosition;
         }
-        public Num.Vector2 WorldToViewport(Vector2 world)
+        public Vector2 WorldToViewport(Vector2 world)
         {
             world -= Position;
 
@@ -59,14 +59,14 @@ namespace Unify2D.Core
             float sin = -up.X;
             float cos = up.Y;
 
-            Num.Vector2 local = new Num.Vector2(
+            Vector2 local = new Vector2(
                 (world.X * cos) - (world.Y * sin),
                 (world.X * sin) + (world.Y * cos));
 
             // on multiplie pas par le zoom car Matrix.Up en prends deja compte
             //local *= Zoom;
 
-            local += new Num.Vector2(Viewport.X * 0.5f, Viewport.Y * 0.5f);
+            local += Viewport * 0.5f;
 
             return local;
         }
