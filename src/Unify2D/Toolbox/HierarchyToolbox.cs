@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using ImGuiNET;
 using Unify2D.Assets;
 using Unify2D.Core;
@@ -21,6 +22,13 @@ namespace Unify2D.Toolbox
             ImGui.Begin("Hierarchy");
 
             GameObject goToDestroy = null;
+
+            if (_tag is GameCoreInfo coreInfo && coreInfo.AssetType == GameCoreInfo.Type.Prefab) {
+                if (ImGui.Button("Close prefab", new Vector2(ImGui.GetWindowWidth(), 20.0f))) {
+                    GameEditor.Instance.CloseGameCore(coreInfo);
+                }
+                ImGui.Separator();
+            }
 
             ImGui.BeginChild("gameObjectList");
 

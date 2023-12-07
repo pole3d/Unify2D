@@ -348,6 +348,17 @@ namespace Unify2D
             
             prefabCoreInfo.GameCore.AddGameObject(content.InstantiateGameObject(this));
         }
+
+        internal void CloseGameCore(GameCoreInfo gameCoreInfo)
+        {
+            _coresInfo.Remove(gameCoreInfo);
+            GameCoreInfo replacementGameCore = _coresInfo.Count == 0 ? _coreInfoScene : _coresInfo[_coresInfo.Count - 1];
+            if (_gameToolbox.Tag == gameCoreInfo)
+                _gameToolbox.Tag = replacementGameCore;
+            if (_hierarchyToolbox.Tag == gameCoreInfo)
+                _hierarchyToolbox.Tag = replacementGameCore;
+            GameCore.SetCurrent(replacementGameCore.GameCore);
+        }
     }
 }
 

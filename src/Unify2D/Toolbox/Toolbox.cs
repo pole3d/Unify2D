@@ -5,7 +5,7 @@
     /// </summary>
     public abstract class Toolbox
     {
-        public object Tag { set => _tag = value; }
+        public object Tag { get => _tag; set => _tag = value; }
 
         protected GameEditor _editor;
         protected object _tag;
