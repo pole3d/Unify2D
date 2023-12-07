@@ -24,7 +24,6 @@ namespace Unify2D.Toolbox
         bool[] _selected;
         List<Asset> _assets = new List<Asset>();
 
-        GameEditor _editor;
         public static TreeNode selectedNode;
 
         int treeFilesIndex = 0;
