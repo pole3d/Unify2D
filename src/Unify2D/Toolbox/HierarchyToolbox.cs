@@ -14,6 +14,7 @@ namespace Unify2D.Toolbox
         public override void Draw()
         {
             ImGui.Begin("Hierarchy");
+ 
 
             if (ImGui.Button("Add GameObject", new System.Numerics.Vector2(-1, 0)))
             {
@@ -39,6 +40,8 @@ namespace Unify2D.Toolbox
 
                 DrawNode(item);
             }
+
+
 
             ImGui.End();
 

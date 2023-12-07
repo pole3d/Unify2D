@@ -73,6 +73,15 @@ namespace Unify2D.Core
 
         internal void Load(Game game)
         {
+            if (Children != null)
+            {
+                foreach (var child in Children)
+                {
+                    child.Parent = this;
+                    child.Load(game);
+                }
+            }
+
             foreach (var component in _components)
             {
                 component.Initialize(this);

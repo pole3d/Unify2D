@@ -91,12 +91,14 @@ namespace Unify2D.Core
 
         public void DestroyImmediate(GameObject item)
         {
-            if ( item.Parent != null )
+            if (item.Parent != null)
             {
                 item.Parent.Children.Remove(item);
             }
-
-            _gameObjects.Remove(item);
+            else
+            {
+                _gameObjects.Remove(item);
+            }
         }
 
         public void Initialize(GraphicsDevice graphicsDevice)
