@@ -31,7 +31,7 @@ namespace UnifyCore.Core.Physics
 
             if (rb == null)
             {
-                staticBody = BodyFactory.CreateRectangle(PhysicsSettings.World, m_width, m_height, 1, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, 0, BodyType.Static);
+                staticBody = BodyFactory.CreateRectangle(PhysicsSettings.World, m_width * _gameObject.Scale.X, m_height * _gameObject.Scale.Y, 1, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, 0, BodyType.Static);
             }
         }
 

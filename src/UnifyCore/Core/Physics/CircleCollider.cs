@@ -27,7 +27,12 @@ namespace UnifyCore.Core.Physics
 
             if (rb == null)
             {
-                staticBody = BodyFactory.CreateCircle(PhysicsSettings.World, m_radius, 1, _gameObject.Position, 0, BodyType.Static);
+                float size = _gameObject.Scale.Y;
+
+                if (_gameObject.Scale.X > size)
+                    size = _gameObject.Scale.X;
+
+                staticBody = BodyFactory.CreateCircle(PhysicsSettings.World, m_radius * size, 1, _gameObject.Position, 0, BodyType.Static);
             }
         }
 
