@@ -14,8 +14,9 @@ namespace UnifyCore.Core.Physics
     internal class CircleCollider: Component
     {
         public float Radius{ get { return m_radius; } set { m_radius = value; } }
+        public Vector2 Offset { get { return m_offset; } set { m_offset = value; } }
 
-        private Vector2 m_size;
+        private Vector2 m_size, m_offset;
 
         private Body staticBody;
 
@@ -32,7 +33,7 @@ namespace UnifyCore.Core.Physics
                 if (_gameObject.Scale.X > size)
                     size = _gameObject.Scale.X;
 
-                staticBody = BodyFactory.CreateCircle(PhysicsSettings.World, m_radius * size, 1, _gameObject.Position, 0, BodyType.Static);
+                staticBody = BodyFactory.CreateCircle(PhysicsSettings.World, m_radius * size, 1, _gameObject.Position + Offset, 0, BodyType.Static);
             }
         }
 
