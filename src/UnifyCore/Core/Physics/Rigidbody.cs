@@ -56,12 +56,12 @@ namespace Unify2D.Physics
 
             if (boxCol != null)
             {
-                m_velcroBody = BodyFactory.CreateRectangle(PhysicsSettings.World, boxCol.Width * _gameObject.Scale.X, boxCol.Height * _gameObject.Scale.Y, 1, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, _gameObject.Rotation, m_type);
+                m_velcroBody = BodyFactory.CreateRectangle(PhysicsSettings.World, boxCol.Width * _gameObject.Scale.X, boxCol.Height * _gameObject.Scale.Y, 1, (_gameObject.Position + boxCol.Offset) / PhysicsSettings.UnitToPixelRatio, _gameObject.Rotation, m_type);
                 
             }
             else if (cirCol!= null)
             {
-                m_velcroBody = BodyFactory.CreateCircle(PhysicsSettings.World, cirCol.Radius * _gameObject.Scale.X, 0, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, m_type);
+                m_velcroBody = BodyFactory.CreateCircle(PhysicsSettings.World, cirCol.Radius * _gameObject.Scale.X, 0, (_gameObject.Position + cirCol.Offset) / PhysicsSettings.UnitToPixelRatio, m_type);
             }
             else if (capsuleCol != null)
             {
