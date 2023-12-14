@@ -28,9 +28,10 @@ namespace Unify2D.Core.Tools
             Rectangle left   = new Rectangle((int)topLeft.X, (int)topLeft.Y, width, (int)(bottomRight.Y - topLeft.Y));
             Rectangle right  = new Rectangle((int)bottomRight.X, (int)topLeft.Y, width, (int)(bottomRight.Y - topLeft.Y));
 
+            
+
             Rectangle top    = new Rectangle((int)topLeft.X, (int)bottomRight.Y, (int)(bottomRight.X - topLeft.X), width);
             Rectangle bottom = new Rectangle((int)topLeft.X, (int)topLeft.Y, (int)(bottomRight.X - topLeft.X), width);
-
 
             GameCore.Current.SpriteBatch.Draw(_texture, left, Color.White);
             GameCore.Current.SpriteBatch.Draw(_texture, right, Color.White);
