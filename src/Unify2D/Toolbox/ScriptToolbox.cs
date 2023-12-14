@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using Microsoft.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -24,11 +25,46 @@ namespace Unify2D.Toolbox
         string TemplateProjectPathFull => ToolsEditor.CombinePath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), TemplateProjectDirectory);
 
         Asset _asset;
-
+        FileSystemWatcher _watcher;
 
         public void SetObject(Asset asset)
         {
             _asset = asset;
+            var scriptAsset = _asset.AssetContent as ScriptAssetContent;
+
+            string path = Path.GetDirectoryName(scriptAsset.Path);
+
+            if (_watcher != null)
+            {
+                _watcher.Changed -= OnChanged;
+                _watcher.Created -= OnCreated;
+                _watcher.Renamed -= OnRenamed;
+            }
+
+            _watcher = new FileSystemWatcher(path);
+            _watcher.Path = path;
+            _watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName;
+            _watcher.Filter = "*.cs";
+            _watcher.Changed += new FileSystemEventHandler(OnChanged);
+            _watcher.Created += new FileSystemEventHandler(OnCreated);
+            _watcher.Renamed += new RenamedEventHandler(OnRenamed);
+            _watcher.EnableRaisingEvents = true;
+        }
+
+        private void OnRenamed(object sender, FileSystemEventArgs e)
+        {
+            var scriptAsset = _asset.AssetContent as ScriptAssetContent;
+            scriptAsset.Load();
+
+        }
+
+        private void OnCreated(object sender, FileSystemEventArgs e)
+        {
+
+        }
+
+        private void OnChanged(object sender, FileSystemEventArgs e)
+        {
         }
 
         public override void Draw()

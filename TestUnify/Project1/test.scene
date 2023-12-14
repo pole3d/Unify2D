@@ -2,15 +2,19 @@
   {
     "_components": [
       {
-        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
-        "_asset": {
-          "_name": "\\ship_0001.png"
-        },
-        "Color": "255, 255, 255, 255"
+        "$type": "Unify2D.Core.Graphics.Camera, UnifyCore",
+        "Background": "100, 149, 237, 255",
+        "ZoomLevel": 1.0,
+        "Rotation": 0.0,
+        "Viewport": "1920, 1080",
+        "TopLeft": "-960, -540",
+        "BottomRight": "960, 540"
       }
     ],
-    "Position": "1263, 450",
-    "Name": "ship_0001",
+    "Position": "0, 0",
+    "Name": "Camera",
+    "Rotation": 0.0,
+    "Scale": "1, 1",
     "BoundingSize": "32, 32"
   },
   {
@@ -29,8 +33,10 @@
         "Text": "mpm"
       }
     ],
-    "Position": "812, 675",
+    "Position": "130, 139",
     "Name": "ship_0007",
+    "Rotation": 0.0,
+    "Scale": "1, 1",
     "BoundingSize": "32, 32"
   },
   {
@@ -45,6 +51,8 @@
     ],
     "Position": "436, 134",
     "Name": "ship_0009",
+    "Rotation": 0.0,
+    "Scale": "1, 1",
     "BoundingSize": "32, 32"
   },
   {
@@ -57,8 +65,10 @@
         "Color": "255, 255, 255, 255"
       }
     ],
-    "Position": "1421, 641",
+    "Position": "497, 297",
     "Name": "ship_0010",
+    "Rotation": 0.0,
+    "Scale": "1, 1",
     "BoundingSize": "32, 32"
   },
   {
@@ -71,8 +81,10 @@
         "Color": "255, 255, 255, 255"
       }
     ],
-    "Position": "649, 813",
+    "Position": "-12, 225",
     "Name": "ship_0007",
+    "Rotation": 0.0,
+    "Scale": "1, 1",
     "BoundingSize": "32, 32"
   },
   {
@@ -85,8 +97,60 @@
         "Color": "255, 255, 255, 255"
       }
     ],
-    "Position": "1332, 245",
-    "Name": "ship_0004",
+    "Position": "346, -17",
+    "Name": "GameObject",
+    "Rotation": 0.0,
+    "Scale": "1, 1",
     "BoundingSize": "32, 32"
+  },
+  {
+    "_components": [
+      {
+        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
+        "_asset": {
+          "_name": "/Cube100100_2.png"
+        },
+        "Color": "255, 255, 255, 255"
+      },
+      {
+        "$type": "Unify2D.Physics.Rigidbody, UnifyCore",
+        "Type": 2,
+        "Mass": 1.0,
+        "LinearDamper": 0.1,
+        "GravityScale": 1.0,
+        "IsKinematic": false
+      },
+      {
+        "$type": "UnifyCore.Core.Physics.BoxCollider, UnifyCore",
+        "Width": 1.0,
+        "Height": 1.0
+      }
+    ],
+    "Position": "761, 240",
+    "Name": "Cube100100_2",
+    "Rotation": 0.0,
+    "Scale": "1, 1",
+    "BoundingSize": "100, 100"
+  },
+  {
+    "_components": [
+      {
+        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
+        "_asset": {
+          "_name": "/Cube100100.png"
+        },
+        "Color": "255, 255, 255, 255"
+      },
+      {
+        "$type": "UnifyCore.Core.Physics.BoxCollider, UnifyCore",
+        "Width": 1.0,
+        "Height": 1.0
+      }
+    ],
+    "Position": "766, 444",
+    "Name": "Cube100100",
+    "Rotation": 0.0,
+    "Scale": "1, 1",
+    "BoundingSize": "100, 100"
   }
 ]

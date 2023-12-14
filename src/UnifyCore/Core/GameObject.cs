@@ -13,6 +13,8 @@ namespace Unify2D.Core
     {
         public Vector2 Position{ get; set; }
         public string Name { get; set; }
+        public float Rotation { get; set; }
+        public Vector2 Scale { get; set; } = new Vector2(1, 1);
         public Vector2 BoundingSize { get; set; } = new Vector2(30, 30);
 
 
@@ -47,8 +49,18 @@ namespace Unify2D.Core
             }
         }
 
+        public T GetComponent<T>() where T : Component
+        {
+            foreach (var item in Components)
+            {
+                if (item is T)
+                {
+                    return (item as T);
+                }
+            }
 
-
+            return null;
+        }
 
         public bool HasRenderer()
         {

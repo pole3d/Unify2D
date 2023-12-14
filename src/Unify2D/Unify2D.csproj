@@ -12,6 +12,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\FNA\FNA.csproj" />
+        <ProjectReference Include="..\..\VelcroPhysics-master-TEMP\src\VelcroPhysics\VelcroPhysics.csproj" />
         <ProjectReference Include="..\ImGui.NET\ImGui.NET.csproj" />
         <ProjectReference Include="..\UnifyCore\UnifyCore.csproj" />
     </ItemGroup>

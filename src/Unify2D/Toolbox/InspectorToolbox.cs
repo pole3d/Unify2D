@@ -106,8 +106,15 @@ namespace Unify2D.Toolbox
             ImGui.InputText("name", ref name, 40);
             _gameObject.Name = name;
             System.Numerics.Vector2 position = new System.Numerics.Vector2(_gameObject.Position.X, _gameObject.Position.Y);
+            float rotation = MathHelper.ToDegrees(_gameObject.Rotation);
+            System.Numerics.Vector2 scale = new System.Numerics.Vector2(_gameObject.Scale.X, _gameObject.Scale.Y);
             ImGui.InputFloat2("position", ref position);
+            ImGui.InputFloat("rotation", ref rotation);
+            ImGui.InputFloat2("scale", ref scale);
+
             _gameObject.Position = new Vector2(position.X, position.Y);
+            _gameObject.Rotation = MathHelper.ToRadians(rotation);
+            _gameObject.Scale = new Vector2(scale.X, scale.Y);
 
 
             List<Component> toRemove = new List<Component>();
@@ -198,7 +205,5 @@ namespace Unify2D.Toolbox
             public Texture2D Texture { get; set; }
             public IntPtr IntPtr { get; set; }
         }
-
-
     }
 }

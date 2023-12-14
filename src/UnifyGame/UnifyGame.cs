@@ -31,7 +31,8 @@ namespace UnifyGame
             _graphics.PreferredBackBufferWidth = 1920;
             _graphics.PreferredBackBufferHeight = 1080;
             _graphics.PreferMultiSampling = true;
-
+            _graphics.SynchronizeWithVerticalRetrace = false;
+            
             IsMouseVisible = true;
         }
 
@@ -55,12 +56,19 @@ namespace UnifyGame
             _core.Initialize(GraphicsDevice);
 
             _core.GameObjects.Clear();
+            try
+            {
+                string text = File.ReadAllText("./test.scene");
+                JsonSerializerSettings settings = new JsonSerializerSettings();
+                settings.TypeNameHandling = TypeNameHandling.Auto;
 
-            string text = File.ReadAllText("./test.scene");
-            JsonSerializerSettings settings = new JsonSerializerSettings();
-            settings.TypeNameHandling = TypeNameHandling.Auto;
 
-            _core.LoadScene(this, JsonConvert.DeserializeObject<List<GameObject>>(text, settings));
+                _core.LoadScene(this, JsonConvert.DeserializeObject<List<GameObject>>(text, settings));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Can't load test.scene" + ex.ToString());
+            }
 
             base.LoadContent();
         }
@@ -73,6 +81,13 @@ namespace UnifyGame
 
         protected override void Draw(GameTime gameTime)
         {
+            if ( Camera.Main == null)
+            {
+                Console.WriteLine( "There's no camera on this scene" );
+                GameObject go = new GameObject();
+                go.AddComponent<Camera>();
+            }
+
             Camera camera = Camera.Main;
 
             if (camera != null)
@@ -98,35 +113,15 @@ namespace UnifyGame
             _imGuiRenderer.AfterLayout();
         }
 
-        //public Vector2 GetMousePosition()
-        //{
-        //    var mouseState = Mouse.GetState();
-        //    Num.Vector2 mousePosition = new Num.Vector2(mouseState.X, mouseState.Y);
-        //    mousePosition -= (_gameWindowPosition + _gameWindowOffset);
-
-        //    Vector2 size = new Vector2(_gameWindowSize.X, _gameWindowSize.Y);
-        //    Vector2 result = new Vector2(mousePosition.X, mousePosition.Y);
-        //    result /= size;
-
-        //    result.X = MathHelper.Clamp(result.X, 0, 1);
-        //    result.Y = MathHelper.Clamp(result.Y, 0, 1);
-
-        //    result *= _gameResolution;
-
-        //    result.X = MathF.Round(result.X);
-        //    result.Y = MathF.Round(result.Y);
-
-        //    return result;
-        //}
 
 
 
         protected virtual void ImGuiLayout()
         {
-          //  ImGui.ShowDemoWindow();
+            //  ImGui.ShowDemoWindow();
         }
 
-     
+
     }
 
 

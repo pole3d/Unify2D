@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +26,7 @@ namespace Unify2D.Toolbox
         {
         }
 
-        public virtual void Update()
+        public virtual void Update(GameTime gameTime)
         {
         }
     }

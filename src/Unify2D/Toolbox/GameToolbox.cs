@@ -83,6 +83,10 @@ namespace Unify2D.Toolbox
             _smallGridTexture = new Texture2D(_editor.GraphicsDevice, 1, 1);
             _smallGridTexture.SetData(new Color[] { new Color(1, 1, 1, .1f) });
         }
+        public override void Update(GameTime gameTime)
+        {
+            Selection.Update(gameTime);
+        }
         public override void Draw()
         {
             // Render target
