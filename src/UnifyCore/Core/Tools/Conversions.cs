@@ -25,5 +25,17 @@ namespace Unify2D.Core.Tools
         }
 
         public static float Deg2Rad = MathF.PI / 180f;
+
+
+        //Remove it from here later
+        public static Vector2 RotationOffset(Vector2 vector, float radians)
+        {
+            float sin = MathF.Sin(radians);
+            float cos = MathF.Cos(radians);
+
+            Vector2 rotated = new Vector2((vector.X * cos) + (vector.Y * sin), ((vector.X * sin) - (vector.Y * cos)));
+
+            return rotated;
+        }
     }
 }

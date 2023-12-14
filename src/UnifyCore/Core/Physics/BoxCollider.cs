@@ -53,19 +53,13 @@ namespace UnifyCore.Core.Physics
 
             Vector2 offsettedPosition = new Vector2((m_offset.X * cos) + (m_offset.Y * sin), ((m_offset.X * sin) - (m_offset.Y * cos)));
 
-            //Gizmo.DrawSquare(_gameObject.Position, new Vector2(/*_gameObject.Position.X - */-pixelsWidth / 2,/* _gameObject.Position.Y - */-pixelsHeight / 2), new Vector2(/*_gameObject.Position.X + */pixelsWidth / 2, /*_gameObject.Position.Y + */pixelsHeight / 2), _gameObject.Rotation) ;
+            //Gizmo.DrawSquare(_gameObject.Position + offsettedPosition, new Vector2(pixelsWidth, pixelsHeight), _gameObject.Rotation);
+
+            
 
 
-            Gizmo.DrawSquare(_gameObject.Position + offsettedPosition, new Vector2(pixelsWidth, pixelsHeight), _gameObject.Rotation);
-
-            /*
-            Vector2 topLeft = new Vector2(offsettedPosition.X - pixelsWidth / 2, offsettedPosition.Y - pixelsHeight / 2);
-            Vector2 topRight = new Vector2(offsettedPosition.X + pixelsWidth / 2, offsettedPosition.Y - pixelsHeight / 2);
-            Vector2 bottomLeft = new Vector2(offsettedPosition.X - pixelsWidth / 2, offsettedPosition.Y + pixelsHeight / 2);
-            Vector2 bottomRight = new Vector2(offsettedPosition.X + pixelsWidth / 2, offsettedPosition.Y + pixelsHeight / 2);
-
-            Gizmo.DrawWireBox(topLeft, topRight, bottomLeft, bottomRight, 3, Color.LightGreen);
-            */
+            Gizmo.DrawWireSquare(_gameObject.Position + offsettedPosition, new Vector2(pixelsWidth, pixelsHeight), 2, _gameObject.Rotation, Color.LightGreen);    
+            
         }
 
     }
