@@ -322,7 +322,7 @@ namespace Unify2D
 
             GameCore.SetCurrent(prefabCoreInfo.GameCore);
             
-            prefabCoreInfo.GameCore.AddGameObject(content.InstantiateGameObject(this));
+            prefabCoreInfo.GameCore.AddGameObjectImmediate(content.InstantiateGameObject(this));
         }
 
         internal void CloseGameCore(GameCoreInfo gameCoreInfo)

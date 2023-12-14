@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Numerics;
 using ImGuiNET;
 using Unify2D.Assets;
@@ -21,7 +21,7 @@ namespace Unify2D.Toolbox
             if (ImGui.Button("Add GameObject", new System.Numerics.Vector2(-  1,0)))
             {
                 GameObject go = new GameObject();
-                GameCore.Current.AddGameObject(go);
+                GameCore.Current.AddGameObjectImmediate(go);
                 go.Name = "GameObject";
             }
 

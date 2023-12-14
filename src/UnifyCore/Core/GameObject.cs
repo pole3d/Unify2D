@@ -126,13 +126,12 @@ namespace Unify2D.Core
         public static GameObject Instantiate(string originalAssetName)
         {
             // Get serialized text
-            string serializedText = System.IO.File.ReadAllText($"./Assets/{originalAssetName}.prefab");
+            string serializedText = File.ReadAllText($"./Assets/{originalAssetName}.prefab");
             // Create gameObject
             GameObject go = JsonConvert.DeserializeObject<GameObject>(serializedText, s_serializerSettings);
             go.Load(GameCore.Current.Game);
             GameCore.Current.AddGameObject(go);
             return go;
-            // TODO: LIST GAMEOBJECTS TO ADD
         }
     }
 }

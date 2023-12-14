@@ -37,6 +37,7 @@ namespace Unify2D.Core
         static GameCore s_current;
 
         List<GameObject> _gameObjects;
+        List<GameObject> _gameObjectsToInstantiate = new List<GameObject>();
         List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
         Game _game;
 
@@ -46,9 +47,13 @@ namespace Unify2D.Core
             _gameObjects = new List<GameObject>();
         }
 
-        public void AddGameObject(GameObject go)
+        public void AddGameObjectImmediate(GameObject go)
         {
             _gameObjects.Add(go);
+        }
+
+        public void AddGameObject(GameObject go) {
+            _gameObjectsToInstantiate.Add(go);
         }
 
         public void BeginDraw()
@@ -104,7 +109,7 @@ namespace Unify2D.Core
             _gameObjects.Clear();
             foreach (var item in gameObjects)
             {
-                AddGameObject(item);
+                AddGameObjectImmediate(item);
                 item.Load(game);
             }
         }
@@ -118,6 +123,12 @@ namespace Unify2D.Core
                 item.Update(this);
             }
 
+            foreach (GameObject item in _gameObjectsToInstantiate)
+            {
+                AddGameObjectImmediate(item);
+            }
+            _gameObjectsToInstantiate.Clear();
+            
             foreach (var item in _gameObjectsToDestroy)
             {
                 _gameObjects.Remove(item);
