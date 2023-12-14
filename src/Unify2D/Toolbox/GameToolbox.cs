@@ -89,14 +89,11 @@ namespace Unify2D.Toolbox
             _editor.GraphicsDevice.SetRenderTarget(_sceneRenderTarget);
             _editor.GraphicsDevice.Clear(_gameCamera.Background);
 
-
-
-
             // clear la texture de render de la scéne
-            ImGui.Begin("GAME", ImGuiWindowFlags.AlwaysVerticalScrollbar);
+            ImGui.Begin("GAME", ImGuiWindowFlags.None);
 
             // Declare style
-            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Num.Vector2.Zero);
+            ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, Num.Vector2.One);
 
 
             if (ImGui.MenuItem($"Resolution {_resolution}"))
@@ -104,9 +101,6 @@ namespace Unify2D.Toolbox
                 ImGui.SetWindowPos("Resolution", ImGui.GetMousePos());
                 _editor.ShowPopup(new ValuePopup<Vector2>("Resolution", s_resolutions, SetResolution));
             }
-
-            // Write camera data
-            ImGui.Text($"(X.{_lastMousePosition.X} Y.{_lastMousePosition.Y}) (Zoom.{MathF.Round(_gameCamera.ZoomLevel * 100) / 100}) (Angle.{_rotationAngle}°) (Pixel / Square : {_pixelPerGridSquare})");
 
             // begin child because stupid ImGui doesn't calculate Menu height....
             ImGui.BeginChild("Camera", new Num.Vector2(), false, ImGuiWindowFlags.NoScrollbar);
@@ -176,8 +170,12 @@ namespace Unify2D.Toolbox
             _editor.GameCore.EndDraw();
             #endregion
 
+            // Write camera data
+            ImGui.Text($"(X.{_lastMousePosition.X} Y.{_lastMousePosition.Y}) (Zoom.{MathF.Round(_gameCamera.ZoomLevel * 100) / 100}) (Angle.{_rotationAngle}°) (Pixel / Square : {_pixelPerGridSquare})");
+
             // Close
             ImGui.EndChild();
+
             ImGui.PopStyleVar();
             ImGui.End();
 
