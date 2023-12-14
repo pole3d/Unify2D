@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using Genbox.VelcroPhysics.Collision.Filtering;
+using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -24,32 +25,72 @@ namespace Unify2D
     /// </summary>
     public static class Debug
     {
-        private static List<DebugLog> _newLogs = new List<DebugLog>();
-        private static List<DebugLog> _logs = new List<DebugLog>();
+        private static Dictionary<string, List<DebugLog>> _logs = new();
 
-        internal static List<DebugLog> GetLogs() 
+        internal static List<DebugLog> GetLogs(string category)
         {
-            _logs.AddRange(_newLogs);
-            _newLogs.Clear();
-            return _logs; 
+            return _logs[category];
+        }
+        internal static IEnumerable<string> GetCategories()
+        {
+            return _logs.Keys;
         }
 
 
         public static void Log(string text)
         {
-            _newLogs.Add(new DebugLog(text));
+            Debug.Log(text, "All");
+        }
+        public static void Log(string text, string category)
+        {
+            if(! _logs.TryGetValue(category, out List<DebugLog> logs))
+            {
+                logs = new List<DebugLog>();
+                _logs.Add(category, logs);
+            }
+            logs.Add(new DebugLog(text));
         }
         public static void LogWarning(string text)
         {
-            _newLogs.Add(new WarningLog(text));
+            Debug.LogWarning(text, "All");
+        }
+        public static void LogWarning(string text, string category)
+        {
+            if (!_logs.TryGetValue(category, out List<DebugLog> logs))
+            {
+                logs = new List<DebugLog>();
+                _logs.Add(category, logs);
+            }
+            logs.Add(new WarningLog(text));
         }
         public static void LogError(string text)
         {
-            _newLogs.Add(new ErrorLog(text));
+            Debug.LogError(text, "All");
+        }
+        public static void LogError(string text, string category)
+        {
+            if (!_logs.TryGetValue(category, out List<DebugLog> logs))
+            {
+                logs = new List<DebugLog>();
+                _logs.Add(category, logs);
+            }
+            logs.Add(new ErrorLog(text));
         }
         public static void Assert(bool condition, string text)
         {
-            if (condition) _newLogs.Add(new ErrorLog(text));
+            if(condition) Debug.LogError(text, "All");
+        }
+        public static void Assert(bool condition, string text, string category)
+        {
+            if (condition)
+            {
+                if (!_logs.TryGetValue(category, out List<DebugLog> logs))
+                {
+                    logs = new List<DebugLog>();
+                    _logs.Add(category, logs);
+                }
+                logs.Add(new ErrorLog(text));
+            }
         }
     }
 }

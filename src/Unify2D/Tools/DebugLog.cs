@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using Microsoft.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -24,7 +25,7 @@ namespace Unify2D
     /// </summary>
     public class DebugLog
     {
-        public static DebugLog s_SelectedLog;
+        public static HashSet<DebugLog> s_SelectedLogs = new();
 
         private DateTime _time;
         private string _text;
@@ -39,24 +40,23 @@ namespace Unify2D
 
         internal virtual void Draw()
         {
-            if (s_SelectedLog == this)
+            if (s_SelectedLogs.Contains(this))
             {
-                ImGui.BeginPopup(_menuText);
-                DrawSelected();
-                ImGui.CloseCurrentPopup();
+                ImGui.SeparatorText(_menuText);
             }
-            else if(ImGui.MenuItem(_menuText))
+            else if (ImGui.MenuItem(_menuText))
             {
-                s_SelectedLog = this;
+                if(! Keyboard.GetState().IsKeyDown(Keys.LeftShift)) 
+                {
+                    s_SelectedLogs.Clear();
+                }
+                s_SelectedLogs.Add(this);
             }
         }
 
-        internal void DrawSelected()
+        internal virtual void DrawSelected()
         {
-            if (ImGui.MenuItem(_time.ToLongTimeString() + " :"))
-            {
-                s_SelectedLog = null;
-            }
+            ImGui.SeparatorText(_time.ToLongTimeString() + " :");
             ImGui.Text(_text);
         }
     }
@@ -75,6 +75,14 @@ namespace Unify2D
 
             ImGui.PopStyleColor();
         }
+        internal override void DrawSelected()
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, new Num.Vector4(1, 0.6f, 0, 1));
+
+            base.DrawSelected();
+
+            ImGui.PopStyleColor();
+        }
     }
     public class ErrorLog : DebugLog
     {
@@ -87,6 +95,14 @@ namespace Unify2D
             ImGui.PushStyleColor(ImGuiCol.Text, new Num.Vector4(1, 0, 0, 1));
 
             base.Draw();
+
+            ImGui.PopStyleColor();
+        }
+        internal override void DrawSelected()
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, new Num.Vector4(1, 0, 0, 1));
+
+            base.DrawSelected();
 
             ImGui.PopStyleColor();
         }

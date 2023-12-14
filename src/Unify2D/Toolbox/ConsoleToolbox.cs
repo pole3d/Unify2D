@@ -19,6 +19,8 @@ namespace Unify2D.Toolbox
 {
     internal class ConsoleToolbox : Toolbox
     {
+        private string _logCategory = "All";
+
         internal ConsoleToolbox()
         {
             Debug.Log("log 1");
@@ -31,9 +33,9 @@ namespace Unify2D.Toolbox
             Debug.Assert(true, "assert true");
             Debug.Assert(false, "assert false");
 
-            for(int i = 2; i < 999; i++)
+            for(int i = 0; i < 999; i++)
             {
-                Debug.Log($"log {i}");
+                Debug.Log($"spam {i}", "spam");
             }
         }
 
@@ -43,14 +45,46 @@ namespace Unify2D.Toolbox
         }
         public override void Draw()
         {
-            ImGui.Begin("Console", ImGuiWindowFlags.None);
+            ImGui.Begin("Console", ImGuiWindowFlags.NoScrollbar);
 
-            List<DebugLog> logs = Debug.GetLogs();
+            Num.Vector2 avail = ImGui.GetContentRegionAvail();
+            avail.Y /= 2f;
 
-            foreach (var log in logs)
+            ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, 1);
+
+
+            ImGui.BeginChild("Logs", avail, true);
+
+
+            ImGui.BeginTabBar("Log Categories", ImGuiTabBarFlags.None);
+            foreach(string category in Debug.GetCategories())
+            {
+                if (ImGui.TabItemButton(category))
+                {
+                    _logCategory = category;
+                }
+            }
+            ImGui.EndTabBar();
+
+
+            ImGui.BeginTabItem(_logCategory);
+            foreach (var log in Debug.GetLogs(_logCategory))
             {
                 log.Draw();
             }
+            ImGui.EndTabItem();
+
+
+            ImGui.EndChild();
+
+
+            ImGui.BeginChild("Selected", avail, true);
+            foreach (var log in DebugLog.s_SelectedLogs)
+            {
+                log.DrawSelected();
+            }
+            ImGui.EndChild();
+
 
             ImGui.PopStyleVar();
             ImGui.End();
