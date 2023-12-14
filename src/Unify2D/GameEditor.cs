@@ -44,6 +44,7 @@ namespace Unify2D
         
         public GameEditorSettings Settings => _settings;
         public Scripting.Scripting Scripting => _scripting;
+        public AssetManager AssetManager => _assetManager;
         public ImGuiRenderer.Renderer GuiRenderer => _imGuiRenderer;
         internal InspectorToolbox InspectorToolbox => _inspectorToolbox;
         internal ScriptToolbox ScriptToolbox => _scriptToolbox;
@@ -60,6 +61,7 @@ namespace Unify2D
         GameEditorUI _gameEditorUI;
         ImGuiRenderer.Renderer _imGuiRenderer;
         Scripting.Scripting _scripting;
+        AssetManager _assetManager;
         GameEditorSettings _settings;
         SceneEditorManager _sceneEditorManager;
         
@@ -97,6 +99,8 @@ namespace Unify2D
 
             _scripting = new Scripting.Scripting();
             _scripting.Load(this);
+
+            _assetManager = new AssetManager(this);
             
             //Create game core and load scene content
             _coreInfoScene = new GameCoreInfo(
@@ -324,7 +328,7 @@ namespace Unify2D
 
             GameCore.SetCurrent(prefabCoreInfo.GameCore);
             
-            prefabCoreInfo.GameCore.AddGameObjectImmediate(content.InstantiateGameObject(this));
+            GameCore.Current.LoadScene(this, new List<GameObject>() { content.InstantiateGameObject() });
         }
 
         internal void CloseGameCore(GameCoreInfo gameCoreInfo)

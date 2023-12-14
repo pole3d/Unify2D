@@ -1,4 +1,7 @@
-﻿using Unify2D.Tools;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
+using Unify2D.Tools;
 
 namespace Unify2D.Assets
 {
@@ -7,7 +10,7 @@ namespace Unify2D.Assets
         public string Name => _name;
         public string Extension => _extension;  
         public string Path  => _path; 
-        public AssetContent AssetContent  => _content;
+        public AssetContent AssetContent => _content;
 
         public string FullPath => _fullPath; 
         
@@ -17,29 +20,16 @@ namespace Unify2D.Assets
         string _fullPath;
         AssetContent _content;
 
-
-        public Asset(string name, string extension, string path)
+        internal Asset(string name, string extension, string path)
         {
             _name = name;
             _extension = extension;
             _path = path;
 
-            switch (extension)
-            {
-                case ".cs":
-                    _content = new ScriptAssetContent(this);
-                    break;
-                case ".prefab":
-                    _content = new PrefabAssetContent(this);
-                    break;
-                case ".png":
-                    _content = new TextureAssetContent(this);
-                    break;
-            }
+            _content = (AssetContent)Activator.CreateInstance(GameEditor.Instance.AssetManager.ExtensionToAssetType[extension], this);
 
             _fullPath = ToolsEditor.CombinePath(path, name + extension);
         }
-
 
         public override string ToString()
         {

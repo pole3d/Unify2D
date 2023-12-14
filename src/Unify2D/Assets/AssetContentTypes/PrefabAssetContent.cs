@@ -12,12 +12,12 @@ namespace Unify2D.Assets
 
         public override void OnDragDroppedInGame(GameEditor editor)
         {
-            GameObject go = InstantiateGameObject(editor);
+            GameObject go = InstantiateGameObject();
             GameCore.Current.AddGameObjectImmediate(go);
             Selection.SelectObject(go);
         }
 
-        public GameObject InstantiateGameObject(GameEditor editor)
+        public GameObject InstantiateGameObject()
         {
             // Get serialized text
             _serializedText = File.ReadAllText($"{GameEditor.Instance.AssetsPath}{_asset.FullPath}");
@@ -26,6 +26,16 @@ namespace Unify2D.Assets
             settings.TypeNameHandling = TypeNameHandling.Auto;
             // Create gameObject
             return JsonConvert.DeserializeObject<GameObject>(_serializedText, settings);
+        }
+
+        internal void Save(GameObject gameObject)
+        {
+            // Make so type name should be written in serialized data
+            JsonSerializerSettings settings = new JsonSerializerSettings();
+            settings.TypeNameHandling = TypeNameHandling.Auto;
+            // Write serialized data to file
+            _serializedText = JsonConvert.SerializeObject(gameObject, settings);
+            File.WriteAllText(_asset.FullPath, _serializedText);
         }
     }
 }

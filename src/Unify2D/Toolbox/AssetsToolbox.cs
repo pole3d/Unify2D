@@ -24,29 +24,10 @@ namespace Unify2D.Toolbox
 
         internal override void Reset()
         {
-            _assets.Clear();
-            _path = _editor.AssetsPath;
-
-            if (String.IsNullOrEmpty(_path))
-                return;
-
-            if (Directory.Exists(_path) == false)
-                Directory.CreateDirectory(_path);
-
-            var files = Directory.GetFiles(_path);
-
-            foreach (var file in files)
-            {
-                string relativeFile = file.Replace(_path, string.Empty);
-
-                _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeFile),
-                    Path.GetExtension(relativeFile),
-                    Path.GetDirectoryName(relativeFile)));
-            }
-
-            _selected = new bool[files.Length];
+            _editor.AssetManager.RefreshDatabase();
+            _assets = _editor.AssetManager.Assets;
+            _selected = new bool[_editor.AssetManager.NbOfFiles];
         }
-
 
         public override void Draw()
         {
@@ -117,33 +98,9 @@ namespace Unify2D.Toolbox
 
                 if (draggedGO != null)
                 {
-                    StringBuilder nameSb = new StringBuilder(draggedGO.Name);
-                    int safeguard = 0;
-                    // Append number in filename if file already exists
-                    while (File.Exists(Path.Combine(_editor.AssetsPath, nameSb + ".prefab")))
-                    {
-                        if (++safeguard > 99999)
-                            throw new Exception("Too many files with the same name, or potentially stuck in an infinite loop. Prefab save failed.");
-                        
-                        // TODO: Fix number assignement. this currently goes from "19" to "110" (and "119" to "1110", etc...)
-                        char lastChar = nameSb[nameSb.Length - 1];
-                        if (char.IsDigit(lastChar))
-                        {
-                            nameSb.Length--;
-                            if (lastChar == '9')
-                                nameSb.Append("10");
-                            else
-                                nameSb.Append((char)(lastChar + 1));
-                        }
-                        else
-                            nameSb.Append('1');
-                    }
-                    nameSb.Append(".prefab");
-                    // Make so type name should be written in serialized data
-                    JsonSerializerSettings settings = new JsonSerializerSettings();
-                    settings.TypeNameHandling = TypeNameHandling.Auto;
                     // Write serialized data to file
-                    File.WriteAllText(Path.Combine(_editor.AssetsPath, nameSb.ToString()), JsonConvert.SerializeObject(draggedGO, settings));
+                    Asset prefabAsset = _editor.AssetManager.CreateAsset<PrefabAssetContent>(draggedGO.Name);
+                    ((PrefabAssetContent)prefabAsset.AssetContent).Save(draggedGO);
                     // Refresh toolbox
                     Reset();
                 }
