@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Unify2D.Physics;
+using Unify2D.Core.Tools;
 
 namespace Unify2D.Core
 {
@@ -85,6 +86,7 @@ namespace Unify2D.Core
         }
         public void DrawGizmo()
         {
+            Gizmo.SetColor(Color.White);
             foreach (var item in _gameObjects)
             {
                 item.DrawGizmo();

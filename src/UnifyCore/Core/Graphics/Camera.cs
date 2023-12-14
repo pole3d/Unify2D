@@ -132,7 +132,6 @@ namespace Unify2D.Core.Graphics
 
         internal override void DrawGizmo()
         {
-            Gizmo.SetColor(Color.White);
             Gizmo.DrawWireSquare(TopLeft, BottomRight, (int)MathF.Max(5 * ZoomLevel, 5));
         }
 
