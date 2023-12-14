@@ -40,10 +40,10 @@ namespace Unify2D.Core
         List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
         Game _game;
 
-        public GameCore(Game game, IEnumerable<GameObject> gameObjects = null)
+        public GameCore(Game game)
         {
             _game = game;
-            _gameObjects = gameObjects == null ? new List<GameObject>() : new List<GameObject>(gameObjects);
+            _gameObjects = new List<GameObject>();
         }
 
         public void AddGameObject(GameObject go)
@@ -101,6 +101,7 @@ namespace Unify2D.Core
 
         public void LoadScene(Game game, List<GameObject> gameObjects)
         {
+            _gameObjects.Clear();
             foreach (var item in gameObjects)
             {
                 AddGameObject(item);

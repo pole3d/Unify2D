@@ -22,12 +22,8 @@ namespace Unify2D
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
             settings.Formatting = Formatting.Indented;
-            foreach (GameCoreInfo coreInfo in _gameEditor.GameCoresInfo)
-            {
-                string text = JsonConvert.SerializeObject(coreInfo.GameCore.GameObjects, settings);
-                File.WriteAllText(ToolsEditor.CombinePath(_gameEditor.ProjectPath, coreInfo.AssetPath), text);
-            }
-
+            string text = JsonConvert.SerializeObject(_gameEditor.GameCoreInfoScene.GameCore.GameObjects, settings);
+            File.WriteAllText(ToolsEditor.CombinePath(_gameEditor.ProjectPath, $"./{sceneName}.scene"), text);
         }
 
         public void LoadScene(string sceneName)
@@ -51,8 +47,9 @@ namespace Unify2D
                 Selection.SelectObject(null);
                 _gameEditor.GameCoresInfo.Remove(_gameEditor.GameCoreInfoScene);
                 _gameEditor.SetSceneCore(new GameCoreInfo(
-                    new GameCore(_gameEditor, gameObjects),
+                    new GameCore(_gameEditor),
                     $"./{sceneName}.scene"));
+                _gameEditor.GameCoreInfoScene.GameCore.LoadScene(_gameEditor, gameObjects);
             }
         }
 
