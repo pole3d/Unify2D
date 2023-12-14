@@ -69,6 +69,8 @@ namespace Unify2D
 
         GameObject _selected;
         bool _projectLoaded = false;
+
+        List<(RenderTarget2D, IntPtr)> _unbindTargets = new List<(RenderTarget2D, IntPtr)>();
         #endregion
 
         #region Initialization
@@ -171,6 +173,18 @@ namespace Unify2D
 
             // Call AfterLayout now to finish up and draw all the things
             _imGuiRenderer.AfterLayout();
+
+
+            // Unbind old rendertarget, need to be done outside the drawcalls or it crashes
+            if(_unbindTargets.Count > 0)
+            {
+                foreach (var tuple in _unbindTargets)
+                {
+                    tuple.Item1.Dispose(); // Rendertarget
+                    GuiRenderer.UnbindTexture(tuple.Item2); // Id Pointer
+                }
+                _unbindTargets.Clear();
+            }
         }
 
 
@@ -360,6 +374,11 @@ namespace Unify2D
         protected override void UnloadContent()
         {
             _settings.Save();
+        }
+
+        internal void UnbindTexture(RenderTarget2D sceneRenderTarget, IntPtr renderTargetId)
+        {
+            _unbindTargets.Add((sceneRenderTarget, renderTargetId));
         }
     }
 

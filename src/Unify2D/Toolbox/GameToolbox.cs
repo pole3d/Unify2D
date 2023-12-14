@@ -61,16 +61,11 @@ namespace Unify2D.Toolbox
             _resolution = resolution;
             _gameCamera.Viewport = resolution;
 
-            /*
-            // delete old texture
-            _editor.GuiRenderer.UnbindTexture(_renderTargetId);
-            tmp.Dispose();
-            */
+            _editor.UnbindTexture(_sceneRenderTarget, _renderTargetId);
 
             // new texture
             _sceneRenderTarget = new RenderTarget2D(_editor.GraphicsDevice, (int)resolution.X, (int)resolution.Y);
             _renderTargetId = _editor.GuiRenderer.BindTexture(_sceneRenderTarget);
-
 
         }
         public override void Initialize(GameEditor editor)
