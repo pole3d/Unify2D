@@ -126,6 +126,7 @@ namespace Unify2D
 
             _toolboxes.Add(new AssetsToolbox());
             _toolboxes.Add(new HierarchyToolbox());
+            _toolboxes.Add(new ConsoleToolbox());
 
             _toolboxes.Add(ScriptToolbox);
             _toolboxes.Add(InspectorToolbox);
