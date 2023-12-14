@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Newtonsoft.Json;
 using Unify2D.Core;
 
@@ -35,7 +36,7 @@ namespace Unify2D.Assets
             settings.TypeNameHandling = TypeNameHandling.Auto;
             // Write serialized data to file
             _serializedText = JsonConvert.SerializeObject(gameObject, settings);
-            File.WriteAllText(_asset.FullPath, _serializedText);
+            File.WriteAllText(GameEditor.Instance.AssetsPath + _asset.FullPath, _serializedText);
         }
     }
 }

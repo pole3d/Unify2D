@@ -22,8 +22,20 @@ namespace Unify2D
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
             settings.Formatting = Formatting.Indented;
-            string text = JsonConvert.SerializeObject(_gameEditor.GameCoreInfoScene.GameCore.GameObjects, settings);
-            File.WriteAllText(ToolsEditor.CombinePath(_gameEditor.ProjectPath, $"./{sceneName}.scene"), text);
+            foreach (GameCoreInfo coreInfo in _gameEditor.GameCoresInfo)
+            {
+                if (coreInfo.AssetType == GameCoreInfo.Type.Scene)
+                {
+                    string text = JsonConvert.SerializeObject(_gameEditor.GameCoreInfoScene.GameCore.GameObjects, settings);
+                    File.WriteAllText(ToolsEditor.CombinePath(_gameEditor.ProjectPath, $"./{sceneName}.scene"), text);
+                }
+                else if (coreInfo.AssetType == GameCoreInfo.Type.Prefab)
+                {
+                    Asset asset = _gameEditor.AssetManager.Find(coreInfo.AssetPath, true);
+                    if (asset != null)
+                        ((PrefabAssetContent)asset.AssetContent).Save(coreInfo.GameCore.GameObjects[0].GetRoot()); //Not so ideal, todo we should find a way to cache the root gameObject of a core (after branch merge)
+                }
+            }
         }
 
         public void LoadScene(string sceneName)

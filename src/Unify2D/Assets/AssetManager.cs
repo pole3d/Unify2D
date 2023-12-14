@@ -88,5 +88,18 @@ namespace Unify2D.Assets
             File.Create(filePath).Close();
             return new Asset(name, extension, _editor.AssetsPath);
         }
+
+        internal Asset Find(string path, bool isFullPath = false)
+        {
+            if (isFullPath == false)
+                path = Path.Combine(_editor.AssetsPath, path);
+            foreach (Asset asset in Assets)
+            {
+                if (asset.FullPath == path)
+                    return asset;
+            }
+
+            throw new Exception($"No Asset found at path \"{path}\"");
+        }
     }
 }

@@ -137,6 +137,13 @@ namespace Unify2D.Core
 
             _components.Clear();
         }
+
+        public GameObject GetRoot()
+        {
+            return this;
+            // TODO VERY IMPORTANT: Implement this method after merge with the gameObject parenting branch
+            // recursive : if the gameObject has no parent, return it, otherwise execute the method on its parent.
+        }
         
         public static GameObject Instantiate(string originalAssetName)
         {
