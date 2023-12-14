@@ -45,18 +45,27 @@ namespace UnifyCore.Core.Physics
 
         internal override void DrawGizmo()
         {
-            Vector2 offsettedPosition = _gameObject.Position + m_offset;
-
             int pixelsWidth  = (int)Math.Round(m_width * _gameObject.Scale.X * PhysicsSettings.UnitToPixelRatio);
             int pixelsHeight = (int)Math.Round(m_height * _gameObject.Scale.Y * PhysicsSettings.UnitToPixelRatio);
 
+            float sin = MathF.Sin(_gameObject.Rotation);
+            float cos = MathF.Cos(_gameObject.Rotation);
+
+            Vector2 offsettedPosition = new Vector2((m_offset.X * cos) + (m_offset.Y * sin), ((m_offset.X * sin) - (m_offset.Y * cos)));
+
+            //Gizmo.DrawSquare(_gameObject.Position, new Vector2(/*_gameObject.Position.X - */-pixelsWidth / 2,/* _gameObject.Position.Y - */-pixelsHeight / 2), new Vector2(/*_gameObject.Position.X + */pixelsWidth / 2, /*_gameObject.Position.Y + */pixelsHeight / 2), _gameObject.Rotation) ;
+
+
+            Gizmo.DrawSquare(_gameObject.Position + offsettedPosition, new Vector2(pixelsWidth, pixelsHeight), _gameObject.Rotation);
+
             /*
-            Gizmo.DrawSquare(_gameObject.Position, new Vector2(_gameObject.Position.X - pixelsWidth / 2, _gameObject.Position.Y - pixelsHeight / 2),
-                new Vector2(_gameObject.Position.X + pixelsWidth / 2, _gameObject.Position.Y + pixelsHeight / 2), _gameObject.Rotation) ;
+            Vector2 topLeft = new Vector2(offsettedPosition.X - pixelsWidth / 2, offsettedPosition.Y - pixelsHeight / 2);
+            Vector2 topRight = new Vector2(offsettedPosition.X + pixelsWidth / 2, offsettedPosition.Y - pixelsHeight / 2);
+            Vector2 bottomLeft = new Vector2(offsettedPosition.X - pixelsWidth / 2, offsettedPosition.Y + pixelsHeight / 2);
+            Vector2 bottomRight = new Vector2(offsettedPosition.X + pixelsWidth / 2, offsettedPosition.Y + pixelsHeight / 2);
+
+            Gizmo.DrawWireBox(topLeft, topRight, bottomLeft, bottomRight, 3, Color.LightGreen);
             */
-            Gizmo.DrawWireSquare(new Vector2(offsettedPosition.X - pixelsWidth / 2, offsettedPosition.Y - pixelsHeight / 2), 
-                new Vector2(offsettedPosition.X + pixelsWidth / 2, offsettedPosition.Y + pixelsHeight / 2), 3, Color.LightGreen);
-            
         }
 
     }

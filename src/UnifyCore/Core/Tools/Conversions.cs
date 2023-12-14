@@ -1,0 +1,29 @@
+﻿using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Unify2D.Core.Tools
+{
+    internal class Conversions
+    {
+        public static uint ColorToUInt(Color color)
+        {
+            return (uint)((color.A << 24) | (color.R << 16) |
+                          (color.G << 8) | (color.B << 0));
+        }
+
+        public static Color UIntToColor(uint color)
+        {
+            byte a = (byte)(color >> 24);
+            byte r = (byte)(color >> 16);
+            byte g = (byte)(color >> 8);
+            byte b = (byte)(color >> 0);
+            return new Color(a, r, g, b);
+        }
+
+        public static float Deg2Rad = MathF.PI / 180f;
+    }
+}
