@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualBasic.FileIO;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
@@ -24,10 +25,16 @@ namespace Unify2D.Toolbox
         bool[] _selected;
         List<Asset> _assets = new List<Asset>();
         GameEditor _editor;
-        public static TreeNode selectedNode;
+   
 
+        int folderCount = 0;
         int treeFilesIndex = 0;
         string newName = "";
+        string[] folders;
+        string selectedFolder;
+        string previousFolder = null;
+        string selectedFile;
+        string previousFile = null;
         public override void Initialize(GameEditor editor)
         {
             _editor = editor;
@@ -39,63 +46,47 @@ namespace Unify2D.Toolbox
             _assets.Clear();
             _path = _editor.AssetsPath;
             treeFilesIndex = 0;
+            folderCount = 0;
             if (String.IsNullOrEmpty(_path))
                 return;
 
             if (Directory.Exists(_path) == false)
                 Directory.CreateDirectory(_path);
 
-            var folders = Directory.GetDirectories(_path);
+            folders = Directory.GetDirectories(_path);
             var rootFiles = Directory.GetFiles(_path);
 
-            // root
-            treeFiles.Add(new TreeNode() { name = "Root", type = "Root", childType = "null", nodeIndex = treeFilesIndex, childCount = rootFiles.Length + folders.Length, path = _editor.AssetsPath, isSelected = false }) ;
-            treeFilesIndex++;
+        }
+        public void DisplayFilesTree(string folderPath)
+        {
 
-            // files in root
-            foreach (var file in rootFiles)
+            if (folderPath == null)
+                return;
+
+            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.NoTreePushOnOpen;
+
+
+            string relativePath = Path.Combine(_editor.AssetsPath, folderPath);
+            string[] files = Directory.GetFiles(relativePath);
+
+            foreach (var file in files)
             {
-                string relativeFile = file.Replace(_path, string.Empty);
-
-                _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeFile), Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile)));
-
-                string fileName = Path.GetFileNameWithoutExtension(relativeFile).ToString();
-
-                treeFiles.Add(new TreeNode() { name = fileName, type = "file", childType = "null", nodeIndex = treeFilesIndex, childCount = -1, folderPath = _editor.AssetsPath, path = Path.Combine(_editor.AssetsPath, Path.GetDirectoryName(relativeFile), relativeFile), isSelected = false }); ;
-                treeFilesIndex++;
-
-            }
-
-            // folder in root
-            foreach (var folder in folders)
-            {
-                string relativeFolder = folder.Replace(_path, string.Empty);
-                string folderName = Path.GetFileName(relativeFolder);
-
-                treeFiles.Add(new TreeNode() { name = folderName, type = "Folder", childType = "file", nodeIndex = treeFilesIndex, childCount = 2, folderPath = _editor.AssetsPath, path = Path.Combine(_editor.AssetsPath, folderName), isSelected = false });
-                treeFilesIndex++;
-
-                var files = Directory.GetFiles(Path.Combine(_editor.AssetsPath, folderName));
-
-                // files in each folders
-                foreach (var file in files)
+                ImGui.TableSetColumnIndex(1);
+                ImGui.Text(Path.GetFileNameWithoutExtension(file));
+                if (ImGui.IsItemClicked())
                 {
-                    string relativeFile = file.Replace(Path.Combine(_editor.AssetsPath, folderName), string.Empty);
+                    Console.WriteLine("OO");
+                    selectedFile = file;
 
-                    _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeFile), Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile)));
 
-                    string fileName = Path.GetFileNameWithoutExtension(relativeFile).ToString();
-                    string extension = Path.GetExtension(relativeFile).ToString();
-
-                    treeFiles.Add(new TreeNode() { name = fileName, type = "file", childType = "null", nodeIndex = treeFilesIndex, childCount = -1, folderPath = Path.Combine(_editor.AssetsPath, folderName), path = Path.Combine(_editor.AssetsPath, Path.GetDirectoryName(relativeFile), relativeFile), isSelected = false }); ;
-
-                    treeFilesIndex++;
+                    if (selectedFile != previousFile)
+                    {
+                        Console.WriteLine("file selectionné = " + Path.GetFileNameWithoutExtension(file));
+                        previousFile = selectedFile;
+                    }
                 }
             }
-
-            //_selected = new bool[files.Length];
         }
-
 
         public override void Show()
         {
@@ -118,58 +109,104 @@ namespace Unify2D.Toolbox
                 {
                     if (ImGui.MenuItem("Delete Folder", null))
                     {
-                        DeleteFolder(GetSelectedNode().nodeIndex, GetSelectedNode().path);
+                        DeleteFolder(0, null);
                     }
                     if (ImGui.MenuItem("Delete File", null))
                     {
-                        DeleteFile(GetSelectedNode().path);
+                        DeleteFile(null);
                     }
                     ImGui.EndMenu();
                 }
-                if(ImGui.BeginMenu("Rename selected file"))
+                if (ImGui.BeginMenu("Rename selected file"))
                 {
-                    if(ImGui.MenuItem("Rename file", null))
+                    if (ImGui.MenuItem("Rename file", null))
                     {
-                        RenameFile(GetSelectedNode().path, newName);
+                        RenameFile(null, newName);
                     }
                 }
-                
-               
+
+
                 ImGui.EndMenuBar();
             }
-            
-            if(ImGui.InputTextWithHint("Rename", "Enter new name here", ref newName, 128))
-            {
-                
-                RenameFile(GetSelectedNode().path, newName);
-            }
-           
-            if (ImGui.TreeNode("Tree View"))
-            {
-                ImGuiTableFlags flags = ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.Resizable | ImGuiTableFlags.RowBg | ImGuiTableFlags.NoBordersInBody | ImGuiTableFlags.Reorderable;
-                if (ImGui.BeginTable("3 ways", 3, flags))
-                {
-                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.NoHide);
-                    ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.WidthFixed, 18f);
-                    ImGui.TableSetupColumn("Index", ImGuiTableColumnFlags.WidthFixed, 18f);
-                    ImGui.TableHeadersRow();
 
-                    
-                    TreeNode.DisplayNode(treeFiles[0], treeFiles);
-                    ImGui.EndTable();
+            if (ImGui.InputTextWithHint("Rename", "Enter new name here", ref newName, 128))
+            {
+
+                RenameFile(null, newName);
+            }
+
+            if (ImGui.BeginTable("Tree Table", 2))
+            {
+                ImGui.Unindent(ImGui.GetTreeNodeToLabelSpacing());
+                ImGui.TableNextColumn();
+                if (ImGui.TreeNode("Root"))
+                {
+
+                    for (int i = 0; i < folders.Length; i++)
+                    {
+                        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.OpenOnDoubleClick | ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.NoTreePushOnOpen | ImGuiTreeNodeFlags.AllowOverlap;
+                        string relativeFolder = folders[i].Replace(_path, string.Empty);
+                        string folderName = Path.GetFileName(relativeFolder);
+                        if (ImGui.TreeNodeEx(folderName, flags))
+                        {
+                            ImGui.TableNextRow();
+                            //ImGui.TreePop();
+                            selectedFolder = folders[i];
+
+                            if (selectedFolder != previousFolder)
+                            {
+                                Console.WriteLine("folder selectionné = " + Path.GetFileName(relativeFolder));
+                                previousFolder = selectedFolder;
+                            }
+                        }
+                    }
+                    ImGui.TreePop();
                 }
-                ImGui.TreePop();
+                //ImGui.TableNextColumn();
+                ImGui.TableSetColumnIndex(1);
+                ImGui.SetNextItemOpen(true);
+                if (ImGui.TreeNode("Files"))
+                {
+                    ImGui.TableSetColumnIndex(1);
+                    DisplayFilesTree(selectedFolder);
+                }
+                ImGui.EndTable();
+            }
+            bool j = false;
+
+            if (ImGui.GetIO().MouseClicked[1])
+            {
+                j = true;
+                
+            }
+            if(j) 
+            {
+                Console.WriteLine("SS");
+
+                if (ImGui.Button("sdsd"))
+                    ImGui.OpenPopup("File Popup");
+                if (ImGui.BeginPopup("File Popup", ImGuiWindowFlags.MenuBar))
+                {
+                    if (ImGui.BeginMenuBar())
+                    {
+                        if (ImGui.BeginMenu("Rename"))
+                        {
+                            ImGui.EndMenu();
+                        }
+                        if (ImGui.BeginMenu("Delete"))
+                        {
+                            ImGui.EndMenu();
+                        }
+                        ImGui.EndMenuBar();
+                    }
+                    ImGui.EndPopup();
+                }
             }
 
             ImGui.End();
+
         }
 
-        public static void SetSelectedNode(TreeNode node)
-        {
-            selectedNode = node;
-        }
-        public static TreeNode GetSelectedNode() 
-        { return selectedNode; }
         public void CreateDirectoryTreeNode()
         {
             Console.WriteLine(_editor.AssetsPath);
@@ -178,7 +215,7 @@ namespace Unify2D.Toolbox
             CheckNewFolder(0);
         }
 
-        
+
         public void CheckNewFolder(int newIndex)
         {
             if (Directory.Exists(Path.Combine(_editor.AssetsPath, "New Folder" + newIndex)))
@@ -189,145 +226,63 @@ namespace Unify2D.Toolbox
             {
                 Directory.CreateDirectory(Path.Combine(_editor.AssetsPath, "New Folder" + newIndex));
                 string folderName = "New Folder" + newIndex.ToString();
-                int newNodeIndex = treeFiles.Count-1;
-              
-                treeFiles.Add(new TreeNode() { name = "New Folder " + newIndex, type = "Folder", childType = "file", nodeIndex = newNodeIndex, childCount = 10, folderPath = _editor.AssetsPath, path = Path.Combine(_editor.AssetsPath, folderName) });
+                //int newNodeIndex = treeFiles.Count-1;
+
+                //treeFiles.Add(new TreeNode() { name = "New Folder " + newIndex, type = "Folder", childType = "file", nodeIndex = newNodeIndex, childCount = 10, folderPath = _editor.AssetsPath, path = Path.Combine(_editor.AssetsPath, folderName) });
             }
         }
 
         public void DeleteFolder(int index, string folderName)
         {
-            if (treeFiles[index].type != "Folder")
-            {
-                Console.WriteLine("La node n'est pas un folder");
-                return;
-            }
+            //if (treeFiles[index].type != "Folder")
+            //{
+            //    Console.WriteLine("La node n'est pas un folder");
+            //    return;
+            //}
 
             Console.Write("La node est un folder");
             string folderPath = Path.Combine(_editor.AssetsPath, folderName);
-            treeFiles.RemoveAt(index);
+            //treeFiles.RemoveAt(index);
             if (Directory.Exists(folderPath))
             {
                 Directory.Delete(folderPath, true);
                 Reset();
             }
-            
+
         }
         public void RenameFile(string pathFile, string newName)
         {
             FileInfo currentFile = new FileInfo(_editor.AssetsPath + pathFile);
             string newFile = Path.Combine(_editor.AssetsPath + newName);
-            if (currentFile.Exists) 
+            if (currentFile.Exists)
             {
                 string newPath = Path.Combine(_editor.AssetsPath, newName);
                 Console.WriteLine("Rename");
                 File.Move(currentFile.ToString(), newPath);
-                treeFiles.RemoveAt(GetSelectedNode().nodeIndex);
-                treeFiles.Add(new TreeNode() { name = newName, type = "Folder", childType = "file", nodeIndex = treeFilesIndex, childCount = 10, folderPath = _editor.AssetsPath, path = Path.Combine(_editor.AssetsPath) });
+                //treeFiles.RemoveAt(GetSelectedNode().nodeIndex);
+                //treeFiles.Add(new TreeNode() { name = newName, type = "Folder", childType = "file", nodeIndex = treeFilesIndex, childCount = 10, folderPath = _editor.AssetsPath, path = Path.Combine(_editor.AssetsPath) });
                 treeFilesIndex++;
-            } else
+            }
+            else
             {
                 Console.WriteLine("Le fichier n'existe pas");
             }
-          
+
         }
         public void DeleteFile(string pathFile)
         {
             string combinedPath = _editor.AssetsPath + pathFile;
-            treeFiles.RemoveAt(GetSelectedNode().nodeIndex);
-            if(File.Exists(combinedPath))
+            //treeFiles.RemoveAt(GetSelectedNode().nodeIndex);
+            if (File.Exists(combinedPath))
             {
                 File.Delete(combinedPath);
-            } else
+            }
+            else
             {
                 Console.WriteLine(combinedPath + " doesnt exist");
             }
-           
+
         }
-        
 
-        public struct TreeNode
-        {
-            public string name;
-            public string type;
-            public string childType;
-            public int nodeIndex;
-            public int childCount;
-            public string folderPath;
-            public string path;
-            public bool isSelected;
-            
-
-            public static void DisplayNode(TreeNode node, List<TreeNode> allNodes)
-            {
-                if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
-                {
-                    Console.Write(ImGui.IsItemClicked());
-                    TreeNode selectedNode = allNodes[node.nodeIndex -1];
-                    selectedNode.isSelected = !selectedNode.isSelected;
-                  
-                    if (selectedNode.isSelected)
-                    {
-                        Console.WriteLine(selectedNode.name + " is selected, her index is "+ selectedNode.nodeIndex);
-                        SetSelectedNode(selectedNode);
-                    }
-                }
-
-                ImGui.TableNextRow();
-                ImGui.TableNextColumn();
-               
-  
-                bool isFolder = false;
-                if (node.childCount > 0)
-                {
-                    isFolder = true;
-                }
-
-                if (isFolder)
-                {
-                    bool open = ImGui.TreeNodeEx(node.name, ImGuiTreeNodeFlags.SpanFullWidth);
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(node.type);
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(node.nodeIndex.ToString());
-
-                    if (open)
-                    {
-
-                        for (int i = 0; i < allNodes.Count; i++)
-                        {
-                            if (node.type == "Root")
-                            {
-                                if (node.path == allNodes[i].folderPath)
-                                {
-                                    DisplayNode(allNodes[i], allNodes);
-                                }
-                            }
-                            if (node.type == "Folder")
-                            {
-                                if (allNodes[i].folderPath == node.path)
-                                {
-                                    DisplayNode(allNodes[i], allNodes);
-                                }
-
-                            }
-                        }
-                        ImGui.TreePop();
-                    }
-                }
-                else
-                {
-                    ImGui.TreeNodeEx(node.name, ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.Bullet | ImGuiTreeNodeFlags.NoTreePushOnOpen | ImGuiTreeNodeFlags.SpanFullWidth);
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(node.type);
-                    ImGui.TableNextColumn();
-                    ImGui.TextUnformatted(node.nodeIndex.ToString());
-                }
-            }
-        };
-        public List<TreeNode> treeFiles = new List<TreeNode>();
     }
-
-
-
 }
