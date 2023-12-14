@@ -9,6 +9,7 @@ namespace Unify2D.Core.Graphics
     public class SpriteRenderer : Renderer
     {
         public Color Color { get; set; } = Color.White;
+        public float LayerDepth { get; set; } = 0f;
         [JsonIgnore]
         public GameAsset Asset => _asset;
 
@@ -47,7 +48,9 @@ namespace Unify2D.Core.Graphics
             if (_texture == null)
                 return;
 
-            GameCore.Current.SpriteBatch.Draw(_texture, _gameObject.Position - _gameObject.BoundingSize / 2, Color);
+            GameCore.Current.SpriteBatch.Draw(_texture, _gameObject.Position,
+     null, Color, _gameObject.Rotation, _gameObject.BoundingSize / 2, _gameObject.Scale,
+     SpriteEffects.None, LayerDepth);
         }
 
    
