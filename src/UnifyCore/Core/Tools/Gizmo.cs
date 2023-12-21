@@ -9,6 +9,13 @@ using Unify2D;
 
 namespace Unify2D.Core.Tools
 {
+    /// <summary>
+    /// The <see cref="Gizmo"/> class is a static class that facilitates
+    /// in-editor visual debugging by providing methods to draw graphical
+    /// elements in the Unify editor scene view. It offers a set of static
+    /// methods for drawing gizmos, labels, and other visual cues to aid
+    /// developers in understanding and debugging their scenes during development.
+    /// </summary>
     public static class Gizmo
     {
         private static Texture2D _texture = new Texture2D(GameCore.Current.Game.GraphicsDevice, 1, 1);

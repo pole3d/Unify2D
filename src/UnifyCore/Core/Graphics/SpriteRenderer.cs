@@ -6,6 +6,12 @@ using System;
 
 namespace Unify2D.Core.Graphics
 {
+    /// <summary>
+    /// The <see cref="SpriteRenderer"/> class extends the functionality of
+    /// the base <see cref="Renderer"/> class and introduces properties for color
+    /// and a sprite <see cref="GameAsset"/>. This class is specifically designed
+    /// for rendering 2D sprites in the game world.
+    /// </summary>
     public class SpriteRenderer : Renderer
     {
         public Color Color { get; set; } = Color.White;

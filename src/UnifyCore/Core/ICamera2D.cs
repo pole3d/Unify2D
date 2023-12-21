@@ -9,6 +9,14 @@ using Num = System.Numerics;
 
 namespace Unify2D.Core
 {
+    /// <summary>
+    /// The <see cref="ICamera2D"/> interface defines a contract for 2D cameras,
+    /// designed to be inherited by components or utilized in the editor.
+    /// It can be implemented to create customized 2D camera functionality.
+    /// It provides properties for Background color, Zoom, Rotation, Viewport,
+    /// Position, and a Matrix derived from these parameters.
+    /// As well a functions to translate screen position to world position and vice-versa.
+    /// </summary>
     public interface ICamera2D
     {
         public Color Background { get; set; }

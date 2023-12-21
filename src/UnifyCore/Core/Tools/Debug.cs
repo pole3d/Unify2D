@@ -16,7 +16,8 @@ using Num = System.Numerics;
 namespace Unify2D
 {
     /// <summary>
-    /// 
+    /// The <see cref="Debug"/> class provides a collection of static methods
+    /// for debugging purposes, including logging and other utilities.
     /// </summary>
     public static class Debug
     {

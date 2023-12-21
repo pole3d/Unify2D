@@ -11,6 +11,13 @@ using Num = System.Numerics;
 
 namespace Unify2D.Core.Graphics
 {
+    /// <summary>
+    /// The <see cref="Camera"/> class extends the functionality of a <see cref="GameObject"/>'s
+    /// <see cref="Component"/> by implementing the <see cref="ICamera2D"/> interface. This class
+    /// provides properties for background color, zoom, rotation, viewport size, position,
+    /// and a derived transformation matrix. It can be attached to a game object to enable 
+    /// 2D camera functionality within the game world.
+    /// </summary>
     public class Camera : Component, ICamera2D
     {
         protected Matrix _matrix;

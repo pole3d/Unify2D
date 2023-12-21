@@ -24,7 +24,9 @@ namespace Unify2D
     }
 
     /// <summary>
-    /// 
+    /// The <see cref="DebugLog"/> class serves as a base class for log entries,
+    /// providing common functionality such as storing log text and a timestamp.
+    /// This class is intended to be inherited by specialized log types that may include additional properties or behaviors.
     /// </summary>
     public class DebugLog
     {
@@ -68,6 +70,10 @@ namespace Unify2D
         }
     }
 
+    /// <summary>
+    /// The <see cref="WarningLog"/> class inherits the <see cref="DebugLog"/>,
+    /// it provides filtering of non-Warning logs and is colored in orange.
+    /// </summary>
     public class WarningLog : DebugLog
     {
         public WarningLog(string text) : base(text)
@@ -95,6 +101,10 @@ namespace Unify2D
             ImGui.PopStyleColor();
         }
     }
+    /// <summary>
+    /// The <see cref="ErrorLog"/> class inherits the <see cref="DebugLog"/>,
+    /// it provides filtering of non-Error logs and is colored in red.
+    /// </summary>
     public class ErrorLog : DebugLog
     {
         public ErrorLog(string text) : base(text)
@@ -122,6 +132,10 @@ namespace Unify2D
             ImGui.PopStyleColor();
         }
     }
+    /// <summary>
+    /// The <see cref="DebugColorLog"/> class inherits the <see cref="DebugLog"/>,
+    /// it provides a field for text color.
+    /// </summary>
     public class DebugColorLog : DebugLog
     {
         protected Num.Vector4 _color;

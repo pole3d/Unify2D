@@ -9,6 +9,11 @@ using Unify2D.Core.Graphics;
 
 namespace Unify2D.Core
 {
+    /// <summary>
+    /// The <see cref="GameObject"/> class represents an object in a game world,
+    /// providing properties for its position, rotation, scale, name, and a list of components.
+    /// This class serves as a fundamental building block for constructing scenes in a game.
+    /// </summary>
     public class GameObject
     {
         public Vector2 Position{ get; set; }
