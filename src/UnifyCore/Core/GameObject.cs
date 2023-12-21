@@ -1,24 +1,20 @@
-﻿using Microsoft.Xna.Framework;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
+using Newtonsoft.Json;
 using Unify2D.Core.Graphics;
 
 namespace Unify2D.Core
 {
-    public class GameObject
+    public class GameObject : Object
     {
         public Vector2 Position{ get; set; }
-        public string Name { get; set; }
         public float Rotation { get; set; }
         public Vector2 Scale { get; set; } = new Vector2(1, 1);
         public Vector2 BoundingSize { get; set; } = new Vector2(30, 30);
 
+        public PrefabInstance PrefabInstance => _prefabInstance;
 
         [JsonIgnore]
         public IEnumerable<Component> Components => _components;
@@ -29,6 +25,9 @@ namespace Unify2D.Core
 
         [JsonProperty]
         List<Component> _components;
+
+        [JsonIgnore]
+        private PrefabInstance _prefabInstance;
 
         public GameObject()
         {
@@ -145,15 +144,25 @@ namespace Unify2D.Core
             // recursive : if the gameObject has no parent, return it, otherwise execute the method on its parent.
         }
         
+        /// <summary> BUILT GAME ONLY! "<tt>./Assets/filename.prefab</tt>" is not a valid path when used in the editor</summary>
         public static GameObject Instantiate(string originalAssetName)
         {
+            StringBuilder sb = new StringBuilder(originalAssetName);
+            sb.Insert(0, "./Assets/");
+            if (sb.ToString().EndsWith(".prefab") == false)
+                sb.Append(".prefab");
             // Get serialized text
-            string serializedText = File.ReadAllText($"./Assets/{originalAssetName}.prefab");
+            string serializedText = File.ReadAllText(sb.ToString());
             // Create gameObject
             GameObject go = JsonConvert.DeserializeObject<GameObject>(serializedText, s_serializerSettings);
             go.Load(GameCore.Current.Game);
             GameCore.Current.AddGameObject(go);
             return go;
+        }
+
+        internal void LinkToPrefabInstance(PrefabInstance prefabInstance)
+        {
+            _prefabInstance = prefabInstance;
         }
     }
 }

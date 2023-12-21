@@ -67,7 +67,7 @@ namespace Unify2D.Assets
             // Append number in filename if file already exists
             while (File.Exists(Path.Combine(_editor.AssetsPath, $"{nameSb}{extension}")))
             {
-                if (++safeguard > 99999)
+                if (++safeguard >= int.MaxValue)
                     throw new Exception("Too many files with the same name, or potentially stuck in an infinite loop. Prefab save failed.");
                         
                 // TODO: Fix number assignement. this currently goes from "19" to "110" (and "119" to "1110", etc...)

@@ -62,7 +62,7 @@ namespace UnifyGame
                 settings.TypeNameHandling = TypeNameHandling.Auto;
                 
                 //_core.LoadScene(this, JsonConvert.DeserializeObject<List<GameObject>>(text, settings));
-                GameCoreContent content = JsonConvert.DeserializeObject<GameCoreContent>(text, settings);
+                SceneData content = JsonConvert.DeserializeObject<SceneData>(text, settings);
                 content.PrefabInstancesToGameObjects();
                 _core.LoadScene(this, content);
             }

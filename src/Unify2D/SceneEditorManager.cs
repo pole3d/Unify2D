@@ -40,28 +40,28 @@ namespace Unify2D
 
         public void LoadScene(string sceneName)
         {
-            GameCoreContent content = null;
+            SceneData sceneData = null;
             try
             {
                 string text = File.ReadAllText(ToolsEditor.CombinePath(_gameEditor.ProjectPath, $"./{sceneName}.scene"));
                 JsonSerializerSettings settings = new JsonSerializerSettings();
                 settings.TypeNameHandling = TypeNameHandling.Auto;
                 settings.Error += SilentErrors;
-                content = JsonConvert.DeserializeObject<GameCoreContent>(text, settings);
+                sceneData = JsonConvert.DeserializeObject<SceneData>(text, settings);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
 
-            if (content != null)
+            if (sceneData != null)
             {
                 Selection.SelectObject(null);
                 _gameEditor.GameCoreViewers.Remove(_gameEditor.GameCoreViewerScene);
                 _gameEditor.SetSceneCore(new GameCoreViewer(
                     new GameCore(_gameEditor),
                     $"./{sceneName}.scene"));
-                _gameEditor.GameCoreViewerScene.GameCore.LoadScene(_gameEditor, content);
+                _gameEditor.GameCoreViewerScene.GameCore.LoadScene(_gameEditor, sceneData);
             }
         }
 

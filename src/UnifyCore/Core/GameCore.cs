@@ -40,10 +40,10 @@ namespace Unify2D.Core
 
         static GameCore s_current;
 
-        private List<GameObject> _gameObjects; //todo parent commmun
+        private List<GameObject> _gameObjects;
         private List<GameObject> _gameObjectsToInstantiate = new List<GameObject>();
         private List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
-        private List<PrefabInstance> _prefabInstances = new List<PrefabInstance>();
+        private List<PrefabInstance> _prefabInstances = new List<PrefabInstance>(); // Should be editor-only
         private Game _game;
 
         public GameCore(Game game)
@@ -52,10 +52,6 @@ namespace Unify2D.Core
             _gameObjects = new List<GameObject>();
         }
 
-        public void AddGameObjectImmediate(GameObject go)
-        {
-            _gameObjects.Add(go);
-        }
         public void InitPhysics()
         {
             if (PhysicsSettings == null)
@@ -66,6 +62,18 @@ namespace Unify2D.Core
 
         public void AddGameObject(GameObject go) {
             _gameObjectsToInstantiate.Add(go);
+        }
+        
+        public void AddGameObjectImmediate(GameObject go)
+        {
+            _gameObjects.Add(go);
+        }
+
+        // Should be editor-only
+        public void AddPrefabInstance(PrefabInstance pi)
+        {
+            _prefabInstances.Add(pi);
+            AddGameObjectImmediate(pi.InstantiateAndLinkGameObject());
         }
 
         public void BeginDraw()
@@ -128,18 +136,12 @@ namespace Unify2D.Core
             }
         }
         
-        public void LoadScene(Game game, GameCoreContent content)
+        public void LoadScene(Game game, SceneData content)
         {
-            _gameObjects.Clear();
-            foreach (var item in content.GameObjects)
-            {
-                AddGameObjectImmediate(item);
-                item.Load(game);
-            }
+            LoadScene(game, content.GameObjects);
             _prefabInstances.Clear();
             foreach (PrefabInstance item in content.PrefabInstances) {
-                _prefabInstances.Add(item);
-                //load
+                AddPrefabInstance(item);
             }
         }
 
@@ -167,9 +169,9 @@ namespace Unify2D.Core
             _gameObjectsToDestroy.Clear();
         }
 
-        public GameCoreContent GetAsContent()
+        public SceneData GetAsContent()
         {
-            return new GameCoreContent(_gameObjects, _prefabInstances);
+            return new SceneData(_gameObjects, _prefabInstances);
         }
     }
 }

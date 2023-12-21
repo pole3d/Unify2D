@@ -2,7 +2,7 @@
 
 namespace Unify2D.Core
 {
-    public class GameCoreContent
+    public class SceneData
     {
         public List<GameObject> GameObjects => _gameObjects;
         public List<PrefabInstance> PrefabInstances => _prefabInstances;
@@ -10,7 +10,7 @@ namespace Unify2D.Core
         private List<GameObject> _gameObjects;
         private List<PrefabInstance> _prefabInstances;
 
-        internal GameCoreContent(List<GameObject> gameObjects, List<PrefabInstance> prefabInstances)
+        internal SceneData(List<GameObject> gameObjects, List<PrefabInstance> prefabInstances)
         {
             _gameObjects = gameObjects;
             _prefabInstances = prefabInstances;
@@ -22,6 +22,7 @@ namespace Unify2D.Core
             {
                 _gameObjects.Add(GameObject.Instantiate(prefabInstance.PrefabAssetPath));
             }
+            _prefabInstances.Clear();
         }
     }
 }

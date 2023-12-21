@@ -41,12 +41,21 @@ namespace Unify2D.Toolbox
             int i = 0;
             foreach (var item in ((GameCoreViewer)_tag).GameCore.GameObjects)
             {
-
+                bool isPrefabInstance = item.PrefabInstance != null;
+                
                 ImGui.PushID(i++);
+                if (isPrefabInstance)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.0f, 1.0f, 1.0f, 0.25f));
+                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.0f, 1.0f, 1.0f, 0.5f));
+                    ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.0f, 1.0f, 1.0f, 1.0f));
+                }
                 if (ImGui.Selectable($"{item.Name}", selectedGameObject == item))
                 {
                     Selection.SelectObject(item);
                 }
+                if (isPrefabInstance)
+                    ImGui.PopStyleColor(3);
 
                 if (ImGui.BeginPopupContextItem())
                 {
