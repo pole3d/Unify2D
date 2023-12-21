@@ -8,46 +8,46 @@ using Unify2D.Physics;
 
 namespace UnifyCore.Core.Physics
 {
-    internal class BoxCollider : Component
+    internal class BoxCollider : Collider
     {
-        public float Width { get { return m_width ; } set { m_width = value; } }
-        public float Height { get { return m_height ; } set { m_height = value; } }
-        public Vector2 Offset { get { return m_offset; } set { m_offset = value; } }
+        public float Width { get { return _width ; } set { _width = value; } }
+        public float Height { get { return _height ; } set { _height = value; } }
 
-        private Body kinematicBody;
+        private float _width = 1f, _height = 1f;
 
-        private float m_width = 1f, m_height = 1f;
-
-        private Vector2 m_offset;
-
-        public override void Load(Game game, GameObject go)
+        public override Body Init()
         {
-            Rigidbody rb = _gameObject.GetComponent<Rigidbody>();
+            _body = BodyFactory.CreateRectangle(PhysicsSettings.World, _width * _gameObject.Scale.X, _height * _gameObject.Scale.Y, 1, (_gameObject.Position + _offset) / PhysicsSettings.UnitToPixelRatio, _gameObject.Rotation, BodyType.Kinematic);
+            return _body;
+        }
 
-            if (rb == null)
+        public override void LateLoad(Game game, GameObject go)
+        {
+            if (_body == null)
             {
-                kinematicBody = BodyFactory.CreateRectangle(PhysicsSettings.World, m_width * _gameObject.Scale.X, m_height * _gameObject.Scale.Y, 1, (_gameObject.Position + m_offset) / PhysicsSettings.UnitToPixelRatio, _gameObject.Rotation, BodyType.Kinematic);
+                _body = BodyFactory.CreateRectangle(PhysicsSettings.World, _width * _gameObject.Scale.X, _height * _gameObject.Scale.Y, 1, (_gameObject.Position + _offset) / PhysicsSettings.UnitToPixelRatio, _gameObject.Rotation, BodyType.Kinematic);
+                _standalone = true;
             }
         }
 
-        public override void Update(GameCore game)
+        public override void PhysicsUpdate(GameCore game)
         {
-            if (kinematicBody != null)
+            if (_standalone)
             {
-                kinematicBody.Position = _gameObject.Position / PhysicsSettings.UnitToPixelRatio;
-                kinematicBody.Rotation = _gameObject.Rotation; 
+                _body.Position = _gameObject.Position / PhysicsSettings.UnitToPixelRatio;
+                _body.Rotation = _gameObject.Rotation;
             }
         }
 
         internal override void DrawGizmo()
         {
-            int pixelsWidth  = (int)Math.Round(m_width * _gameObject.Scale.X * PhysicsSettings.UnitToPixelRatio);
-            int pixelsHeight = (int)Math.Round(m_height * _gameObject.Scale.Y * PhysicsSettings.UnitToPixelRatio);
+            int pixelsWidth  = (int)Math.Round(_width * _gameObject.Scale.X * PhysicsSettings.UnitToPixelRatio);
+            int pixelsHeight = (int)Math.Round(_height * _gameObject.Scale.Y * PhysicsSettings.UnitToPixelRatio);
 
             float sin = MathF.Sin(_gameObject.Rotation);
             float cos = MathF.Cos(_gameObject.Rotation);
 
-            Vector2 offsettedPosition = new Vector2((m_offset.X * cos) + (m_offset.Y * sin), ((m_offset.X * sin) - (m_offset.Y * cos)));
+            Vector2 offsettedPosition = new Vector2((_offset.X * cos) + (_offset.Y * sin), ((_offset.X * sin) - (_offset.Y * cos)));
 
             Gizmo.DrawWireSquare(_gameObject.Position + offsettedPosition, new Vector2(pixelsWidth, pixelsHeight), 2, _gameObject.Rotation, Color.LightGreen);    
         }

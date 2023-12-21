@@ -6,6 +6,8 @@ using Unify2D.Physics;
 
 namespace UnifyCore.Core.Physics
 {
+    //OUTDATED, NEEDS TO BE COMPLETELY REFACTORED
+
     internal class CircleCollider: Component
     {
         public float Radius{ get { return m_radius; } set { m_radius = value; } }
@@ -32,7 +34,7 @@ namespace UnifyCore.Core.Physics
             }
         }
 
-        public override void Update(GameCore game)
+        public override void PhysicsUpdate(GameCore game)
         {
             if (staticBody != null)
             {

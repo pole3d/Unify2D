@@ -6,6 +6,8 @@ using Unify2D.Physics;
 
 namespace UnifyCore.Core.Physics
 {
+    //OUTDATED, NEEDS TO BE COMPLETELY REFACTORED
+
     internal class CapsuleCollider : Component
     {
         public float Height { get{ return m_height; } set { m_height = value; } }
@@ -26,7 +28,7 @@ namespace UnifyCore.Core.Physics
             }
         }
 
-        public override void Update(GameCore game)
+        public override void PhysicsUpdate(GameCore game)
         {
             if (staticBody != null)
             {

@@ -24,13 +24,13 @@
         "IsKinematic": false
       }
     ],
-    "Position": "-126, -507",
+    "Position": "-118, -310",
     "Name": "Cube100100_2",
     "Rotation": 0.0,
     "Scale": "4, 1",
     "BoundingSize": "100, 100",
-    "PositionUpdated": false,
-    "RotationUpdated": false
+    "PositionUpdated": true,
+    "RotationUpdated": true
   },
   {
     "_components": [
@@ -55,13 +55,13 @@
         "Text": null
       }
     ],
-    "Position": "-112, 116",
+    "Position": "-112, 70",
     "Name": "Cube100100",
     "Rotation": 0.0,
     "Scale": "1, 1",
     "BoundingSize": "100, 100",
-    "PositionUpdated": false,
-    "RotationUpdated": false
+    "PositionUpdated": true,
+    "RotationUpdated": true
   },
   {
     "_components": [
@@ -88,13 +88,13 @@
         "IsKinematic": false
       }
     ],
-    "Position": "-86, 14",
+    "Position": "726, -39",
     "Name": "Cube100100",
     "Rotation": 0.0,
     "Scale": "1, 1",
     "BoundingSize": "100, 100",
-    "PositionUpdated": false,
-    "RotationUpdated": false
+    "PositionUpdated": true,
+    "RotationUpdated": true
   },
   {
     "_components": [
@@ -121,13 +121,13 @@
         "IsKinematic": false
       }
     ],
-    "Position": "-116, -94",
+    "Position": "745, -213",
     "Name": "Cube100100_2",
     "Rotation": 0.0,
     "Scale": "1, 1",
     "BoundingSize": "100, 100",
-    "PositionUpdated": false,
-    "RotationUpdated": false
+    "PositionUpdated": true,
+    "RotationUpdated": true
   },
   {
     "_components": [
@@ -154,12 +154,12 @@
         "IsKinematic": false
       }
     ],
-    "Position": "-102, -250",
+    "Position": "710, -270",
     "Name": "Cube100100_2",
     "Rotation": 0.0,
     "Scale": "1, 1",
     "BoundingSize": "100, 100",
-    "PositionUpdated": false,
-    "RotationUpdated": false
+    "PositionUpdated": true,
+    "RotationUpdated": true
   }
 ]
