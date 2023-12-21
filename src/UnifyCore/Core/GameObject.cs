@@ -7,12 +7,17 @@ namespace Unify2D.Core
 {
     public class GameObject
     {
-        public Vector2 Position{ get; set; }
+        public Vector2 Position { get { return m_position; } set { m_position = value; m_positionUpdated = true; } }
         public string Name { get; set; }
-        public float Rotation { get; set; }
+        public float Rotation { get { return m_rotation; } set { m_rotation = value; m_rotationUpdated = true; } }
         public Vector2 Scale { get; set; } = new Vector2(1, 1);
         public Vector2 BoundingSize { get; set; } = new Vector2(30, 30);
+        public bool PositionUpdated { get { return m_positionUpdated; } }
+        public bool RotationUpdated { get { return m_rotationUpdated; } }
 
+        private Vector2 m_position;
+        private float m_rotation;
+        private bool m_positionUpdated, m_rotationUpdated;
 
         [JsonIgnore]
         public IEnumerable<Component> Components => _components;
@@ -42,6 +47,11 @@ namespace Unify2D.Core
                 {
                     _renderers.Add(renderer);
                 }
+            }
+
+            foreach (var component in _components)
+            {
+                component.LateLoad(game, this);
             }
         }
 
@@ -104,6 +114,16 @@ namespace Unify2D.Core
             {
                 item.Update(core);
             }
+
+
+            ///To be refactored as FixedUpdate later
+            foreach (var item in _components)
+            {
+                item.PhysicsUpdate(core);
+            }
+
+            m_positionUpdated = false;
+            m_rotationUpdated = false;
         }
 
         public void RemoveComponent(Component item)

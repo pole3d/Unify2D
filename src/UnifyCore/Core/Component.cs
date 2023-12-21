@@ -15,9 +15,23 @@ namespace Unify2D.Core
         {
         }
 
+        public virtual void LateLoad(Game game, GameObject go)
+        {
+
+        }
+
         public virtual void Update(GameCore game)
         {
+
         }
+
+
+        ///To be replaced by FixedUpdate later on
+        public virtual void PhysicsUpdate(GameCore game)
+        {
+
+        }
+
 
         internal virtual void Destroy()
         {
