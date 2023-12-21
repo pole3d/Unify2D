@@ -53,13 +53,7 @@ namespace UnifyCore.Core.Physics
 
             Vector2 offsettedPosition = new Vector2((m_offset.X * cos) + (m_offset.Y * sin), ((m_offset.X * sin) - (m_offset.Y * cos)));
 
-            //Gizmo.DrawSquare(_gameObject.Position + offsettedPosition, new Vector2(pixelsWidth, pixelsHeight), _gameObject.Rotation);
-
-            
-
-
             Gizmo.DrawWireSquare(_gameObject.Position + offsettedPosition, new Vector2(pixelsWidth, pixelsHeight), 2, _gameObject.Rotation, Color.LightGreen);    
-            
         }
 
     }

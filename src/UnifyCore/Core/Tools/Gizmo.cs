@@ -56,23 +56,22 @@ namespace Unify2D.Core.Tools
 
         public static void DrawWireSquare(Vector2 position, Vector2 size, int thickness, float rotation, Color color)
         {
+            Vector2 reverseSize = new Vector2(size.Y, size.X); //Rotating the draw also rotates THE FUCKING AXIS
+
             Vector2 topLeft = new Vector2(position.X - size.X / 2, position.Y - size.Y / 2);
-            Vector2 topRight = new Vector2(position.X + size.X / 2, position.Y - size.Y / 2);
-            Vector2 bottomLeft = new Vector2(position.X - size.X / 2, position.Y + size.Y / 2);
             Vector2 bottomRight = new Vector2(position.X + size.X / 2, position.Y + size.Y / 2);
 
+            Rectangle top = new Rectangle((int)position.X, (int)position.Y, (int)(bottomRight.X - topLeft.X), thickness);
+            Rectangle right = new Rectangle((int)position.X, (int)position.Y, (int)(bottomRight.Y - topLeft.Y), thickness);
+            Rectangle bottom = new Rectangle((int)position.X, (int)position.Y, (int)(bottomRight.X - topLeft.X), thickness);
+            Rectangle left = new Rectangle((int)position.X, (int)position.Y, (int)(bottomRight.Y - topLeft.Y), thickness);
 
 
-            Rectangle top = new Rectangle((int)topLeft.X + (int)size.X/2 , (int)topLeft.Y + (int)size.Y/2, (int)(bottomRight.X - topLeft.X), thickness);
-            Rectangle right = new Rectangle((int)topRight.X - (int)size.X / 2, (int)topRight.Y + (int)size.Y / 2, (int)(bottomRight.Y - topLeft.Y), thickness);
-            Rectangle bottom = new Rectangle((int)bottomRight.X - (int)size.X / 2, (int)bottomRight.Y - (int)size.Y / 2, (int)(bottomRight.X - topLeft.X), thickness);
-            Rectangle left = new Rectangle((int)bottomLeft.X + (int)size.X / 2, (int)bottomLeft.Y - (int)size.Y / 2, (int)(bottomRight.Y - topLeft.Y), thickness);
 
-
-            GameCore.Current.SpriteBatch.Draw(_texture, top, top, color, 0 + rotation, size / 2 , SpriteEffects.None, 1);
-            GameCore.Current.SpriteBatch.Draw(_texture, right, right, color, MathF.PI/2 + rotation, size / 2, SpriteEffects.None, 1);
+            GameCore.Current.SpriteBatch.Draw(_texture, top, top, color, 0 + rotation, size / 2f, SpriteEffects.None, 1);
+            GameCore.Current.SpriteBatch.Draw(_texture, right, right, color, MathF.PI/2 + rotation, reverseSize / 2f, SpriteEffects.None, 1);
             GameCore.Current.SpriteBatch.Draw(_texture, bottom, bottom, color, MathF.PI + rotation, size / 2f, SpriteEffects.None, 1);
-            GameCore.Current.SpriteBatch.Draw(_texture, left, left, color, 3 * MathF.PI/2 + rotation, size / 2f, SpriteEffects.None, 1);
+            GameCore.Current.SpriteBatch.Draw(_texture, left, left, color, 3 * MathF.PI/2 + rotation, reverseSize / 2f, SpriteEffects.None, 1);
         }
     }
 }
