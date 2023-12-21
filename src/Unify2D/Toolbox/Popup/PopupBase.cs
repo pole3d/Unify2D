@@ -25,9 +25,6 @@ namespace Unify2D.Toolbox.Popup
 
         }
 
-        protected virtual void DrawInternal(GameEditor editor)
-        {
-
-        }
+        protected abstract void DrawInternal(GameEditor editor);
     }
 }
