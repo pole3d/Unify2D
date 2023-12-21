@@ -8,14 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using Unify2D.Assets;
-using Unify2D.Builder;
 using Unify2D.Core;
 using Unify2D.Core.Graphics;
 using Unify2D.ImGuiRenderer;
-using Unify2D.Toolbox;
-using Unify2D.Toolbox.Popup;
-using Unify2D.Tools;
 using Num = System.Numerics;
 
 namespace Unify2D
@@ -46,11 +41,11 @@ namespace Unify2D
             _menuText = $"{_time.ToLongTimeString()} : {_text.Split('\n')[0]}";
         }
 
-        internal virtual void Draw(LogTypes filter)
+        public virtual void Draw(LogTypes filter)
         {
             if(filter.HasFlag(LogTypes.Log)) Draw();
         }
-        internal virtual void Draw()
+        public virtual void Draw()
         {
             if (s_SelectedLogs.Contains(this))
             {
@@ -66,7 +61,7 @@ namespace Unify2D
             }
         }
 
-        internal virtual void DrawSelected()
+        public virtual void DrawSelected()
         {
             ImGui.SeparatorText(_time.ToLongTimeString() + " :");
             ImGui.Text(_text);
@@ -79,11 +74,11 @@ namespace Unify2D
         {
         }
 
-        internal override void Draw(LogTypes filter)
+        public override void Draw(LogTypes filter)
         {
             if (filter.HasFlag(LogTypes.Warning)) Draw();
         }
-        internal override void Draw()
+        public override void Draw()
         {
             ImGui.PushStyleColor(ImGuiCol.Text, new Num.Vector4(1, 0.6f, 0, 1));
 
@@ -91,7 +86,7 @@ namespace Unify2D
 
             ImGui.PopStyleColor();
         }
-        internal override void DrawSelected()
+        public override void DrawSelected()
         {
             ImGui.PushStyleColor(ImGuiCol.Text, new Num.Vector4(1, 0.6f, 0, 1));
 
@@ -106,11 +101,11 @@ namespace Unify2D
         {
         }
 
-        internal override void Draw(LogTypes filter)
+        public override void Draw(LogTypes filter)
         {
             if (filter.HasFlag(LogTypes.Error)) Draw();
         }
-        internal override void Draw()
+        public override void Draw()
         {
             ImGui.PushStyleColor(ImGuiCol.Text, new Num.Vector4(1, 0, 0, 1));
 
@@ -118,7 +113,7 @@ namespace Unify2D
 
             ImGui.PopStyleColor();
         }
-        internal override void DrawSelected()
+        public override void DrawSelected()
         {
             ImGui.PushStyleColor(ImGuiCol.Text, new Num.Vector4(1, 0, 0, 1));
 
@@ -136,7 +131,7 @@ namespace Unify2D
             _color = color;
         }
 
-        internal override void Draw()
+        public override void Draw()
         {
             ImGui.PushStyleColor(ImGuiCol.Text, _color);
 
@@ -144,7 +139,7 @@ namespace Unify2D
 
             ImGui.PopStyleColor();
         }
-        internal override void DrawSelected()
+        public override void DrawSelected()
         {
             ImGui.PushStyleColor(ImGuiCol.Text, _color);
 

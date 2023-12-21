@@ -8,14 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using Unify2D.Assets;
-using Unify2D.Builder;
 using Unify2D.Core;
 using Unify2D.Core.Graphics;
 using Unify2D.ImGuiRenderer;
-using Unify2D.Toolbox;
-using Unify2D.Toolbox.Popup;
-using Unify2D.Tools;
 using Num = System.Numerics;
 
 namespace Unify2D
@@ -27,7 +22,7 @@ namespace Unify2D
     {
         private static Dictionary<string, List<DebugLog>> _logs = new();
 
-        internal static List<DebugLog> GetLogs(string category)
+        public static List<DebugLog> GetLogs(string category)
         {
             if (_logs.TryGetValue(category, out List<DebugLog> values))
             {
@@ -38,7 +33,7 @@ namespace Unify2D
                 return new List<DebugLog>(0);
             }
         }
-        internal static IEnumerable<string> GetCategories()
+        public static IEnumerable<string> GetCategories()
         {
             return _logs.Keys;
         }
@@ -113,7 +108,7 @@ namespace Unify2D
             }
         }
 
-        internal static void ClearLogs()
+        public static void ClearLogs()
         {
             _logs.Clear();
         }
