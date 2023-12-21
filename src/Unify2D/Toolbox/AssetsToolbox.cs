@@ -11,6 +11,10 @@ using Unify2D.Tools;
 
 namespace Unify2D.Toolbox
 {
+    /// <summary>
+    /// The <see cref="AssetsToolbox"/> class,
+    /// is a specialized toolbox designed to provide a user interface to visualise and select <see cref="Asset">s.
+    /// </summary>
     internal class AssetsToolbox : Toolbox
     {
         string _path;

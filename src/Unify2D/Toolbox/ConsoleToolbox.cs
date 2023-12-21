@@ -17,6 +17,11 @@ using Num = System.Numerics;
 
 namespace Unify2D.Toolbox
 {
+    /// <summary>
+    /// The <see cref="ConsoleToolbox"/> class,
+    /// is a specialized toolbox designed to provide a user interface for debugging and inspectiong logs.
+    /// It pulls thoses logs from the <see cref="Debug"> class and draws them within the editor environment.
+    /// </summary>
     internal class ConsoleToolbox : Toolbox
     {
         private string _logCategory = "All";

@@ -17,6 +17,11 @@ using Num = System.Numerics;
 
 namespace Unify2D.Toolbox
 {
+    /// <summary>
+    /// The <see cref="GameToolbox"/> class,
+    /// is a specialized toolbox designed to provide a user interface to visualize the game world, it provide a <see cref="CameraEditor">,
+    /// and provides functionality to interact with gameobjects.
+    /// </summary>
     internal class GameToolbox : Toolbox
     {
         static readonly List<Vector2> s_resolutions = new List<Vector2>()

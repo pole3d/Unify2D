@@ -11,6 +11,11 @@ using Unify2D.Core;
 
 namespace Unify2D.Toolbox
 {
+    /// <summary>
+    /// The <see cref="InspectorToolbox"/> class,
+    /// is a specialized toolbox designed to provide a user interface for inspecting details of a
+    /// specific <see cref="GameAsset"> or <see cref="GameObject"> within the editor environment.
+    /// </summary>
     public class InspectorToolbox : Toolbox
     {
         GameObject _gameObject;

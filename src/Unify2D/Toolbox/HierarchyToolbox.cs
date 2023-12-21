@@ -4,6 +4,11 @@ using Unify2D.Core;
 
 namespace Unify2D.Toolbox
 {
+    /// <summary>
+    /// The <see cref="HierarchyToolbox"/> class,
+    /// is a specialized toolbox designed to provide a user interface to visualize and interact with game objects
+    /// within a scene.
+    /// </summary>
     internal class HierarchyToolbox : Toolbox
     {
         public override void Draw()
