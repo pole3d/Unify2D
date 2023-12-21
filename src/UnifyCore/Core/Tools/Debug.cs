@@ -39,12 +39,7 @@ namespace Unify2D
             return _logs.Keys;
         }
 
-
-        public static void Log(string text)
-        {
-            Debug.Log(text, "All");
-        }
-        public static void Log(string text, string category)
+        public static void Log(string text, string category = "All")
         {
             if(! _logs.TryGetValue(category, out List<DebugLog> logs))
             {
@@ -53,11 +48,7 @@ namespace Unify2D
             }
             logs.Add(new DebugLog(text));
         }
-        public static void Log(string text, Num.Vector4 color)
-        {
-            Debug.Log(text, "All", color);
-        }
-        public static void Log(string text, string category, Num.Vector4 color)
+        public static void Log(string text, Num.Vector4 color, string category = "All")
         {
             if (!_logs.TryGetValue(category, out List<DebugLog> logs))
             {
@@ -66,11 +57,7 @@ namespace Unify2D
             }
             logs.Add(new DebugColorLog(text, color));
         }
-        public static void LogWarning(string text)
-        {
-            Debug.LogWarning(text, "All");
-        }
-        public static void LogWarning(string text, string category)
+        public static void LogWarning(string text, string category = "All")
         {
             if (!_logs.TryGetValue(category, out List<DebugLog> logs))
             {
@@ -79,11 +66,7 @@ namespace Unify2D
             }
             logs.Add(new WarningLog(text));
         }
-        public static void LogError(string text)
-        {
-            Debug.LogError(text, "All");
-        }
-        public static void LogError(string text, string category)
+        public static void LogError(string text, string category = "All")
         {
             if (!_logs.TryGetValue(category, out List<DebugLog> logs))
             {
@@ -92,11 +75,7 @@ namespace Unify2D
             }
             logs.Add(new ErrorLog(text));
         }
-        public static void Assert(bool condition, string text)
-        {
-            if(condition) Debug.LogError(text, "All");
-        }
-        public static void Assert(bool condition, string text, string category)
+        public static void Assert(bool condition, string text, string category = "All")
         {
             if (condition)
             {
