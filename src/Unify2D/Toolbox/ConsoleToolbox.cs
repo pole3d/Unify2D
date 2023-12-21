@@ -24,7 +24,7 @@ namespace Unify2D.Toolbox
     /// </summary>
     internal class ConsoleToolbox : Toolbox
     {
-        private string _logCategory = "All";
+        private HashSet<string> _logCategories = new HashSet<string>() { "All" };
         private LogTypes _logTypes = LogTypes.Log | LogTypes.Warning | LogTypes.Error;
 
         internal ConsoleToolbox()
@@ -90,7 +90,7 @@ namespace Unify2D.Toolbox
 
             foreach (string category in Debug.GetCategories())
             {
-                bool isCat = category == _logCategory;
+                bool isCat = _logCategories.Contains(category);
                 if (isCat)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Tab, new Num.Vector4(0.4f, 0.5f, 1, 1));
@@ -98,7 +98,10 @@ namespace Unify2D.Toolbox
 
                 if (ImGui.TabItemButton(category))
                 {
-                    _logCategory = category;
+                    if(_logCategories.Add(category) == false)
+                    {
+                        _logCategories.Remove(category);
+                    }
                 }
 
                 if (isCat)
@@ -109,13 +112,17 @@ namespace Unify2D.Toolbox
             ImGui.EndTabBar();
 
 
-            ImGui.BeginTabItem(_logCategory);
-            foreach (var log in Debug.GetLogs(_logCategory))
+            foreach (var category in _logCategories)
             {
-                log.Draw(_logTypes);
+                if(_logCategories.Count > 1)
+                {
+                    ImGui.SeparatorText(category);
+                }
+                foreach (var log in Debug.GetLogs(category))
+                {
+                    log.Draw(_logTypes);
+                }
             }
-            ImGui.EndTabItem();
-
 
             ImGui.EndChild();
 
