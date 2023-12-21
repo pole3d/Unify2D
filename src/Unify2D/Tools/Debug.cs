@@ -29,7 +29,14 @@ namespace Unify2D
 
         internal static List<DebugLog> GetLogs(string category)
         {
-            return _logs[category];
+            if (_logs.TryGetValue(category, out List<DebugLog> values))
+            {
+                return values;
+            }
+            else
+            {
+                return new List<DebugLog>(0);
+            }
         }
         internal static IEnumerable<string> GetCategories()
         {

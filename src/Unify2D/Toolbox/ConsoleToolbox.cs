@@ -23,6 +23,7 @@ namespace Unify2D.Toolbox
 
         internal ConsoleToolbox()
         {
+            /*
             Debug.Log("log 1");
             Debug.Log("veeeeeeeeeeeeeerrrrrrrrrrrryyyyyyyyyyyyy\nllllllllloooooooooooooonnnnnnnnnnnnnngggggggggggggg\nlooog");
 
@@ -37,6 +38,7 @@ namespace Unify2D.Toolbox
             {
                 Debug.Log($"spam {i}", "spam");
             }
+            */
         }
 
         public override void Initialize(GameEditor editor)
