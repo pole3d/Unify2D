@@ -24,11 +24,13 @@
         "IsKinematic": false
       }
     ],
-    "Position": "-142, -333",
+    "Position": "-126, -507",
     "Name": "Cube100100_2",
     "Rotation": 0.0,
     "Scale": "4, 1",
-    "BoundingSize": "100, 100"
+    "BoundingSize": "100, 100",
+    "PositionUpdated": false,
+    "RotationUpdated": false
   },
   {
     "_components": [
@@ -45,13 +47,21 @@
         "Width": 1.0,
         "Height": 1.0,
         "Offset": "0, 0"
+      },
+      {
+        "$type": "GameAssembly.TestA, GameAssembly",
+        "Speed": 400.0,
+        "Speed7": 400.0,
+        "Text": null
       }
     ],
-    "Position": "-339, 26",
+    "Position": "-112, 116",
     "Name": "Cube100100",
     "Rotation": 0.0,
     "Scale": "1, 1",
-    "BoundingSize": "100, 100"
+    "BoundingSize": "100, 100",
+    "PositionUpdated": false,
+    "RotationUpdated": false
   },
   {
     "_components": [
@@ -68,12 +78,88 @@
         "Width": 1.0,
         "Height": 1.0,
         "Offset": "0, 0"
+      },
+      {
+        "$type": "Unify2D.Physics.Rigidbody, UnifyCore",
+        "Type": 2,
+        "Mass": 1.0,
+        "LinearDamper": 0.1,
+        "GravityScale": 1.0,
+        "IsKinematic": false
       }
     ],
-    "Position": "26, 286",
+    "Position": "-86, 14",
     "Name": "Cube100100",
     "Rotation": 0.0,
     "Scale": "1, 1",
-    "BoundingSize": "100, 100"
+    "BoundingSize": "100, 100",
+    "PositionUpdated": false,
+    "RotationUpdated": false
+  },
+  {
+    "_components": [
+      {
+        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
+        "_asset": {
+          "_name": "/Cube100100_2.png"
+        },
+        "Color": "255, 255, 255, 255",
+        "LayerDepth": 0.0
+      },
+      {
+        "$type": "UnifyCore.Core.Physics.BoxCollider, UnifyCore",
+        "Width": 1.0,
+        "Height": 1.0,
+        "Offset": "0, 0"
+      },
+      {
+        "$type": "Unify2D.Physics.Rigidbody, UnifyCore",
+        "Type": 2,
+        "Mass": 1.0,
+        "LinearDamper": 0.1,
+        "GravityScale": 1.0,
+        "IsKinematic": false
+      }
+    ],
+    "Position": "-116, -94",
+    "Name": "Cube100100_2",
+    "Rotation": 0.0,
+    "Scale": "1, 1",
+    "BoundingSize": "100, 100",
+    "PositionUpdated": false,
+    "RotationUpdated": false
+  },
+  {
+    "_components": [
+      {
+        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
+        "_asset": {
+          "_name": "/Cube100100_2.png"
+        },
+        "Color": "255, 255, 255, 255",
+        "LayerDepth": 0.0
+      },
+      {
+        "$type": "UnifyCore.Core.Physics.BoxCollider, UnifyCore",
+        "Width": 1.0,
+        "Height": 1.0,
+        "Offset": "0, 0"
+      },
+      {
+        "$type": "Unify2D.Physics.Rigidbody, UnifyCore",
+        "Type": 2,
+        "Mass": 1.0,
+        "LinearDamper": 0.1,
+        "GravityScale": 1.0,
+        "IsKinematic": false
+      }
+    ],
+    "Position": "-102, -250",
+    "Name": "Cube100100_2",
+    "Rotation": 0.0,
+    "Scale": "1, 1",
+    "BoundingSize": "100, 100",
+    "PositionUpdated": false,
+    "RotationUpdated": false
   }
 ]

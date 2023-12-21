@@ -34,7 +34,11 @@ namespace UnifyCore.Core.Physics
 
         public override void Update(GameCore game)
         {
-
+            if (staticBody != null)
+            {
+                staticBody.Position = _gameObject.Position / PhysicsSettings.UnitToPixelRatio;
+                staticBody.Rotation = _gameObject.Rotation;
+            }
         }
         /*
 

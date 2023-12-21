@@ -14,7 +14,7 @@ namespace UnifyCore.Core.Physics
         public float Height { get { return m_height ; } set { m_height = value; } }
         public Vector2 Offset { get { return m_offset; } set { m_offset = value; } }
 
-        private Body staticBody;
+        private Body kinematicBody;
 
         private float m_width = 1f, m_height = 1f;
 
@@ -26,13 +26,17 @@ namespace UnifyCore.Core.Physics
 
             if (rb == null)
             {
-                staticBody = BodyFactory.CreateRectangle(PhysicsSettings.World, m_width * _gameObject.Scale.X, m_height * _gameObject.Scale.Y, 1, (_gameObject.Position + m_offset) / PhysicsSettings.UnitToPixelRatio, _gameObject.Rotation, BodyType.Static);
+                kinematicBody = BodyFactory.CreateRectangle(PhysicsSettings.World, m_width * _gameObject.Scale.X, m_height * _gameObject.Scale.Y, 1, (_gameObject.Position + m_offset) / PhysicsSettings.UnitToPixelRatio, _gameObject.Rotation, BodyType.Kinematic);
             }
         }
 
         public override void Update(GameCore game)
         {
-
+            if (kinematicBody != null)
+            {
+                kinematicBody.Position = _gameObject.Position / PhysicsSettings.UnitToPixelRatio;
+                kinematicBody.Rotation = _gameObject.Rotation; 
+            }
         }
 
         internal override void DrawGizmo()
