@@ -26,42 +26,42 @@ namespace Unify2D
             {
                 if (coreViewer.AssetType == GameCoreViewer.Type.Scene)
                 {
-                    string text = JsonConvert.SerializeObject(_gameEditor.GameCoreViewerScene.GameCore.GameObjects, settings);
+                    string text = JsonConvert.SerializeObject(_gameEditor.GameCoreViewerScene.GameCore.GetAsContent(), settings);
                     File.WriteAllText(ToolsEditor.CombinePath(_gameEditor.ProjectPath, $"./{sceneName}.scene"), text);
                 }
                 else if (coreViewer.AssetType == GameCoreViewer.Type.Prefab)
                 {
                     Asset asset = _gameEditor.AssetManager.Find(coreViewer.AssetPath, true);
                     if (asset != null)
-                        ((PrefabAssetContent)asset.AssetContent).Save(coreViewer.GameCore.GameObjects[0].GetRoot()); //Not so ideal, todo we should find a way to cache the root gameObject of a core (after branch merge)
+                        ((PrefabAssetContent)asset.AssetContent).Save(coreViewer.GameCore.GameObjects[0].GetRoot()); //Not so ideal, todo find a way to cache the root gameObject of a core (after branch merge)
                 }
             }
         }
 
         public void LoadScene(string sceneName)
         {
-            List<GameObject> gameObjects = null;
+            GameCoreContent content = null;
             try
             {
                 string text = File.ReadAllText(ToolsEditor.CombinePath(_gameEditor.ProjectPath, $"./{sceneName}.scene"));
                 JsonSerializerSettings settings = new JsonSerializerSettings();
                 settings.TypeNameHandling = TypeNameHandling.Auto;
                 settings.Error += SilentErrors;
-                gameObjects = JsonConvert.DeserializeObject<List<GameObject>>(text, settings);
+                content = JsonConvert.DeserializeObject<GameCoreContent>(text, settings);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
 
-            if (gameObjects != null)
+            if (content != null)
             {
                 Selection.SelectObject(null);
                 _gameEditor.GameCoreViewers.Remove(_gameEditor.GameCoreViewerScene);
                 _gameEditor.SetSceneCore(new GameCoreViewer(
                     new GameCore(_gameEditor),
                     $"./{sceneName}.scene"));
-                _gameEditor.GameCoreViewerScene.GameCore.LoadScene(_gameEditor, gameObjects);
+                _gameEditor.GameCoreViewerScene.GameCore.LoadScene(_gameEditor, content);
             }
         }
 

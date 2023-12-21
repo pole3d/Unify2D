@@ -40,10 +40,11 @@ namespace Unify2D.Core
 
         static GameCore s_current;
 
-        List<GameObject> _gameObjects;
-        List<GameObject> _gameObjectsToInstantiate = new List<GameObject>();
-        List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
-        Game _game;
+        private List<GameObject> _gameObjects; //todo parent commmun
+        private List<GameObject> _gameObjectsToInstantiate = new List<GameObject>();
+        private List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
+        private List<PrefabInstance> _prefabInstances = new List<PrefabInstance>();
+        private Game _game;
 
         public GameCore(Game game)
         {
@@ -126,6 +127,21 @@ namespace Unify2D.Core
                 item.Load(game);
             }
         }
+        
+        public void LoadScene(Game game, GameCoreContent content)
+        {
+            _gameObjects.Clear();
+            foreach (var item in content.GameObjects)
+            {
+                AddGameObjectImmediate(item);
+                item.Load(game);
+            }
+            _prefabInstances.Clear();
+            foreach (PrefabInstance item in content.PrefabInstances) {
+                _prefabInstances.Add(item);
+                //load
+            }
+        }
 
         public void Update(GameTime gameTime)
         {
@@ -149,6 +165,11 @@ namespace Unify2D.Core
             PhysicsSettings.World.Step(DeltaTime);
 
             _gameObjectsToDestroy.Clear();
+        }
+
+        public GameCoreContent GetAsContent()
+        {
+            return new GameCoreContent(_gameObjects, _prefabInstances);
         }
     }
 }

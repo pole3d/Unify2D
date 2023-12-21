@@ -60,9 +60,11 @@ namespace UnifyGame
                 string text = File.ReadAllText("./test.scene");
                 JsonSerializerSettings settings = new JsonSerializerSettings();
                 settings.TypeNameHandling = TypeNameHandling.Auto;
-
-
-                _core.LoadScene(this, JsonConvert.DeserializeObject<List<GameObject>>(text, settings));
+                
+                //_core.LoadScene(this, JsonConvert.DeserializeObject<List<GameObject>>(text, settings));
+                GameCoreContent content = JsonConvert.DeserializeObject<GameCoreContent>(text, settings);
+                content.PrefabInstancesToGameObjects();
+                _core.LoadScene(this, content);
             }
             catch (Exception ex)
             {
