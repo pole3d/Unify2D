@@ -26,11 +26,9 @@ namespace Unify2D.Toolbox
         List<Asset> _assets = new List<Asset>();
         GameEditor _editor;
    
-
-        int folderCount = 0;
-        int treeFilesIndex = 0;
         int windowIndex = 0;
         string newName = "";
+        string newPath = "";
         string[] folders;
         string selectedFolder;
         string previousFolder = null;
@@ -41,6 +39,7 @@ namespace Unify2D.Toolbox
         public override void Initialize(GameEditor editor)
         {
             _editor = editor;
+            newPath = _editor.AssetsPath;
             selectedFolder = _editor.AssetsPath;
             Reset();
         }
@@ -49,8 +48,7 @@ namespace Unify2D.Toolbox
         {
             _assets.Clear();
             _path = _editor.AssetsPath;
-            treeFilesIndex = 0;
-            folderCount = 0;
+      
             if (String.IsNullOrEmpty(_path))
                 return;
 
@@ -61,6 +59,10 @@ namespace Unify2D.Toolbox
             var rootFiles = Directory.GetFiles(_path);
 
         }
+        /// <summary>
+        ///  Show files in selected folder
+        /// </summary>
+        /// <param name="folderPath"></param>
         public void DisplayFilesTree(string folderPath)
         {
 
@@ -89,10 +91,10 @@ namespace Unify2D.Toolbox
                         previousFile = selectedFile;
                     }
                 }
+                
             }
         }
-
-        public override void Show()
+        public void AssetsWindowMenu()
         {
             ImGui.Begin("Assets", ImGuiWindowFlags.MenuBar);
 
@@ -109,16 +111,21 @@ namespace Unify2D.Toolbox
 
                     ImGui.EndMenu();
                 }
-                if(ImGui.Button("Duplicate Asset Windows"))
+                if (ImGui.Button("Duplicate Asset Windows"))
                 {
                     DuplicateWindowsAsset();
                 }
                 ImGui.EndMenuBar();
             }
+        }
+        public override void Show()
+        {
+            // assets menu options
+            AssetsWindowMenu();
 
+            // show folder files
             if (ImGui.BeginTable("Tree Table", 2))
             {
-                ImGui.Unindent(ImGui.GetTreeNodeToLabelSpacing());
                 ImGui.TableNextColumn();
                 if (ImGui.TreeNode("Root"))
                 {
@@ -130,35 +137,33 @@ namespace Unify2D.Toolbox
                             selectedItem = _editor.AssetsPath;
                             selectedFolder = _editor.AssetsPath;
                         }
-                        
                     }
-                        
-
                     for (int i = 0; i < folders.Length; i++)
                     {
                         if (ImGui.IsItemHovered())
                             selectedItem = folders[i];
-                        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.OpenOnDoubleClick | ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.NoTreePushOnOpen | ImGuiTreeNodeFlags.AllowOverlap | ImGuiTreeNodeFlags.Selected;
+                        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.OpenOnDoubleClick | ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.AllowOverlap | ImGuiTreeNodeFlags.Selected | ImGuiTreeNodeFlags.NoTreePushOnOpen | ImGuiTreeNodeFlags.SpanFullWidth;
                         string relativeFolder = folders[i].Replace(_path, string.Empty);
                         
                         string folderName = Path.GetFileName(relativeFolder);
                         if (ImGui.TreeNodeEx(folderName, flags))
                         {
-                            ImGui.TableNextRow();
-                           
-
                             selectedFolder = folders[i];
-
+                            
                             if (selectedFolder != previousFolder)
-                            {
+                            {   
                                 Console.WriteLine("folder selectionné = " + Path.GetFileName(relativeFolder));
                                 previousFolder = selectedFolder;
                             }
                         }
+
+                        if (folders[i] != selectedFolder)
+                        {
+                            ImGui.SetNextItemOpen(false);
+                        }
                     }
                     ImGui.TreePop();
                 }
-
                 ImGui.TableSetColumnIndex(1);
                 ImGui.SetNextItemOpen(true);
                 if (ImGui.TreeNode("Files"))
@@ -166,118 +171,71 @@ namespace Unify2D.Toolbox
                     ImGui.TableSetColumnIndex(1);
                     DisplayFilesTree(selectedFolder);
                 }
+                
                 ImGui.EndTable();
             }
-          
-            if(ImGui.BeginPopupContextItem())
+            ImGui.SetItemTooltip("Right click to open file menu");
+            PopUpItem();
+        }
+        public void PopUpItem()
+        {
+            // popup menu when right click on item
+            if (ImGui.BeginPopupContextItem())
             {
                 ImGui.Text("Popup for " + Path.GetFileNameWithoutExtension(selectedItem));
-                
+
                 if (ImGui.Button("Rename"))
-                    RenameFile(newName);
+                    RenameItem(newName);
                 ImGui.SameLine();
                 ImGui.InputText("Write new name then click on rename", ref newName, 128);
 
+                if (ImGui.Button("Move To"))
+                    MoveItem(newPath);
+                ImGui.SameLine();
+                for (int i = 0; i < folders.Length; i++)
+                {
+                    if (ImGui.Selectable(folders[i]))
+                    {
+                        Console.WriteLine(newPath);
+                        newPath = folders[i];
+                        ImGui.Text(Path.GetFileNameWithoutExtension(folders[i]));
+                        if (ImGui.IsItemHovered())
+                        {
+
+
+                        }
+                    }
+                }
 
                 if (ImGui.Button("Delete"))
                     DeleteItem();
-                if(ImGui.Button("Close"))
+                if (ImGui.Button("Close"))
                     ImGui.CloseCurrentPopup();
                 ImGui.EndPopup();
             }
-            ImGui.SetItemTooltip("Right click to open file menu");
         }
-
+        /// <summary>
+        /// duplicate asset toolbox wip
+        /// </summary>
         public void DuplicateWindowsAsset()
         {
             windowIndex++;
             ImGui.Begin("new toolbox" + windowIndex, ImGuiWindowFlags.MenuBar);
             Console.WriteLine("Duplicate");
-
-            //if (ImGui.BeginMenuBar())
-            //{
-            //    if (ImGui.BeginMenu("Create"))
-            //    {
-            //        ImGui.MenuItem("Script", null);
-
-            //        if (ImGui.MenuItem("New Folder", null))
-            //        {
-            //            CreateDirectory();
-            //        }
-
-            //        ImGui.EndMenu();
-            //    }
-            //    if (ImGui.Button("Duplicate Asset Windows"))
-            //    {
-
-            //    }
-            //    ImGui.EndMenuBar();
-            //}
-
-            //if (ImGui.BeginTable("Tree Table", 2))
-            //{
-            //    ImGui.Unindent(ImGui.GetTreeNodeToLabelSpacing());
-            //    ImGui.TableNextColumn();
-            //    if (ImGui.TreeNode("Root"))
-            //    {
-
-            //        for (int i = 0; i < folders.Length; i++)
-            //        {
-            //            if (ImGui.IsItemHovered())
-            //                selectedItem = folders[i];
-            //            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.OpenOnDoubleClick | ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.NoTreePushOnOpen | ImGuiTreeNodeFlags.AllowOverlap | ImGuiTreeNodeFlags.Selected;
-            //            string relativeFolder = folders[i].Replace(_path, string.Empty);
-
-            //            string folderName = Path.GetFileName(relativeFolder);
-            //            if (ImGui.TreeNodeEx(folderName, flags))
-            //            {
-            //                ImGui.TableNextRow();
-
-
-            //                selectedFolder = folders[i];
-
-            //                if (selectedFolder != previousFolder)
-            //                {
-            //                    Console.WriteLine("folder selectionné = " + Path.GetFileName(relativeFolder));
-            //                    previousFolder = selectedFolder;
-            //                }
-            //            }
-            //        }
-            //        ImGui.TreePop();
-            //    }
-
-            //    ImGui.TableSetColumnIndex(1);
-            //    ImGui.SetNextItemOpen(true);
-            //    if (ImGui.TreeNode("Files"))
-            //    {
-            //        ImGui.TableSetColumnIndex(1);
-            //        DisplayFilesTree(selectedFolder);
-            //    }
-            //    ImGui.EndTable();
-            //}
-
-            //if (ImGui.BeginPopupContextItem())
-            //{
-            //    ImGui.Text("Popup for " + Path.GetFileNameWithoutExtension(selectedItem));
-
-            //    if (ImGui.Button("Rename"))
-            //        RenameFile(newName);
-            //    ImGui.SameLine();
-            //    ImGui.InputText("Write new name then click on rename", ref newName, 128);
-
-
-            //    if (ImGui.Button("Delete"))
-            //        DeleteItem();
-            //    if (ImGui.Button("Close"))
-            //        ImGui.CloseCurrentPopup();
-            //    ImGui.EndPopup();
-            //}
-            //ImGui.SetItemTooltip("Right click to open file menu");
         }
+
+        /// <summary>
+        ///     Create new directory
+        /// </summary>
         public void CreateDirectory()
         {
             CheckIfFolderExist(0);
         }
+
+        /// <summary>
+        /// Check if new directory doesnt exist, if exist add suffixe number
+        /// </summary>
+        /// <param name="index"></param>
         public void CheckIfFolderExist(int index)
         {
             if(Directory.Exists(Path.Combine(selectedFolder, ("New Folder" + index))))
@@ -293,6 +251,10 @@ namespace Unify2D.Toolbox
             }
             
         }
+
+        /// <summary>
+        ///     Delete selected item (folder or file)
+        /// </summary>
         public void DeleteItem()
         {
             FileInfo item = new FileInfo(selectedItem);
@@ -335,7 +297,57 @@ namespace Unify2D.Toolbox
                 }
             }
         }
-        public void RenameFile(string newName)
+        /// <summary>
+        /// Move item to newPath
+        /// </summary>
+        /// <param name="newPath"></param>
+        public void MoveItem(string newPath)
+        {
+            FileInfo file = new FileInfo(selectedItem);
+            DirectoryInfo directoryInfo = new DirectoryInfo(selectedItem);
+            bool isDirectory;
+            FileAttributes attributes = file.Attributes;
+            if (attributes.HasFlag(FileAttributes.Directory))
+                isDirectory = true;
+            else
+                isDirectory = false;
+
+            string directory = file.DirectoryName;
+            string extension = file.Extension;
+
+            if (!isDirectory)
+            {
+                if (file.Exists)
+                {
+                    File.Move(file.ToString(), newPath);
+                }
+                else
+                {
+                    Console.Write("Le fichier n'existe pas");
+                }
+            }
+            if (isDirectory)
+            {
+                if (directoryInfo.Exists)
+                {
+                    string newFile = Path.Combine(directory, newPath + extension);
+                    Directory.Move(directoryInfo.ToString(), newFile);
+                    selectedFolder = newFile;
+                    DisplayFilesTree(selectedFolder);
+                    Reset();
+                }
+                else
+                {
+                    Console.WriteLine("Le dossier n'existe pas");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Rename selected item (folder or file)
+        /// </summary>
+        /// <param name="newName"></param>
+        public void RenameItem(string newName)
         {
             FileInfo file = new FileInfo(selectedItem);
             DirectoryInfo directoryInfo = new DirectoryInfo(selectedItem);
