@@ -112,6 +112,11 @@ namespace Unify2D
                 logs.Add(new ErrorLog(text));
             }
         }
+
+        internal static void ClearLogs()
+        {
+            _logs.Clear();
+        }
     }
 }
 

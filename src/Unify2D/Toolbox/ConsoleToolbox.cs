@@ -72,6 +72,11 @@ namespace Unify2D.Toolbox
 
             ImGui.BeginTabBar("Log Categories", ImGuiTabBarFlags.None);
 
+
+            if (ImGui.TabItemButton("Clear"))
+            {
+                Debug.ClearLogs();
+            }
             if (ImGui.TabItemButton("Filter"))
             {
                 ImGui.SetWindowPos("Log Filter", ImGui.GetMousePos());
