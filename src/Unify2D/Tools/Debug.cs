@@ -57,6 +57,19 @@ namespace Unify2D
             }
             logs.Add(new DebugLog(text));
         }
+        public static void Log(string text, Num.Vector4 color)
+        {
+            Debug.Log(text, "All", color);
+        }
+        public static void Log(string text, string category, Num.Vector4 color)
+        {
+            if (!_logs.TryGetValue(category, out List<DebugLog> logs))
+            {
+                logs = new List<DebugLog>();
+                _logs.Add(category, logs);
+            }
+            logs.Add(new DebugColorLog(text, color));
+        }
         public static void LogWarning(string text)
         {
             Debug.LogWarning(text, "All");

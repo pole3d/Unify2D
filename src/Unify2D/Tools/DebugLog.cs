@@ -107,6 +107,32 @@ namespace Unify2D
             ImGui.PopStyleColor();
         }
     }
+    public class DebugColorLog : DebugLog
+    {
+        protected Num.Vector4 _color;
+
+        public DebugColorLog(string text, Num.Vector4 color) : base(text)
+        {
+            _color = color;
+        }
+
+        internal override void Draw()
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, _color);
+
+            base.Draw();
+
+            ImGui.PopStyleColor();
+        }
+        internal override void DrawSelected()
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, _color);
+
+            base.DrawSelected();
+
+            ImGui.PopStyleColor();
+        }
+    }
 }
 
 
