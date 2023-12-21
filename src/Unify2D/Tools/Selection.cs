@@ -20,7 +20,8 @@ using Num = System.Numerics;
 namespace Unify2D
 {
     /// <summary>
-    /// 
+    /// The <see cref="Selection"/> class provides various Utility fonctions for selecting
+    /// <see cref="GameObject"/>s or <see cref="GameAsset"/>s in the editor.
     /// </summary>
     public static class Selection
     {

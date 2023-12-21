@@ -9,6 +9,12 @@ using Num = System.Numerics;
 
 namespace Unify2D.Core
 {
+    /// <summary>
+    /// The <see cref="CameraEditor"/> class, is only meant to be used in the editor.
+    /// It implements the <see cref="ICamera2D"/> interface. This class
+    /// provides properties for background color, zoom, rotation, viewport size, position,
+    /// and a derived transformation matrix. It enables 2D camera functionality within the <see cref="Toolbox.GameToolbox"/>.
+    /// </summary>
     public class CameraEditor : ICamera2D
     {
         protected Matrix _matrix;
