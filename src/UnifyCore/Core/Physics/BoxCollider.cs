@@ -1,16 +1,8 @@
 ﻿using Genbox.VelcroPhysics.Dynamics;
 using Genbox.VelcroPhysics.Factories;
-using ImGuiNET;
 using Microsoft.Xna.Framework;
 using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IO.Pipes;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unify2D.Core;
-using Unify2D.Core.Graphics;
 using Unify2D.Core.Tools;
 using Unify2D.Physics;
 

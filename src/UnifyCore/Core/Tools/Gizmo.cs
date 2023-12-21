@@ -1,13 +1,6 @@
-﻿using ImGuiNET;
-using Microsoft.VisualBasic;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Unify2D;
 
 namespace Unify2D.Core.Tools
 {
@@ -66,7 +59,7 @@ namespace Unify2D.Core.Tools
             Rectangle bottom = new Rectangle((int)position.X, (int)position.Y, (int)(bottomRight.X - topLeft.X), thickness);
             Rectangle left = new Rectangle((int)position.X, (int)position.Y, (int)(bottomRight.Y - topLeft.Y), thickness);
 
-
+            
 
             GameCore.Current.SpriteBatch.Draw(_texture, top, top, color, 0 + rotation, size / 2f, SpriteEffects.None, 1);
             GameCore.Current.SpriteBatch.Draw(_texture, right, right, color, MathF.PI/2 + rotation, reverseSize / 2f, SpriteEffects.None, 1);
