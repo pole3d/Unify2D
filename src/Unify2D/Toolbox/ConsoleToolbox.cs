@@ -20,6 +20,7 @@ namespace Unify2D.Toolbox
     internal class ConsoleToolbox : Toolbox
     {
         private string _logCategory = "All";
+        private LogTypes _logTypes = LogTypes.Log | LogTypes.Warning | LogTypes.Error;
 
         internal ConsoleToolbox()
         {
@@ -41,6 +42,17 @@ namespace Unify2D.Toolbox
             */
         }
 
+        private void ToggleLogType(LogTypes type)
+        {
+            if(_logTypes.HasFlag(type))
+            {
+                _logTypes &= ~type;
+            }
+            else
+            {
+                _logTypes |= type;
+            }
+        }
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
@@ -59,11 +71,29 @@ namespace Unify2D.Toolbox
 
 
             ImGui.BeginTabBar("Log Categories", ImGuiTabBarFlags.None);
-            foreach(string category in Debug.GetCategories())
+
+            if (ImGui.TabItemButton("Filter"))
             {
+                ImGui.SetWindowPos("Log Filter", ImGui.GetMousePos());
+                _editor.ShowPopup(new EnumPopup<LogTypes>("Log Filter", _logTypes, ToggleLogType));
+            }
+
+            foreach (string category in Debug.GetCategories())
+            {
+                bool isCat = category == _logCategory;
+                if (isCat)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Tab, new Num.Vector4(0.4f, 0.5f, 1, 1));
+                }
+
                 if (ImGui.TabItemButton(category))
                 {
                     _logCategory = category;
+                }
+
+                if (isCat)
+                {
+                    ImGui.PopStyleColor();
                 }
             }
             ImGui.EndTabBar();
@@ -72,7 +102,7 @@ namespace Unify2D.Toolbox
             ImGui.BeginTabItem(_logCategory);
             foreach (var log in Debug.GetLogs(_logCategory))
             {
-                log.Draw();
+                log.Draw(_logTypes);
             }
             ImGui.EndTabItem();
 

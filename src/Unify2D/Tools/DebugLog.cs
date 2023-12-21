@@ -20,6 +20,14 @@ using Num = System.Numerics;
 
 namespace Unify2D
 {
+    [Flags]
+    public enum LogTypes
+    {
+        Log = 1 << 1,
+        Warning = 1 << 2,
+        Error = 1 << 3,
+    }
+
     /// <summary>
     /// 
     /// </summary>
@@ -38,6 +46,10 @@ namespace Unify2D
             _menuText = $"{_time.ToLongTimeString()} : {_text.Split('\n')[0]}";
         }
 
+        internal virtual void Draw(LogTypes filter)
+        {
+            if(filter.HasFlag(LogTypes.Log)) Draw();
+        }
         internal virtual void Draw()
         {
             if (s_SelectedLogs.Contains(this))
@@ -67,6 +79,10 @@ namespace Unify2D
         {
         }
 
+        internal override void Draw(LogTypes filter)
+        {
+            if (filter.HasFlag(LogTypes.Warning)) Draw();
+        }
         internal override void Draw()
         {
             ImGui.PushStyleColor(ImGuiCol.Text, new Num.Vector4(1, 0.6f, 0, 1));
@@ -90,6 +106,10 @@ namespace Unify2D
         {
         }
 
+        internal override void Draw(LogTypes filter)
+        {
+            if (filter.HasFlag(LogTypes.Error)) Draw();
+        }
         internal override void Draw()
         {
             ImGui.PushStyleColor(ImGuiCol.Text, new Num.Vector4(1, 0, 0, 1));
