@@ -49,8 +49,8 @@ namespace Unify2D
         internal InspectorToolbox InspectorToolbox => _inspectorToolbox;
         internal ScriptToolbox ScriptToolbox => _scriptToolbox;
         internal GameToolbox GameToolbox => _gameToolbox;
-        public GameCoreInfo GameCoreInfoScene => _coreInfoScene; 
-        public List<GameCoreInfo> GameCoresInfo => _coresInfo;
+        public GameCoreViewer GameCoreViewerScene => _coreViewerScene; 
+        public List<GameCoreViewer> GameCoreViewers => _coreViewers;
 
         public SceneEditorManager SceneEditorManager => _sceneEditorManager;
         #endregion
@@ -65,8 +65,8 @@ namespace Unify2D
         GameEditorSettings _settings;
         SceneEditorManager _sceneEditorManager;
         
-        GameCoreInfo _coreInfoScene;
-        List<GameCoreInfo> _coresInfo = new List<GameCoreInfo>();
+        GameCoreViewer _coreViewerScene;
+        List<GameCoreViewer> _coreViewers = new List<GameCoreViewer>();
 
         List<ToolboxBase> _toolboxes = new List<ToolboxBase>();
         
@@ -103,11 +103,11 @@ namespace Unify2D
             _assetManager = new AssetManager(this);
             
             //Create game core and load scene content
-            _coreInfoScene = new GameCoreInfo(
+            _coreViewerScene = new GameCoreViewer(
                 new GameCore(this),
                 "./test.scene");
-            _coresInfo.Add(_coreInfoScene);
-            GameCore.SetCurrent(_coreInfoScene.GameCore);
+            _coreViewers.Add(_coreViewerScene);
+            GameCore.SetCurrent(_coreViewerScene.GameCore);
 
             _imGuiRenderer = new ImGuiRenderer.Renderer(this);
             _imGuiRenderer.RebuildFontAtlas();
@@ -130,9 +130,9 @@ namespace Unify2D
             _scriptToolbox = new ScriptToolbox();
             _inspectorToolbox = new InspectorToolbox();
             _gameToolbox = new GameToolbox();
-            _gameToolbox.SetCore(_coreInfoScene);
+            _gameToolbox.SetCore(_coreViewerScene);
             _hierarchyToolbox = new HierarchyToolbox();
-            _hierarchyToolbox.SetCore(_coreInfoScene);
+            _hierarchyToolbox.SetCore(_coreViewerScene);
 
             _toolboxes.Add(new AssetsToolbox());
             _toolboxes.Add(_hierarchyToolbox);
@@ -149,7 +149,7 @@ namespace Unify2D
 
         protected override void LoadContent()
         {
-            _coreInfoScene.GameCore.Initialize(GraphicsDevice);
+            _coreViewerScene.GameCore.Initialize(GraphicsDevice);
 
             base.LoadContent();
         }
@@ -224,7 +224,7 @@ namespace Unify2D
         public void Build()
         {
             GameBuilder builder = new GameBuilder();
-            builder.Build(_coreInfoScene.GameCore, this);
+            builder.Build(_coreViewerScene.GameCore, this);
             builder.StartBuild();
         }
 
@@ -258,7 +258,7 @@ namespace Unify2D
 //             JsonSerializerSettings settings = new JsonSerializerSettings();
 //             settings.TypeNameHandling = TypeNameHandling.Auto;
 //             settings.Formatting = Formatting.Indented;
-//             string text = JsonConvert.SerializeObject(_coreInfoScene.GameCore.GameObjects, settings);
+//             string text = JsonConvert.SerializeObject(_coreViewerScene.GameCore.GameObjects, settings);
 //
 //             File.WriteAllText(ToolsEditor.CombinePath(ProjectPath, "./test.scene"), text);
 //         }
@@ -267,14 +267,14 @@ namespace Unify2D
 //         {
 //             _projectLoaded = true;
 //
-//             _coreInfoScene.GameCore.GameObjects.Clear();
+//             _coreViewerScene.GameCore.GameObjects.Clear();
 //
 //             SelectObject(null);
 //
 //             List<GameObject> gameObjects = null;
 //             try
 //             {
-//                 string text = File.ReadAllText(_coreInfoScene.AssetPath);
+//                 string text = File.ReadAllText(_coreViewerScene.AssetPath);
 //                 JsonSerializerSettings settings = new JsonSerializerSettings();
 //                 settings.TypeNameHandling = TypeNameHandling.Auto;
 //                 settings.Error += SilentErrors;
@@ -288,7 +288,7 @@ namespace Unify2D
 //             if (gameObjects != null)
 //             {
 //                 Content.RootDirectory = ProjectPath;
-//                 _coreInfoScene.GameCore.LoadScene(this, gameObjects);
+//                 _coreViewerScene.GameCore.LoadScene(this, gameObjects);
 //             }
 //         }
 //
@@ -304,40 +304,42 @@ namespace Unify2D
             _settings.Save();
         }
 
-        internal void SetSceneCore(GameCoreInfo sceneCoreInfo)
+        internal void SetSceneCore(GameCoreViewer sceneCoreViewer)
         {
-            sceneCoreInfo.GameCore.Initialize(GraphicsDevice);
+            sceneCoreViewer.GameCore.Initialize(GraphicsDevice);
+            if (_coreViewers.Contains(sceneCoreViewer) == false)
+                _coreViewers.Add(sceneCoreViewer);
             
-            _coreInfoScene = sceneCoreInfo;
-            _gameToolbox.SetCore(sceneCoreInfo);
-            _hierarchyToolbox.SetCore(sceneCoreInfo);
+            _coreViewerScene = sceneCoreViewer;
+            _gameToolbox.SetCore(sceneCoreViewer);
+            _hierarchyToolbox.SetCore(sceneCoreViewer);
             
-            GameCore.SetCurrent(sceneCoreInfo.GameCore);
+            GameCore.SetCurrent(sceneCoreViewer.GameCore);
         }
 
         internal void OpenPrefab(PrefabAssetContent content)
         {
-            GameCoreInfo prefabCoreInfo = new GameCoreInfo(
+            GameCoreViewer prefabCoreViewer = new GameCoreViewer(
                 new GameCore(this),
                 content.Asset.FullPath);
-            _coresInfo.Add(prefabCoreInfo);
-            prefabCoreInfo.GameCore.Initialize(GraphicsDevice);
+            _coreViewers.Add(prefabCoreViewer);
+            prefabCoreViewer.GameCore.Initialize(GraphicsDevice);
             
-            _gameToolbox.SetCore(prefabCoreInfo);
-            _hierarchyToolbox.SetCore(prefabCoreInfo);
+            _gameToolbox.SetCore(prefabCoreViewer);
+            _hierarchyToolbox.SetCore(prefabCoreViewer);
 
-            GameCore.SetCurrent(prefabCoreInfo.GameCore);
+            GameCore.SetCurrent(prefabCoreViewer.GameCore);
             
             GameCore.Current.LoadScene(this, new List<GameObject>() { content.InstantiateGameObject() });
         }
 
-        internal void CloseGameCore(GameCoreInfo gameCoreInfo)
+        internal void CloseGameCore(GameCoreViewer gameCoreViewer)
         {
-            _coresInfo.Remove(gameCoreInfo);
-            GameCoreInfo replaceCore = _coresInfo.Count == 0 ? _coreInfoScene : _coresInfo[_coresInfo.Count - 1];
-            if (_gameToolbox.Tag == gameCoreInfo)
+            _coreViewers.Remove(gameCoreViewer);
+            GameCoreViewer replaceCore = _coreViewers.Count == 0 ? _coreViewerScene : _coreViewers[_coreViewers.Count - 1];
+            if (_gameToolbox.Tag == gameCoreViewer)
                 _gameToolbox.SetCore(replaceCore);
-            if (_hierarchyToolbox.Tag == gameCoreInfo)
+            if (_hierarchyToolbox.Tag == gameCoreViewer)
                 _hierarchyToolbox.SetCore(replaceCore);
             GameCore.SetCurrent(replaceCore.GameCore);
         }

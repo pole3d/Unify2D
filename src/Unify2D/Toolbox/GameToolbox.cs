@@ -55,9 +55,9 @@ namespace Unify2D.Toolbox
             _smallGridTexture.SetData(new Color[] { new Color(1, 1, 1, .1f) });
         }
         
-        public void SetCore(GameCoreInfo coreInfo)
+        public void SetCore(GameCoreViewer coreViewer)
         {
-            _tag = coreInfo;
+            _tag = coreViewer;
         }
 
         public override void Update(GameTime gameTime)
@@ -73,7 +73,7 @@ namespace Unify2D.Toolbox
             _editor.GraphicsDevice.Clear(_gameCamera.Background);
 
             // clear la texture de render de la scéne
-            ImGui.Begin($"GAME - {((GameCoreInfo)_tag).AssetPath}", ImGuiWindowFlags.None);
+            ImGui.Begin($"GAME - {((GameCoreViewer)_tag).AssetPath}", ImGuiWindowFlags.None);
 
             // Windows property
             Position = ImGui.GetWindowPos();
@@ -108,17 +108,17 @@ namespace Unify2D.Toolbox
             UpdateCamera();
 
             #region Drawing
-            ((GameCoreInfo)_tag).GameCore.BeginDraw(_gameCamera.Matrix);
+            ((GameCoreViewer)_tag).GameCore.BeginDraw(_gameCamera.Matrix);
 
             //Draw the editor only grid
             DrawGrid();
 
             // Draw all game assets
-            ((GameCoreInfo)_tag).GameCore.Draw();
+            ((GameCoreViewer)_tag).GameCore.Draw();
             // Draw all debutg gizmo
-            ((GameCoreInfo)_tag).GameCore.DrawGizmo();
+            ((GameCoreViewer)_tag).GameCore.DrawGizmo();
 
-            ((GameCoreInfo)_tag).GameCore.EndDraw();
+            ((GameCoreViewer)_tag).GameCore.EndDraw();
             #endregion
 
             // Write position in world

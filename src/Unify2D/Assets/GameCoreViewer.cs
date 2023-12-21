@@ -3,7 +3,7 @@ using Unify2D.Core;
 
 namespace Unify2D.Assets
 {
-    public class GameCoreInfo
+    public class GameCoreViewer
     {
         public enum Type
         {
@@ -16,7 +16,7 @@ namespace Unify2D.Assets
         public string AssetPath => _assetPath;
         public Type AssetType => _assetType;
 
-        public GameCoreInfo(GameCore core, string assetPath)
+        public GameCoreViewer(GameCore core, string assetPath)
         {
             _gameCore = core;
             _assetPath = assetPath;

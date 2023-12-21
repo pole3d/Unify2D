@@ -136,11 +136,10 @@ namespace Unify2D.Core
                 item.Update(this);
             }
 
-            foreach (GameObject item in _gameObjectsToInstantiate)
-            {
-                AddGameObjectImmediate(item);
+            while (_gameObjectsToInstantiate.Count > 0) {
+                AddGameObjectImmediate(_gameObjectsToInstantiate[0]);
+                _gameObjectsToInstantiate.RemoveAt(0);
             }
-            _gameObjectsToInstantiate.Clear();
             
             foreach (var item in _gameObjectsToDestroy)
             {

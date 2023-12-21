@@ -22,18 +22,18 @@ namespace Unify2D
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
             settings.Formatting = Formatting.Indented;
-            foreach (GameCoreInfo coreInfo in _gameEditor.GameCoresInfo)
+            foreach (GameCoreViewer coreViewer in _gameEditor.GameCoreViewers)
             {
-                if (coreInfo.AssetType == GameCoreInfo.Type.Scene)
+                if (coreViewer.AssetType == GameCoreViewer.Type.Scene)
                 {
-                    string text = JsonConvert.SerializeObject(_gameEditor.GameCoreInfoScene.GameCore.GameObjects, settings);
+                    string text = JsonConvert.SerializeObject(_gameEditor.GameCoreViewerScene.GameCore.GameObjects, settings);
                     File.WriteAllText(ToolsEditor.CombinePath(_gameEditor.ProjectPath, $"./{sceneName}.scene"), text);
                 }
-                else if (coreInfo.AssetType == GameCoreInfo.Type.Prefab)
+                else if (coreViewer.AssetType == GameCoreViewer.Type.Prefab)
                 {
-                    Asset asset = _gameEditor.AssetManager.Find(coreInfo.AssetPath, true);
+                    Asset asset = _gameEditor.AssetManager.Find(coreViewer.AssetPath, true);
                     if (asset != null)
-                        ((PrefabAssetContent)asset.AssetContent).Save(coreInfo.GameCore.GameObjects[0].GetRoot()); //Not so ideal, todo we should find a way to cache the root gameObject of a core (after branch merge)
+                        ((PrefabAssetContent)asset.AssetContent).Save(coreViewer.GameCore.GameObjects[0].GetRoot()); //Not so ideal, todo we should find a way to cache the root gameObject of a core (after branch merge)
                 }
             }
         }
@@ -57,11 +57,11 @@ namespace Unify2D
             if (gameObjects != null)
             {
                 Selection.SelectObject(null);
-                _gameEditor.GameCoresInfo.Remove(_gameEditor.GameCoreInfoScene);
-                _gameEditor.SetSceneCore(new GameCoreInfo(
+                _gameEditor.GameCoreViewers.Remove(_gameEditor.GameCoreViewerScene);
+                _gameEditor.SetSceneCore(new GameCoreViewer(
                     new GameCore(_gameEditor),
                     $"./{sceneName}.scene"));
-                _gameEditor.GameCoreInfoScene.GameCore.LoadScene(_gameEditor, gameObjects);
+                _gameEditor.GameCoreViewerScene.GameCore.LoadScene(_gameEditor, gameObjects);
             }
         }
 

@@ -9,9 +9,9 @@ namespace Unify2D.Toolbox
 {
     internal class HierarchyToolbox : ToolboxBase
     {
-        public void SetCore(GameCoreInfo coreInfo)
+        public void SetCore(GameCoreViewer coreViewer)
         {
-            _tag = coreInfo;
+            _tag = coreViewer;
         }
         
         public override void Draw()
@@ -27,9 +27,9 @@ namespace Unify2D.Toolbox
 
             GameObject goToDestroy = null;
 
-            if (_tag is GameCoreInfo coreInfo && coreInfo.AssetType == GameCoreInfo.Type.Prefab) {
+            if (_tag is GameCoreViewer coreViewer && coreViewer.AssetType == GameCoreViewer.Type.Prefab) {
                 if (ImGui.Button("Close prefab", new Vector2(ImGui.GetWindowWidth(), 20.0f))) {
-                    GameEditor.Instance.CloseGameCore(coreInfo);
+                    GameEditor.Instance.CloseGameCore(coreViewer);
                 }
                 ImGui.Separator();
             }
@@ -39,7 +39,7 @@ namespace Unify2D.Toolbox
             Selection.TryGameObject(out GameObject selectedGameObject);
             
             int i = 0;
-            foreach (var item in ((GameCoreInfo)_tag).GameCore.GameObjects)
+            foreach (var item in ((GameCoreViewer)_tag).GameCore.GameObjects)
             {
 
                 ImGui.PushID(i++);

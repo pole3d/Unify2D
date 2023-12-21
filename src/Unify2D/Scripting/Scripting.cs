@@ -110,7 +110,7 @@ namespace Unify2D.Scripting
 
         private void ReplaceComponents()
         {
-            foreach (var core in _editor.GameCoresInfo)
+            foreach (var core in _editor.GameCoreViewers)
             {
                 foreach (var go in core.GameCore.GameObjects)
                 {
