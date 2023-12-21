@@ -10,6 +10,7 @@
         "dependencies": {
           "FNA": "1.0.0",
           "GameAssembly": "1.0.0",
+          "Genbox.VelcroPhysics": "1.0.0",
           "ImGui.NET": "1.87.3",
           "UnifyCore": "1.0.0",
           "Genbox.VelcroPhysics.Reference": "0.0.0.0"

@@ -43,8 +43,5 @@ namespace Unify2D.Toolbox
 
             }
         }
-
-
-
     }
 }

@@ -1,53 +1,56 @@
 ﻿using Genbox.VelcroPhysics.Dynamics;
 using Genbox.VelcroPhysics.Factories;
-using ImGuiNET;
 using Microsoft.Xna.Framework;
 using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IO.Pipes;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unify2D.Core;
+using Unify2D.Core.Tools;
 using Unify2D.Physics;
 
 namespace UnifyCore.Core.Physics
 {
-    internal class BoxCollider : Component
+    internal class BoxCollider : Collider
     {
-        public float Width { get { return m_width ; } set { m_width = value; } }
-        public float Height { get { return m_height ; } set { m_height = value; } }
+        public float Width { get { return _width ; } set { _width = value; } }
+        public float Height { get { return _height ; } set { _height = value; } }
 
-        private Vector2 m_size;
+        private float _width = 1f, _height = 1f;
 
-        private Body staticBody;
-
-        private float m_width = 1f, m_height = 1f;
-
-        public override void Load(Game game, GameObject go)
+        public override Body Init()
         {
-            Rigidbody rb = _gameObject.GetComponent<Rigidbody>();
+            _body = BodyFactory.CreateRectangle(PhysicsSettings.World, _width * _gameObject.Scale.X, _height * _gameObject.Scale.Y, 1, (_gameObject.Position + _offset) / PhysicsSettings.UnitToPixelRatio, _gameObject.Rotation, BodyType.Kinematic);
+            return _body;
+        }
 
-            if (rb == null)
+        public override void LateLoad(Game game, GameObject go)
+        {
+            if (_body == null)
             {
-                staticBody = BodyFactory.CreateRectangle(PhysicsSettings.World, m_width, m_height, 1, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, 0, BodyType.Static);
+                _body = BodyFactory.CreateRectangle(PhysicsSettings.World, _width * _gameObject.Scale.X, _height * _gameObject.Scale.Y, 1, (_gameObject.Position + _offset) / PhysicsSettings.UnitToPixelRatio, _gameObject.Rotation, BodyType.Kinematic);
+                _standalone = true;
             }
         }
 
-        public override void Update(GameCore game)
+        public override void PhysicsUpdate(GameCore game)
         {
-
-        }
-        /*
-
-        public override void DrawGizmoOnSelected(ImDrawListPtr drawList)
-        {
-            drawList.AddRect(new System.Numerics.Vector2(m_width, m_height), new System.Numerics.Vector2(m_width, m_height), ToColor32(Color.Green.R, Color.Green.G, Color.Green.B, Color.Green.A));
+            if (_standalone)
+            {
+                _body.Position = _gameObject.Position / PhysicsSettings.UnitToPixelRatio;
+                _body.Rotation = _gameObject.Rotation;
+            }
         }
 
-        //REMOVE THIS SHIT
-        static uint ToColor32(byte r, byte g, byte b, byte a) { uint ret = a; ret <<= 8; ret += b; ret <<= 8; ret += g; ret <<= 8; ret += r; return ret; }
-        */
+        internal override void DrawGizmo()
+        {
+            int pixelsWidth  = (int)Math.Round(_width * _gameObject.Scale.X * PhysicsSettings.UnitToPixelRatio);
+            int pixelsHeight = (int)Math.Round(_height * _gameObject.Scale.Y * PhysicsSettings.UnitToPixelRatio);
+
+            float sin = MathF.Sin(_gameObject.Rotation);
+            float cos = MathF.Cos(_gameObject.Rotation);
+
+            Vector2 offsettedPosition = new Vector2((_offset.X * cos) + (_offset.Y * sin), ((_offset.X * sin) - (_offset.Y * cos)));
+
+            Gizmo.DrawWireSquare(_gameObject.Position + offsettedPosition, new Vector2(pixelsWidth, pixelsHeight), 2, _gameObject.Rotation, Color.LightGreen);    
+        }
+
     }
 }

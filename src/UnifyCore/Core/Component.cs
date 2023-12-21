@@ -1,10 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Unify2D.Core
 {
@@ -28,9 +22,23 @@ namespace Unify2D.Core
         {
         }
 
+        public virtual void LateLoad(Game game, GameObject go)
+        {
+
+        }
+
         public virtual void Update(GameCore game)
         {
+
         }
+
+
+        ///To be replaced by FixedUpdate later on
+        public virtual void PhysicsUpdate(GameCore game)
+        {
+
+        }
+
 
         internal virtual void Destroy()
         {

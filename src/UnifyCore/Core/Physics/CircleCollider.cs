@@ -1,21 +1,19 @@
 ﻿using Genbox.VelcroPhysics.Dynamics;
 using Genbox.VelcroPhysics.Factories;
 using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unify2D.Core;
 using Unify2D.Physics;
 
 namespace UnifyCore.Core.Physics
 {
+    //OUTDATED, NEEDS TO BE COMPLETELY REFACTORED
+
     internal class CircleCollider: Component
     {
         public float Radius{ get { return m_radius; } set { m_radius = value; } }
+        public Vector2 Offset { get { return m_offset; } set { m_offset = value; } }
 
-        private Vector2 m_size;
+        private Vector2 m_size, m_offset;
 
         private Body staticBody;
 
@@ -27,13 +25,22 @@ namespace UnifyCore.Core.Physics
 
             if (rb == null)
             {
-                staticBody = BodyFactory.CreateCircle(PhysicsSettings.World, m_radius, 1, _gameObject.Position, 0, BodyType.Static);
+                float size = _gameObject.Scale.Y;
+
+                if (_gameObject.Scale.X > size)
+                    size = _gameObject.Scale.X;
+
+                staticBody = BodyFactory.CreateCircle(PhysicsSettings.World, m_radius * size, 1, _gameObject.Position + Offset, 0, BodyType.Static);
             }
         }
 
-        public override void Update(GameCore game)
+        public override void PhysicsUpdate(GameCore game)
         {
-
+            if (staticBody != null)
+            {
+                staticBody.Position = _gameObject.Position / PhysicsSettings.UnitToPixelRatio;
+                staticBody.Rotation = _gameObject.Rotation;
+            }
         }
         /*
 

@@ -35,6 +35,7 @@ namespace Unify2D.Toolbox
             _propertyViewers.Add(typeof(int), new IntPropertyViewer());
             _propertyViewers.Add(typeof(float), new FloatPropertyViewer());
             _propertyViewers.Add(typeof(string), new StringPropertyViewer());
+            _propertyViewers.Add(typeof(Vector2), new Vector2PropertyViewer());
             _propertyViewers.Add(typeof(GameAsset), new GameAssetPropertyViewer());
         }
 
