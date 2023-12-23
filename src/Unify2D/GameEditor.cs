@@ -36,11 +36,9 @@ namespace Unify2D
 
         #endregion
 
-        const string AssetsFolder = "./Assets";
-
         #region Properties
         public string ProjectPath => _settings.Data.CurrentProjectPath;
-        public string AssetsPath => !string.IsNullOrEmpty(ProjectPath) ? ToolsEditor.CombinePath(ProjectPath, AssetsFolder) : string.Empty;
+        public override string AssetsPath => !string.IsNullOrEmpty(ProjectPath) ? ToolsEditor.CombinePath(ProjectPath, AssetsFolder) : string.Empty;
         
         public GameEditorSettings Settings => _settings;
         public Scripting.Scripting Scripting => _scripting;
@@ -104,7 +102,7 @@ namespace Unify2D
             
             //Create game core and load scene content
             _coreViewerScene = new GameCoreViewer(
-                new GameCore(this),
+                new GameCoreEditor(this),
                 "./test.scene");
             _coreViewers.Add(_coreViewerScene);
             GameCore.SetCurrent(_coreViewerScene.GameCore);
@@ -166,6 +164,8 @@ namespace Unify2D
             {
                 item.Update(gameTime);
             }
+            
+            GameCore.Current.RefreshGameObjectListImmediate();
         }
 
         protected override void Draw(GameTime gameTime)
@@ -320,7 +320,7 @@ namespace Unify2D
         internal void OpenPrefab(PrefabAssetContent content)
         {
             GameCoreViewer prefabCoreViewer = new GameCoreViewer(
-                new GameCore(this),
+                new GameCoreEditor(this),
                 content.Asset.FullPath);
             _coreViewers.Add(prefabCoreViewer);
             prefabCoreViewer.GameCore.Initialize(GraphicsDevice);
@@ -329,8 +329,7 @@ namespace Unify2D
             _hierarchyToolbox.SetCore(prefabCoreViewer);
 
             GameCore.SetCurrent(prefabCoreViewer.GameCore);
-            
-            GameCore.Current.LoadScene(this, new List<GameObject>() { content.InstantiateGameObject() });
+            GameObject.Instantiate(content.Asset.FullPath);
         }
 
         internal void CloseGameCore(GameCoreViewer gameCoreViewer)

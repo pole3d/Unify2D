@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Microsoft.Xna.Framework;
@@ -14,6 +15,7 @@ namespace Unify2D.Core
         public Vector2 Scale { get; set; } = new Vector2(1, 1);
         public Vector2 BoundingSize { get; set; } = new Vector2(30, 30);
 
+        [JsonIgnore]
         public PrefabInstance PrefabInstance => _prefabInstance;
 
         [JsonIgnore]
@@ -144,11 +146,15 @@ namespace Unify2D.Core
             // recursive : if the gameObject has no parent, return it, otherwise execute the method on its parent.
         }
         
-        /// <summary> BUILT GAME ONLY! "<tt>./Assets/filename.prefab</tt>" is not a valid path when used in the editor</summary>
+        /// <summary>
+        ///  Deserialize a prefab asset into a gameObject, load it and add it to the current core.
+        /// </summary>
         public static GameObject Instantiate(string originalAssetName)
         {
             StringBuilder sb = new StringBuilder(originalAssetName);
-            sb.Insert(0, "./Assets/");
+            if (sb.ToString().StartsWith("/") == false)
+                sb.Insert(0, "/");
+            sb.Insert(0, GameCore.Current.Game.AssetsPath);
             if (sb.ToString().EndsWith(".prefab") == false)
                 sb.Append(".prefab");
             // Get serialized text
@@ -163,6 +169,14 @@ namespace Unify2D.Core
         internal void LinkToPrefabInstance(PrefabInstance prefabInstance)
         {
             _prefabInstance = prefabInstance;
+            ApplyOverridesFromPrefabInstance(prefabInstance);
+        }
+
+        internal void ApplyOverridesFromPrefabInstance(PrefabInstance prefabInstance)
+        {
+            if (string.IsNullOrEmpty(prefabInstance.Name) == false)
+                Name = prefabInstance.Name; //Temporary, overridden name should be saved in the override list, instead of using PrefabInstance.Name.
+            // apply overrides here
         }
     }
 }

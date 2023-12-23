@@ -40,16 +40,14 @@ namespace Unify2D.Core
 
         static GameCore s_current;
 
-        private List<GameObject> _gameObjects;
-        private List<GameObject> _gameObjectsToInstantiate = new List<GameObject>();
-        private List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
-        private List<PrefabInstance> _prefabInstances = new List<PrefabInstance>(); // Should be editor-only
+        protected List<GameObject> _gameObjects = new List<GameObject>();
+        protected List<GameObject> _gameObjectsToInstantiate = new List<GameObject>();
+        protected List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
         private Game _game;
 
         public GameCore(Game game)
         {
             _game = game;
-            _gameObjects = new List<GameObject>();
         }
 
         public void InitPhysics()
@@ -69,11 +67,29 @@ namespace Unify2D.Core
             _gameObjects.Add(go);
         }
 
-        // Should be editor-only
-        public void AddPrefabInstance(PrefabInstance pi)
+        public void Destroy(GameObject item)
         {
-            _prefabInstances.Add(pi);
-            AddGameObjectImmediate(pi.InstantiateAndLinkGameObject());
+            _gameObjectsToDestroy.Add(item);
+        }
+
+        public virtual void DestroyImmediate(GameObject item)
+        {
+            _gameObjects.Remove(item);
+        }
+        
+        public void RefreshGameObjectListImmediate()
+        {
+            while (_gameObjectsToInstantiate.Count > 0)
+            {
+                AddGameObjectImmediate(_gameObjectsToInstantiate[0]);
+                _gameObjectsToInstantiate.RemoveAt(0);
+            }
+            
+            foreach (var item in _gameObjectsToDestroy)
+            {
+                DestroyImmediate(item);
+            }
+            _gameObjectsToDestroy.Clear();
         }
 
         public void BeginDraw()
@@ -109,39 +125,20 @@ namespace Unify2D.Core
             SpriteBatch.End();
         }
 
-        public void Destroy(GameObject item)
-        {
-            _gameObjectsToDestroy.Remove(item);
-        }
-
-        public void DestroyImmediate(GameObject item)
-        {
-            _gameObjects.Remove(item);
-        }
-
         public void Initialize(GraphicsDevice graphicsDevice)
         {
             SpriteBatch = new SpriteBatch(graphicsDevice);
 
             InitPhysics();
         }
-
-        public void LoadScene(Game game, List<GameObject> gameObjects)
+        
+        public virtual void LoadScene(Game game, SceneData data)
         {
             _gameObjects.Clear();
-            foreach (var item in gameObjects)
+            foreach (var item in data.GameObjects)
             {
                 AddGameObjectImmediate(item);
                 item.Load(game);
-            }
-        }
-        
-        public void LoadScene(Game game, SceneData content)
-        {
-            LoadScene(game, content.GameObjects);
-            _prefabInstances.Clear();
-            foreach (PrefabInstance item in content.PrefabInstances) {
-                AddPrefabInstance(item);
             }
         }
 
@@ -154,24 +151,9 @@ namespace Unify2D.Core
                 item.Update(this);
             }
 
-            while (_gameObjectsToInstantiate.Count > 0) {
-                AddGameObjectImmediate(_gameObjectsToInstantiate[0]);
-                _gameObjectsToInstantiate.RemoveAt(0);
-            }
+            RefreshGameObjectListImmediate();
             
-            foreach (var item in _gameObjectsToDestroy)
-            {
-                _gameObjects.Remove(item);
-            }
-
             PhysicsSettings.World.Step(DeltaTime);
-
-            _gameObjectsToDestroy.Clear();
-        }
-
-        public SceneData GetAsContent()
-        {
-            return new SceneData(_gameObjects, _prefabInstances);
         }
     }
 }

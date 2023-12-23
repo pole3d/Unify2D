@@ -26,7 +26,7 @@ namespace Unify2D
             {
                 if (coreViewer.AssetType == GameCoreViewer.Type.Scene)
                 {
-                    string text = JsonConvert.SerializeObject(_gameEditor.GameCoreViewerScene.GameCore.GetAsContent(), settings);
+                    string text = JsonConvert.SerializeObject(_gameEditor.GameCoreViewerScene.GameCore.GetSceneData(), settings);
                     File.WriteAllText(ToolsEditor.CombinePath(_gameEditor.ProjectPath, $"./{sceneName}.scene"), text);
                 }
                 else if (coreViewer.AssetType == GameCoreViewer.Type.Prefab)
@@ -59,7 +59,7 @@ namespace Unify2D
                 Selection.SelectObject(null);
                 _gameEditor.GameCoreViewers.Remove(_gameEditor.GameCoreViewerScene);
                 _gameEditor.SetSceneCore(new GameCoreViewer(
-                    new GameCore(_gameEditor),
+                    new GameCoreEditor(_gameEditor),
                     $"./{sceneName}.scene"));
                 _gameEditor.GameCoreViewerScene.GameCore.LoadScene(_gameEditor, sceneData);
             }

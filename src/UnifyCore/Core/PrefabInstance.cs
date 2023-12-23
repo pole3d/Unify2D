@@ -1,23 +1,26 @@
-﻿namespace Unify2D.Core
+﻿using System.IO;
+using Newtonsoft.Json;
+
+namespace Unify2D.Core
 {
     public class PrefabInstance : Object
     {
-        public string PrefabAssetPath => _prefabAssetPath;
-        public GameObject LinkedGameObject => _gameObject;
+        [JsonIgnore] public string PrefabAssetPath => _prefabAssetPath;
+        [JsonIgnore] public GameObject LinkedGameObject => _gameObject;
         
-        private string _prefabAssetPath;
-        private GameObject _gameObject;
+        [JsonProperty] private string _prefabAssetPath;
+        // todo here: list of overrides
+        [JsonIgnore] GameObject _gameObject;
 
         public PrefabInstance(string assetPath)
         {
             _prefabAssetPath = assetPath;
         }
-        
-        internal GameObject InstantiateAndLinkGameObject()
+
+        public GameObject InstantiateAndLinkGameObject()
         {
             _gameObject = GameObject.Instantiate(_prefabAssetPath);
             _gameObject.LinkToPrefabInstance(this);
-            //apply overrides here
             return _gameObject;
         }
     }

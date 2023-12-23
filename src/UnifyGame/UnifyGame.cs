@@ -17,6 +17,8 @@ namespace UnifyGame
     /// </summary>
     public class UnifyGame : Game
     {
+        public override string AssetsPath => AssetsFolder;
+
         private GraphicsDeviceManager _graphics;
         private Unify2D.ImGuiRenderer.Renderer _imGuiRenderer;
 
@@ -61,14 +63,13 @@ namespace UnifyGame
                 JsonSerializerSettings settings = new JsonSerializerSettings();
                 settings.TypeNameHandling = TypeNameHandling.Auto;
                 
-                //_core.LoadScene(this, JsonConvert.DeserializeObject<List<GameObject>>(text, settings));
-                SceneData content = JsonConvert.DeserializeObject<SceneData>(text, settings);
-                content.PrefabInstancesToGameObjects();
-                _core.LoadScene(this, content);
+                SceneData sceneData = JsonConvert.DeserializeObject<SceneData>(text, settings);
+                sceneData.PrefabInstancesToGameObjects();
+                _core.LoadScene(this, sceneData);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Can't load test.scene" + ex.ToString());
+                Console.WriteLine("Can't load test.scene => " + ex.ToString());
             }
 
             base.LoadContent();

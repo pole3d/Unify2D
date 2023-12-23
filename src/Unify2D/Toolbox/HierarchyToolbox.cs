@@ -46,9 +46,9 @@ namespace Unify2D.Toolbox
                 ImGui.PushID(i++);
                 if (isPrefabInstance)
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.0f, 1.0f, 1.0f, 0.25f));
-                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.0f, 1.0f, 1.0f, 0.5f));
-                    ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.0f, 1.0f, 1.0f, 1.0f));
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.0f, 1.0f, 1.0f, 1.0f));
+                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, new Vector4(0.0f, 1.0f, 1.0f, 0.5f));
+                    ImGui.PushStyleColor(ImGuiCol.HeaderActive, new Vector4(0.0f, 1.0f, 1.0f, 1.0f));
                 }
                 if (ImGui.Selectable($"{item.Name}", selectedGameObject == item))
                 {

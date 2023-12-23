@@ -12,11 +12,11 @@ namespace Unify2D.Assets
             Prefab
         }
 
-        public GameCore GameCore => _gameCore;
+        public GameCoreEditor GameCore => _gameCore;
         public string AssetPath => _assetPath;
         public Type AssetType => _assetType;
 
-        public GameCoreViewer(GameCore core, string assetPath)
+        public GameCoreViewer(GameCoreEditor core, string assetPath)
         {
             _gameCore = core;
             _assetPath = assetPath;
@@ -28,7 +28,7 @@ namespace Unify2D.Assets
                 throw new Exception("Unknown asset type for a GameCore. Very weird!");
         }
     
-        private GameCore _gameCore;
+        private GameCoreEditor _gameCore;
         private string _assetPath;
         private Type _assetType;
     }
