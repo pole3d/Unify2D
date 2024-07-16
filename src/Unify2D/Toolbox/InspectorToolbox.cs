@@ -172,10 +172,10 @@ namespace Unify2D.Toolbox
             PropertyInfo[] properties = component.GetType().GetProperties();
             foreach (PropertyInfo property in properties)
             {
-                if (Attribute.IsDefined(property, typeof(JsonIgnoreAttribute)))
-                {
-                    continue;
-                }
+                //if (Attribute.IsDefined(property, typeof(JsonIgnoreAttribute)))
+                //{
+                //    continue;
+                //}
 
                 try
                 {

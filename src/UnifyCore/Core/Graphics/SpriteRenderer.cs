@@ -23,12 +23,12 @@ namespace Unify2D.Core.Graphics
         GameAsset _asset;
         Texture2D _texture;
 
-        public void Initialize( Game game, GameObject go, string path)
+        public void Initialize(Game game, GameObject go, string path)
         {
             _gameObject = go;
             try
             {
-                _texture = game.Content.Load<Texture2D>(   $"./Assets/{path}");
+                _texture = game.Content.Load<Texture2D>($"./Assets/{path}");
                 _asset = new GameAsset(_texture, path);
                 _gameObject.BoundingSize = new Vector2(_texture.Width, _texture.Height);
             }
@@ -46,7 +46,7 @@ namespace Unify2D.Core.Graphics
             _asset.Release();
         }
 
-        public override void Load(Game game , GameObject go)
+        public override void Load(Game game, GameObject go)
         {
             Initialize(game, go, _asset.Name);
         }
@@ -61,6 +61,6 @@ namespace Unify2D.Core.Graphics
      SpriteEffects.None, LayerDepth);
         }
 
-   
+
     }
 }

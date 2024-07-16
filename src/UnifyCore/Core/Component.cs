@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Newtonsoft.Json;
 
 namespace Unify2D.Core
 {
@@ -11,6 +12,9 @@ namespace Unify2D.Core
     /// </summary>
     public class Component
     {
+        [JsonIgnore]
+        public GameObject GameObject => _gameObject;
+
         protected GameObject _gameObject;
 
         public virtual void Initialize(GameObject go)

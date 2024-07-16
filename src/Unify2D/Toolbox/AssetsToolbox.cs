@@ -27,6 +27,16 @@ namespace Unify2D.Toolbox
             Reset();
         }
 
+        public Asset GetAssetFromPath( string path)
+        {
+            foreach (var asset in _assets)
+            {
+                if ( path == asset.FullPath )
+                    return asset;
+            }
+            return null;
+        }
+
         internal override void Reset()
         {
             _assets.Clear();
