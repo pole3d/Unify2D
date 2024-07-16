@@ -98,7 +98,14 @@ namespace Unify2D.Core
 
         public void DestroyImmediate(GameObject item)
         {
-            _gameObjects.Remove(item);
+            if (item.Parent != null)
+            {
+                item.Parent.Children.Remove(item);
+            }
+            else
+            {
+                _gameObjects.Remove(item);
+            }
         }
 
         public void Initialize(GraphicsDevice graphicsDevice)
