@@ -149,8 +149,11 @@ namespace Unify2D.Toolbox
                     if (ptr.NativePtr != null)
                     {
                         Asset asset = Clipboard.Content as Asset;
-                        GameObject go = new GameObject() { Name = asset.Name };
+                        GameObject go = GameObject.Create();
+                        go.Name = asset.Name;
+                        
                         go.Position = GetMousePosition();
+
 
                         Selection.SelectObject(go);
 

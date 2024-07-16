@@ -45,10 +45,11 @@ namespace Unify2D.Core
             _gameObjects = new List<GameObject>();
         }
 
-        internal void AddGameObject(GameObject go)
+        internal void AddRootGameObject(GameObject go)
         {
             _gameObjects.Add(go);
         }
+
         public void InitPhysics()
         {
             if (PhysicsSettings == null)
@@ -119,6 +120,8 @@ namespace Unify2D.Core
         {
             foreach (var item in gameObjects)
             {
+                _gameObjects.Add(item);
+
                 item.Load(game);
             }
         }

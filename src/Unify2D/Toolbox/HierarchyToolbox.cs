@@ -1,68 +1,57 @@
 ﻿using ImGuiNET;
 using System;
+using System.Diagnostics;
 using Unify2D.Core;
 
 namespace Unify2D.Toolbox
 {
-    /// <summary>
-    /// The <see cref="HierarchyToolbox"/> class,
-    /// is a specialized toolbox designed to provide a user interface to visualize and interact with game objects
-    /// within a scene.
-    /// </summary>
     internal class HierarchyToolbox : Toolbox
     {
+
+        int _currentIndex = 0;
+        GameObject _goToDestroy = null;
+
         public override void Draw()
         {
             ImGui.Begin("Hierarchy");
- 
 
-            if (ImGui.Button("Add GameObject", new System.Numerics.Vector2(-  1,0)))
+
+            if (ImGui.Button("Add GameObject", new System.Numerics.Vector2(-1, 0)))
             {
-                GameObject go = new GameObject();
-                go.Name = "GameObject";
+                if (Selection.Selected != null)
+                {
+                    GameObject parent = Selection.Selected as GameObject;
+                    GameObject go = GameObject.CreateChild(parent);
+                    go.Name = "GameObject";
+                }
+                else
+                {
+                    GameObject go = GameObject.Create();
+                    go.Name = "GameObject";
+                }
             }
 
-            GameObject goToDestroy = null;
-
-            int i = 0;
-
-            Selection.TryGameObject(out GameObject selectedGameObject);
+            _currentIndex = 0;
 
             foreach (var item in GameCore.Current.GameObjects)
             {
+                if (item.Parent != null)
+                    continue;
 
-                ImGui.PushID(i++);
-                if (ImGui.Selectable($"{item.Name}", selectedGameObject == item))
-                {
-                    Selection.SelectObject(item);
-                }
-
-                if (ImGui.BeginPopupContextItem())
-                {
-                    if (ImGui.Button("Destroy"))
-                    {
-                        ImGui.CloseCurrentPopup();
-
-                        goToDestroy = item;
-                    }
-
-                    ImGui.EndPopup();
-                }
-                ImGui.PopID();
-
+                DrawNode(item);
             }
 
 
 
             ImGui.End();
 
-            if (goToDestroy != null)
+            if (_goToDestroy != null)
             {
-                GameCore.Current.DestroyImmediate(goToDestroy);
+                GameCore.Current.DestroyImmediate(_goToDestroy);
                 Selection.UnSelectObject();
                 _goToDestroy = null;
             }
-
+        }
 
         void DrawNode(GameObject go)
         {
@@ -138,7 +127,8 @@ namespace Unify2D.Toolbox
             }
 
             ImGui.PopID();
-
         }
     }
 }
+
+
