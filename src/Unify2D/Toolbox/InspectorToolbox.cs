@@ -21,11 +21,16 @@ namespace Unify2D.Toolbox
         GameObject _gameObject;
         Asset _asset;
 
-
         List<TextureBound> _texturesBound = new List<TextureBound>();
         List<TextureBound> _texturesToUnbind = new List<TextureBound>();
 
         Dictionary<Type,PropertyViewer> _propertyViewers = new Dictionary<Type,PropertyViewer>();
+
+        /// <summary>
+        /// WORKAROUND : Add one frame delay to avoid modifying another gameobject when
+        /// switching between gameobjects
+        /// </summary>
+        int _changeCount = 0;
 
         public override void Initialize(GameEditor editor)
         {
@@ -50,11 +55,11 @@ namespace Unify2D.Toolbox
                 _gameObject = obj as GameObject;
             else if (obj is Asset)
                 _asset = obj as Asset;
-
         }
 
         private void UnSelect()
         {
+            _changeCount = 1;
 
             foreach (var item in _texturesBound)
             {
@@ -77,14 +82,20 @@ namespace Unify2D.Toolbox
 
             ImGui.Begin("Inspector");
 
-            if (_gameObject != null)
+            if (_changeCount <= 0)
             {
-                ShowGameObject();
+
+                if (_gameObject != null)
+                {
+                    ShowGameObject();
+                }
+                else if (_asset != null)
+                {
+                    ShowAsset();
+                }
             }
-            else if (_asset != null)
-            {
-                ShowAsset();
-            }
+            else
+                _changeCount--;
 
             ImGui.End();
         }
@@ -121,7 +132,6 @@ namespace Unify2D.Toolbox
             _gameObject.Position = new Vector2(position.X, position.Y);
             _gameObject.Rotation = MathHelper.ToRadians(rotation);
             _gameObject.Scale = new Vector2(scale.X, scale.Y);
-
 
             List<Component> toRemove = new List<Component>();
             foreach (var component in _gameObject.Components)
