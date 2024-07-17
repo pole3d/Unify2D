@@ -35,7 +35,7 @@ namespace Unify2D
 
         #endregion
 
-        const string AssetsFolder = "./Assets";
+        const string AssetsFolder = "\\Assets";
 
         #region Properties
 
