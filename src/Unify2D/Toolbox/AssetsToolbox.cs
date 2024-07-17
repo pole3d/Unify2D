@@ -3,9 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unify2D.Assets;
 using Unify2D.Tools;
 
@@ -27,11 +24,11 @@ namespace Unify2D.Toolbox
             Reset();
         }
 
-        public Asset GetAssetFromPath( string path)
+        public Asset GetAssetFromPath(string path)
         {
             foreach (var asset in _assets)
             {
-                if ( path == asset.FullPath )
+                if (path == asset.FullPath)
                     return asset;
             }
             return null;
@@ -65,6 +62,13 @@ namespace Unify2D.Toolbox
         public override void Draw()
         {
             ImGui.Begin("Assets");
+
+            if (ImGui.Button("Show Explorer", new System.Numerics.Vector2(-1, 0)))
+            {
+                string path = GameEditor.Instance.AssetsPath + Path.DirectorySeparatorChar;
+
+                System.Diagnostics.Process.Start("explorer.exe", path );
+            }
 
             for (int n = 0; n < _assets.Count; n++)
             {

@@ -33,7 +33,7 @@ namespace Unify2D.Tools
             if ( b.StartsWith("./"))
                 b = b.Substring(2,b.Length-2);
 
-            return a + "/" + b;
+            return a + "\\" + b;
 
         }
     }
