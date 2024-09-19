@@ -67,6 +67,9 @@ namespace Unify2D.Toolbox
             {
                 string path = GameEditor.Instance.AssetsPath + Path.DirectorySeparatorChar;
 
+                if ( Directory.Exists(path) == false)
+                    Directory.CreateDirectory(path);
+
                 System.Diagnostics.Process.Start("explorer.exe", path );
             }
 

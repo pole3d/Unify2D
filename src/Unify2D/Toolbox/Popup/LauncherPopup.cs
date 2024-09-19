@@ -45,11 +45,18 @@ namespace Unify2D.Toolbox
             {
                 _newProjectPath = ToolsEditor.CombinePath(_newProjectPath, _newProjectName);
 
-                Directory.CreateDirectory(_newProjectPath);
+                CreateProject();
 
                 OnOpenProjectPathSelected(_newProjectPath);
             }
 
+
+        }
+
+        private void CreateProject()
+        {
+            Directory.CreateDirectory(_newProjectPath);
+            Directory.CreateDirectory(Path.Combine(_newProjectPath, GameEditor.AssetsFolder));
 
         }
 

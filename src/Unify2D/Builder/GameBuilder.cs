@@ -50,14 +50,17 @@ namespace Unify2D.Builder
 
             Directory.CreateDirectory(BuildPathFull + AssetsPath);
 
-            foreach (var file in Directory.GetFiles(AssetsPathFull))
+            if (Directory.Exists(AssetsPathFull))
             {
-                string fileName = Path.GetFileName(file);
-                string newPath = ToolsEditor.CombinePath(ToolsEditor.CombinePath(BuildPathFull, AssetsPath)   , fileName);
+                foreach (var file in Directory.GetFiles(AssetsPathFull))
+                {
+                    string fileName = Path.GetFileName(file);
+                    string newPath = ToolsEditor.CombinePath(ToolsEditor.CombinePath(BuildPathFull, AssetsPath), fileName);
 
-                var sourceFile = new FileInfo(file);
-                sourceFile.CopyTo(newPath, true);
+                    var sourceFile = new FileInfo(file);
+                    sourceFile.CopyTo(newPath, true);
 
+                }
             }
 
             Save();
@@ -69,11 +72,14 @@ namespace Unify2D.Builder
         {
             List<SyntaxTree> syntaxes = new List<SyntaxTree>();
 
-            foreach (var item in Directory.GetFiles(_editor.AssetsPath, "*.cs"))
+            if (Directory.Exists(_editor.AssetsPath))
             {
-                string content = File.ReadAllText(item);
-                SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(content);
-                syntaxes.Add(syntaxTree);
+                foreach (var item in Directory.GetFiles(_editor.AssetsPath, "*.cs"))
+                {
+                    string content = File.ReadAllText(item);
+                    SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(content);
+                    syntaxes.Add(syntaxTree);
+                }
             }
 
             string assemblyName = "GameAssembly";
