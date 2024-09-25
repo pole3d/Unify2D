@@ -116,7 +116,7 @@ namespace Unify2D.Toolbox
             {
                 if(_logCategories.Count > 1)
                 {
-                    ImGui.SeparatorText(category);
+                    //ImGui.SeparatorText(category);
                 }
                 foreach (var log in Debug.GetLogs(category))
                 {
