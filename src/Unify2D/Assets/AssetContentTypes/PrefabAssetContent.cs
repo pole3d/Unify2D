@@ -27,7 +27,7 @@ namespace Unify2D.Assets
             settings.TypeNameHandling = TypeNameHandling.Auto;
             // Write serialized data to file
             _serializedText = JsonConvert.SerializeObject(gameObject, settings);
-            File.WriteAllText($"{GameEditor.Instance.AssetsPath}{_asset.FullPath}", _serializedText);
+            File.WriteAllText($"{_asset.FullPath}", _serializedText);
             Console.WriteLine($"Prefab {gameObject.Name} saved to {Path.GetFullPath(_asset.FullPath)}");
         }
     }
