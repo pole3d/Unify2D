@@ -107,6 +107,7 @@ namespace Unify2D
             _imGuiRenderer = new ImGuiRenderer.Renderer(this);
             _imGuiRenderer.RebuildFontAtlas();
             ImGui.GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
+            ImGui.GetIO().ConfigFlags |= ImGuiConfigFlags.DockingEnable | ImGuiConfigFlags.ViewportsEnable;
 
             Window.AllowUserResizing = true;
             _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
@@ -192,6 +193,8 @@ namespace Unify2D
         {
             // Call BeforeLayout first to set things up
             _imGuiRenderer.BeforeLayout(gameTime);
+
+            ImGui.DockSpaceOverViewport();
 
             _gameEditorUI.DrawMainMenuBarUI();
 
