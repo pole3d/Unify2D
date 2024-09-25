@@ -23,7 +23,7 @@ namespace Unify2D
             settings.Formatting = Formatting.Indented;
             string text = JsonConvert.SerializeObject(_gameEditor.GameCore.GameObjects, settings);
 
-            File.WriteAllText(ToolsEditor.CombinePath(_gameEditor.ProjectPath, $"./{sceneName}.scene"), text);
+            File.WriteAllText(ToolsEditor.CombinePath(_gameEditor.ProjectPath, $"./Assets/{sceneName}.scene"), text);
         }
 
         public void LoadScene(string sceneName)
@@ -33,7 +33,8 @@ namespace Unify2D
             List<GameObject> gameObjects = null;
             try
             {
-                string text = File.ReadAllText(ToolsEditor.CombinePath(_gameEditor.ProjectPath, $"./{sceneName}.scene"));
+                Console.WriteLine(_gameEditor.ProjectPath + " project path");
+                string text = File.ReadAllText(ToolsEditor.CombinePath(_gameEditor.ProjectPath, $"./Assets/{sceneName}.scene"));
                 JsonSerializerSettings settings = new JsonSerializerSettings();
                 settings.TypeNameHandling = TypeNameHandling.Auto;
                 settings.Error += SilentErrors;
