@@ -1,16 +1,13 @@
 ﻿using Genbox.VelcroPhysics.Dynamics;
 using Genbox.VelcroPhysics.Factories;
 using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unify2D.Core;
 using Unify2D.Physics;
 
 namespace UnifyCore.Core.Physics
 {
+    //OUTDATED, NEEDS TO BE COMPLETELY REFACTORED
+
     internal class CapsuleCollider : Component
     {
         public float Height { get{ return m_height; } set { m_height = value; } }
@@ -27,13 +24,17 @@ namespace UnifyCore.Core.Physics
 
             if (rb == null)
             {
-                staticBody = BodyFactory.CreateCapsule(PhysicsSettings.World, m_height, m_radius, 1, _gameObject.Position, 0, BodyType.Static);
+                staticBody = BodyFactory.CreateCapsule(PhysicsSettings.World, m_height * _gameObject.Scale.Y, m_radius * _gameObject.Scale.X, 1, _gameObject.Position, _gameObject.Rotation, BodyType.Static);
             }
         }
 
-        public override void Update(GameCore game)
+        public override void PhysicsUpdate(GameCore game)
         {
-
+            if (staticBody != null)
+            {
+                staticBody.Position = _gameObject.Position / PhysicsSettings.UnitToPixelRatio;
+                staticBody.Rotation = _gameObject.Rotation;
+            }
         }
         /*
 

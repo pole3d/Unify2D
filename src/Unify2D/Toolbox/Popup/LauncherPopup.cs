@@ -26,7 +26,7 @@ namespace Unify2D.Toolbox
 
         private void DrawNewProject(GameEditor editor)
         {
-            ImGui.SeparatorText("New Project");
+            //ImGui.SeparatorText("New Project");
 
             ImGui.InputText("Name", ref _newProjectName, 30);
 
@@ -45,7 +45,7 @@ namespace Unify2D.Toolbox
             {
                 _newProjectPath = ToolsEditor.CombinePath(_newProjectPath, _newProjectName);
 
-                Directory.CreateDirectory(_newProjectPath);
+                CreateProject();
 
                 OnOpenProjectPathSelected(_newProjectPath);
             }
@@ -53,9 +53,16 @@ namespace Unify2D.Toolbox
 
         }
 
+        private void CreateProject()
+        {
+            Directory.CreateDirectory(_newProjectPath);
+            Directory.CreateDirectory(Path.Combine(_newProjectPath, GameEditor.AssetsFolder));
+
+        }
+
         private void DrawExistingProject(GameEditor editor)
         {
-            ImGui.SeparatorText("Recent projects");
+            //ImGui.SeparatorText("Recent projects");
 
             ImGui.BeginChildFrame(12, new System.Numerics.Vector2(140, 80));
             if (string.IsNullOrEmpty(editor.Settings.Data.CurrentProjectPath) == false)

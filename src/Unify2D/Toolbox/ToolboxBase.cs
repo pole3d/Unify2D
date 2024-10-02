@@ -3,7 +3,10 @@ using Microsoft.Xna.Framework;
 namespace Unify2D.Toolbox
 {
     /// <summary>
-    /// Base class for a tool window in the game editor
+    /// The <see cref="Toolbox"/> class, as an abstract base class, serves as the foundation
+    /// for creating in-editor windows using <see cref="ImGui"/>. Toolboxes are specialized interfaces within
+    /// the editor environment. It's meant to be inherited to create more specific toolboxes, 
+    /// implementing the necessary functionalities.
     /// </summary>
     public abstract class ToolboxBase
     {

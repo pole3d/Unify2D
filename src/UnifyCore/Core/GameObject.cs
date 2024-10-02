@@ -1,45 +1,108 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Microsoft.Xna.Framework;
-using Newtonsoft.Json;
 using Unify2D.Core.Graphics;
 
 namespace Unify2D.Core
 {
-    public class GameObject : Object
+    /// <summary>
+    /// The <see cref="GameObject"/> class represents an object in a game world,
+    /// providing properties for its position, rotation, scale, name, and a list of components.
+    /// This class serves as a fundamental building block for constructing scenes in a game.
+    /// </summary>
+    public class GameObject
     {
-        public Vector2 Position{ get; set; }
-        public float Rotation { get; set; }
+        public static ulong s_maxID = 0;
+        public ulong UID { get; set; }
+
+
+
+        public string Name { get; set; }
+
+        public Vector2 Position
+        {
+            get { return GetParentPosition() + LocalPosition; }
+            set
+            {
+                LocalPosition = value - GetParentPosition();
+                m_positionUpdated = true;
+            }
+        }
+
+        public Vector2 LocalPosition { get; set; }
+
+        public float Rotation { get { return m_rotation; } set { m_rotation = value; m_rotationUpdated = true; } }
         public Vector2 Scale { get; set; } = new Vector2(1, 1);
         public Vector2 BoundingSize { get; set; } = new Vector2(30, 30);
-
+        public bool PositionUpdated { get { return m_positionUpdated; } }
+        public bool RotationUpdated { get { return m_rotationUpdated; } }
+        public List<GameObject> Children { get; set; }
         [JsonIgnore]
-        public PrefabInstance PrefabInstance => _prefabInstance;
-
+        public GameObject Parent { get; set; }
         [JsonIgnore]
         public IEnumerable<Component> Components => _components;
 
-        private static JsonSerializerSettings s_serializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto }; //type name should be read
-        
-        List<Renderer> _renderers;
+        private Vector2 m_position;
+        private float m_rotation;
+        private bool m_positionUpdated, m_rotationUpdated;
 
-        [JsonProperty]
-        List<Component> _components;
 
         [JsonIgnore]
         private PrefabInstance _prefabInstance;
+        
+        //type name should be read
+        private static JsonSerializerSettings s_serializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto }; 
+
+        List<Renderer> _renderers;
+
+        [JsonIgnore]
+        public PrefabInstance PrefabInstance => _prefabInstance;
+        
+        [JsonProperty]
+        List<Component> _components;
 
         public GameObject()
         {
             _components = new List<Component>();
             _renderers = new List<Renderer>();
             Name = "GameObject";
+
+        }
+
+        public static GameObject Create()
+        {
+            GameObject go = new GameObject();
+            go.UID = s_maxID++;
+            GameCore.Current.AddRootGameObject(go);
+            return go;
+        }
+
+        public static GameObject CreateChild(GameObject parent)
+        {
+            GameObject child = new GameObject();
+            child.UID = s_maxID++;
+
+            if (parent.Children == null)
+                parent.Children = new List<GameObject>();
+
+            child.Parent = parent;
+            parent.Children.Add(child);
+            return child;
         }
 
         internal void Load(Game game)
         {
+            if (Children != null)
+            {
+                foreach (var child in Children)
+                {
+                    child.Parent = this;
+                    child.Load(game);
+                }
+            }
+
             foreach (var component in _components)
             {
                 component.Initialize(this);
@@ -49,6 +112,11 @@ namespace Unify2D.Core
                 {
                     _renderers.Add(renderer);
                 }
+            }
+
+            foreach (var component in _components)
+            {
+                component.LateLoad(game, this);
             }
         }
 
@@ -111,6 +179,16 @@ namespace Unify2D.Core
             {
                 item.Update(core);
             }
+
+
+            ///To be refactored as FixedUpdate later
+            foreach (var item in _components)
+            {
+                item.PhysicsUpdate(core);
+            }
+
+            m_positionUpdated = false;
+            m_rotationUpdated = false;
         }
 
         public void RemoveComponent(Component item)
@@ -139,6 +217,20 @@ namespace Unify2D.Core
             _components.Clear();
         }
 
+        Vector2 GetParentPosition()
+        {
+            Vector2 position = Vector2.Zero;
+            GameObject parent = Parent;
+
+            while (parent != null)
+            {
+                position += Parent.LocalPosition;
+                parent = parent.Parent;
+            }
+
+            return position;
+        }
+        
         public GameObject GetRoot()
         {
             return this;
@@ -165,13 +257,12 @@ namespace Unify2D.Core
             GameCore.Current.AddGameObject(go);
             return go;
         }
-
         internal void LinkToPrefabInstance(PrefabInstance prefabInstance)
         {
             _prefabInstance = prefabInstance;
             ApplyOverridesFromPrefabInstance(prefabInstance);
         }
-
+        
         internal void ApplyOverridesFromPrefabInstance(PrefabInstance prefabInstance)
         {
             if (string.IsNullOrEmpty(prefabInstance.Name) == false)

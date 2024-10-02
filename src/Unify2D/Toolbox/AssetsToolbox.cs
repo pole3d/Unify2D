@@ -1,15 +1,17 @@
-﻿using System;
+﻿using ImGuiNET;
+using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using Newtonsoft.Json;
-using ImGuiNET;
 using Unify2D.Assets;
-using Unify2D.Core;
 using Unify2D.Tools;
 
 namespace Unify2D.Toolbox
 {
+    /// <summary>
+    /// The <see cref="AssetsToolbox"/> class,
+    /// is a specialized toolbox designed to provide a user interface to visualise and select <see cref="Asset">s.
+    /// </summary>
     internal class AssetsToolbox : ToolboxBase
     {
         string _path;
@@ -22,17 +24,54 @@ namespace Unify2D.Toolbox
             Reset();
         }
 
+        public Asset GetAssetFromPath(string path)
+        {
+            foreach (var asset in _assets)
+            {
+                if (path == asset.FullPath)
+                    return asset;
+            }
+            return null;
+        }
+
         internal override void Reset()
         {
-            _editor.AssetManager.RefreshDatabase();
-            _assets = _editor.AssetManager.Assets;
-            _selected = new bool[_editor.AssetManager.NbOfFiles];
+            _assets.Clear();
+            _path = _editor.AssetsPath;
+
+            if (String.IsNullOrEmpty(_path))
+                return;
+
+            if (Directory.Exists(_path) == false)
+                Directory.CreateDirectory(_path);
+
+            var files = Directory.GetFiles(_path);
+
+            foreach (var file in files)
+            {
+                string relativeFile = file.Replace(_path, string.Empty);
+
+                _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeFile),
+                    Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile)));
+            }
+
+            _selected = new bool[files.Length];
         }
+
 
         public override void Draw()
         {
             ImGui.Begin("Assets");
-            ImGui.BeginChild("assetList");
+
+            if (ImGui.Button("Show Explorer", new System.Numerics.Vector2(-1, 0)))
+            {
+                string path = $"{GameEditor.Instance.AssetsPath + Path.DirectorySeparatorChar}";
+
+                if ( Directory.Exists(path) == false)
+                    Directory.CreateDirectory(path);
+
+                System.Diagnostics.Process.Start("explorer.exe", path );
+            }
 
             for (int n = 0; n < _assets.Count; n++)
             {
@@ -59,67 +98,14 @@ namespace Unify2D.Toolbox
                         ImGui.SetDragDropPayload("ASSET", (IntPtr)(&n), sizeof(int));
                     }
 
-                    Clipboard.DragContent = _assets[n];
+                    Clipboard.Content = _assets[n];
 
                     ImGui.Text(_assets[n].ToString());
 
                     ImGui.EndDragDropSource();
                 }
-                
-                if (ImGui.BeginPopupContextItem())
-                {
-                    if (_assets[n].AssetContent is PrefabAssetContent prefabContent)
-                    {
-                        if (ImGui.Button("Open Prefab"))
-                        {
-                            GameEditor.Instance.OpenPrefab(prefabContent);
-                        }
-                    }
-                    if (ImGui.Button("Delete"))
-                    {
-                        DeleteSelectedAssets();
-                    }
-                    ImGui.EndPopup();
-                }
             }
-            
-            ImGui.EndChild();
-            
-            if (ImGui.BeginDragDropTarget())
-            {
-                GameObject draggedGO = null;
-                
-                unsafe
-                {
-                    var ptr = ImGui.AcceptDragDropPayload("HIERARCHY");
-                    if (ptr.NativePtr != null)
-                        draggedGO = Clipboard.DragContent as GameObject;
-                }
-
-                if (draggedGO != null)
-                {
-                    // Write serialized data to file
-                    Asset prefabAsset = _editor.AssetManager.CreateAsset<PrefabAssetContent>(draggedGO.Name);
-                    ((PrefabAssetContent)prefabAsset.AssetContent).Save(draggedGO);
-                    // Refresh toolbox
-                    Reset();
-                }
-                ImGui.EndDragDropTarget();
-            }
-            
             ImGui.End();
-        }
-        
-        private void DeleteSelectedAssets()
-        {
-            for (int n = 0; n < _assets.Count; n++)
-            {
-                if (_selected[n])
-                {
-                    File.Delete(GameEditor.Instance.AssetsPath + _assets[n].FullPath);
-                }
-            }
-            Reset();
         }
     }
 }

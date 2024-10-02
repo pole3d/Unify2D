@@ -11,7 +11,12 @@ using Unify2D.Core;
 
 namespace Unify2D.Toolbox
 {
-    internal class InspectorToolbox : ToolboxBase
+    /// <summary>
+    /// The <see cref="InspectorToolbox"/> class,
+    /// is a specialized toolbox designed to provide a user interface for inspecting details of a
+    /// specific <see cref="GameAsset"> or <see cref="GameObject"> within the editor environment.
+    /// </summary>
+    public class InspectorToolbox : Toolbox
     {
         GameObject _gameObject;
         Asset _asset;
@@ -21,6 +26,12 @@ namespace Unify2D.Toolbox
 
         Dictionary<Type,PropertyViewer> _propertyViewers = new Dictionary<Type,PropertyViewer>();
 
+        /// <summary>
+        /// WORKAROUND : Add one frame delay to avoid modifying another gameobject when
+        /// switching between gameobjects
+        /// </summary>
+        int _changeCount = 0;
+
         public override void Initialize(GameEditor editor)
         {
             _editor = editor;
@@ -29,6 +40,7 @@ namespace Unify2D.Toolbox
             _propertyViewers.Add(typeof(int), new IntPropertyViewer());
             _propertyViewers.Add(typeof(float), new FloatPropertyViewer());
             _propertyViewers.Add(typeof(string), new StringPropertyViewer());
+            _propertyViewers.Add(typeof(Vector2), new Vector2PropertyViewer());
             _propertyViewers.Add(typeof(GameAsset), new GameAssetPropertyViewer());
         }
 
@@ -43,17 +55,19 @@ namespace Unify2D.Toolbox
                 _gameObject = obj as GameObject;
             else if (obj is Asset)
                 _asset = obj as Asset;
-
         }
 
         private void UnSelect()
         {
+            _changeCount = 1;
+
             foreach (var item in _texturesBound)
             {
                 _texturesToUnbind.Add(item);
             }
 
             _texturesBound.Clear();
+
         }
         
 
@@ -68,14 +82,20 @@ namespace Unify2D.Toolbox
 
             ImGui.Begin("Inspector");
 
-            if (_gameObject != null)
+            if (_changeCount <= 0)
             {
-                ShowGameObject();
+
+                if (_gameObject != null)
+                {
+                    ShowGameObject();
+                }
+                else if (_asset != null)
+                {
+                    ShowAsset();
+                }
             }
-            else if (_asset != null)
-            {
-                ShowAsset();
-            }
+            else
+                _changeCount--;
 
             ImGui.End();
         }
@@ -112,7 +132,6 @@ namespace Unify2D.Toolbox
             _gameObject.Position = new Vector2(position.X, position.Y);
             _gameObject.Rotation = MathHelper.ToRadians(rotation);
             _gameObject.Scale = new Vector2(scale.X, scale.Y);
-
 
             List<Component> toRemove = new List<Component>();
             foreach (var component in _gameObject.Components)
@@ -163,10 +182,10 @@ namespace Unify2D.Toolbox
             PropertyInfo[] properties = component.GetType().GetProperties();
             foreach (PropertyInfo property in properties)
             {
-                if (Attribute.IsDefined(property, typeof(JsonIgnoreAttribute)))
-                {
-                    continue;
-                }
+                //if (Attribute.IsDefined(property, typeof(JsonIgnoreAttribute)))
+                //{
+                //    continue;
+                //}
 
                 try
                 {

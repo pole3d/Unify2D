@@ -1,61 +1,80 @@
-﻿using System;
-using System.Numerics;
-using ImGuiNET;
-using Unify2D.Assets;
+﻿using ImGuiNET;
+using System;
+using System.Diagnostics;
 using Unify2D.Core;
-using Unify2D.Tools;
 
 namespace Unify2D.Toolbox
 {
-    internal class HierarchyToolbox : ToolboxBase
+    internal class HierarchyToolbox : Toolbox
     {
-        public void SetCore(GameCoreViewer coreViewer)
-        {
-            _tag = coreViewer;
-        }
-        
+
+        int _currentIndex = 0;
+        GameObject _goToDestroy = null;
+
         public override void Draw()
         {
             ImGui.Begin("Hierarchy");
 
-            if (ImGui.Button("Add GameObject", new System.Numerics.Vector2(-  1,0)))
+
+            if (ImGui.Button("Add GameObject", new System.Numerics.Vector2(-1, 0)))
             {
-                GameObject go = new GameObject();
-                GameCore.Current.AddGameObjectImmediate(go);
-                go.Name = "GameObject";
+                if (Selection.Selected != null)
+                {
+                    GameObject parent = Selection.Selected as GameObject;
+                    GameObject go = GameObject.CreateChild(parent);
+                    go.Name = "GameObject";
+                }
+                else
+                {
+                    GameObject go = GameObject.Create();
+                    go.Name = "GameObject";
+                }
             }
 
-            GameObject goToDestroy = null;
+            _currentIndex = 0;
 
-            if (_tag is GameCoreViewer coreViewer && coreViewer.AssetType == GameCoreViewer.Type.Prefab) {
-                if (ImGui.Button("Close prefab", new Vector2(ImGui.GetWindowWidth(), 20.0f))) {
-                    GameEditor.Instance.CloseGameCore(coreViewer);
-                }
-                ImGui.Separator();
+            foreach (var item in GameCore.Current.GameObjects)
+            {
+                if (item.Parent != null)
+                    continue;
+
+                DrawNode(item);
             }
 
-            ImGui.BeginChild("gameObjectList");
 
-            Selection.TryGameObject(out GameObject selectedGameObject);
-            
-            int i = 0;
-            foreach (var item in ((GameCoreViewer)_tag).GameCore.GameObjects)
+
+            ImGui.End();
+
+            if (_goToDestroy != null)
             {
-                bool isPrefabInstance = item.PrefabInstance != null;
-                
-                ImGui.PushID(i++);
-                if (isPrefabInstance)
+                GameCore.Current.DestroyImmediate(_goToDestroy);
+                Selection.UnSelectObject();
+                _goToDestroy = null;
+            }
+        }
+
+        void DrawNode(GameObject go)
+        {
+            ImGui.PushID((int)go.UID);
+
+            ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.OpenOnDoubleClick |
+                ImGuiTreeNodeFlags.SpanAvailWidth;
+
+
+            if (go.Children == null || go.Children.Count == 0)
+            {
+                base_flags = ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen; // ImGuiTreeNodeFlags_Bullet
+
+                if (Selection.Selected == go)
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.0f, 1.0f, 1.0f, 1.0f));
-                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, new Vector4(0.0f, 1.0f, 1.0f, 0.5f));
-                    ImGui.PushStyleColor(ImGuiCol.HeaderActive, new Vector4(0.0f, 1.0f, 1.0f, 1.0f));
+                    base_flags |= ImGuiTreeNodeFlags.Selected;
                 }
-                if (ImGui.Selectable($"{item.Name}", selectedGameObject == item))
+
+                ImGui.TreeNodeEx($"{go.Name}##{go.GetHashCode()}", base_flags);
+                if (ImGui.IsItemClicked())
                 {
-                    Selection.SelectObject(item);
+                    Selection.SelectObject(go);
                 }
-                if (isPrefabInstance)
-                    ImGui.PopStyleColor(3);
 
                 if (ImGui.BeginPopupContextItem())
                 {
@@ -63,38 +82,53 @@ namespace Unify2D.Toolbox
                     {
                         ImGui.CloseCurrentPopup();
 
-                        goToDestroy = item;
+                        _goToDestroy = go;
                     }
 
                     ImGui.EndPopup();
                 }
-                
-                if (ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
-                {
-                    unsafe
-                    {
-                        // Set payload to carry the index of our item (could be anything)
-                        ImGui.SetDragDropPayload("HIERARCHY", (IntPtr)(&i), sizeof(int));
-                    }
-                    
-                    Clipboard.DragContent = item;
-                    ImGui.Text(item.Name);
-                        
-                    ImGui.EndDragDropSource();
-                }
-                ImGui.PopID();
             }
-            
-            ImGui.EndChild();
-
-            ImGui.End();
-
-            if (goToDestroy != null)
+            else
             {
-                GameCore.Current.DestroyImmediate(goToDestroy);
-                Selection.UnSelectObject();
+                if (Selection.Selected == go)
+                {
+                    base_flags |= ImGuiTreeNodeFlags.Selected;
+                }
+
+                bool open = (ImGui.TreeNodeEx($"{go.Name}##{go.GetHashCode()}", base_flags));
+                if (ImGui.IsItemClicked())
+                {
+                    Selection.SelectObject(go);
+                }
+
+                if (ImGui.BeginPopupContextItem())
+                {
+                    if (ImGui.Button("Destroy"))
+                    {
+                        ImGui.CloseCurrentPopup();
+
+                        _goToDestroy = go;
+                    }
+
+                    ImGui.EndPopup();
+                }
+
+                if (open)
+                {
+                    if (go.Children != null)
+                    {
+                        foreach (var item in go.Children)
+                        {
+                            DrawNode(item);
+                        }
+                    }
+                    ImGui.TreePop();
+                }
             }
 
+            ImGui.PopID();
         }
     }
 }
+
+

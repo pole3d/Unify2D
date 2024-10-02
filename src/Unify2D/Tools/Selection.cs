@@ -20,21 +20,26 @@ using Num = System.Numerics;
 namespace Unify2D
 {
     /// <summary>
-    /// 
+    /// The <see cref="Selection"/> class provides various Utility fonctions for selecting
+    /// <see cref="GameObject"/>s or <see cref="GameAsset"/>s in the editor.
     /// </summary>
     public static class Selection
     {
         enum SelectedState
         {
             None,
-            Select,
-            Drag
+            Empty,
+            Select
         }
         private static SelectedState _selectState = SelectedState.None;
 
-        private static object Selected 
+        public static object Selected 
         {
-            set
+            get
+            {
+                return _gameObject;
+            }
+            private set
             {
                 _gameObject = value as GameObject;
                 _asset = value as Asset;
@@ -97,8 +102,11 @@ namespace Unify2D
         internal static void Update(GameTime gameTime)
         {
             var mouseState = Mouse.GetState();
-
-            if (_selectState == SelectedState.None && mouseState.LeftButton == ButtonState.Pressed && GameEditor.Instance.IsMouseInGameWindow())
+            if(_selectState == SelectedState.Empty && mouseState.LeftButton == ButtonState.Released)
+            {
+                _selectState = SelectedState.None;
+            }
+            else if (_selectState == SelectedState.None && mouseState.LeftButton == ButtonState.Pressed && GameEditor.Instance.IsMouseInGameWindow())
             {
                 Vector2 worldPosition = GameEditor.Instance.GetWorldMousePosition();
 
@@ -113,15 +121,20 @@ namespace Unify2D
                         }
 
                         SelectObject(item);
-                        _selectState = SelectedState.Drag;
+                        _selectState = SelectedState.Select;
                         _dragOffset = GameEditor.Instance.GetWorldMousePosition() - item.Position;
 
                         _timeAtLastClick = gameTime.TotalGameTime.Seconds;
                         break;
                     }
                 }
+
+                if(_selectState == SelectedState.None)
+                {
+                    _selectState = SelectedState.Empty;
+                }
             }
-            else if (_selectState == SelectedState.Drag)
+            else if (_selectState == SelectedState.Select)
             {
                 if (mouseState.LeftButton == ButtonState.Pressed && _gameObject != null)
                 {
@@ -144,11 +157,15 @@ namespace Unify2D
             var drawList = ImGui.GetWindowDrawList();
             drawList.PushClipRect(p0, p1);
 
-            uint color = ToolsUI.ToColor32(50, 255, 50, 255);
+            uint color;
 
-            if (_selectState == SelectedState.Drag)
+            if (_selectState == SelectedState.Select)
             {
                 color = ToolsUI.ToColor32(255, 255, 50, 255);
+            }
+            else
+            {
+                color = ToolsUI.ToColor32(50, 255, 50, 255);
             }
 
             drawList.AddCircle(GameEditor.Instance.GameToolbox.WorldToUI(go.Position),

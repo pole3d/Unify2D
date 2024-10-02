@@ -36,9 +36,6 @@ namespace Unify2D
 
         #endregion
 
-
-        public const string AssetsFolder = "\\Assets";
-        
         #region Properties
         public string ProjectPath => _settings.Data.CurrentProjectPath;
         public override string AssetsPath => !string.IsNullOrEmpty(ProjectPath) ? ToolsEditor.CombinePath(ProjectPath, AssetsFolder) : string.Empty;
@@ -54,10 +51,6 @@ namespace Unify2D
         public List<GameCoreViewer> GameCoreViewers => _coreViewers;
 
         public SceneEditorManager SceneEditorManager => _sceneEditorManager;
-        internal HierarchyToolbox HierarchyToolbox => _hierarchyToolbox;
-        internal AssetsToolbox AssetsToolBox{ get; private set; }
-
-
         #endregion
 
         #region Fields
@@ -79,9 +72,6 @@ namespace Unify2D
         ScriptToolbox _scriptToolbox;
         GameToolbox _gameToolbox;
         HierarchyToolbox _hierarchyToolbox;
-     
-        GameObject _selected;
-        List<(RenderTarget2D, IntPtr)> _unbindTargets = new List<(RenderTarget2D, IntPtr)>();
         #endregion
 
         #region Initialization
@@ -120,7 +110,6 @@ namespace Unify2D
             _imGuiRenderer = new ImGuiRenderer.Renderer(this);
             _imGuiRenderer.RebuildFontAtlas();
             ImGui.GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
-            ImGui.GetIO().ConfigFlags |= ImGuiConfigFlags.DockingEnable | ImGuiConfigFlags.ViewportsEnable;
 
             Window.AllowUserResizing = true;
             _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
@@ -136,8 +125,6 @@ namespace Unify2D
 
         void InitializeToolBoxes()
         {
-            AssetsToolBox = new AssetsToolbox();
-
             _scriptToolbox = new ScriptToolbox();
             _inspectorToolbox = new InspectorToolbox();
             _gameToolbox = new GameToolbox();
@@ -145,9 +132,8 @@ namespace Unify2D
             _hierarchyToolbox = new HierarchyToolbox();
             _hierarchyToolbox.SetCore(_coreViewerScene);
 
-            _toolboxes.Add(AssetsToolBox);
-            _toolboxes.Add(HierarchyToolbox);
-            _toolboxes.Add(new ConsoleToolbox());
+            _toolboxes.Add(new AssetsToolbox());
+            _toolboxes.Add(_hierarchyToolbox);
 
             _toolboxes.Add(ScriptToolbox);
             _toolboxes.Add(InspectorToolbox);
@@ -192,18 +178,6 @@ namespace Unify2D
 
             // Call AfterLayout now to finish up and draw all the things
             _imGuiRenderer.AfterLayout();
-
-
-            // Unbind old rendertarget, need to be done outside the drawcalls or it crashes
-            if(_unbindTargets.Count > 0)
-            {
-                foreach (var tuple in _unbindTargets)
-                {
-                    tuple.Item1.Dispose(); // Rendertarget
-                    GuiRenderer.UnbindTexture(tuple.Item2); // Id Pointer
-                }
-                _unbindTargets.Clear();
-            }
         }
 
 
@@ -211,8 +185,6 @@ namespace Unify2D
         {
             // Call BeforeLayout first to set things up
             _imGuiRenderer.BeforeLayout(gameTime);
-
-            ImGui.DockSpaceOverViewport();
 
             _gameEditorUI.DrawMainMenuBarUI();
 
@@ -332,7 +304,6 @@ namespace Unify2D
             _settings.Save();
         }
 
-
         internal void SetSceneCore(GameCoreViewer sceneCoreViewer)
         {
             sceneCoreViewer.GameCore.Initialize(GraphicsDevice);
@@ -370,11 +341,6 @@ namespace Unify2D
             if (_hierarchyToolbox.Tag == gameCoreViewer)
                 _hierarchyToolbox.SetCore(replaceCore);
             GameCore.SetCurrent(replaceCore.GameCore);
-
-        internal void UnbindTexture(RenderTarget2D sceneRenderTarget, IntPtr renderTargetId)
-        {
-            _unbindTargets.Add((sceneRenderTarget, renderTargetId));
-
         }
     }
 }

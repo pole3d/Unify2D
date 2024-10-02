@@ -2,28 +2,49 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Unify2D.Assets;
+using Unify2D.Core.Graphics;
 using Unify2D.Core;
 using Unify2D.Tools;
 using Microsoft.Xna.Framework;
-using Unify2D.Core.Graphics;
+
 using Num = System.Numerics;
 
 namespace Unify2D.Toolbox
 {
+    /// <summary>
+    /// The <see cref="GameToolbox"/> class,
+    /// is a specialized toolbox designed to provide a user interface to visualize the game world, it provide a <see cref="CameraEditor">,
+    /// and provides functionality to interact with gameobjects.
+    /// </summary>
     internal class GameToolbox : ToolboxBase
     {
-        readonly Num.Vector2 _gameResolution = new Num.Vector2(1920, 1080);
+        static readonly List<Vector2> s_resolutions = new List<Vector2>()
+        {
+            new Vector2(1920, 1080),
+            new Vector2(1366, 768 ),
+            new Vector2(1440, 900 ),
+            new Vector2(1280, 720 ),
+            new Vector2(1280, 1024),
+        };
+
         readonly Num.Vector2 _bottomOffset   = new Num.Vector2(0, 20);
+        Vector2 _resolution = new Vector2(1920, 1080);
 
-        public readonly Num.Vector2 WindowOffset = new Num.Vector2(8, 27);
-
-        public Num.Vector2 Position { get; private set; }
-        public Num.Vector2 Size { get; private set; }
+        public Vector2 Position { get; private set; }
+        public Num.Vector2 UIPosition { get => new Num.Vector2(Position.X, Position.Y); private set => Position = new Vector2(value.X, value.Y); }
+        public Vector2 CameraSize { get; private set; }
+        public Num.Vector2 UICameraSize { get => new Num.Vector2(CameraSize.X, CameraSize.Y); private set => CameraSize = new Vector2(value.X, value.Y); }
 
         private RenderTarget2D _sceneRenderTarget;
         IntPtr _renderTargetId;
         private CameraEditor _gameCamera;
+
 
         private bool _movingCamera;
         private bool _dragInput;
@@ -32,20 +53,33 @@ namespace Unify2D.Toolbox
         private int _lastMouseSroll;
         private int _rotationAngle;
 
+
         private int _pixelPerGridSquare;
 
         private Texture2D _gridTexture;
         private Texture2D _smallGridTexture;
-        
+
+
+        private void SetResolution(Vector2 resolution)
+        {
+            // set local and camera resolution
+            _resolution = resolution;
+            _gameCamera.Viewport = resolution;
+
+            _editor.UnbindTexture(_sceneRenderTarget, _renderTargetId);
+
+            // new texture
+            _sceneRenderTarget = new RenderTarget2D(_editor.GraphicsDevice, (int)resolution.X, (int)resolution.Y);
+            _renderTargetId = _editor.GuiRenderer.BindTexture(_sceneRenderTarget);
+
+        }
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
             
-            _sceneRenderTarget = new RenderTarget2D(editor.GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
+            _gameCamera = new CameraEditor(new Vector2(_resolution.X, _resolution.Y), new Vector2(0, 0));
 
-            _gameCamera = new CameraEditor(new Vector2(_gameResolution.X, _gameResolution.Y), new Vector2(_gameResolution.X / 2, _gameResolution.Y / 2));
-
-            _sceneRenderTarget = new RenderTarget2D(_editor.GraphicsDevice, (int)_gameResolution.X, (int)_gameResolution.Y);
+            _sceneRenderTarget = new RenderTarget2D(editor.GraphicsDevice, (int)_resolution.X, (int)_resolution.Y);
             _renderTargetId = _editor.GuiRenderer.BindTexture(_sceneRenderTarget);
 
             _gridTexture = new Texture2D(_editor.GraphicsDevice, 1, 1);
@@ -54,18 +88,10 @@ namespace Unify2D.Toolbox
             _smallGridTexture = new Texture2D(_editor.GraphicsDevice, 1, 1);
             _smallGridTexture.SetData(new Color[] { new Color(1, 1, 1, .1f) });
         }
-        
-        public void SetCore(GameCoreViewer coreViewer)
-        {
-            _tag = coreViewer;
-        }
-
         public override void Update(GameTime gameTime)
         {
             Selection.Update(gameTime);
         }
-
-        
         public override void Draw()
         {
             // Render target
@@ -73,18 +99,40 @@ namespace Unify2D.Toolbox
             _editor.GraphicsDevice.Clear(_gameCamera.Background);
 
             // clear la texture de render de la scéne
-            ImGui.Begin($"GAME - {((GameCoreViewer)_tag).AssetPath}", ImGuiWindowFlags.None);
+            ImGui.Begin("GAME", ImGuiWindowFlags.None);
 
-            // Windows property
-            Position = ImGui.GetWindowPos();
-            Size = ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin() - _bottomOffset;
+            if (ImGui.MenuItem($"Resolution {_resolution}"))
+            {
+                ImGui.SetWindowPos("Resolution", ImGui.GetMousePos());
+                _editor.ShowPopup(new ValuePopup<Vector2>("Resolution", s_resolutions, SetResolution));
+            }
 
-            // Declare style
-            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Num.Vector2.Zero);
-            
+            // begin child because stupid ImGui doesn't calculate Menu height....
+            ImGui.BeginChild("Camera", new Num.Vector2(), false, ImGuiWindowFlags.NoScrollbar);
+
+            UIPosition = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMin();
+
+            #region Camera Size
+
+            Num.Vector2 space = ImGui.GetContentRegionAvail();
+
+            float spaceX = space.X / _resolution.X;
+            float spaceY = space.Y / _resolution.Y;
+
+            if (spaceY >= spaceX)
+            {
+                space.Y = _resolution.Y * spaceX;
+            }
+            else
+            {
+                space.X = _resolution.X * spaceY;
+            }
+            UICameraSize = space;
+            #endregion
+
             // Bind and give pointer to Scene render texture
-            ImGui.Image(_renderTargetId, ImGui.GetContentRegionAvail() - _bottomOffset);
-            
+            ImGui.Image(_renderTargetId, space);
+
             // Circle Gizmo around selected Game Object
             Selection.CircleSelected();
 
@@ -96,39 +144,49 @@ namespace Unify2D.Toolbox
                     var ptr = ImGui.AcceptDragDropPayload("ASSET");
                     if (ptr.NativePtr != null)
                     {
-                        Asset asset = Clipboard.DragContent as Asset;
-                        asset?.AssetContent.OnDragDroppedInGame(_editor);
+                        Asset asset = Clipboard.Content as Asset;
+                        GameObject go = GameObject.Create();
+                        go.Name = asset.Name;
+                        
+                        go.Position = GetMousePosition();
+
+
+                        Selection.SelectObject(go);
+
+                        SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
+                        renderer.Initialize(_editor, go, asset.FullPath);
                     }
                 }
-                ImGui.EndDragDropTarget();
             }
+            ImGui.EndDragDropTarget();
             #endregion
 
             //updates camera movement ect...
             UpdateCamera();
 
             #region Drawing
-            ((GameCoreViewer)_tag).GameCore.BeginDraw(_gameCamera.Matrix);
+            _editor.GameCore.BeginDraw(_gameCamera.Matrix);
 
             //Draw the editor only grid
             DrawGrid();
 
             // Draw all game assets
-            ((GameCoreViewer)_tag).GameCore.Draw();
+            _editor.GameCore.Draw();
             // Draw all debutg gizmo
-            ((GameCoreViewer)_tag).GameCore.DrawGizmo();
+            _editor.GameCore.DrawGizmo();
 
-            ((GameCoreViewer)_tag).GameCore.EndDraw();
+            _editor.GameCore.EndDraw();
             #endregion
 
-            // Write position in world
+            // Write camera data
             ImGui.Text($"(X.{_lastMousePosition.X} Y.{_lastMousePosition.Y}) (Zoom.{MathF.Round(_gameCamera.ZoomLevel * 100) / 100}) (Angle.{_rotationAngle}°) (Pixel / Square : {_pixelPerGridSquare})");
-            
-            // Close
-            ImGui.PopStyleVar();
-            ImGui.End();
-        }
 
+            // Close
+            ImGui.EndChild();
+
+            ImGui.End();
+
+        }
         private void DrawGrid()
         {
             Vector2 viewPort = _gameCamera.Viewport / _gameCamera.Zoom;
@@ -193,7 +251,6 @@ namespace Unify2D.Toolbox
                 }
             }
         }
-        
         private void UpdateCamera()
         {
             MouseState mouseState = Mouse.GetState();
@@ -280,42 +337,45 @@ namespace Unify2D.Toolbox
 
             #endregion
         }
-
         public bool IsMouseInWindow()
         {
             var mouseState = Mouse.GetState();
-            Num.Vector2 mousePosition = new Num.Vector2(mouseState.X, mouseState.Y);
-            mousePosition -= (Position + WindowOffset);
+            Vector2 position = new Vector2(mouseState.X, mouseState.Y);
 
-            Num.Vector2 result = new Num.Vector2(mousePosition.X, mousePosition.Y);
-            result /= Size;
+            position -= new Vector2(Position.X, Position.Y);
+            position /= CameraSize;
 
-            return result.X >= 0 && result.X <= 1 && result.Y >= 0 && result.Y <= 1;
+            return position.X >= 0 && position.X <= 1 && position.Y >= 0 && position.Y <= 1;
         }
         public Vector2 GetMousePosition()
         {
             var mouseState = Mouse.GetState();
 
-            Num.Vector2 mousePosition = new Num.Vector2(mouseState.X, mouseState.Y);
+            float mouseX = mouseState.X;
+            float mouseY = mouseState.Y;
 
-            mousePosition -= (Position + WindowOffset);
-            mousePosition /= Size;
-            mousePosition *= _gameResolution;
+            mouseX -= Position.X;
+            mouseX /= CameraSize.X;
+            mouseX *= _resolution.X;
 
-            Vector2 localPosition = _gameCamera.LocalToWorld(mousePosition);
+            mouseY -= Position.Y;
+            mouseY /= CameraSize.Y;
+            mouseY *= _resolution.Y;
+
+            Vector2 localPosition = _gameCamera.LocalToWorld(new Vector2(mouseX, mouseY));
 
             return new Vector2(MathF.Round(localPosition.X), MathF.Round(localPosition.Y));
         }
         public Num.Vector2 WorldToUI(Vector2 world)
         {
-            Num.Vector2 uiPos = _gameCamera.WorldToViewport(world);
+            Vector2 uiPos = _gameCamera.WorldToViewport(world);
 
-            uiPos /= _gameResolution;
-            uiPos *= Size;
-           
-            return Position + WindowOffset + uiPos;
+            uiPos /= _resolution;
+            uiPos *= CameraSize;
+            uiPos += Position;
+
+            return new Num.Vector2(uiPos.X, uiPos.Y);
         }
-
         internal void GoTo(Vector2 position)
         {
             _gameCamera.Position = position;

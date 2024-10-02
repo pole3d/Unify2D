@@ -45,11 +45,14 @@ namespace Unify2D.Core
             _game = game;
         }
 
+<<<<<<< HEAD
+=======
         internal void AddRootGameObject(GameObject go)
         {
             _gameObjects.Add(go);
         }
 
+>>>>>>> main
         public void InitPhysics()
         {
             if (PhysicsSettings == null)
@@ -125,7 +128,27 @@ namespace Unify2D.Core
         {
             SpriteBatch.End();
         }
-        
+
+<<<<<<< HEAD
+=======
+        public void Destroy(GameObject item)
+        {
+            _gameObjectsToDestroy.Remove(item);
+        }
+
+        public void DestroyImmediate(GameObject item)
+        {
+            if (item.Parent != null)
+            {
+                item.Parent.Children.Remove(item);
+            }
+            else
+            {
+                _gameObjects.Remove(item);
+            }
+        }
+
+>>>>>>> main
         public void Initialize(GraphicsDevice graphicsDevice)
         {
             SpriteBatch = new SpriteBatch(graphicsDevice);
@@ -138,7 +161,12 @@ namespace Unify2D.Core
             _gameObjects.Clear();
             foreach (var item in data.GameObjects)
             {
+<<<<<<< HEAD
                 AddGameObjectImmediate(item);
+=======
+                _gameObjects.Add(item);
+
+>>>>>>> main
                 item.Load(game);
             }
         }
