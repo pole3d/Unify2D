@@ -171,7 +171,7 @@ namespace Unify2D.Toolbox
             DrawGrid();
 
             // Draw all game assets
-            _editor.GameCore.Draw();
+            SceneManager.Instance.CurrentScene.Draw();
             // Draw all debutg gizmo
             _editor.GameCore.DrawGizmo();
 
