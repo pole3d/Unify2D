@@ -43,6 +43,7 @@ namespace Unify2D
         public string ProjectPath => _settings.Data.CurrentProjectPath;
         public override string AssetsPath => !string.IsNullOrEmpty(ProjectPath) ? ToolsEditor.CombinePath(ProjectPath, AssetsFolder) : string.Empty;
         
+        public GameCore GameCore => _core;
         public GameEditorSettings Settings => _settings;
         public Scripting.Scripting Scripting => _scripting;
         public AssetManager AssetManager => _assetManager;
@@ -62,6 +63,7 @@ namespace Unify2D
 
         #region Fields
         bool _projectLoaded;
+        GameCore _core;
         GraphicsDeviceManager _graphics;
         GameEditorUI _gameEditorUI;
         ImGuiRenderer.Renderer _imGuiRenderer;
