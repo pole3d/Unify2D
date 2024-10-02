@@ -149,6 +149,14 @@ namespace Unify2D.Toolbox
                         toRemove.Add(component);
                     }
                     ImGui.PopStyleColor(3);
+                    
+                    ImGui.SameLine();
+                    
+                    if (ImGui.Button("Sprite Editor"))
+                    {
+                        SpriteEditorToolbox.Open();
+                        Debug.Log("Sprite Editor is open !");
+                    }
 
                     ImGui.TreePop();
                 }

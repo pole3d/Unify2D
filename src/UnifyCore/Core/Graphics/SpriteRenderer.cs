@@ -60,7 +60,5 @@ namespace Unify2D.Core.Graphics
      null, Color, _gameObject.Rotation, _gameObject.BoundingSize / 2, _gameObject.Scale,
      SpriteEffects.None, LayerDepth);
         }
-
-
     }
 }
