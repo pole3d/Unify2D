@@ -22,7 +22,7 @@ namespace Unify2D.Toolbox
     /// is a specialized toolbox designed to provide a user interface for debugging and inspectiong logs.
     /// It pulls thoses logs from the <see cref="Debug"> class and draws them within the editor environment.
     /// </summary>
-    internal class ConsoleToolbox : ToolboxBase
+    internal class ConsoleToolbox : Toolbox
     {
         private HashSet<string> _logCategories = new HashSet<string>() { "All" };
         private LogTypes _logTypes = LogTypes.Log | LogTypes.Warning | LogTypes.Error;

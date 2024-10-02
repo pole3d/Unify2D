@@ -75,7 +75,7 @@ namespace Unify2D
         GameCoreViewer _coreViewerScene;
         List<GameCoreViewer> _coreViewers = new List<GameCoreViewer>();
 
-        List<ToolboxBase> _toolboxes = new List<ToolboxBase>();
+        List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
         
         InspectorToolbox _inspectorToolbox;
         ScriptToolbox _scriptToolbox;
@@ -102,6 +102,9 @@ namespace Unify2D
 
         protected override void Initialize()
         {
+            _core = new GameCore(this);
+            GameCore.SetCurrent(_core);
+            
             _settings = new GameEditorSettings();
             _settings.Load(this);
 

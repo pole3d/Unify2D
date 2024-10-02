@@ -17,7 +17,7 @@ namespace Unify2D.Toolbox
     /// Script Editor
     /// Allow the user to modify C# script directly inside the editor
     /// </summary>
-    internal class ScriptToolbox : ToolboxBase
+    internal class ScriptToolbox : Toolbox
     {
         const string ProjectFile = "GameAssembly.csproj";
         const string TemplateProjectDirectory = "GameAssemblyProject";

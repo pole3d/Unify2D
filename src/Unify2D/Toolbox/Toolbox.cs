@@ -10,7 +10,7 @@ namespace Unify2D.Toolbox
     /// the editor environment. It's meant to be inherited to create more specific toolboxes, 
     /// implementing the necessary functionalities.
     /// </summary>
-    public abstract class ToolboxBase
+    public abstract class Toolbox
     {
         public object Tag { get => _tag; }
 
