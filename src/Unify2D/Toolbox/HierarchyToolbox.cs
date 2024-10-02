@@ -33,12 +33,12 @@ namespace Unify2D.Toolbox
 
             _currentIndex = 0;
 
-            foreach (var item in GameCore.Current.GameObjects)
+            foreach (GameObject gameObject in SceneManager.Instance.CurrentScene.GameObjects)
             {
-                if (item.Parent != null)
+                if (gameObject.Parent != null)
                     continue;
 
-                DrawNode(item);
+                DrawNode(gameObject);
             }
 
 
@@ -47,7 +47,7 @@ namespace Unify2D.Toolbox
 
             if (_goToDestroy != null)
             {
-                GameCore.Current.DestroyImmediate(_goToDestroy);
+                SceneManager.Instance.CurrentScene.DestroyImmediate(_goToDestroy);
                 Selection.UnSelectObject();
                 _goToDestroy = null;
             }

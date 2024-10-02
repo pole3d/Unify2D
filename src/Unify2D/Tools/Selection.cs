@@ -110,7 +110,7 @@ namespace Unify2D
             {
                 Vector2 worldPosition = GameEditor.Instance.GetWorldMousePosition();
 
-                foreach (var item in GameEditor.Instance.GameCore.GameObjects)
+                foreach (var item in SceneManager.Instance.CurrentScene.GameObjects)
                 {
                     if (worldPosition.X >= item.Position.X - item.BoundingSize.X / 2 && worldPosition.X <= item.Position.X + item.BoundingSize.X / 2
                         && worldPosition.Y >= item.Position.Y - item.BoundingSize.Y / 2 && worldPosition.Y <= item.Position.Y + item.BoundingSize.Y / 2)

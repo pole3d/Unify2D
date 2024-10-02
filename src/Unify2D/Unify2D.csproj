@@ -5,7 +5,7 @@
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <AssemblyName>Unify2D</AssemblyName>
         <RootNamespace>Unify2D</RootNamespace>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <OutputType>Exe</OutputType>
         <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     </PropertyGroup>
@@ -19,6 +19,7 @@
     <ItemGroup>
       <PackageReference Include="ImGui.NET.Branches.Docking" Version="1.88.0" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.3.1" />
+      <PackageReference Include="NativeFileDialogs.Net" Version="1.2.1" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
       <PackageReference Include="System.CodeDom" Version="6.0.0" />
     </ItemGroup>
