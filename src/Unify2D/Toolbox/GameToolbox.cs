@@ -59,6 +59,7 @@ namespace Unify2D.Toolbox
         private Texture2D _gridTexture;
         private Texture2D _smallGridTexture;
 
+        private bool _isPlaying = false;
 
         private void SetResolution(Vector2 resolution)
         {
@@ -94,6 +95,25 @@ namespace Unify2D.Toolbox
         }
         public override void Draw()
         {
+            if (ImGui.BeginMainMenuBar())
+            {
+                if (ImGui.MenuItem(_isPlaying ? "Stop" : "Play"))
+                {
+                    SceneManager sceneManager = SceneManager.Instance;
+                    
+                    _isPlaying = !_isPlaying;
+                    if (_isPlaying)
+                    {
+                        // todo: show file explorer when saving
+                        sceneManager.SaveCurrentScene();
+                    }
+                    
+                    sceneManager.LoadScene(sceneManager.CurrentScene.Path);
+                }
+                
+                ImGui.EndMainMenuBar();
+            }
+            
             // Render target
             _editor.GraphicsDevice.SetRenderTarget(_sceneRenderTarget);
             _editor.GraphicsDevice.Clear(_gameCamera.Background);
