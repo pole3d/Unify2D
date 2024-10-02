@@ -1,4 +1,6 @@
+using ImGuiNET;
 using Microsoft.Xna.Framework;
+using Unify2D.Assets;
 
 namespace Unify2D.Toolbox
 {
@@ -28,6 +30,11 @@ namespace Unify2D.Toolbox
 
         public virtual void Update(GameTime gameTime)
         {
+        }
+        
+        public virtual void SetCore(GameCoreViewer coreViewer)
+        {
+            _tag = coreViewer;
         }
     }
 }

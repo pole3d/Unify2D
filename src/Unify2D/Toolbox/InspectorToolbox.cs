@@ -16,7 +16,7 @@ namespace Unify2D.Toolbox
     /// is a specialized toolbox designed to provide a user interface for inspecting details of a
     /// specific <see cref="GameAsset"> or <see cref="GameObject"> within the editor environment.
     /// </summary>
-    public class InspectorToolbox : Toolbox
+    public class InspectorToolbox : ToolboxBase
     {
         GameObject _gameObject;
         Asset _asset;

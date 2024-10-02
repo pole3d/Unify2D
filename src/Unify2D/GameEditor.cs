@@ -364,17 +364,18 @@ namespace Unify2D
         internal void CloseGameCore(GameCoreViewer gameCoreViewer)
         {
             _coreViewers.Remove(gameCoreViewer);
-            GameCoreViewer replaceCore = _coreViewers.Count == 0 ? _coreViewerScene : _coreViewers[_coreViewers.Count - 1];
+            GameCoreViewer replaceCore =
+                _coreViewers.Count == 0 ? _coreViewerScene : _coreViewers[_coreViewers.Count - 1];
             if (_gameToolbox.Tag == gameCoreViewer)
                 _gameToolbox.SetCore(replaceCore);
             if (_hierarchyToolbox.Tag == gameCoreViewer)
                 _hierarchyToolbox.SetCore(replaceCore);
             GameCore.SetCurrent(replaceCore.GameCore);
+        }
 
         internal void UnbindTexture(RenderTarget2D sceneRenderTarget, IntPtr renderTargetId)
         {
             _unbindTargets.Add((sceneRenderTarget, renderTargetId));
-
         }
     }
 }

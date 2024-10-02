@@ -88,10 +88,7 @@ namespace Unify2D.Toolbox
             _smallGridTexture = new Texture2D(_editor.GraphicsDevice, 1, 1);
             _smallGridTexture.SetData(new Color[] { new Color(1, 1, 1, .1f) });
         }
-        public void SetCore(GameCoreViewer coreViewer)
-        {
-            _tag = coreViewer;
-        }
+        
         public override void Update(GameTime gameTime)
         {
             Selection.Update(gameTime);
@@ -148,7 +145,7 @@ namespace Unify2D.Toolbox
                     var ptr = ImGui.AcceptDragDropPayload("ASSET");
                     if (ptr.NativePtr != null)
                     {
-                        Asset asset = Clipboard.Content as Asset;
+                        Asset asset = Clipboard.DragContent as Asset;
                         GameObject go = GameObject.Create();
                         go.Name = asset.Name;
                         

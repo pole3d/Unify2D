@@ -98,7 +98,7 @@ namespace Unify2D.Toolbox
                         ImGui.SetDragDropPayload("ASSET", (IntPtr)(&n), sizeof(int));
                     }
 
-                    Clipboard.Content = _assets[n];
+                    Clipboard.DragContent = _assets[n];
 
                     ImGui.Text(_assets[n].ToString());
 

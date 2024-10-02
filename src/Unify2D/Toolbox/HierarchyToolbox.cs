@@ -5,7 +5,7 @@ using Unify2D.Core;
 
 namespace Unify2D.Toolbox
 {
-    internal class HierarchyToolbox : Toolbox
+    internal class HierarchyToolbox : ToolboxBase
     {
 
         int _currentIndex = 0;
