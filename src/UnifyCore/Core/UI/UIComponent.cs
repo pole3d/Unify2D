@@ -6,5 +6,6 @@
     /// </summary>
     public abstract class UIComponent : Component
     {
+        public abstract void Draw();
     }
 }

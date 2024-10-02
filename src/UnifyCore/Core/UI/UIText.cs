@@ -12,6 +12,11 @@ namespace Unify2D.Core
         public string Text { get; set; } = "Lorem Ipsum";
         public int Size { get; set; } = 10;
         public Color VertexColor { get; set; } = Color.White;
-        
+
+
+        public override void Draw()
+        {
+            // Draw text
+        }
     }
 }
