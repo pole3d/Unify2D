@@ -38,6 +38,8 @@ namespace Unify2D.Builder
 
             if ( Directory.Exists(TemplatePath) == false )
             {
+                Console.WriteLine( $"There's no template at the given path {TemplatePath}" );
+
                 return;
             }
             
