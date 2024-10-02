@@ -62,6 +62,8 @@ namespace Unify2D
         }
         public static void SelectObject(object obj)
         {
+            if ( Selected == obj ) return;
+
             Selected = obj;
 
             if (obj == null)
