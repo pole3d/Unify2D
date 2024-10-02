@@ -51,7 +51,7 @@ namespace Unify2D
         {
             if (s_SelectedLogs.Contains(this))
             {
-                ImGui.SeparatorText(_menuText);
+                //ImGui.SeparatorText(_menuText);
             }
             else if (ImGui.MenuItem(_menuText))
             {
@@ -65,7 +65,7 @@ namespace Unify2D
 
         public virtual void DrawSelected()
         {
-            ImGui.SeparatorText(_time.ToLongTimeString() + " :");
+            //ImGui.SeparatorText(_time.ToLongTimeString() + " :");
             ImGui.Text(_text);
         }
     }
