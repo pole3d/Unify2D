@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Unify2D.Assets;
+using Unify2D.Core;
 using Unify2D.Tools;
 
 namespace Unify2D.Toolbox
@@ -63,14 +64,24 @@ namespace Unify2D.Toolbox
         {
             ImGui.Begin("Assets");
 
+            string path = GameEditor.Instance.AssetsPath + Path.DirectorySeparatorChar;
+            
             if (ImGui.Button("Show Explorer", new System.Numerics.Vector2(-1, 0)))
             {
-                string path = GameEditor.Instance.AssetsPath + Path.DirectorySeparatorChar;
-
-                if ( Directory.Exists(path) == false)
-                    Directory.CreateDirectory(path);
+                TryCreateFolder(path);
 
                 System.Diagnostics.Process.Start("explorer.exe", path );
+            }
+            
+            if (ImGui.BeginPopupContextWindow())
+            {
+                if (ImGui.Button("Create New Folder"))
+                {
+                    string folderPath = $"{path}/NewFolder";
+                    TryCreateFolder(folderPath); 
+                }
+
+                ImGui.EndPopup();
             }
 
             for (int n = 0; n < _assets.Count; n++)
@@ -89,7 +100,7 @@ namespace Unify2D.Toolbox
                     Selection.SelectObject(_assets[n]);
                     _selected[n] = !_selected[n];
                 }
-
+                
                 if (ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
                 {
                     unsafe
@@ -101,11 +112,21 @@ namespace Unify2D.Toolbox
                     Clipboard.Content = _assets[n];
 
                     ImGui.Text(_assets[n].ToString());
-
+                    
                     ImGui.EndDragDropSource();
                 }
             }
+            
             ImGui.End();
+        }
+
+        private bool TryCreateFolder(string path)
+        {
+            if (Directory.Exists(path)) 
+                return false;
+            
+            Directory.CreateDirectory(path);
+            return true;
         }
     }
 }
