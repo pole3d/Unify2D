@@ -77,7 +77,7 @@ namespace Unify2D.Toolbox
                     }
                     if (ImGui.Button("Delete"))
                     {
-                        //delete code
+                        DeleteSelectedAssets();
                     }
                     ImGui.EndPopup();
                 }
@@ -108,6 +108,18 @@ namespace Unify2D.Toolbox
             }
             
             ImGui.End();
+        }
+        
+        private void DeleteSelectedAssets()
+        {
+            for (int n = 0; n < _assets.Count; n++)
+            {
+                if (_selected[n])
+                {
+                    File.Delete(GameEditor.Instance.AssetsPath + _assets[n].FullPath);
+                }
+            }
+            Reset();
         }
     }
 }
