@@ -88,6 +88,10 @@ namespace Unify2D.Toolbox
             _smallGridTexture = new Texture2D(_editor.GraphicsDevice, 1, 1);
             _smallGridTexture.SetData(new Color[] { new Color(1, 1, 1, .1f) });
         }
+        public void SetCore(GameCoreViewer coreViewer)
+        {
+            _tag = coreViewer;
+        }
         public override void Update(GameTime gameTime)
         {
             Selection.Update(gameTime);
