@@ -1,5 +1,4 @@
 ﻿using ImGuiNET;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -65,12 +64,11 @@ namespace Unify2D.Toolbox
 
             if (ImGui.Button("Show Explorer", new System.Numerics.Vector2(-1, 0)))
             {
-                string path = GameEditor.Instance.AssetsPath + Path.DirectorySeparatorChar;
-
-                if ( Directory.Exists(path) == false)
-                    Directory.CreateDirectory(path);
-
-                System.Diagnostics.Process.Start("explorer.exe", path );
+                ShowExplorer();
+            }
+            if (ImGui.Button("Create Script", new System.Numerics.Vector2(-1, 0)))
+            {
+                CreateScript();
             }
 
             for (int n = 0; n < _assets.Count; n++)
@@ -106,6 +104,29 @@ namespace Unify2D.Toolbox
                 }
             }
             ImGui.End();
+        }
+
+        private void CreateScript()
+        {
+            string newFile = "newScript.cs";
+
+            using (StreamWriter sw = File.CreateText(Path.Combine(_path, newFile)))
+            {
+                string defaultScript = "using Unify2D.Core;\r\nusing Input = Microsoft.Xna.Framework.Input;\r\n\r\nnamespace Game\r\n{\r\n    class NewScript : Component\r\n    {\r\n        public override void Update(GameCore game)\r\n        {\r\n\r\n        }\r\n    }\r\n}";
+                sw.WriteLine(defaultScript);
+            }
+
+            Reset();
+        }
+
+        private static void ShowExplorer()
+        {
+            string path = GameEditor.Instance.AssetsPath + Path.DirectorySeparatorChar;
+
+            if (Directory.Exists(path) == false)
+                Directory.CreateDirectory(path);
+
+            System.Diagnostics.Process.Start("explorer.exe", path);
         }
     }
 }
