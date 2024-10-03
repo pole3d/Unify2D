@@ -16,10 +16,14 @@ namespace Unify2D.Toolbox
         string _path;
         bool[] _selected;
         List<Asset> _assets = new List<Asset>();
+        HashSet<string> _extensionsToIgnore;
 
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
+
+            _extensionsToIgnore = new HashSet<string>{ ".csproj", ".dll" , ".sln" };
+
             Reset();
         }
 
@@ -49,6 +53,10 @@ namespace Unify2D.Toolbox
             foreach (var file in files)
             {
                 string relativeFile = file.Replace(_path, string.Empty);
+                string extension = Path.GetExtension(relativeFile);
+
+                if ( _extensionsToIgnore.Contains(extension) )
+                    continue;
 
                 _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeFile),
                     Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile)));
