@@ -49,9 +49,9 @@ namespace Unify2D.Toolbox
             if (Directory.Exists(_path) == false)
                 Directory.CreateDirectory(_path);
 
-            var files = Directory.GetFiles(_path);
+            string[] files = Directory.GetFiles(_path);
 
-            foreach (var file in files)
+            foreach (string file in files)
             {
                 string relativeFile = file.Replace(_path, string.Empty);
                 string extension = Path.GetExtension(relativeFile);
@@ -61,6 +61,14 @@ namespace Unify2D.Toolbox
 
                 _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeFile),
                     Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile)));
+            }
+            
+            string[] directories = Directory.GetDirectories(_path);
+
+            foreach (string directory in directories)
+            {
+                string relativeDirectory = directory.Replace(_path, string.Empty);
+                _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeDirectory), Path.GetDirectoryName(relativeDirectory)));
             }
 
             _selected = new bool[files.Length];
@@ -77,17 +85,17 @@ namespace Unify2D.Toolbox
             {
                 ShowExplorer();
             }
-            if (ImGui.Button("Create Script", new System.Numerics.Vector2(-1, 0)))
-            {
-                CreateScript();
-            }
-            
+
             if (ImGui.BeginPopupContextWindow())
             {
+                if (ImGui.Button("Create Script"))
+                {
+                    CreateScript();
+                }
+
                 if (ImGui.Button("Create New Folder"))
                 {
-                    string folderPath = $"{path}/NewFolder";
-                    TryCreateFolder(folderPath); 
+                    CreateFolder();
                 }
 
                 ImGui.EndPopup();
@@ -125,7 +133,7 @@ namespace Unify2D.Toolbox
                     ImGui.EndDragDropSource();
                 }
             }
-            
+
             ImGui.End();
         }
 
@@ -138,6 +146,24 @@ namespace Unify2D.Toolbox
                 string defaultScript = "using Unify2D.Core;\r\nusing Input = Microsoft.Xna.Framework.Input;\r\n\r\nnamespace Game\r\n{\r\n    class NewScript : Component\r\n    {\r\n        public override void Update(GameCore game)\r\n        {\r\n\r\n        }\r\n    }\r\n}";
                 sw.WriteLine(defaultScript);
             }
+
+            Reset();
+        }
+
+        private void CreateFolder()
+        {
+            string folderName = "New Folder";
+
+            string newFolderPath = Path.Combine(_path, folderName);
+            int counter = 1;
+            
+            while (Directory.Exists(newFolderPath))
+            {
+                newFolderPath = Path.Combine(_path, $"folderName ({counter})");
+                counter++;
+            }
+
+            Directory.CreateDirectory(newFolderPath);
 
             Reset();
         }

@@ -37,6 +37,14 @@ namespace Unify2D.Assets
             _fullPath = ToolsEditor.CombinePath(path, name + extension);
         }
 
+        public Asset(string name, string path)
+        {
+            _name = name;
+            _path = path;
+            
+            _fullPath = ToolsEditor.CombinePath(path, name);
+        }
+
 
         public override string ToString()
         {
