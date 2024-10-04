@@ -29,25 +29,16 @@ namespace Unify2D.Core
         public Game Game => _game;
 
         public SpriteBatch SpriteBatch { get; private set; }
-        public List<GameObject> GameObjects => _gameObjects;
         public PhysicsSettings PhysicsSettings { get; private set; }
         public float DeltaTime { get; private set; }
 
         static GameCore s_current;
 
-        List<GameObject> _gameObjects;
-        List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
         Game _game;
 
         public GameCore(Game game)
         {
             _game = game;
-            _gameObjects = new List<GameObject>();
-        }
-
-        internal void AddRootGameObject(GameObject go)
-        {
-            _gameObjects.Add(go);
         }
 
         public void InitPhysics()
@@ -72,17 +63,10 @@ namespace Unify2D.Core
                         null,
                         matrix);
         }
-        public void Draw()
-        {
-            foreach (var item in _gameObjects)
-            {
-                item.Draw();
-            }
-        }
         public void DrawGizmo()
         {
             Gizmo.SetColor(Color.White);
-            foreach (var item in _gameObjects)
+            foreach (var item in SceneManager.Instance.CurrentScene.GameObjects)
             {
                 item.DrawGizmo();
             }
@@ -92,23 +76,6 @@ namespace Unify2D.Core
             SpriteBatch.End();
         }
 
-        public void Destroy(GameObject item)
-        {
-            _gameObjectsToDestroy.Remove(item);
-        }
-
-        public void DestroyImmediate(GameObject item)
-        {
-            if (item.Parent != null)
-            {
-                item.Parent.Children.Remove(item);
-            }
-            else
-            {
-                _gameObjects.Remove(item);
-            }
-        }
-
         public void Initialize(GraphicsDevice graphicsDevice)
         {
             SpriteBatch = new SpriteBatch(graphicsDevice);
@@ -116,33 +83,9 @@ namespace Unify2D.Core
             InitPhysics();
         }
 
-        public void LoadScene(Game game,  List<GameObject> gameObjects)
-        {
-            foreach (var item in gameObjects)
-            {
-                _gameObjects.Add(item);
-
-                item.Load(game);
-            }
-        }
-
         public void Update(GameTime gameTime)
         {
             DeltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            foreach (var item in _gameObjects)
-            {
-                item.Update(this);
-            }
-
-            foreach (var item in _gameObjectsToDestroy)
-            {
-                _gameObjects.Remove(item);
-            }
-
-            PhysicsSettings.World.Step(DeltaTime);
-
-            _gameObjectsToDestroy.Clear();
         }
     }
 }

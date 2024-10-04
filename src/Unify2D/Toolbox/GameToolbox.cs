@@ -101,10 +101,6 @@ namespace Unify2D.Toolbox
             // clear la texture de render de la scéne
             ImGui.Begin("GAME", ImGuiWindowFlags.None);
 
-            // Declare style
-            ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, Num.Vector2.One);
-
-
             if (ImGui.MenuItem($"Resolution {_resolution}"))
             {
                 ImGui.SetWindowPos("Resolution", ImGui.GetMousePos());
@@ -175,7 +171,7 @@ namespace Unify2D.Toolbox
             DrawGrid();
 
             // Draw all game assets
-            _editor.GameCore.Draw();
+            SceneManager.Instance.CurrentScene.Draw();
             // Draw all debutg gizmo
             _editor.GameCore.DrawGizmo();
 
@@ -188,7 +184,6 @@ namespace Unify2D.Toolbox
             // Close
             ImGui.EndChild();
 
-            ImGui.PopStyleVar();
             ImGui.End();
 
         }

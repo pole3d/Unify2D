@@ -38,6 +38,8 @@ namespace Unify2D.Builder
 
             if ( Directory.Exists(TemplatePath) == false )
             {
+                Console.WriteLine( $"There's no template at the given path {TemplatePath}" );
+
                 return;
             }
             
@@ -122,7 +124,7 @@ namespace Unify2D.Builder
         {
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
-            string text = JsonConvert.SerializeObject(_core.GameObjects, settings);
+            string text = JsonConvert.SerializeObject(SceneManager.Instance.CurrentScene.GameObjects, settings);
 
             File.WriteAllText(ToolsEditor.CombinePath(BuildPathFull,"test.scene"), text);
         }

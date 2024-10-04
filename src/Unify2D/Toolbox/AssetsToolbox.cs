@@ -1,5 +1,4 @@
 ﻿using ImGuiNET;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,10 +17,14 @@ namespace Unify2D.Toolbox
         string _path;
         bool[] _selected;
         List<Asset> _assets = new List<Asset>();
+        HashSet<string> _extensionsToIgnore;
 
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
+
+            _extensionsToIgnore = new HashSet<string>{ ".csproj", ".dll" , ".sln" };
+
             Reset();
         }
 
@@ -51,6 +54,10 @@ namespace Unify2D.Toolbox
             foreach (var file in files)
             {
                 string relativeFile = file.Replace(_path, string.Empty);
+                string extension = Path.GetExtension(relativeFile);
+
+                if ( _extensionsToIgnore.Contains(extension) )
+                    continue;
 
                 _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeFile),
                     Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile)));
@@ -68,9 +75,11 @@ namespace Unify2D.Toolbox
             
             if (ImGui.Button("Show Explorer", new System.Numerics.Vector2(-1, 0)))
             {
-                TryCreateFolder(path);
-
-                System.Diagnostics.Process.Start("explorer.exe", path );
+                ShowExplorer();
+            }
+            if (ImGui.Button("Create Script", new System.Numerics.Vector2(-1, 0)))
+            {
+                CreateScript();
             }
             
             if (ImGui.BeginPopupContextWindow())
@@ -120,13 +129,27 @@ namespace Unify2D.Toolbox
             ImGui.End();
         }
 
-        private bool TryCreateFolder(string path)
+        private void CreateScript()
         {
-            if (Directory.Exists(path)) 
-                return false;
-            
-            Directory.CreateDirectory(path);
-            return true;
+            string newFile = "newScript.cs";
+
+            using (StreamWriter sw = File.CreateText(Path.Combine(_path, newFile)))
+            {
+                string defaultScript = "using Unify2D.Core;\r\nusing Input = Microsoft.Xna.Framework.Input;\r\n\r\nnamespace Game\r\n{\r\n    class NewScript : Component\r\n    {\r\n        public override void Update(GameCore game)\r\n        {\r\n\r\n        }\r\n    }\r\n}";
+                sw.WriteLine(defaultScript);
+            }
+
+            Reset();
+        }
+
+        private static void ShowExplorer()
+        {
+            string path = GameEditor.Instance.AssetsPath + Path.DirectorySeparatorChar;
+
+            if (Directory.Exists(path) == false)
+                Directory.CreateDirectory(path);
+
+            System.Diagnostics.Process.Start("explorer.exe", path);
         }
     }
 }
