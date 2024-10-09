@@ -71,7 +71,7 @@ namespace Unify2D.Toolbox
                 _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeDirectory), Path.GetDirectoryName(relativeDirectory)));
             }
 
-            _selected = new bool[files.Length];
+            _selected = new bool[files.Length + directories.Length];
         }
 
 
@@ -79,8 +79,6 @@ namespace Unify2D.Toolbox
         {
             ImGui.Begin("Assets");
 
-            string path = GameEditor.Instance.AssetsPath + Path.DirectorySeparatorChar;
-            
             if (ImGui.Button("Show Explorer", new System.Numerics.Vector2(-1, 0)))
             {
                 ShowExplorer();
@@ -88,7 +86,7 @@ namespace Unify2D.Toolbox
 
             if (ImGui.BeginPopupContextWindow())
             {
-                if (ImGui.Button("Create Script"))
+                if (ImGui.Button("Create New Script"))
                 {
                     CreateScript();
                 }
@@ -109,9 +107,7 @@ namespace Unify2D.Toolbox
                     if (!ImGui.GetIO().KeyCtrl)
                     {
                         for (int i = 0; i < _assets.Count; i++)
-                        {
                             _selected[i] = false;
-                        }
                     }
 
                     Selection.SelectObject(_assets[n]);
@@ -129,7 +125,6 @@ namespace Unify2D.Toolbox
                     Clipboard.Content = _assets[n];
 
                     ImGui.Text(_assets[n].ToString());
-                    
                     ImGui.EndDragDropSource();
                 }
             }
@@ -159,7 +154,7 @@ namespace Unify2D.Toolbox
             
             while (Directory.Exists(newFolderPath))
             {
-                newFolderPath = Path.Combine(_path, $"folderName ({counter})");
+                newFolderPath = Path.Combine(_path, $"New Folder ({counter})");
                 counter++;
             }
 
