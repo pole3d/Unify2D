@@ -88,14 +88,16 @@ namespace Unify2D.Toolbox
             {
                 if (ImGui.Button("Create New Script"))
                 {
+                    ImGui.CloseCurrentPopup();
                     CreateScript();
                 }
 
                 if (ImGui.Button("Create New Folder"))
                 {
+                    ImGui.CloseCurrentPopup();
                     CreateFolder();
                 }
-
+                
                 ImGui.EndPopup();
             }
 
