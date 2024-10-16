@@ -253,6 +253,20 @@ namespace Unify2D
 
 
 
+    // internal void OpenPrefab(PrefabAssetContent content)
+    // {
+    //     GameCoreViewer prefabCoreViewer = new GameCoreViewer(
+    //         new GameCoreEditor(this),
+    //         content.Asset.FullPath);
+    //     _coreViewers.Add(prefabCoreViewer);
+    //     prefabCoreViewer.GameCore.Initialize(GraphicsDevice);
+    //         
+    //     _gameToolbox.SetCore(prefabCoreViewer);
+    //     _hierarchyToolbox.SetCore(prefabCoreViewer);
+    //
+    //     GameCore.SetCurrent(prefabCoreViewer.GameCore);
+    //     GameObject.Instantiate(content.Asset.FullPath);
+    // }
 
 }
 

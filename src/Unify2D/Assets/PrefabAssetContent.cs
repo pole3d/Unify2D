@@ -11,15 +11,9 @@ namespace Unify2D.Assets
     {
         private string _serializedText;
         
-        public PrefabAssetContent(Asset asset)
-        {
-            _asset = asset;
-        }
-        Asset _asset;
+        public PrefabAssetContent(Asset asset) : base(asset) { }
 
-
-        // public override OnDragDroppedInGame(GameEditor editor)
-        public void OnDragDroppedInGame(GameEditor editor)
+        public override void OnDragDroppedInGame(GameEditor editor)
         {
             PrefabInstance pi = new PrefabInstance(_asset.FullPath);;
             ((GameCoreEditor)GameCore.Current).AddPrefabInstance(pi);

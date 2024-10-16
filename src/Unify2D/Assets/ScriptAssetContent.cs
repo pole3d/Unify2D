@@ -14,12 +14,7 @@ namespace Unify2D.Assets
     {
         public string Content = String.Empty;
         public string Path => Tools.ToolsEditor.CombinePath(GameEditor.Instance.AssetsPath, _asset.FullPath);
-        Asset _asset;
-
-        public ScriptAssetContent(Asset asset)
-        {
-            _asset = asset;
-        }
+        public ScriptAssetContent(Asset asset) : base(asset) { }
 
         public override void Load()
         {
