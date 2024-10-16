@@ -233,22 +233,22 @@ namespace Unify2D.Core
         /// <summary>
         ///  Deserialize a prefab asset into a gameObject, load it and add it to the current core.
         /// </summary>
-        // public static GameObject Instantiate(string originalAssetName)
-        // {
-             // StringBuilder sb = new StringBuilder(originalAssetName);
-            // if (sb.ToString().StartsWith("/") == false)
-            //     sb.Insert(0, "/");
-            // sb.Insert(0, GameCore.Current.Game.AssetsPath);
-            // if (sb.ToString().EndsWith(".prefab") == false)
-            //     sb.Append(".prefab");
-            // // Get serialized text
-            // string serializedText = File.ReadAllText(sb.ToString());
-            // // Create gameObject
-            // GameObject go = JsonConvert.DeserializeObject<GameObject>(serializedText, s_serializerSettings);
-            // go.Init(GameCore.Current.Game);
-            // GameCore.Current.AddGameObject(go);
-            // return go;
-        //}
+         public static GameObject Instantiate(string originalAssetName)
+         {
+              StringBuilder sb = new StringBuilder(originalAssetName);
+             if (sb.ToString().StartsWith("/") == false)
+                 sb.Insert(0, "/");
+             sb.Insert(0, GameCore.Current.Game.AssetsPath);
+             if (sb.ToString().EndsWith(".prefab") == false)
+                 sb.Append(".prefab");
+             // Get serialized text
+             string serializedText = File.ReadAllText(sb.ToString());
+             // Create gameObject
+             GameObject go = JsonConvert.DeserializeObject<GameObject>(serializedText, s_serializerSettings);
+             go.Init(GameCore.Current.Game);
+             GameCore.Current.AddGameObject(go);
+             return go;
+        }
 
         internal void LinkToPrefabInstance(PrefabInstance prefabInstance)
         {
@@ -258,8 +258,8 @@ namespace Unify2D.Core
 
         internal void ApplyOverridesFromPrefabInstance(PrefabInstance prefabInstance)
         {
-            //if (string.IsNullOrEmpty(prefabInstance.Name) == false)
-             //   Name = prefabInstance.Name; //Temporary, overridden name should be saved in the override list, instead of using PrefabInstance.Name.
+            if (string.IsNullOrEmpty(prefabInstance.Name) == false)
+                Name = prefabInstance.Name; //Temporary, overridden name should be saved in the override list, instead of using PrefabInstance.Name.
             // apply overrides here
         }
     }

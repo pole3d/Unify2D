@@ -22,7 +22,7 @@ namespace Unify2D.Assets
         public void OnDragDroppedInGame(GameEditor editor)
         {
             PrefabInstance pi = new PrefabInstance(_asset.FullPath);;
-            //((GameCore)GameCore.Current).AddPrefabInstance(pi);
+            ((GameCoreEditor)GameCore.Current).AddPrefabInstance(pi);
             Selection.SelectObject(pi.LinkedGameObject);
         }
 

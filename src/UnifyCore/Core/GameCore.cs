@@ -35,6 +35,11 @@ namespace Unify2D.Core
         static GameCore s_current;
 
         Game _game;
+        
+        protected List<GameObject> _gameObjects = new List<GameObject>();
+        protected List<GameObject> _gameObjectsToInstantiate = new List<GameObject>();
+        protected List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
+
 
         public GameCore(Game game)
         {
@@ -48,6 +53,40 @@ namespace Unify2D.Core
 
             PhysicsSettings.Init();
         }
+        
+        #region GameObjects
+        public void AddGameObject(GameObject go) {
+            _gameObjectsToInstantiate.Add(go);
+        }
+        
+        public void AddGameObjectImmediate(GameObject go)
+        {
+            _gameObjects.Add(go);
+        }
+        public void Destroy(GameObject item)
+        {
+            _gameObjectsToDestroy.Add(item);
+        }
+        public virtual void DestroyImmediate(GameObject item)
+        {
+            _gameObjects.Remove(item);
+        }
+        public void RefreshGameObjectListImmediate()
+        {
+            while (_gameObjectsToInstantiate.Count > 0)
+            {
+                AddGameObjectImmediate(_gameObjectsToInstantiate[0]);
+                _gameObjectsToInstantiate.RemoveAt(0);
+            }
+            
+            foreach (var item in _gameObjectsToDestroy)
+            {
+                DestroyImmediate(item);
+            }
+            _gameObjectsToDestroy.Clear();
+        }
+        
+        #endregion
 
         public void BeginDraw()
         {
@@ -86,6 +125,17 @@ namespace Unify2D.Core
         public void Update(GameTime gameTime)
         {
             DeltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        }
+        
+    
+        public virtual void LoadScene(Game game, SceneData data)
+        {
+            _gameObjects.Clear();
+            foreach (var item in data.GameObjects)
+            {
+                AddGameObjectImmediate(item);
+                item.Init(game);
+            }
         }
     }
 }
