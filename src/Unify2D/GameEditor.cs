@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using Microsoft.Xna.Framework.Input;
 using Unify2D.Assets;
 using Unify2D.Builder;
 using Unify2D.Core;
@@ -46,43 +45,34 @@ namespace Unify2D
         public GameCore GameCore => _core;
         public GameEditorSettings Settings => _settings;
         public Scripting.Scripting Scripting => _scripting;
-        public AssetManager AssetManager => _assetManager;
         public ImGuiRenderer.Renderer GuiRenderer => _imGuiRenderer;
-        internal InspectorToolbox InspectorToolbox => _inspectorToolbox;
-        internal ScriptToolbox ScriptToolbox => _scriptToolbox;
-        internal GameToolbox GameToolbox => _gameToolbox;
-        public GameCoreViewer GameCoreViewerScene => _coreViewerScene; 
-        public List<GameCoreViewer> GameCoreViewers => _coreViewers;
+        
+        public GameObject Selected => _selected;
+        public SceneManager SceneEditorManager => _sceneEditorManager;
 
-        public SceneEditorManager SceneEditorManager => _sceneEditorManager;
-        internal HierarchyToolbox HierarchyToolbox => _hierarchyToolbox;
+        internal InspectorToolbox InspectorToolbox { get; private set; }
+        internal ScriptToolbox ScriptToolbox { get; private set; }
+        internal GameToolbox GameToolbox { get; private set; }
+        internal HierarchyToolbox HierarchyToolbox { get; private set; }
         internal AssetsToolbox AssetsToolBox{ get; private set; }
 
 
         #endregion
 
         #region Fields
-        bool _projectLoaded;
         GameCore _core;
         GraphicsDeviceManager _graphics;
         GameEditorUI _gameEditorUI;
         ImGuiRenderer.Renderer _imGuiRenderer;
         Scripting.Scripting _scripting;
-        AssetManager _assetManager;
         GameEditorSettings _settings;
-        SceneEditorManager _sceneEditorManager;
+        SceneManager _sceneEditorManager;
         
-        GameCoreViewer _coreViewerScene;
-        List<GameCoreViewer> _coreViewers = new List<GameCoreViewer>();
-
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
         
-        InspectorToolbox _inspectorToolbox;
-        ScriptToolbox _scriptToolbox;
-        GameToolbox _gameToolbox;
-        HierarchyToolbox _hierarchyToolbox;
-     
         GameObject _selected;
+        bool _projectLoaded;
+   
         List<(RenderTarget2D, IntPtr)> _unbindTargets = new List<(RenderTarget2D, IntPtr)>();
         #endregion
 
@@ -97,7 +87,7 @@ namespace Unify2D
             IsMouseVisible = true;
 
             _gameEditorUI = new GameEditorUI(this);
-            _sceneEditorManager = new SceneEditorManager(this);
+            _sceneEditorManager = SceneManager.Instance;
         }
 
         protected override void Initialize()
@@ -113,15 +103,8 @@ namespace Unify2D
             _scripting = new Scripting.Scripting();
             _scripting.Load(this);
 
-            _assetManager = new AssetManager(this);
+            // _assetManager = new AssetManager(this);
             
-            //Create game core and load scene content
-            _coreViewerScene = new GameCoreViewer(
-                new GameCoreEditor(this),
-                "./test.scene");
-            _coreViewers.Add(_coreViewerScene);
-            GameCore.SetCurrent(_coreViewerScene.GameCore);
-
             _imGuiRenderer = new ImGuiRenderer.Renderer(this);
             _imGuiRenderer.RebuildFontAtlas();
             ImGui.GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
@@ -143,12 +126,12 @@ namespace Unify2D
         {
             AssetsToolBox = new AssetsToolbox();
 
-            _scriptToolbox = new ScriptToolbox();
-            _inspectorToolbox = new InspectorToolbox();
-            _gameToolbox = new GameToolbox();
-            _gameToolbox.SetCore(_coreViewerScene);
-            _hierarchyToolbox = new HierarchyToolbox();
-            _hierarchyToolbox.SetCore(_coreViewerScene);
+            ScriptToolbox = new ScriptToolbox();
+            InspectorToolbox = new InspectorToolbox();
+            GameToolbox = new GameToolbox();
+            //_gameToolbox.SetCore(_coreViewerScene);
+            HierarchyToolbox = new HierarchyToolbox();
+            // _hierarchyToolbox.SetCore(_coreViewerScene);
 
             _toolboxes.Add(AssetsToolBox);
             _toolboxes.Add(HierarchyToolbox);
@@ -166,7 +149,7 @@ namespace Unify2D
 
         protected override void LoadContent()
         {
-            _coreViewerScene.GameCore.Initialize(GraphicsDevice);
+            _core.Initialize(GraphicsDevice);
 
             base.LoadContent();
         }
@@ -257,7 +240,7 @@ namespace Unify2D
         public void Build()
         {
             GameBuilder builder = new GameBuilder();
-            builder.Build(_coreViewerScene.GameCore, this);
+            builder.Build(_core, this);
             builder.StartBuild();
         }
 
@@ -338,45 +321,45 @@ namespace Unify2D
         }
 
 
-        internal void SetSceneCore(GameCoreViewer sceneCoreViewer)
-        {
-            sceneCoreViewer.GameCore.Initialize(GraphicsDevice);
-            if (_coreViewers.Contains(sceneCoreViewer) == false)
-                _coreViewers.Add(sceneCoreViewer);
-            
-            _coreViewerScene = sceneCoreViewer;
-            _gameToolbox.SetCore(sceneCoreViewer);
-            _hierarchyToolbox.SetCore(sceneCoreViewer);
-            
-            GameCore.SetCurrent(sceneCoreViewer.GameCore);
-        }
-
-        internal void OpenPrefab(PrefabAssetContent content)
-        {
-            GameCoreViewer prefabCoreViewer = new GameCoreViewer(
-                new GameCoreEditor(this),
-                content.Asset.FullPath);
-            _coreViewers.Add(prefabCoreViewer);
-            prefabCoreViewer.GameCore.Initialize(GraphicsDevice);
-            
-            _gameToolbox.SetCore(prefabCoreViewer);
-            _hierarchyToolbox.SetCore(prefabCoreViewer);
-
-            GameCore.SetCurrent(prefabCoreViewer.GameCore);
-            GameObject.Instantiate(content.Asset.FullPath);
-        }
-
-        internal void CloseGameCore(GameCoreViewer gameCoreViewer)
-        {
-            _coreViewers.Remove(gameCoreViewer);
-            GameCoreViewer replaceCore =
-                _coreViewers.Count == 0 ? _coreViewerScene : _coreViewers[_coreViewers.Count - 1];
-            if (_gameToolbox.Tag == gameCoreViewer)
-                _gameToolbox.SetCore(replaceCore);
-            if (_hierarchyToolbox.Tag == gameCoreViewer)
-                _hierarchyToolbox.SetCore(replaceCore);
-            GameCore.SetCurrent(replaceCore.GameCore);
-        }
+        // internal void SetSceneCore(GameCoreViewer sceneCoreViewer)
+        // {
+        //     sceneCoreViewer.GameCore.Initialize(GraphicsDevice);
+        //     if (_coreViewers.Contains(sceneCoreViewer) == false)
+        //         _coreViewers.Add(sceneCoreViewer);
+        //     
+        //     _coreViewerScene = sceneCoreViewer;
+        //     _gameToolbox.SetCore(sceneCoreViewer);
+        //     _hierarchyToolbox.SetCore(sceneCoreViewer);
+        //     
+        //     GameCore.SetCurrent(sceneCoreViewer.GameCore);
+        // }
+        //
+        // internal void OpenPrefab(PrefabAssetContent content)
+        // {
+        //     GameCoreViewer prefabCoreViewer = new GameCoreViewer(
+        //         new GameCoreEditor(this),
+        //         content.Asset.FullPath);
+        //     _coreViewers.Add(prefabCoreViewer);
+        //     prefabCoreViewer.GameCore.Initialize(GraphicsDevice);
+        //     
+        //     _gameToolbox.SetCore(prefabCoreViewer);
+        //     _hierarchyToolbox.SetCore(prefabCoreViewer);
+        //
+        //     GameCore.SetCurrent(prefabCoreViewer.GameCore);
+        //     GameObject.Instantiate(content.Asset.FullPath);
+        // }
+        //
+        // internal void CloseGameCore(GameCoreViewer gameCoreViewer)
+        // {
+        //     _coreViewers.Remove(gameCoreViewer);
+        //     GameCoreViewer replaceCore =
+        //         _coreViewers.Count == 0 ? _coreViewerScene : _coreViewers[_coreViewers.Count - 1];
+        //     if (_gameToolbox.Tag == gameCoreViewer)
+        //         _gameToolbox.SetCore(replaceCore);
+        //     if (_hierarchyToolbox.Tag == gameCoreViewer)
+        //         _hierarchyToolbox.SetCore(replaceCore);
+        //     GameCore.SetCurrent(replaceCore.GameCore);
+        // }
 
         internal void UnbindTexture(RenderTarget2D sceneRenderTarget, IntPtr renderTargetId)
         {

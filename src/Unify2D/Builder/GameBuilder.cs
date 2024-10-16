@@ -22,10 +22,10 @@ namespace Unify2D.Builder
         string BuildPathFull => ToolsEditor.CombinePath(_editor.ProjectPath,  "./Build");
         const string ExeName = "UnifyGame.exe";
 
-        GameCoreEditor _core;
+        GameCore _core;
         GameEditor _editor;
 
-        public void Build(GameCoreEditor core , GameEditor editor)
+        public void Build(GameCore core , GameEditor editor)
         {
             _core = core;
             _editor = editor;
@@ -123,7 +123,7 @@ namespace Unify2D.Builder
         {
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
-            string text = JsonConvert.SerializeObject(_core.GetSceneData(), settings);
+            string text = JsonConvert.SerializeObject(SceneManager.Instance.CurrentScene.GameObjects, settings);
 
             File.WriteAllText(ToolsEditor.CombinePath(BuildPathFull,"test.scene"), text);
         }

@@ -1,7 +1,10 @@
-﻿using ImGuiNET;
+﻿﻿using ImGuiNET;
+using NativeFileDialogs.Net;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime;
 using System.Text;
@@ -41,11 +44,14 @@ namespace Unify2D
                         _editor.Build();
                     if (ImGui.MenuItem("Save"))
                     {
-                        _editor.SceneEditorManager.Save("test");
+                        // _editor.SceneEditorManager.Save("test");
+                        SaveCurrentScene();
                     }
                     if (ImGui.MenuItem("Load"))
                     {
-                        _editor.SceneEditorManager.LoadScene("test");
+                        // _editor.SceneEditorManager.LoadScene("test");
+                        LoadScene();
+                        Selection.UnSelectObject();
                     }
                     if (ImGui.MenuItem("Quit"))
                     {
@@ -65,6 +71,38 @@ namespace Unify2D
             }
         }
 
+        private void LoadScene()
+        {
+            string path = string.Empty;
+
+            NfdStatus result = Nfd.OpenDialog(out path, new Dictionary<string, string>() { { "New Scene", "Scene" } }, Path.GetFullPath("./Assets"));
+
+            if (result == NfdStatus.Ok)
+            {
+                SceneManager.Instance.LoadScene(path);
+            }
+        }
+
+        private void SaveCurrentScene()
+        {
+            Scene scene = SceneManager.Instance.CurrentScene;
+
+            if (scene.Name == null)
+            {
+                string path = string.Empty;
+                NfdStatus result = Nfd.SaveDialog(out path, new Dictionary<string, string>() { { "New Scene", "scene" } }, "New Scene", Path.GetFullPath("./Assets").ToString());
+                if (result == NfdStatus.Ok)
+                {
+                    scene.Path = path;
+                    scene.Name = Path.GetFileName(path);
+                }
+            }
+
+            if (scene.Name != null)
+            {
+                SceneManager.Instance.Save(scene);
+            }
+        }
         public void DrawPopup()
         {
             if (_popups.Count > 0)

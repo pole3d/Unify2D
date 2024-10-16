@@ -92,14 +92,14 @@ namespace Unify2D.Core
             return child;
         }
 
-        internal void Load(Game game)
+        internal void Init(Game game)
         {
             if (Children != null)
             {
-                foreach (var child in Children)
+                foreach (GameObject child in Children)
                 {
                     child.Parent = this;
-                    child.Load(game);
+                    child.Init(game);
                 }
             }
 
@@ -253,7 +253,7 @@ namespace Unify2D.Core
             string serializedText = File.ReadAllText(sb.ToString());
             // Create gameObject
             GameObject go = JsonConvert.DeserializeObject<GameObject>(serializedText, s_serializerSettings);
-            go.Load(GameCore.Current.Game);
+            go.Init(GameCore.Current.Game);
             GameCore.Current.AddGameObject(go);
             return go;
         }

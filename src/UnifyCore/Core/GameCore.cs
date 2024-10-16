@@ -139,7 +139,7 @@ namespace Unify2D.Core
             foreach (var item in data.GameObjects)
             {
                 AddGameObjectImmediate(item);
-                item.Load(game);
+                item.Init(game);
             }
         }
 
