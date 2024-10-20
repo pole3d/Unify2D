@@ -16,7 +16,7 @@ namespace Unify2D.Assets
         public override void OnDragDroppedInGame(GameEditor editor)
         {
             PrefabInstance pi = new PrefabInstance(_asset.FullPath);;
-            ((GameCoreEditor)GameCore.Current).AddPrefabInstance(pi);
+            (GameCore.Current).AddPrefabInstance(pi);
             Selection.SelectObject(pi.LinkedGameObject);
         }
 

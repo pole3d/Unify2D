@@ -27,7 +27,7 @@ namespace Unify2D
     /// </summary>
     public class GameEditor : Game
     {
-        #region singleton 
+        #region singleton
 
         public static GameEditor Instance => s_instance;
 
@@ -40,7 +40,10 @@ namespace Unify2D
         #region Properties
 
         public string ProjectPath => _settings.Data.CurrentProjectPath;
-        public string AssetsPath => !string.IsNullOrEmpty(ProjectPath) ? ToolsEditor.CombinePath(ProjectPath, AssetsFolder) : string.Empty;
+
+        public string AssetsPath => !string.IsNullOrEmpty(ProjectPath)
+            ? ToolsEditor.CombinePath(ProjectPath, AssetsFolder)
+            : string.Empty;
 
         public GameCore GameCore => _core;
         public GameEditorSettings Settings => _settings;
@@ -55,11 +58,12 @@ namespace Unify2D
         internal ScriptToolbox ScriptToolbox { get; private set; }
         internal GameToolbox GameToolbox { get; private set; }
         internal HierarchyToolbox HierarchyToolbox { get; private set; }
-        internal AssetsToolbox AssetsToolBox{ get; private set; }
+        internal AssetsToolbox AssetsToolBox { get; private set; }
 
         #endregion
 
         #region Fields
+
         GameCore _core;
         GraphicsDeviceManager _graphics;
         GameEditorUI _gameEditorUI;
@@ -68,12 +72,14 @@ namespace Unify2D
         GameEditorSettings _settings;
         SceneManager _sceneEditorManager;
 
+
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
 
         GameObject _selected;
         bool _projectLoaded = false;
 
         List<(RenderTarget2D, IntPtr)> _unbindTargets = new List<(RenderTarget2D, IntPtr)>();
+
         #endregion
 
         #region Initialization
@@ -152,7 +158,7 @@ namespace Unify2D
 
         #endregion
 
-        #region Update / Draw 
+        #region Update / Draw
 
         protected override void Update(GameTime gameTime)
         {
@@ -177,13 +183,14 @@ namespace Unify2D
 
 
             // Unbind old rendertarget, need to be done outside the drawcalls or it crashes
-            if(_unbindTargets.Count > 0)
+            if (_unbindTargets.Count > 0)
             {
                 foreach (var tuple in _unbindTargets)
                 {
                     tuple.Item1.Dispose(); // Rendertarget
                     GuiRenderer.UnbindTexture(tuple.Item2); // Id Pointer
                 }
+
                 _unbindTargets.Clear();
             }
         }
@@ -249,8 +256,9 @@ namespace Unify2D
         {
             _unbindTargets.Add((sceneRenderTarget, renderTargetId));
         }
-    }
 
+        
+    }
 
 
     // internal void OpenPrefab(PrefabAssetContent content)
@@ -267,8 +275,4 @@ namespace Unify2D
     //     GameCore.SetCurrent(prefabCoreViewer.GameCore);
     //     GameObject.Instantiate(content.Asset.FullPath);
     // }
-
 }
-
-
-
