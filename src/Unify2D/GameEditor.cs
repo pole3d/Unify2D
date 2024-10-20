@@ -1,6 +1,4 @@
 ﻿using ImGuiNET;
-using Genbox.VelcroPhysics.Dynamics;
-using Genbox.VelcroPhysics.Factories;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
@@ -59,6 +57,8 @@ namespace Unify2D
         internal GameToolbox GameToolbox { get; private set; }
         internal HierarchyToolbox HierarchyToolbox { get; private set; }
         internal AssetsToolbox AssetsToolBox { get; private set; }
+        internal AssetManager AssetManager { get; private set; }
+
 
         #endregion
 
@@ -72,7 +72,7 @@ namespace Unify2D
         GameEditorSettings _settings;
         SceneManager _sceneEditorManager;
 
-        public GameCoreViewer GameCoreViewerScene => _coreViewerScene; 
+        public GameCoreViewer GameCoreViewerScene => _coreViewerScene;
         GameCoreViewer _coreViewerScene;
         public List<GameCoreViewer> GameCoreViewers => _coreViewers;
         List<GameCoreViewer> _coreViewers = new List<GameCoreViewer>();
@@ -266,7 +266,7 @@ namespace Unify2D
         internal void OpenPrefab(PrefabAssetContent content)
         {
             GameCoreViewer prefabCoreViewer = new GameCoreViewer(
-                new GameCoreEditor(this),
+                new GameCore(this),
                 content.Asset.FullPath);
             _coreViewers.Add(prefabCoreViewer);
             prefabCoreViewer.GameCore.Initialize(GraphicsDevice);
@@ -290,3 +290,4 @@ namespace Unify2D
             GameCore.SetCurrent(replaceCore.GameCore);
         }
     }
+}

@@ -29,6 +29,8 @@ namespace Unify2D.Core
         public Game Game => _game;
 
         public SpriteBatch SpriteBatch { get; private set; }
+        public List<GameObject> GameObjects => _gameObjects;
+
         public PhysicsSettings PhysicsSettings { get; private set; }
         public float DeltaTime { get; private set; }
 

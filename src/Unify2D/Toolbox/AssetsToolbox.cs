@@ -139,7 +139,7 @@ namespace Unify2D.Toolbox
                 {
                     var ptr = ImGui.AcceptDragDropPayload("HIERARCHY");
                     if (ptr.NativePtr != null)
-                        draggedGO = Clipboard.DragContent as GameObject;
+                        draggedGO = Clipboard.Content as GameObject;
                 }
 
                 if (draggedGO != null)

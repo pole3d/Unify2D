@@ -84,7 +84,7 @@ namespace Unify2D
         //     SceneData sceneData = null;
         //     try
         //     {
-        //         string text = File.ReadAllText(ToolsEditor.CombinePath(_gameEditor.ProjectPath, $"./{sceneName}.scene"));
+        //         string text = File.ReadAllText(ToolsEditor.CombinePath(GameEditor.ProjectPath, $"./{sceneName}.scene"));
         //         JsonSerializerSettings settings = new JsonSerializerSettings();
         //         settings.TypeNameHandling = TypeNameHandling.Auto;
         //         settings.Error += SilentErrors;

@@ -154,8 +154,7 @@ namespace Unify2D.Toolbox
                         go.Name = asset.Name;
                         
                         go.Position = GetMousePosition();
-
-
+                        
                         Selection.SelectObject(go);
 
                         SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
