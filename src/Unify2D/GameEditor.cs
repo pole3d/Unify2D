@@ -72,6 +72,11 @@ namespace Unify2D
         GameEditorSettings _settings;
         SceneManager _sceneEditorManager;
 
+        public GameCoreViewer GameCoreViewerScene => _coreViewerScene; 
+        GameCoreViewer _coreViewerScene;
+        public List<GameCoreViewer> GameCoreViewers => _coreViewers;
+        List<GameCoreViewer> _coreViewers = new List<GameCoreViewer>();
+
 
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
 
@@ -257,22 +262,31 @@ namespace Unify2D
             _unbindTargets.Add((sceneRenderTarget, renderTargetId));
         }
 
-        
+
+        internal void OpenPrefab(PrefabAssetContent content)
+        {
+            GameCoreViewer prefabCoreViewer = new GameCoreViewer(
+                new GameCoreEditor(this),
+                content.Asset.FullPath);
+            _coreViewers.Add(prefabCoreViewer);
+            prefabCoreViewer.GameCore.Initialize(GraphicsDevice);
+
+            GameToolbox.SetCore(prefabCoreViewer);
+            HierarchyToolbox.SetCore(prefabCoreViewer);
+
+            GameCore.SetCurrent(prefabCoreViewer.GameCore);
+            GameObject.Instantiate(content.Asset.FullPath);
+        }
+
+        internal void CloseGameCore(GameCoreViewer gameCoreViewer)
+        {
+            _coreViewers.Remove(gameCoreViewer);
+            GameCoreViewer replaceCore =
+                _coreViewers.Count == 0 ? _coreViewerScene : _coreViewers[^1];
+            if (GameToolbox.Tag == gameCoreViewer)
+                GameToolbox.SetCore(replaceCore);
+            if (HierarchyToolbox.Tag == gameCoreViewer)
+                HierarchyToolbox.SetCore(replaceCore);
+            GameCore.SetCurrent(replaceCore.GameCore);
+        }
     }
-
-
-    // internal void OpenPrefab(PrefabAssetContent content)
-    // {
-    //     GameCoreViewer prefabCoreViewer = new GameCoreViewer(
-    //         new GameCoreEditor(this),
-    //         content.Asset.FullPath);
-    //     _coreViewers.Add(prefabCoreViewer);
-    //     prefabCoreViewer.GameCore.Initialize(GraphicsDevice);
-    //         
-    //     _gameToolbox.SetCore(prefabCoreViewer);
-    //     _hierarchyToolbox.SetCore(prefabCoreViewer);
-    //
-    //     GameCore.SetCurrent(prefabCoreViewer.GameCore);
-    //     GameObject.Instantiate(content.Asset.FullPath);
-    // }
-}

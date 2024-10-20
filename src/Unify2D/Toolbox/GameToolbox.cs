@@ -59,6 +59,11 @@ namespace Unify2D.Toolbox
         private Texture2D _gridTexture;
         private Texture2D _smallGridTexture;
 
+        
+        public void SetCore(GameCoreViewer coreViewer)
+        {
+            _tag = coreViewer;
+        }
 
         private void SetResolution(Vector2 resolution)
         {

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Unify2D.Assets;
+using Unify2D.Core;
 using Unify2D.Tools;
 
 namespace Unify2D.Toolbox
@@ -110,7 +111,49 @@ namespace Unify2D.Toolbox
 
                     ImGui.EndDragDropSource();
                 }
+                
+                if (ImGui.BeginPopupContextItem())
+                {
+                    if (_assets[n].AssetContent is PrefabAssetContent prefabContent)
+                    {
+                        if (ImGui.Button("Open Prefab"))
+                        {
+                            GameEditor.Instance.OpenPrefab(prefabContent);
+                        }
+                    }
+                    if (ImGui.Button("Delete"))
+                    {
+                        //delete code
+                    }
+                    ImGui.EndPopup();
+                }
             }
+            
+            ImGui.EndChild();
+
+            if (ImGui.BeginDragDropTarget())
+            {
+                GameObject draggedGO = null;
+
+                unsafe
+                {
+                    var ptr = ImGui.AcceptDragDropPayload("HIERARCHY");
+                    if (ptr.NativePtr != null)
+                        draggedGO = Clipboard.DragContent as GameObject;
+                }
+
+                if (draggedGO != null)
+                {
+                    // Write serialized data to file
+                    Asset prefabAsset = _editor.AssetManager.CreateAsset<PrefabAssetContent>(draggedGO.Name);
+                    ((PrefabAssetContent)prefabAsset.AssetContent).Save(draggedGO);
+                    // Refresh toolbox
+                    Reset();
+                }
+
+                ImGui.EndDragDropTarget();
+            }
+            
             ImGui.End();
         }
 

@@ -1,7 +1,11 @@
 ﻿using ImGuiNET;
 using System;
+using System.Numerics;
 using System.Diagnostics;
+using Unify2D.Assets;
 using Unify2D.Core;
+using Unify2D.Tools;
+
 
 namespace Unify2D.Toolbox
 {
@@ -11,6 +15,11 @@ namespace Unify2D.Toolbox
         int _currentIndex = 0;
         GameObject _goToDestroy = null;
 
+        public void SetCore(GameCoreViewer coreViewer)
+        {
+            _tag = coreViewer;
+        }
+        
         public override void Draw()
         {
             ImGui.Begin("Hierarchy");
@@ -29,6 +38,13 @@ namespace Unify2D.Toolbox
                     GameObject go = GameObject.Create();
                     go.Name = "GameObject";
                 }
+            }
+            
+            if (_tag is GameCoreViewer coreViewer && coreViewer.AssetType == GameCoreViewer.Type.Prefab) {
+                if (ImGui.Button("Close prefab", new Vector2(ImGui.GetWindowWidth(), 20.0f))) {
+                    GameEditor.Instance.CloseGameCore(coreViewer);
+                }
+                ImGui.Separator();
             }
 
             _currentIndex = 0;
