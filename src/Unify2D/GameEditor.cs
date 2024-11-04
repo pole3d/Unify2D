@@ -43,7 +43,7 @@ namespace Unify2D
             ? ToolsEditor.CombinePath(ProjectPath, AssetsFolder)
             : string.Empty;
 
-        public GameCore GameCore => _core;
+        // public GameCore GameCore => _core;
         public GameEditorSettings Settings => _settings;
         public Scripting.Scripting Scripting => _scripting;
         public ImGuiRenderer.Renderer GuiRenderer => _imGuiRenderer;
@@ -64,7 +64,7 @@ namespace Unify2D
 
         #region Fields
 
-        GameCore _core;
+        // GameCore _core;
         GraphicsDeviceManager _graphics;
         GameEditorUI _gameEditorUI;
         ImGuiRenderer.Renderer _imGuiRenderer;
@@ -104,8 +104,8 @@ namespace Unify2D
 
         protected override void Initialize()
         {
-            _core = new GameCore(this);
-            GameCore.SetCurrent(_core);
+            // _core = new GameCore(this);
+            // GameCore.SetCurrent(_core);
 
             _settings = new GameEditorSettings();
             _settings.Load(this);
@@ -114,6 +114,18 @@ namespace Unify2D
 
             _scripting = new Scripting.Scripting();
             _scripting.Load(this);
+            
+            AssetManager = new AssetManager(this);
+            
+            //Create game core and load scene content
+            _coreViewerScene = new GameCoreViewer(
+                new GameCoreEditor(this),
+                "./test.scene");
+            Debug.Log($"_coreViewerScene: {_coreViewerScene.GameCore}");
+            _coreViewers.Add(_coreViewerScene);
+            GameCore.SetCurrent(_coreViewerScene.GameCore);
+            
+            
 
             _imGuiRenderer = new ImGuiRenderer.Renderer(this);
             _imGuiRenderer.RebuildFontAtlas();
@@ -134,12 +146,17 @@ namespace Unify2D
 
         void InitializeToolBoxes()
         {
+            Debug.Log("InitializeToolBoxes");
             ScriptToolbox = new ScriptToolbox();
             InspectorToolbox = new InspectorToolbox();
             GameToolbox = new GameToolbox();
             HierarchyToolbox = new HierarchyToolbox();
             AssetsToolBox = new AssetsToolbox();
 
+            GameToolbox.SetCore(_coreViewerScene);
+            HierarchyToolbox.SetCore(_coreViewerScene);
+            Debug.Log($"_coreViewerScene is null: {_coreViewerScene.GameCore == null}");
+            
             _toolboxes.Add(AssetsToolBox);
             _toolboxes.Add(HierarchyToolbox);
             _toolboxes.Add(new ConsoleToolbox());
@@ -156,7 +173,7 @@ namespace Unify2D
 
         protected override void LoadContent()
         {
-            _core.Initialize(GraphicsDevice);
+            _coreViewerScene.GameCore.Initialize(GraphicsDevice);
 
             base.LoadContent();
         }
@@ -246,7 +263,7 @@ namespace Unify2D
         public void Build()
         {
             GameBuilder builder = new GameBuilder();
-            builder.Build(_core, this);
+            builder.Build(_coreViewerScene.GameCore, this);
             builder.StartBuild();
         }
 

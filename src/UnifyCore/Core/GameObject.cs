@@ -89,6 +89,8 @@ namespace Unify2D.Core
 
             child.Parent = parent;
             parent.Children.Add(child);
+            
+            // SceneManager.Instance.CurrentScene.AddRootGameObject(child);
             return child;
         }
         public void Init(Game game)
@@ -246,7 +248,7 @@ namespace Unify2D.Core
              // Create gameObject
              GameObject go = JsonConvert.DeserializeObject<GameObject>(serializedText, s_serializerSettings);
              go.Init(GameCore.Current.Game);
-             GameCore.Current.AddGameObject(go);
+             // GameCore.Current.AddGameObject(go);
              return go;
         }
 

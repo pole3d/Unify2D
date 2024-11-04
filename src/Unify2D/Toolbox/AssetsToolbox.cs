@@ -40,32 +40,10 @@ namespace Unify2D.Toolbox
 
         internal override void Reset()
         {
-            _assets.Clear();
-            _path = _editor.AssetsPath;
-
-            if (String.IsNullOrEmpty(_path))
-                return;
-
-            if (Directory.Exists(_path) == false)
-                Directory.CreateDirectory(_path);
-
-            var files = Directory.GetFiles(_path);
-
-            foreach (var file in files)
-            {
-                string relativeFile = file.Replace(_path, string.Empty);
-                string extension = Path.GetExtension(relativeFile);
-
-                if ( _extensionsToIgnore.Contains(extension) )
-                    continue;
-
-                _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeFile),
-                    Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile)));
-            }
-
-            _selected = new bool[files.Length];
+            _editor.AssetManager.RefreshDatabase();
+            _assets = _editor.AssetManager.Assets;
+            _selected = new bool[_editor.AssetManager.NbOfFiles];
         }
-
 
         public override void Draw()
         {
@@ -106,6 +84,7 @@ namespace Unify2D.Toolbox
                     }
 
                     Clipboard.Content = _assets[n];
+                    Debug.Log("Dragging " + _assets[n].ToString());
 
                     ImGui.Text(_assets[n].ToString());
 
@@ -114,16 +93,29 @@ namespace Unify2D.Toolbox
                 
                 if (ImGui.BeginPopupContextItem())
                 {
+                    Debug.ClearLogs();
+                    Debug.Log($"AssetContent is {_assets[n].AssetContent}");
                     if (_assets[n].AssetContent is PrefabAssetContent prefabContent)
                     {
                         if (ImGui.Button("Open Prefab"))
                         {
                             GameEditor.Instance.OpenPrefab(prefabContent);
                         }
+
+                        if (ImGui.Button("Instantiate as GameObject"))
+                        {
+                            // Logic to instantiate the prefab as a GameObject
+                            PrefabInstance prefabInstance = new PrefabInstance(prefabContent.Asset.FullPath);
+                            GameObject instantiatedGameObject = prefabInstance.InstantiateAndLinkGameObject();
+                            SceneManager.Instance.CurrentScene.AddRootGameObject(instantiatedGameObject);
+
+                            ImGui.CloseCurrentPopup();
+                            Debug.Log("Instantiated Prefab as GameObject");
+                        }
                     }
                     if (ImGui.Button("Delete"))
                     {
-                        //delete code
+                        DeleteSelectedAssets();
                     }
                     ImGui.EndPopup();
                 }
@@ -140,15 +132,17 @@ namespace Unify2D.Toolbox
                     var ptr = ImGui.AcceptDragDropPayload("HIERARCHY");
                     if (ptr.NativePtr != null)
                         draggedGO = Clipboard.Content as GameObject;
+                    
+                    Debug.Log("AssetsToolbox Dropped " + draggedGO?.Name);
                 }
 
                 if (draggedGO != null)
                 {
                     // Write serialized data to file
-                    Asset prefabAsset = _editor.AssetManager.CreateAsset<PrefabAssetContent>(draggedGO.Name);
-                    ((PrefabAssetContent)prefabAsset.AssetContent).Save(draggedGO);
+                    //Asset prefabAsset = _editor.AssetManager.CreateAsset<PrefabAssetContent>(draggedGO.Name);
+                    //((PrefabAssetContent)prefabAsset.AssetContent).Save(draggedGO);
                     // Refresh toolbox
-                    Reset();
+                    //Reset();
                 }
 
                 ImGui.EndDragDropTarget();
@@ -178,6 +172,18 @@ namespace Unify2D.Toolbox
                 Directory.CreateDirectory(path);
 
             System.Diagnostics.Process.Start("explorer.exe", path);
+        }
+        
+        private void DeleteSelectedAssets()
+        {
+            for (int n = 0; n < _assets.Count; n++)
+            {
+                if (_selected[n])
+                {
+                    File.Delete(GameEditor.Instance.AssetsPath + _assets[n].FullPath);
+                }
+            }
+            Reset();
         }
     }
 }

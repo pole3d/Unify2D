@@ -59,7 +59,7 @@ namespace Unify2D.Assets
             }
         }
         
-        internal Asset CreateAsset<T>(string name) where T : AssetContent
+        internal Asset CreateAsset<T>(string name) where T : AssetContent, new()
         {
             string extension = _assetTypeToExtension[typeof(T)];
             StringBuilder nameSb = new StringBuilder(name);
@@ -69,8 +69,7 @@ namespace Unify2D.Assets
             {
                 if (++safeguard >= int.MaxValue)
                     throw new Exception("Too many files with the same name, or potentially stuck in an infinite loop. Prefab save failed.");
-                        
-                // TODO: Fix number assignement. this currently goes from "19" to "110" (and "119" to "1110", etc...)
+
                 char lastChar = nameSb[nameSb.Length - 1];
                 if (char.IsDigit(lastChar))
                 {
@@ -83,10 +82,18 @@ namespace Unify2D.Assets
                 else
                     nameSb.Append('1');
             }
-            
-            string filePath = Path.Combine(_editor.AssetsPath, $"{name}{extension}");
+
+            string filePath = Path.Combine(_editor.AssetsPath, $"{nameSb}{extension}");
             File.Create(filePath).Close();
-            return new Asset(name, extension, _editor.AssetsPath);
+
+            // Create the asset and initialize its content
+            Asset asset = new Asset(nameSb.ToString(), extension, _editor.AssetsPath);
+            asset.AssetContent = (T)Activator.CreateInstance(typeof(T), asset); // Ensure AssetContent is correctly instantiated with the Asset
+
+            // Refresh the AssetsToolbox
+            _editor.AssetsToolBox.Reset();
+
+            return asset;
         }
 
         internal Asset Find(string path, bool isFullPath = false)

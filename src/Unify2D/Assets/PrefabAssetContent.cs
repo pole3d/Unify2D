@@ -10,16 +10,18 @@ namespace Unify2D.Assets
     internal class PrefabAssetContent : AssetContent
     {
         private string _serializedText;
-        
+
+        // Public parameterless constructor
+        public PrefabAssetContent() : base(null) { }
+
         public PrefabAssetContent(Asset asset) : base(asset) { }
 
         public override void OnDragDroppedInGame(GameEditor editor)
         {
-            PrefabInstance pi = new PrefabInstance(_asset.FullPath);;
+            PrefabInstance pi = new PrefabInstance(_asset.FullPath);
             (GameCore.Current).AddPrefabInstance(pi);
             Selection.SelectObject(pi.LinkedGameObject);
         }
-
 
         internal void Save(GameObject gameObject)
         {

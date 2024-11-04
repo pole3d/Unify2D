@@ -29,7 +29,7 @@ namespace Unify2D.Core
         public Game Game => _game;
 
         public SpriteBatch SpriteBatch { get; private set; }
-        public List<GameObject> GameObjects => _gameObjects;
+        public List<GameObject> GameObjects => SceneManager.Instance.CurrentScene.GameObjects;
 
         public PhysicsSettings PhysicsSettings { get; private set; }
         public float DeltaTime { get; private set; }
@@ -38,9 +38,9 @@ namespace Unify2D.Core
 
         Game _game;
         
-        protected List<GameObject> _gameObjects = new List<GameObject>();
-        protected List<GameObject> _gameObjectsToInstantiate = new List<GameObject>();
-        protected List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
+        // protected List<GameObject> _gameObjects = new List<GameObject>();
+        // protected List<GameObject> _gameObjectsToInstantiate = new List<GameObject>();
+        // protected List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
 
         private List<PrefabInstance> _prefabInstances = new List<PrefabInstance>();
 
@@ -59,41 +59,45 @@ namespace Unify2D.Core
         }
         
         #region OldWayGameObjects
-        public void AddGameObject(GameObject go) {
-            _gameObjectsToInstantiate.Add(go);
-        }
-        
-        public void AddGameObjectImmediate(GameObject go)
-        {
-            _gameObjects.Add(go);
-        }
-        public void Destroy(GameObject item)
-        {
-            _gameObjectsToDestroy.Add(item);
-        }
-        public void DestroyImmediate(GameObject item)
-        {
-            // Remove item from gameObjects list
-            _gameObjects.Remove(item);
-            
-            // Remove prefab instance
-            if (item.PrefabInstance != null)
-                _prefabInstances.Remove(item.PrefabInstance);
-        }
-        public void RefreshGameObjectListImmediate()
-        {
-            while (_gameObjectsToInstantiate.Count > 0)
-            {
-                AddGameObjectImmediate(_gameObjectsToInstantiate[0]);
-                _gameObjectsToInstantiate.RemoveAt(0);
-            }
-            
-            foreach (var item in _gameObjectsToDestroy)
-            {
-                DestroyImmediate(item);
-            }
-            _gameObjectsToDestroy.Clear();
-        }
+        // public void AddGameObject(GameObject go) 
+        // {
+        //     // _gameObjectsToInstantiate.Add(go);
+        //     // _gameObjects.Add(go);
+        //     Debug.Log($"Add GameObject {go.Name}");
+        // }
+        //
+        // public void AddGameObjectImmediate(GameObject go)
+        // {
+        //     _gameObjects.Add(go);
+        //     Debug.Log($"Add GameObject Immediate {go.Name}");
+        // }
+        // public void Destroy(GameObject item)
+        // {
+        //     _gameObjectsToDestroy.Add(item);
+        // }
+        // public void DestroyImmediate(GameObject item)
+        // {
+        //     // Remove item from gameObjects list
+        //     _gameObjects.Remove(item);
+        //     
+        //     // Remove prefab instance
+        //     if (item.PrefabInstance != null)
+        //         _prefabInstances.Remove(item.PrefabInstance);
+        // }
+        // public void RefreshGameObjectListImmediate()
+        // {
+        //     while (_gameObjectsToInstantiate.Count > 0)
+        //     {
+        //         AddGameObjectImmediate(_gameObjectsToInstantiate[0]);
+        //         _gameObjectsToInstantiate.RemoveAt(0);
+        //     }
+        //     
+        //     foreach (var item in _gameObjectsToDestroy)
+        //     {
+        //         DestroyImmediate(item);
+        //     }
+        //     _gameObjectsToDestroy.Clear();
+        // }
         
         #endregion
 
@@ -145,41 +149,41 @@ namespace Unify2D.Core
             }
         }
     
-        public void LoadScene(Game game, SceneData data)
-        {
-            _gameObjects.Clear();
-            foreach (var item in data.GameObjects)
-            {
-                AddGameObjectImmediate(item);
-                item.Init(game);
-            }
-            
-            _prefabInstances.Clear();
-            foreach (PrefabInstance item in data.PrefabInstances)
-            {
-                AddPrefabInstance(item);
-            }
-        }
+        // public void LoadScene(Game game, SceneData data)
+        // {
+        //     _gameObjects.Clear();
+        //     foreach (var item in data.GameObjects)
+        //     {
+        //         AddGameObjectImmediate(item);
+        //         item.Init(game);
+        //     }
+        //     
+        //     _prefabInstances.Clear();
+        //     foreach (PrefabInstance item in data.PrefabInstances)
+        //     {
+        //         AddPrefabInstance(item);
+        //     }
+        // }
         
-        public SceneData GetSceneData()
-        {
-            // Set Name property of prefab instances
-            foreach (PrefabInstance prefabInstance in _prefabInstances)
-            {
-                if (string.IsNullOrEmpty(prefabInstance.Name) && prefabInstance.LinkedGameObject != null)
-                    prefabInstance.Name = prefabInstance.LinkedGameObject.Name;
-            }
-
-            // Don't serialize gameObjects from prefab instances
-            List<GameObject> gameObjects = new List<GameObject>(_gameObjects);
-            for (int i = gameObjects.Count - 1; i >= 0; i--)
-            {
-                if (gameObjects[i].PrefabInstance != null)
-                    gameObjects.RemoveAt(i);
-            }
-
-            return new SceneData(gameObjects, _prefabInstances);
-        }
+        // public SceneData GetSceneData()
+        // {
+        //     // Set Name property of prefab instances
+        //     foreach (PrefabInstance prefabInstance in _prefabInstances)
+        //     {
+        //         if (string.IsNullOrEmpty(prefabInstance.Name) && prefabInstance.LinkedGameObject != null)
+        //             prefabInstance.Name = prefabInstance.LinkedGameObject.Name;
+        //     }
+        //
+        //     // Don't serialize gameObjects from prefab instances
+        //     List<GameObject> gameObjects = new List<GameObject>(_gameObjects);
+        //     for (int i = gameObjects.Count - 1; i >= 0; i--)
+        //     {
+        //         if (gameObjects[i].PrefabInstance != null)
+        //             gameObjects.RemoveAt(i);
+        //     }
+        //
+        //     return new SceneData(gameObjects, _prefabInstances);
+        // }
 
     }
 }
