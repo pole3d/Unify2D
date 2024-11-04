@@ -127,39 +127,36 @@ namespace Unify2D.Toolbox
 
         private void HandleBeginPopupContext(int assetIndex)
         {
-            if (ImGui.BeginPopupContextItem())
+            if (!ImGui.BeginPopupContextItem()) 
+                return;
+            
+            if (ImGui.Button("Delete"))
             {
-                if (ImGui.Button("Destroy"))
-                {
-                    DeleteAsset($"{_path}{_assets[assetIndex].FullPath}");
-                    ImGui.CloseCurrentPopup();
-                }
-
-                if (ImGui.Button("Show in explorer"))
-                {
-                    ShowExplorer(string.Empty);
-                    ImGui.CloseCurrentPopup();
-                }
-
-                ImGui.EndPopup();
+                DeleteAsset($"{_path}{_assets[assetIndex].FullPath}");
+                ImGui.CloseCurrentPopup();
             }
+
+            if (ImGui.Button("Show in explorer"))
+            {
+                ShowExplorer(string.Empty);
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.EndPopup();
         }
 
         private unsafe void HandBeginDragDropSource(int assetIndex)
         {
-            if (ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
-            {
-                unsafe
-                {
-                    // Set payload to carry the index of our item (could be anything)
-                    ImGui.SetDragDropPayload("ASSET", (IntPtr)(&assetIndex), sizeof(int));
-                }
+            if (!ImGui.BeginDragDropSource(ImGuiDragDropFlags.None)) 
+                return;
+            
+            // Set payload to carry the index of our item (could be anything)
+            ImGui.SetDragDropPayload("ASSET", (IntPtr)(&assetIndex), sizeof(int));
 
-                Clipboard.Content = _assets[assetIndex];
+            Clipboard.Content = _assets[assetIndex];
 
-                ImGui.Text(_assets[assetIndex].ToString());
-                ImGui.EndDragDropSource();
-            }
+            ImGui.Text(_assets[assetIndex].ToString());
+            ImGui.EndDragDropSource();
         }
 
         private unsafe void HandleBeginDragDropTarget(int assetIndex)
@@ -181,7 +178,14 @@ namespace Unify2D.Toolbox
                         string oldPath = $"{_path}{_assets[sourceIndex].FullPath}";
                         string newPath = $"{_path}{_assets[assetIndex].FullPath}{_assets[sourceIndex].FullPath}";
 
-                        File.Move(oldPath, newPath);
+                        if (Path.Exists(newPath))
+                            return; 
+                        
+                        if(String.IsNullOrEmpty(_assets[sourceIndex].Extension))
+                            Directory.Move(oldPath, newPath);
+                        else
+                            File.Move(oldPath, newPath);
+                        
                         _assets[sourceIndex].SetPath(_path + _assets[assetIndex].FullPath);
 
                         Reset();
@@ -194,12 +198,21 @@ namespace Unify2D.Toolbox
 
         private void CreateScript()
         {
-            string newFile = "newScript.cs";
+            string newFile = "NewScript.cs";
+            string newScriptPath = Path.Combine(_path, newFile);
+            int counter = 1;
 
-            using (StreamWriter sw = File.CreateText(Path.Combine(_path, newFile)))
+            while (File.Exists(newScriptPath))
             {
-                string defaultScript =
-                    "using Unify2D.Core;\r\nusing Input = Microsoft.Xna.Framework.Input;\r\n\r\nnamespace Game\r\n{\r\n    class NewScript : Component\r\n    {\r\n        public override void Update(GameCore game)\r\n        {\r\n\r\n        }\r\n    }\r\n}";
+                newFile = $"NewScript{counter}.cs";
+                newScriptPath = Path.Combine(_path, newFile);
+                counter++;
+            }
+            
+            string className = newFile.Replace(".cs", "");
+            using (StreamWriter sw = File.CreateText(newScriptPath))
+            {
+                string defaultScript = $"using Unify2D.Core;\r\nusing Input = Microsoft.Xna.Framework.Input;\r\n\r\nnamespace Game\r\n{{\r\n    class {className} : Component\r\n    {{\r\n        public override void Update(GameCore game)\r\n        {{\r\n\r\n        }}\r\n    }}\r\n}}";
                 sw.WriteLine(defaultScript);
             }
 
@@ -209,7 +222,6 @@ namespace Unify2D.Toolbox
         private void CreateFolder()
         {
             string folderName = "New Folder";
-
             string newFolderPath = Path.Combine(_path, folderName);
             int counter = 1;
 
