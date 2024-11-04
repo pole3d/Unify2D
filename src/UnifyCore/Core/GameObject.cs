@@ -45,10 +45,7 @@ namespace Unify2D.Core
         private Vector2 m_position;
         private float m_rotation;
         private bool m_positionUpdated, m_rotationUpdated;
-
-
-
-
+        
         List<Renderer> _renderers;
 
         [JsonProperty]
@@ -144,6 +141,12 @@ namespace Unify2D.Core
             {
                 item.Draw();
             }
+
+            foreach (Component component in _components)
+            {
+                if (component is not UIComponent ui) continue;
+                ui.Draw();
+            }
         }
         internal void DrawGizmo()
         {
@@ -171,7 +174,7 @@ namespace Unify2D.Core
             //ui
             if (component is Canvas canvas)
             {
-                GameCore.Current.CanvasListList.Add(canvas);
+                GameCore.Current.CanvasList.Add(canvas);
             }
             else if (component is UIComponent)
             {
@@ -190,6 +193,8 @@ namespace Unify2D.Core
                         canvasGameObject.AddComponent<Canvas>();
                         
                         SetChild(canvasGameObject, this);
+                        
+                        GameCore.Current.CanvasList.Add(canvasGameObject.GetComponent<Canvas>());
                     }
                     else
                     {
@@ -248,7 +253,7 @@ namespace Unify2D.Core
             if (component is Canvas canvas)
             {
                 Debug.Log("remove from canvas list");
-                GameCore.Current.CanvasListList.Remove(canvas);
+                GameCore.Current.CanvasList.Remove(canvas);
             }
 
             component.Destroy();

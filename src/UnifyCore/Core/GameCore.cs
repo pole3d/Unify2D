@@ -30,7 +30,7 @@ namespace Unify2D.Core
 
         public SpriteBatch SpriteBatch { get; private set; }
         public List<GameObject> GameObjects => _gameObjects;
-        public List<Canvas> CanvasListList => _canvasList;
+        public List<Canvas> CanvasList => _canvasList;
         public PhysicsSettings PhysicsSettings { get; private set; }
         public float DeltaTime { get; private set; }
 
@@ -60,11 +60,7 @@ namespace Unify2D.Core
 
             PhysicsSettings.Init();
         }
-
-        public void BeginDraw()
-        {
-            BeginDraw(Matrix.Identity);
-        }
+        
         public void BeginDraw(Matrix matrix)
         {
             SpriteBatch.Begin(SpriteSortMode.Deferred,
@@ -75,6 +71,7 @@ namespace Unify2D.Core
                         null,
                         matrix);
         }
+        
         public void Draw()
         {
             foreach (var item in _gameObjects)
