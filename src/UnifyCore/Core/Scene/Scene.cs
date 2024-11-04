@@ -45,6 +45,8 @@ namespace Unify2D
 
         public void Init()
         {
+            GameCore.Current.InitPhysics();
+
             foreach (GameObject gameObject in GameObjects)
             {
                 gameObject.Init(GameCore.Current.Game);
@@ -71,12 +73,12 @@ namespace Unify2D
         }
         public void Update(GameTime gameTime)
         {
-            foreach (var item in GameObjects)
+            foreach (GameObject item in GameObjects)
             {
                 item.Update(GameCore.Current);
             }
 
-            foreach (var item in _gameObjectsToDestroy)
+            foreach (GameObject item in _gameObjectsToDestroy)
             {
                 GameObjects.Remove(item);
             }

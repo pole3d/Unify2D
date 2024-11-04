@@ -10,6 +10,8 @@ namespace Unify2D
     {
         private static SceneManager _instance;
 
+        private Scene _currentScene;
+
         public static SceneManager Instance {
             get
             {
@@ -22,7 +24,6 @@ namespace Unify2D
             }
         }
 
-        private Scene _currentScene;
         public Scene CurrentScene => _currentScene;
 
         public SceneManager()
@@ -30,6 +31,7 @@ namespace Unify2D
             _currentScene = new Scene();
         }
 
+        #region Save/Load
         public void Save(Scene scene)
         {
             if (scene.Name == null)
@@ -50,15 +52,53 @@ namespace Unify2D
             Save(_currentScene);
         }
 
-        public void LoadScene(string path)
+        public void LoadScene(string scenePath)
         {
-            _currentScene = new Scene(path);
+            ClearScene();
+
+            _currentScene = new Scene(scenePath);
             _currentScene.Init();
         }
+        #endregion
 
-        private void SilentErrors(object sender, Newtonsoft.Json.Serialization.ErrorEventArgs e)
+
+
+
+
+
+        #region Function
+        public Scene GetActiveScene()
         {
-            e.ErrorContext.Handled = true;
+            return CurrentScene;
+        }
+
+
+        /// <summary>
+        /// Get the Scene at index in the SceneManager's list of loaded Scenes.
+        /// </summary>
+        public void GetSceneAt(int index)
+        {
+
+        }
+
+        /// <summary>
+        /// Get a Scene struct from a build index.
+        /// </summary>
+        public void GetSceneByBuildIndex(int buildIndex)
+        {
+
+        }
+        /// <summary>
+        /// Searches through the Scenes loaded for a Scene with the given name.
+        /// </summary>
+        public void GetSceneByName()
+        {
+
+        }
+
+        public Scene GetSceneByPath(string scenePath)
+        {
+            return new Scene(scenePath);
         }
 
 
@@ -66,5 +106,12 @@ namespace Unify2D
         {
             CurrentScene.GameObjects.Clear();
         }
+
+        private void SilentErrors(object sender, Newtonsoft.Json.Serialization.ErrorEventArgs e)
+        {
+            e.ErrorContext.Handled = true;
+        }
+
+        #endregion
     }
 }
