@@ -60,6 +60,7 @@ namespace Unify2D.Toolbox
         private Texture2D _smallGridTexture;
 
         private bool _isPlaying = false;
+        public bool IsPlaying => _isPlaying;
 
         private void SetResolution(Vector2 resolution)
         {

@@ -162,6 +162,12 @@ namespace Unify2D
             {
                 item.Update(gameTime);
             }
+
+            if (GameToolbox.IsPlaying)
+            {
+                _core.Update(gameTime);
+                SceneManager.Instance.CurrentScene.Update(gameTime);
+            }
         }
 
         protected override void Draw(GameTime gameTime)
