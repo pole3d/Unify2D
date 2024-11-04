@@ -59,6 +59,7 @@ namespace Unify2D
                     }
                     ImGui.EndMenu();
                 }
+
                 if (ImGui.MenuItem("Play"))
                 {
                     _editor.Build();
@@ -93,8 +94,7 @@ namespace Unify2D
                 NfdStatus result = Nfd.SaveDialog(out path, new Dictionary<string, string>() { { "New Scene", "scene" } }, "New Scene", Path.GetFullPath("./Assets").ToString());
                 if (result == NfdStatus.Ok)
                 {
-                    scene.Path = path;
-                    scene.Name = Path.GetFileName(path);
+                    scene.SaveSceneNameAndPath(path, Path.GetFileName(path));
                 }
             }
 
