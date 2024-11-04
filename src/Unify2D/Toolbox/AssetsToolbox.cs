@@ -129,6 +129,17 @@ namespace Unify2D.Toolbox
                     ImGui.Text(_assets[n].ToString());
                     ImGui.EndDragDropSource();
                 }
+                
+                if (ImGui.BeginPopupContextItem())
+                {
+                    if (ImGui.Button("Destroy"))
+                    {
+                        DeleteAsset($"{_path}{_assets[n].FullPath}");
+                        ImGui.CloseCurrentPopup();
+                    }
+
+                    ImGui.EndPopup();
+                }
             }
 
             ImGui.End();
@@ -162,6 +173,19 @@ namespace Unify2D.Toolbox
 
             Directory.CreateDirectory(newFolderPath);
 
+            Reset();
+        }
+
+        private void DeleteAsset(string path)
+        {
+            if (Path.Exists(path))
+            {
+                if(string.IsNullOrEmpty(Path.GetExtension(path)))
+                    Directory.Delete(path);
+                else
+                    File.Delete(path);
+            }
+            
             Reset();
         }
 
