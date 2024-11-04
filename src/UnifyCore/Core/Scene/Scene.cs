@@ -13,9 +13,12 @@ namespace Unify2D
 {
     public class Scene
     {
-        public string Name { get; set; }
-        public string Path { get; set; }
-        public List<GameObject> GameObjects { get; set; } = new List<GameObject>();
+        public string Name { get; private set; }
+        public string Path { get; private set; }
+        public int RootCount => GameObjects.Count;
+        public int BuildIndex { get; private set; }
+
+        public List<GameObject> GameObjects { get; private set; } = new List<GameObject>();
 
         private List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
 
@@ -42,7 +45,11 @@ namespace Unify2D
             }
         }
 
-
+        public void SaveSceneNameAndPath(string path, string name)
+        {
+            Path = path;
+            Name = name;
+        }
         public void Init()
         {
             GameCore.Current.InitPhysics();
@@ -104,5 +111,9 @@ namespace Unify2D
                 GameObjects.Remove(gameObject);
             }
         }
+
+        
+
+
     }
 }
