@@ -109,6 +109,7 @@ namespace Unify2D.Toolbox
                         sceneManager.SaveCurrentScene();
                     }
                     
+                    Selection.UnSelectObject();
                     sceneManager.LoadScene(sceneManager.CurrentScene.Path);
                 }
                 
