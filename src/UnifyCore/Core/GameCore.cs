@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
-using System.Reflection.Metadata.Ecma335;
 using Unify2D.Physics;
 using Unify2D.Core.Tools;
 
@@ -86,7 +85,7 @@ namespace Unify2D.Core
         public void DrawGizmo()
         {
             Gizmo.SetColor(Color.White);
-            foreach (var item in _gameObjects)
+            foreach (var item in SceneManager.Instance.CurrentScene.GameObjects)
             {
                 item.DrawGizmo();
             }
@@ -126,7 +125,7 @@ namespace Unify2D.Core
             {
                 _gameObjects.Add(item);
 
-                item.Load(game);
+                item.Init(game);
             }
         }
 

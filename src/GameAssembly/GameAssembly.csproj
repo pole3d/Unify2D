@@ -9,4 +9,8 @@
     <ProjectReference Include="..\UnifyCore\UnifyCore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="ImGui.NET.Branches.Docking" Version="1.88.0" />
+  </ItemGroup>
+
 </Project>

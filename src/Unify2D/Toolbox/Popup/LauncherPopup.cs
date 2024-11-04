@@ -26,7 +26,7 @@ namespace Unify2D.Toolbox
 
         private void DrawNewProject(GameEditor editor)
         {
-            ImGui.SeparatorText("New Project");
+            //ImGui.SeparatorText("New Project");
 
             ImGui.InputText("Name", ref _newProjectName, 30);
 
@@ -62,7 +62,7 @@ namespace Unify2D.Toolbox
 
         private void DrawExistingProject(GameEditor editor)
         {
-            ImGui.SeparatorText("Recent projects");
+            //ImGui.SeparatorText("Recent projects");
 
             ImGui.BeginChildFrame(12, new System.Numerics.Vector2(140, 80));
             if (string.IsNullOrEmpty(editor.Settings.Data.CurrentProjectPath) == false)
@@ -110,7 +110,7 @@ namespace Unify2D.Toolbox
 
         void LoadProject()
         {
-            _editor.SceneEditorManager.LoadScene("test");
+            //_editor.SceneEditorManager.LoadScene();
 
             _editor.HidePopup();
         }

@@ -110,7 +110,7 @@ namespace Unify2D.Scripting
 
         private void ReplaceComponents()
         {
-            foreach (var go in _editor.GameCore.GameObjects)
+            foreach (var go in SceneManager.Instance.CurrentScene.GameObjects)
             {
                 List<Component> newComponents = new List<Component>();
                 foreach (var oldComponent in go.Components)

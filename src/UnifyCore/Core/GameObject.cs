@@ -66,7 +66,7 @@ namespace Unify2D.Core
         {
             GameObject go = new GameObject();
             go.UID = s_maxID++;
-            GameCore.Current.AddRootGameObject(go);
+            SceneManager.Instance.CurrentScene.AddRootGameObject(go);
             return go;
         }
 
@@ -92,18 +92,18 @@ namespace Unify2D.Core
             parent.Children.Add(child);
         }
 
-        internal void Load(Game game)
+        public void Init(Game game)
         {
             if (Children != null)
             {
-                foreach (var child in Children)
+                foreach (GameObject child in Children)
                 {
                     child.Parent = this;
-                    child.Load(game);
+                    child.Init(game);
                 }
             }
 
-            foreach (var component in _components)
+            foreach (Component component in _components)
             {
                 component.Initialize(this);
                 component.Load(game,this);
@@ -122,7 +122,7 @@ namespace Unify2D.Core
 
         public T GetComponent<T>() where T : Component
         {
-            foreach (var item in Components)
+            foreach (Component item in Components)
             {
                 if (item is T)
                 {
@@ -224,6 +224,7 @@ namespace Unify2D.Core
         {
             DestroyComponent(item);
 
+            item.Destroy();
             _components.Remove(item);
         }
 
