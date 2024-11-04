@@ -241,7 +241,17 @@ namespace Unify2D.Toolbox
             if (Path.Exists(path))
             {
                 if (string.IsNullOrEmpty(Path.GetExtension(path)))
+                {
+                    string[] files = Directory.GetFiles(path);
+                    
+                    if (files.Length > 0)
+                    {
+                        foreach (string file in files)
+                            File.Delete(file);
+                    }
+                    
                     Directory.Delete(path);
+                }
                 else
                     File.Delete(path);
             }
