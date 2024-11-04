@@ -237,7 +237,12 @@ namespace Unify2D
             return GameToolbox.GetMousePosition();
         }
 
-        public void Build()
+        public void BuildProject()
+        {
+            Scripting.Reload();
+        }
+
+        public void BuildAndRun()
         {
             GameBuilder builder = new GameBuilder();
             builder.Build(_core, this);

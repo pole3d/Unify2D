@@ -41,7 +41,7 @@ namespace Unify2D
                         Process.Start("explorer.exe", _editor.Settings.Data.CurrentProjectPath);
                     }
                     if (ImGui.MenuItem("Build"))
-                        _editor.Build();
+                        _editor.BuildProject();
                     if (ImGui.MenuItem("Save"))
                     {
                         // _editor.SceneEditorManager.SaveCurrentScene();
@@ -61,7 +61,7 @@ namespace Unify2D
                 }
                 if (ImGui.MenuItem("Play"))
                 {
-                    _editor.Build();
+                    _editor.BuildAndRun();
                 }
 
                 ImGui.EndMainMenuBar();
