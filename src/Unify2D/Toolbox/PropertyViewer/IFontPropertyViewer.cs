@@ -5,7 +5,7 @@ using Unify2D.Core;
 
 namespace Unify2D.Toolbox
 {
-    internal class SpriteFontPropertyViewer : PropertyViewer
+    internal class IFontPropertyViewer : PropertyViewer
     {
         public override void Draw(PropertyInfo property, object instance) //instance = component
         {

@@ -28,6 +28,7 @@ namespace Unify2D.Core
 
         public Game Game => _game;
 
+        public GraphicsDevice GraphicsDevice { get; private set; }
         public SpriteBatch SpriteBatch { get; private set; }
         public List<GameObject> GameObjects => _gameObjects;
         public List<Canvas> CanvasList => _canvasList;
@@ -111,6 +112,8 @@ namespace Unify2D.Core
 
         public void Initialize(GraphicsDevice graphicsDevice)
         {
+            GraphicsDevice = graphicsDevice;
+            
             SpriteBatch = new SpriteBatch(graphicsDevice);
 
             InitPhysics();
