@@ -42,8 +42,7 @@ namespace Unify2D.Toolbox
                 DrawNode(gameObject);
             }
 
-
-            if (_isAnyWidgetHovered == false && ImGui.IsMouseReleased(ImGuiMouseButton.Left))
+            if (_isAnyWidgetHovered == false && ImGui.IsMouseReleased(ImGuiMouseButton.Left) && ImGui.IsWindowFocused())
             {
                 Selection.UnSelectObject();
             }
