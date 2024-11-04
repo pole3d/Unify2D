@@ -1,23 +1,24 @@
 ﻿using ImGuiNET;
-using System;
-using System.Diagnostics;
 using Unify2D.Core;
 
 namespace Unify2D.Toolbox
 {
     internal class HierarchyToolbox : Toolbox
     {
-
         int _currentIndex = 0;
         GameObject _goToDestroy = null;
+        bool _isAnyWidgetHovered = false;
 
         public override void Draw()
         {
             ImGui.Begin("Hierarchy");
-
+            _isAnyWidgetHovered = false;
 
             if (ImGui.Button("Add GameObject", new System.Numerics.Vector2(-1, 0)))
             {
+                if (ImGui.IsItemHovered())
+                    _isAnyWidgetHovered = true;
+
                 if (Selection.Selected != null)
                 {
                     GameObject parent = Selection.Selected as GameObject;
@@ -41,7 +42,10 @@ namespace Unify2D.Toolbox
                 DrawNode(gameObject);
             }
 
-
+            if (_isAnyWidgetHovered == false && ImGui.IsMouseReleased(ImGuiMouseButton.Left) && ImGui.IsWindowFocused())
+            {
+                Selection.UnSelectObject();
+            }
 
             ImGui.End();
 
@@ -51,6 +55,7 @@ namespace Unify2D.Toolbox
                 Selection.UnSelectObject();
                 _goToDestroy = null;
             }
+
         }
 
         void DrawNode(GameObject go)
@@ -76,6 +81,9 @@ namespace Unify2D.Toolbox
                     Selection.SelectObject(go);
                 }
 
+                if (ImGui.IsItemHovered())
+                    _isAnyWidgetHovered = true;
+
                 if (ImGui.BeginPopupContextItem())
                 {
                     if (ImGui.Button("Destroy"))
@@ -100,6 +108,9 @@ namespace Unify2D.Toolbox
                 {
                     Selection.SelectObject(go);
                 }
+
+                if (ImGui.IsItemHovered())
+                    _isAnyWidgetHovered = true;
 
                 if (ImGui.BeginPopupContextItem())
                 {
