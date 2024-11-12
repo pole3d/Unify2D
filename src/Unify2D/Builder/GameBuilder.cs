@@ -58,7 +58,11 @@ namespace Unify2D.Builder
                 CopyFilesRecursively(AssetsPathFull, newPath);
             }
 
-            SceneManager.Instance.SaveCurrentScene();
+
+            //SceneManager.Instance.SaveCurrentScene();
+            #region old
+            Save();
+            #endregion
 
             CreateDll();
         }
@@ -127,6 +131,17 @@ namespace Unify2D.Builder
 
             }
         }
+
+        #region old
+        void Save()
+        {
+            JsonSerializerSettings settings = new JsonSerializerSettings();
+            settings.TypeNameHandling = TypeNameHandling.Auto;
+            string text = JsonConvert.SerializeObject(SceneManager.Instance.CurrentScene.GameObjects, settings);
+
+            File.WriteAllText(ToolsEditor.CombinePath(BuildPathFull, "test.scene"), text);
+        }
+        #endregion
 
         public void StartBuild()
         {
