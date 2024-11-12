@@ -1,4 +1,7 @@
-﻿namespace Unify2D.Core
+﻿
+using Microsoft.Xna.Framework;
+
+namespace Unify2D.Core
 {
     /// <summary>
     /// The <see cref="n"/> class, an abstract extension of <see cref="Component"/>,
@@ -6,6 +9,8 @@
     /// </summary>
     public abstract class UIComponent : Component
     {
+        public Vector2 Origin { get; set; }
+        
         public abstract void Draw();
     }
 }

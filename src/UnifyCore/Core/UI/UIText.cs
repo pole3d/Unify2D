@@ -15,7 +15,6 @@ namespace Unify2D.Core
     {
         /// Properties
         public string Text { get; set; } = "Lorem Ipsum";
-        public int Size { get; set; } = 1;
         public Color VertexColor { get; set; } = Color.White;
         public SpriteFont Font { get; private set; }
 
@@ -26,9 +25,7 @@ namespace Unify2D.Core
         {
             if (string.IsNullOrEmpty(Text) || Font == null) return;
 
-            Debug.Log("draw");
-            
-            GameCore.Current.SpriteBatch.DrawString(Font, Text, GameObject.Position, VertexColor);
+            GameCore.Current.SpriteBatch.DrawString(Font, Text,  GameObject.Position, VertexColor, GameObject.Rotation, Origin, GameObject.Scale, SpriteEffects.None, 0);
         }
         
         public bool Initialize(Game game, GameObject go, string path)
@@ -37,9 +34,6 @@ namespace Unify2D.Core
             try
             {
                 path = path.Remove(0,1);
-                
-                // FontLibrary font = game.Content.Load<FontLibrary>($"./Assets/{path}");
-                // path = @"C:\Users\matteo.benaissa\Unify2D\bin\Debug\Unify2D\NEW_PROJECT\Assets\font.ttf";
                 
                 path = $"{game.Content.RootDirectory}/Assets/{path}";
                 
@@ -59,8 +53,6 @@ namespace Unify2D.Core
                 SpriteFont font = fontBakeResult.CreateSpriteFont(GameCore.Current.GraphicsDevice);
                 
                 Font = font;
-                
-                Debug.Log(Font != null);
                 
                 _asset = new GameAsset(Font, path);
 
