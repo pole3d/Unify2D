@@ -13,6 +13,8 @@ namespace Unify2D.Toolbox
     /// </summary>
     internal class AssetsToolbox : Toolbox
     {
+        public List<Asset> Assets => _assets;
+        
         string _path;
         bool[] _selected;
         List<Asset> _assets = new List<Asset>();

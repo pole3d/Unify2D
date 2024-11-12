@@ -33,27 +33,7 @@ namespace Unify2D.Core
             _gameObject = go;
             try
             {
-                path = path.Remove(0,1);
-                
-                path = $"{game.Content.RootDirectory}/Assets/{path}";
-                
-                TtfFontBakerResult fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(@"C:\\Windows\\Fonts\arial.ttf"),
-                    25,
-                    1024,
-                    1024,
-                    new[]
-                    {
-                        CharacterRange.BasicLatin,
-                        CharacterRange.Latin1Supplement,
-                        CharacterRange.LatinExtendedA,
-                        CharacterRange.Cyrillic
-                    }
-                );
-                
-                SpriteFont font = fontBakeResult.CreateSpriteFont(GameCore.Current.GraphicsDevice);
-                
-                Font = font;
-                
+                Font = GetSpriteFont(path);
                 _asset = new GameAsset(Font, path);
 
                 return true;
@@ -64,6 +44,25 @@ namespace Unify2D.Core
 
                 return false;
             }
+        }
+
+        public static SpriteFont GetSpriteFont(string path)
+        {
+            TtfFontBakerResult fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(path),
+                25,
+                1024,
+                1024,
+                new[]
+                {
+                    CharacterRange.BasicLatin,
+                    CharacterRange.Latin1Supplement,
+                    CharacterRange.LatinExtendedA,
+                    CharacterRange.Cyrillic
+                }
+            );
+                
+            SpriteFont font = fontBakeResult.CreateSpriteFont(GameCore.Current.GraphicsDevice);
+            return font;
         }
         
         internal override void Destroy()

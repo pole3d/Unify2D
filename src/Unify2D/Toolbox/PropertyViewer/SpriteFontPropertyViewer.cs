@@ -1,5 +1,7 @@
-﻿using ImGuiNET;
+﻿using System.Collections.Generic;
+using ImGuiNET;
 using System.Reflection;
+using Microsoft.Xna.Framework.Graphics;
 using Unify2D.Assets;
 using Unify2D.Core;
 
@@ -14,33 +16,47 @@ namespace Unify2D.Toolbox
                 return;
             }
             
-            GameAsset value = property.GetValue(instance) as GameAsset; //get the current value of the property in component
-            string name = "";
-            
-            name = value == null ? name : value.Name;
-            ImGui.InputText("path", ref name, 50);
-            
-            if (text.Font != null)
+            if (text.Font == null)
             {
+                DrawFoldout(text, true);
                 return;
             }
+            
+            DrawFoldout(text);
+        }
 
-            if (value != null && name == value.Name)
+        internal int _currentFoldoutItem = 0;
+        private void DrawFoldout(UIText text, bool forceInitialize = false)
+        {
+            List<string> fontsNames = new List<string>() {"Arial"};
+            List<string> fontsPaths = new List<string>() {@"C:\\Windows\\Fonts\arial.ttf"};
+            
+            //get all the fonts in the assets
+            List<Asset> assets = GameEditor.Instance.AssetsToolBox.Assets;
+            foreach (Asset asset in assets)
             {
-                return;
+                string name = asset.Name;
+                string path = asset.FullPath;
+                if (path.EndsWith(".ttf"))
+                {
+                    path = path.Remove(0,1);
+                    path = $"{GameCore.Current.Game.Content.RootDirectory}/Assets/{path}";
+                    
+                    fontsNames.Add(name);
+                    fontsPaths.Add(path);
+                }
             }
             
-            if (name != "")
+            //if the text font is null, initialize it
+            if (forceInitialize)
             {
-                Asset asset = GameEditor.Instance.AssetsToolBox.GetAssetFromPath(name);
-                
-                if (asset != null && (value == null || asset != value.Asset))
-                {
-                    if (text.Initialize(GameCore.Current.Game, text.GameObject, name))
-                    {
-                        property.SetValue(instance, name);
-                    }
-                }
+                text.Initialize(GameCore.Current.Game, text.GameObject, fontsPaths[0]);
+            }
+            
+            bool combo = ImGui.Combo("foldout", ref _currentFoldoutItem,  fontsNames.ToArray(), fontsNames.Count);
+            if (combo)
+            {
+                text.Initialize(GameCore.Current.Game, text.GameObject, fontsPaths[_currentFoldoutItem]);
             }
         }
     }
