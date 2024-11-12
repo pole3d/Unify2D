@@ -40,15 +40,15 @@ namespace Unify2D.Toolbox
                 }
             }
 
-            if (_tag is GameCoreViewer coreViewer && coreViewer.AssetType == GameCoreViewer.Type.Prefab)
-            {
-                if (ImGui.Button("Close prefab", new Vector2(ImGui.GetWindowWidth(), 20.0f)))
-                {
-                    GameEditor.Instance.CloseGameCore(coreViewer);
-                }
-
-                ImGui.Separator();
-            }
+            // if (_tag is GameCoreViewer coreViewer && coreViewer.AssetType == GameCoreViewer.Type.Prefab)
+            // {
+            //     if (ImGui.Button("Close prefab", new Vector2(ImGui.GetWindowWidth(), 20.0f)))
+            //     {
+            //         GameEditor.Instance.CloseGameCore(coreViewer);
+            //     }
+            //
+            //     ImGui.Separator();
+            // }
 
             // First way to Display GameObjects to the hierarchy -> Don't allow to D&D
             foreach (GameObject gameObject in SceneManager.Instance.CurrentScene.GameObjects)

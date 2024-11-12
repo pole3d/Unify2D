@@ -74,22 +74,6 @@ namespace Unify2D.Toolbox
                     Selection.SelectObject(_assets[n]);
                     _selected[n] = !_selected[n];
                 }
-
-                // if (ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
-                // {
-                //     unsafe
-                //     {
-                //         // Set payload to carry the index of our item (could be anything)
-                //         ImGui.SetDragDropPayload("ASSET", (IntPtr)(&n), sizeof(int));
-                //     }
-                //
-                //     Clipboard.Content = _assets[n];
-                //     Debug.Log("Dragging " + _assets[n].ToString());
-                //
-                //     ImGui.Text(_assets[n].ToString());
-                //
-                //     ImGui.EndDragDropSource();
-                // }
                 
                 if (ImGui.BeginPopupContextItem())
                 {
@@ -100,23 +84,21 @@ namespace Unify2D.Toolbox
                     {
                         if (ImGui.Button("Open Prefab"))
                         {
-                            GameEditor.Instance.OpenPrefab(prefabContent);
+                            //GameEditor.Instance.OpenPrefab(prefabContent);
+                            ImGui.CloseCurrentPopup();
                         }
 
                         if (ImGui.Button("Instantiate as GameObject"))
                         {
                             // Logic to instantiate the prefab as a GameObject
                             PrefabInstance prefabInstance = new PrefabInstance($"{prefabContent.Asset.FullPath}");
-                            Debug.Log($"prefabInstancePath : {Path.GetFullPath(_editor.AssetsPath)}{prefabContent.Asset.FullPath}");
-
-                            
                             GameObject instantiatedGameObject = prefabInstance.InstantiateAndLinkGameObject();
+                            
                             // Add GameObject to the scene
                             SceneManager.Instance.CurrentScene.AddRootGameObject(instantiatedGameObject);
 
                             _selected[n] = false;
                             ImGui.CloseCurrentPopup();
-                            Debug.Log("Instantiated Prefab as GameObject");
                         }
                     }
                     if (ImGui.Button("Delete"))
@@ -128,31 +110,6 @@ namespace Unify2D.Toolbox
             }
             
             ImGui.EndChild();
-
-            if (ImGui.BeginDragDropTarget())
-            {
-                GameObject draggedGO = null;
-
-                unsafe
-                {
-                    var ptr = ImGui.AcceptDragDropPayload("HIERARCHY");
-                    if (ptr.NativePtr != null)
-                        draggedGO = Clipboard.Content as GameObject;
-                    
-                    Debug.Log("AssetsToolbox Dropped " + draggedGO?.Name);
-                }
-
-                if (draggedGO != null)
-                {
-                    // Write serialized data to file
-                    //Asset prefabAsset = _editor.AssetManager.CreateAsset<PrefabAssetContent>(draggedGO.Name);
-                    //((PrefabAssetContent)prefabAsset.AssetContent).Save(draggedGO);
-                    // Refresh toolbox
-                    //Reset();
-                }
-
-                ImGui.EndDragDropTarget();
-            }
             
             ImGui.End();
         }
