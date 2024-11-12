@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,9 +14,31 @@ namespace Unify2D
 {
     public class Scene
     {
-        public string Name { get; set; }
-        public string Path { get; set; }
-        public List<GameObject> GameObjects { get; set; } = new List<GameObject>();
+        public string Name { get; private set; }
+        public string Path { get; private set; }
+        public int RootCount => GameObjects.Count;
+        public int BuildIndex { get; private set; }
+
+        public List<GameObject> GameObjects { get; private set; } = new List<GameObject>();
+
+        public IEnumerable<GameObject> GameObjectsWithChildren
+        {
+            get
+            {
+                foreach (var gameObject in GameObjects)
+                {
+                    yield return gameObject;
+
+                    if (gameObject.Children != null)
+                    {
+                        foreach (var child in gameObject.Children)
+                        {
+                            yield return child;
+                        }
+                    }
+                }
+            }
+        }
 
         private List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
 
@@ -42,9 +65,15 @@ namespace Unify2D
             }
         }
 
-
+        public void SaveSceneNameAndPath(string path, string name)
+        {
+            Path = path;
+            Name = name;
+        }
         public void Init()
         {
+            GameCore.Current.InitPhysics();
+
             foreach (GameObject gameObject in GameObjects)
             {
                 gameObject.Init(GameCore.Current.Game);
@@ -71,12 +100,12 @@ namespace Unify2D
         }
         public void Update(GameTime gameTime)
         {
-            foreach (var item in GameObjects)
+            foreach (GameObject item in GameObjects)
             {
                 item.Update(GameCore.Current);
             }
 
-            foreach (var item in _gameObjectsToDestroy)
+            foreach (GameObject item in _gameObjectsToDestroy)
             {
                 GameObjects.Remove(item);
             }
@@ -102,5 +131,9 @@ namespace Unify2D
                 GameObjects.Remove(gameObject);
             }
         }
+
+        
+
+
     }
 }

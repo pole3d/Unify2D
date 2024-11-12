@@ -18,14 +18,14 @@ namespace Unify2D.Builder
     {
         const string AssetsPath = "./Assets";
         const string TemplatePath = "./GameTemplate";
-        string AssetsPathFull  => ToolsEditor.CombinePath(_editor.ProjectPath, AssetsPath);
-        string BuildPathFull => ToolsEditor.CombinePath(_editor.ProjectPath,  "./Build");
+        string AssetsPathFull => ToolsEditor.CombinePath(_editor.ProjectPath, AssetsPath);
+        string BuildPathFull => ToolsEditor.CombinePath(_editor.ProjectPath, "./Build");
         const string ExeName = "UnifyGame.exe";
 
         GameCore _core;
         GameEditor _editor;
 
-        public void Build( GameCore core , GameEditor editor)
+        public void Build(GameCore core, GameEditor editor)
         {
             _core = core;
             _editor = editor;
@@ -33,20 +33,20 @@ namespace Unify2D.Builder
             if (Directory.Exists(BuildPathFull) == false)
                 Directory.CreateDirectory(BuildPathFull);
 
-            if (Directory.Exists(ToolsEditor.CombinePath(BuildPathFull,AssetsPath)) == false)
+            if (Directory.Exists(ToolsEditor.CombinePath(BuildPathFull, AssetsPath)) == false)
                 Directory.CreateDirectory(ToolsEditor.CombinePath(BuildPathFull, AssetsPath));
 
-            if ( Directory.Exists(TemplatePath) == false )
+            if (Directory.Exists(TemplatePath) == false)
             {
-                Console.WriteLine( $"There's no template at the given path {TemplatePath}" );
+                Console.WriteLine($"There's no template at the given path {TemplatePath}");
 
                 return;
             }
-            
-            foreach (var file in Directory.GetFiles(TemplatePath))
+
+            foreach (string file in Directory.GetFiles(TemplatePath))
             {
                 string fileName = Path.GetFileName(file);
-                string newPath = ToolsEditor.CombinePath  ( BuildPathFull , fileName );
+                string newPath = ToolsEditor.CombinePath(BuildPathFull, fileName);
                 File.Copy(file, newPath, true);
             }
 
@@ -54,20 +54,33 @@ namespace Unify2D.Builder
 
             if (Directory.Exists(AssetsPathFull))
             {
-                foreach (var file in Directory.GetFiles(AssetsPathFull))
-                {
-                    string fileName = Path.GetFileName(file);
-                    string newPath = ToolsEditor.CombinePath(ToolsEditor.CombinePath(BuildPathFull, AssetsPath), fileName);
-
-                    var sourceFile = new FileInfo(file);
-                    sourceFile.CopyTo(newPath, true);
-
-                }
+                string newPath = ToolsEditor.CombinePath(BuildPathFull, AssetsPath);
+                CopyFilesRecursively(AssetsPathFull, newPath);
             }
 
+
+            //SceneManager.Instance.SaveCurrentScene();
+            #region old
             Save();
+            #endregion
 
             CreateDll();
+        }
+
+
+        private static void CopyFilesRecursively(string sourcePath, string targetPath)
+        {
+            //Now Create all of the directories
+            foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+            {
+                Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+            }
+
+            //Copy all the files & Replaces any files with the same name
+            foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
+            {
+                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+            }
         }
 
         void CreateDll()
@@ -118,16 +131,17 @@ namespace Unify2D.Builder
 
             }
         }
-    
 
+        #region old
         void Save()
         {
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
             string text = JsonConvert.SerializeObject(SceneManager.Instance.CurrentScene.GameObjects, settings);
 
-            File.WriteAllText(ToolsEditor.CombinePath(BuildPathFull,"test.scene"), text);
+            File.WriteAllText(ToolsEditor.CombinePath(BuildPathFull, "test.scene"), text);
         }
+        #endregion
 
         public void StartBuild()
         {

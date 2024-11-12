@@ -1,11 +1,7 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Unify2D.Core;
 using Unify2D.Core.Graphics;
 
@@ -13,7 +9,6 @@ namespace Unify2D.Toolbox
 {
     internal class GameAssetPropertyViewer : PropertyViewer
     {
-
 
         public override void Draw(PropertyInfo property, object instance)
         {

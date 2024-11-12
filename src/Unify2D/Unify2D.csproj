@@ -33,6 +33,10 @@
       </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="src\unify2d\builder\" />
+    </ItemGroup>
+
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
       <Exec Command="xcopy &quot;$(SolutionDir)..\GameAssemblyProject\&quot; &quot;$(OutDir)GameAssemblyProject\&quot; /s /y  &#xD;&#xA;" />
     </Target>
