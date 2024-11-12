@@ -53,27 +53,55 @@ namespace Unify2D.Toolbox
             string[] files = Directory.GetFiles(_path);
 
             foreach (string file in files)
-            {
-                string relativeFile = file.Replace(_path, string.Empty);
-                string extension = Path.GetExtension(relativeFile);
-
-                if (_extensionsToIgnore.Contains(extension))
-                    continue;
-
-                _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeFile),
-                    Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile)));
-            }
+                CreateAssetFromFile(file);
 
             string[] directories = Directory.GetDirectories(_path);
 
             foreach (string directory in directories)
+                CreateAssetFromDirectory(directory);
+
+            _selected = new bool[_assets.Count];
+        }
+
+        private Asset CreateAssetFromDirectory(string directory)
+        {
+            string relativeDirectory = directory.Replace(_path, string.Empty);
+            Asset newAsset = new Asset(Path.GetFileNameWithoutExtension(relativeDirectory), Path.GetDirectoryName(relativeDirectory), true);
+                
+            _assets.Add(newAsset);
+
+            string[] filesInDirectory = Directory.GetFiles($"{_path}{newAsset.FullPath}");
+            string[] directoriesInDirectory = Directory.GetDirectories($"{_path}{newAsset.FullPath}");
+                
+            foreach (string file in filesInDirectory)
             {
-                string relativeDirectory = directory.Replace(_path, string.Empty);
-                _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeDirectory),
-                    Path.GetDirectoryName(relativeDirectory), true));
+                Asset child = CreateAssetFromFile(file);
+                newAsset.AddChild(child);
+            }
+            
+            foreach (string dir in directoriesInDirectory)
+            {
+                Asset child = CreateAssetFromDirectory(dir);
+                newAsset.AddChild(child);
             }
 
-            _selected = new bool[files.Length + directories.Length];
+            return newAsset;
+        }
+
+        private Asset CreateAssetFromFile(string file)
+        {
+            string relativeFile = file.Replace(_path, string.Empty);
+            string extension = Path.GetExtension(relativeFile);
+
+            if (_extensionsToIgnore.Contains(extension))
+                return null;
+
+            Asset newAsset = new Asset(Path.GetFileNameWithoutExtension(relativeFile),
+                Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile));
+            
+            _assets.Add(newAsset);
+
+            return newAsset;
         }
 
         public override void Draw()
@@ -104,18 +132,7 @@ namespace Unify2D.Toolbox
 
             for (int n = 0; n < _assets.Count; n++)
             {
-                if (ImGui.Selectable(_assets[n].ToString(), _selected[n]))
-                {
-                    // Clear selection when CTRL is not held
-                    if (!ImGui.GetIO().KeyCtrl)
-                    {
-                        for (int i = 0; i < _assets.Count; i++)
-                            _selected[i] = false;
-                    }
-
-                    Selection.SelectObject(_assets[n]);
-                    _selected[n] = !_selected[n];
-                }
+                DrawNode(_assets[n]);
 
                 HandBeginDragDropSource(n);
                 HandleBeginDragDropTarget(n);
@@ -123,6 +140,35 @@ namespace Unify2D.Toolbox
             }
 
             ImGui.End();
+        }
+
+        private void DrawNode(Asset node)
+        {
+            ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.OpenOnDoubleClick |
+                                            ImGuiTreeNodeFlags.SpanAvailWidth;
+            
+            if (node.Children.Count <= 0)
+            {
+                base_flags = ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen; // ImGuiTreeNodeFlags_Bullet
+    
+                if (Selection.Selected == node)
+                    base_flags |= ImGuiTreeNodeFlags.Selected;
+
+                ImGui.TreeNodeEx($"{node.Name}##{node.GetHashCode()}", base_flags);
+                
+                if (ImGui.IsItemClicked())
+                    Selection.SelectObject(node);
+            }
+            else
+            {
+                bool open = (ImGui.TreeNodeEx($"{node.Name}##{node.GetHashCode()}", base_flags));
+                
+                if (open)
+                {
+                    foreach (Asset child in node.Children)
+                        DrawNode(child);
+                }
+            }
         }
 
         private void HandleBeginPopupContext(int assetIndex)
@@ -188,7 +234,7 @@ namespace Unify2D.Toolbox
                         File.Move(oldPath, newPath);
                         
                     _assets[sourceIndex].SetPath(_path + _assets[assetIndex].FullPath);
-
+  
                     Reset();
                 }
             }

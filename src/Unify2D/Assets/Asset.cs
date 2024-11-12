@@ -14,16 +14,16 @@ namespace Unify2D.Assets
         public string Path  => _path; 
         public AssetContent AssetContent  => _content;
         public bool IsDirectory => _isDirectory;
-
-        public string FullPath => _fullPath; 
+        public string FullPath => _fullPath;
+        public List<Asset> Children => new(_children);
 
         private string _name;
         private string _extension;
         private string _path;
         private bool _isDirectory;
+        private List<Asset> _children = new();
         string _fullPath;
         AssetContent _content;
-
 
         public Asset(string name, string extension, string path, bool isDirectory = false)
         {
@@ -47,6 +47,21 @@ namespace Unify2D.Assets
             _isDirectory = isDirectory;
             
             _fullPath = ToolsEditor.CombinePath(path, name);
+        }
+        
+        public void AddChild(Asset child)
+        {
+            if (_isDirectory)
+            {
+                _children.Add(child);
+                Debug.Log($"Add {child.Name} as child of {_name}");
+            }
+        }
+
+        public void RemoveChild(Asset child)
+        {
+            if(_isDirectory)
+                _children.Remove(child);
         }
 
         public void SetPath(string path)
