@@ -140,14 +140,14 @@ namespace Unify2D.Core
             DeltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         }
         
-        public void AddPrefabInstance(PrefabInstance pi)
-        {
-            _prefabInstances.Add(pi);
-            if (pi.LinkedGameObject == null)
-            {
-                pi.InstantiateAndLinkGameObject();
-            }
-        }
+        // public void AddPrefabInstance(PrefabInstance pi)
+        // {
+        //     _prefabInstances.Add(pi);
+        //     if (pi.LinkedGameObject == null)
+        //     {
+        //         pi.InstantiateAndLinkGameObject();
+        //     }
+        // }
     
         // public void LoadScene(Game game, SceneData data)
         // {

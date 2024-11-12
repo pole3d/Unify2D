@@ -16,12 +16,12 @@ namespace Unify2D.Assets
 
         public PrefabAssetContent(Asset asset) : base(asset) { }
 
-        public override void OnDragDroppedInGame(GameEditor editor)
-        {
-            PrefabInstance pi = new PrefabInstance(_asset.FullPath);
-            (GameCore.Current).AddPrefabInstance(pi);
-            Selection.SelectObject(pi.LinkedGameObject);
-        }
+        // public override void OnDragDroppedInGame(GameEditor editor)
+        // {
+        //     PrefabInstance pi = new PrefabInstance(_asset.FullPath);
+        //     (GameCore.Current).AddPrefabInstance(pi);
+        //     Selection.SelectObject(pi.LinkedGameObject);
+        // }
 
         internal void Save(GameObject gameObject)
         {
@@ -31,7 +31,11 @@ namespace Unify2D.Assets
             // Write serialized data to file
             _serializedText = JsonConvert.SerializeObject(gameObject, settings);
             File.WriteAllText($"{_asset.FullPath}", _serializedText);
+            
             Console.WriteLine($"Prefab {gameObject.Name} saved to {Path.GetFullPath(_asset.FullPath)}");
+
+            Debug.Log($"full path : {_asset.FullPath}");
+            Debug.Log($"Prefab {gameObject.Name} saved to {Path.GetFullPath(_asset.FullPath)} ");
         }
     }
 }

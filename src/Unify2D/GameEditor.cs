@@ -39,7 +39,7 @@ namespace Unify2D
 
         public string ProjectPath => _settings.Data.CurrentProjectPath;
 
-        public string AssetsPath => !string.IsNullOrEmpty(ProjectPath)
+        public override string AssetsPath => !string.IsNullOrEmpty(ProjectPath)
             ? ToolsEditor.CombinePath(ProjectPath, AssetsFolder)
             : string.Empty;
 
@@ -292,7 +292,7 @@ namespace Unify2D
             HierarchyToolbox.SetCore(prefabCoreViewer);
 
             GameCore.SetCurrent(prefabCoreViewer.GameCore);
-            GameObject.Instantiate(content.Asset.FullPath);
+            // GameObject.Instantiate(content.Asset.FullPath);
         }
 
         internal void CloseGameCore(GameCoreViewer gameCoreViewer)

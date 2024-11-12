@@ -19,7 +19,7 @@ namespace Unify2D.Core
 
         public GameObject InstantiateAndLinkGameObject()
         {
-            _gameObject = GameObject.Instantiate(_prefabAssetPath);
+            _gameObject = GameObject.InstantiateFromPrefab(_prefabAssetPath);
             _gameObject.LinkToPrefabInstance(this);
             return _gameObject;
         }

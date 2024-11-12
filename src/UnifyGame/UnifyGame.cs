@@ -55,20 +55,21 @@ namespace UnifyGame
         {
             _core.Initialize(GraphicsDevice);
 
-            //_core.GameObjects.Clear();
-            //try
-            //{
-            //    string text = File.ReadAllText("./test.scene");
-            //    JsonSerializerSettings settings = new JsonSerializerSettings();
-            //    settings.TypeNameHandling = TypeNameHandling.Auto;
-
-
-            //    _core.LoadScene(this, JsonConvert.DeserializeObject<List<GameObject>>(text, settings));
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine("Can't load test.scene" + ex.ToString());
-            //}
+            // _core.GameObjects.Clear();
+            // try
+            // {
+            //     string text = File.ReadAllText("./test.scene");
+            //     JsonSerializerSettings settings = new JsonSerializerSettings();
+            //     settings.TypeNameHandling = TypeNameHandling.Auto;
+            //
+            //     SceneData sceneData = JsonConvert.DeserializeObject<SceneData>(text, settings);
+            //     sceneData.PrefabInstancesToGameObjects();
+            //     _core.LoadScene(this, sceneData);
+            // }
+            // catch (Exception ex)
+            // {
+            //     Console.WriteLine("Can't load test.scene => " + ex.ToString());
+            // }
 
             base.LoadContent();
         }

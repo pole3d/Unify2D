@@ -75,26 +75,27 @@ namespace Unify2D.Toolbox
                     _selected[n] = !_selected[n];
                 }
 
-                if (ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
-                {
-                    unsafe
-                    {
-                        // Set payload to carry the index of our item (could be anything)
-                        ImGui.SetDragDropPayload("ASSET", (IntPtr)(&n), sizeof(int));
-                    }
-
-                    Clipboard.Content = _assets[n];
-                    Debug.Log("Dragging " + _assets[n].ToString());
-
-                    ImGui.Text(_assets[n].ToString());
-
-                    ImGui.EndDragDropSource();
-                }
+                // if (ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
+                // {
+                //     unsafe
+                //     {
+                //         // Set payload to carry the index of our item (could be anything)
+                //         ImGui.SetDragDropPayload("ASSET", (IntPtr)(&n), sizeof(int));
+                //     }
+                //
+                //     Clipboard.Content = _assets[n];
+                //     Debug.Log("Dragging " + _assets[n].ToString());
+                //
+                //     ImGui.Text(_assets[n].ToString());
+                //
+                //     ImGui.EndDragDropSource();
+                // }
                 
                 if (ImGui.BeginPopupContextItem())
                 {
-                    Debug.ClearLogs();
-                    Debug.Log($"AssetContent is {_assets[n].AssetContent}");
+                    // Avoid opening popup without selecting the item             
+                    _selected[n] = true;
+
                     if (_assets[n].AssetContent is PrefabAssetContent prefabContent)
                     {
                         if (ImGui.Button("Open Prefab"))
@@ -105,10 +106,15 @@ namespace Unify2D.Toolbox
                         if (ImGui.Button("Instantiate as GameObject"))
                         {
                             // Logic to instantiate the prefab as a GameObject
-                            PrefabInstance prefabInstance = new PrefabInstance(prefabContent.Asset.FullPath);
+                            PrefabInstance prefabInstance = new PrefabInstance($"{prefabContent.Asset.FullPath}");
+                            Debug.Log($"prefabInstancePath : {Path.GetFullPath(_editor.AssetsPath)}{prefabContent.Asset.FullPath}");
+
+                            
                             GameObject instantiatedGameObject = prefabInstance.InstantiateAndLinkGameObject();
+                            // Add GameObject to the scene
                             SceneManager.Instance.CurrentScene.AddRootGameObject(instantiatedGameObject);
 
+                            _selected[n] = false;
                             ImGui.CloseCurrentPopup();
                             Debug.Log("Instantiated Prefab as GameObject");
                         }
