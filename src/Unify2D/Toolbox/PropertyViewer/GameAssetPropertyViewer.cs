@@ -13,8 +13,6 @@ namespace Unify2D.Toolbox
 {
     internal class GameAssetPropertyViewer : PropertyViewer
     {
-
-
         public override void Draw(PropertyInfo property, object instance)
         {
             GameAsset value = property.GetValue(instance) as GameAsset;

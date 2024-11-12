@@ -24,7 +24,7 @@ namespace Unify2D.Toolbox
         List<TextureBound> _texturesBound = new List<TextureBound>();
         List<TextureBound> _texturesToUnbind = new List<TextureBound>();
 
-        Dictionary<Type,PropertyViewer> _propertyViewers = new Dictionary<Type,PropertyViewer>();
+        Dictionary<Type, PropertyViewer> _propertyViewers = new Dictionary<Type, PropertyViewer>();
 
         /// <summary>
         /// WORKAROUND : Add one frame delay to avoid modifying another gameobject when
@@ -67,9 +67,8 @@ namespace Unify2D.Toolbox
             }
 
             _texturesBound.Clear();
-
         }
-        
+
 
         public override void Draw()
         {
@@ -84,7 +83,6 @@ namespace Unify2D.Toolbox
 
             if (_changeCount <= 0)
             {
-
                 if (_gameObject != null)
                 {
                     ShowGameObject();
@@ -107,7 +105,8 @@ namespace Unify2D.Toolbox
                 if (scriptAsset.IsLoaded == false)
                     scriptAsset.Load();
 
-                ImGui.InputTextMultiline("##source", ref scriptAsset.Content, ushort.MaxValue, new System.Numerics.Vector2(340, 550));
+                ImGui.InputTextMultiline("##source", ref scriptAsset.Content, ushort.MaxValue,
+                    new System.Numerics.Vector2(340, 550));
                 if (ImGui.Button("Save"))
                 {
                     scriptAsset.Save();
@@ -122,7 +121,8 @@ namespace Unify2D.Toolbox
 
             ImGui.InputText("name", ref name, 40);
             _gameObject.Name = name;
-            System.Numerics.Vector2 position = new System.Numerics.Vector2(_gameObject.Position.X, _gameObject.Position.Y);
+            System.Numerics.Vector2 position =
+                new System.Numerics.Vector2(_gameObject.Position.X, _gameObject.Position.Y);
             float rotation = MathHelper.ToDegrees(_gameObject.Rotation);
             System.Numerics.Vector2 scale = new System.Numerics.Vector2(_gameObject.Scale.X, _gameObject.Scale.Y);
             ImGui.InputFloat2("position", ref position);
@@ -148,15 +148,24 @@ namespace Unify2D.Toolbox
                     {
                         toRemove.Add(component);
                     }
+
                     ImGui.PopStyleColor(3);
-                    
+
                     ImGui.SameLine();
-                    
-                    if (ImGui.Button("Sprite Editor"))
+
+
+                    if (component.GetType().Name == "SpriteRenderer")
                     {
-                        SpriteEditorToolbox.Open();
-                        Debug.Log("Sprite Editor is open !");
+                        if (ImGui.Button("Sprite Editor"))
+                        {
+                            // SpriteEditorToolbox spriteEditorToolbox = new SpriteEditorToolbox();
+                            // spriteEditorToolbox.Initialize(_editor, _gameObject, _asset.FullPath);
+
+                            SpriteEditorToolbox.Open();
+                            Debug.Log("Sprite Editor is open !");
+                        }
                     }
+
 
                     ImGui.TreePop();
                 }
@@ -199,11 +208,13 @@ namespace Unify2D.Toolbox
                 {
                     _propertyViewers[property.PropertyType].Draw(property, component);
                 }
-                catch { }
+                catch
+                {
+                }
             }
         }
 
-        public void AddTextureBound( TextureBound textureBound)
+        public void AddTextureBound(TextureBound textureBound)
         {
             _texturesBound.Add(textureBound);
         }

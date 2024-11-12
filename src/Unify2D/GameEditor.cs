@@ -56,7 +56,8 @@ namespace Unify2D
         internal GameToolbox GameToolbox { get; private set; }
         internal HierarchyToolbox HierarchyToolbox { get; private set; }
         internal AssetsToolbox AssetsToolBox{ get; private set; }
-
+        internal SpriteEditorToolbox SpriteEditorToolbox { get; private set; }
+        
         #endregion
 
         #region Fields
@@ -127,11 +128,12 @@ namespace Unify2D
             GameToolbox = new GameToolbox();
             HierarchyToolbox = new HierarchyToolbox();
             AssetsToolBox = new AssetsToolbox();
-
+            SpriteEditorToolbox = new SpriteEditorToolbox();
+            
             _toolboxes.Add(AssetsToolBox);
             _toolboxes.Add(HierarchyToolbox);
+            _toolboxes.Add(SpriteEditorToolbox);
             _toolboxes.Add(new ConsoleToolbox());
-            _toolboxes.Add(new SpriteEditorToolbox());
 
             _toolboxes.Add(ScriptToolbox);
             _toolboxes.Add(InspectorToolbox);
