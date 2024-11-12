@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using FNT;
 using Unify2D.Assets;
 using Unify2D.Core;
 
@@ -43,7 +42,7 @@ namespace Unify2D.Toolbox
             _propertyViewers.Add(typeof(string), new StringPropertyViewer());
             _propertyViewers.Add(typeof(Vector2), new Vector2PropertyViewer());
             _propertyViewers.Add(typeof(GameAsset), new GameAssetPropertyViewer());
-            _propertyViewers.Add(typeof(FontLibrary.IFont), new IFontPropertyViewer());
+            _propertyViewers.Add(typeof(SpriteFont), new SpriteFontPropertyViewer());
         }
 
         public void SetObject(object obj)

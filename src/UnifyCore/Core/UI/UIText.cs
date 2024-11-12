@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
-using FNT;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
+using SpriteFontPlus;
 
 namespace Unify2D.Core
 {
@@ -17,7 +17,7 @@ namespace Unify2D.Core
         public string Text { get; set; } = "Lorem Ipsum";
         public int Size { get; set; } = 1;
         public Color VertexColor { get; set; } = Color.White;
-        public FontLibrary.IFont Font { get; set; }
+        public SpriteFont Font { get; private set; }
 
         [JsonProperty]
         private GameAsset _asset;
@@ -28,11 +28,10 @@ namespace Unify2D.Core
 
             Debug.Log("draw");
             
-            FontLibrary.IText text = Font.MakeText("Hello, world!");
-            GameCore.Current.SpriteBatch.DrawString(text, GameObject.Position, VertexColor);
+            GameCore.Current.SpriteBatch.DrawString(Font, Text, GameObject.Position, VertexColor);
         }
         
-        public void Initialize(Game game, GameObject go, string path)
+        public bool Initialize(Game game, GameObject go, string path)
         {
             _gameObject = go;
             try
@@ -43,18 +42,35 @@ namespace Unify2D.Core
                 // path = @"C:\Users\matteo.benaissa\Unify2D\bin\Debug\Unify2D\NEW_PROJECT\Assets\font.ttf";
                 
                 path = $"{game.Content.RootDirectory}/Assets/{path}";
-                FontLibrary font = new FontLibrary(File.OpenRead(path ), GameCore.Current.GraphicsDevice);
                 
-                FontLibrary.IFont fontFace = font.CreateFont(64); //--- CODE STOP HERE ---
+                TtfFontBakerResult fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(@"C:\\Windows\\Fonts\arial.ttf"),
+                    25,
+                    1024,
+                    1024,
+                    new[]
+                    {
+                        CharacterRange.BasicLatin,
+                        CharacterRange.Latin1Supplement,
+                        CharacterRange.LatinExtendedA,
+                        CharacterRange.Cyrillic
+                    }
+                );
                 
-                Font = fontFace;
+                SpriteFont font = fontBakeResult.CreateSpriteFont(GameCore.Current.GraphicsDevice);
+                
+                Font = font;
+                
                 Debug.Log(Font != null);
                 
                 _asset = new GameAsset(Font, path);
+
+                return true;
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
+
+                return false;
             }
         }
         
