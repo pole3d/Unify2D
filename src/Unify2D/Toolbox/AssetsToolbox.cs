@@ -23,7 +23,7 @@ namespace Unify2D.Toolbox
         {
             base.Initialize(editor);
 
-            _extensionsToIgnore = new HashSet<string>{ ".csproj", ".dll" , ".sln" };
+            _extensionsToIgnore = new HashSet<string> { ".csproj", ".dll", ".sln" };
 
             Reset();
         }
@@ -40,9 +40,39 @@ namespace Unify2D.Toolbox
 
         internal override void Reset()
         {
-            _editor.AssetManager.RefreshDatabase();
-            _assets = _editor.AssetManager.Assets;
-            _selected = new bool[_editor.AssetManager.NbOfFiles];
+            _assets.Clear();
+            _path = _editor.AssetsPath;
+
+            if (String.IsNullOrEmpty(_path))
+                return;
+
+            if (Directory.Exists(_path) == false)
+                Directory.CreateDirectory(_path);
+
+            string[] files = Directory.GetFiles(_path);
+
+            foreach (string file in files)
+            {
+                string relativeFile = file.Replace(_path, string.Empty);
+                string extension = Path.GetExtension(relativeFile);
+
+                if (_extensionsToIgnore.Contains(extension))
+                    continue;
+
+                _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeFile),
+                    Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile)));
+            }
+
+            string[] directories = Directory.GetDirectories(_path);
+
+            foreach (string directory in directories)
+            {
+                string relativeDirectory = directory.Replace(_path, string.Empty);
+                _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeDirectory),
+                    Path.GetDirectoryName(relativeDirectory), true));
+            }
+
+            _selected = new bool[files.Length + directories.Length];
         }
 
         public override void Draw()
@@ -51,11 +81,24 @@ namespace Unify2D.Toolbox
 
             if (ImGui.Button("Show Explorer", new System.Numerics.Vector2(-1, 0)))
             {
-                ShowExplorer();
+                ShowExplorer(string.Empty);
             }
-            if (ImGui.Button("Create Script", new System.Numerics.Vector2(-1, 0)))
+
+            if (ImGui.BeginPopupContextWindow())
             {
-                CreateScript();
+                if (ImGui.Button("Create New Script"))
+                {
+                    ImGui.CloseCurrentPopup();
+                    CreateScript();
+                }
+
+                if (ImGui.Button("Create New Folder"))
+                {
+                    ImGui.CloseCurrentPopup();
+                    CreateFolder();
+                }
+
+                ImGui.EndPopup();
             }
 
             for (int n = 0; n < _assets.Count; n++)
@@ -74,69 +117,182 @@ namespace Unify2D.Toolbox
                     Selection.SelectObject(_assets[n]);
                     _selected[n] = !_selected[n];
                 }
-                
-                if (ImGui.BeginPopupContextItem())
+
+                HandBeginDragDropSource(n);
+                HandleBeginDragDropTarget(n);
+                HandleBeginPopupContext(n);
+            }
+
+            ImGui.End();
+        }
+
+        private void HandleBeginPopupContext(int assetIndex)
+        {
+            if (!ImGui.BeginPopupContextItem()) 
+                return;
+            
+            if (_assets[assetIndex].AssetContent is PrefabAssetContent prefabContent)
+            {
+                if (ImGui.Button("Open Prefab"))
                 {
-                    // Avoid opening popup without selecting the item             
-                    _selected[n] = true;
+                    //GameEditor.Instance.OpenPrefab(prefabContent);
+                    ImGui.CloseCurrentPopup();
+                }
 
-                    if (_assets[n].AssetContent is PrefabAssetContent prefabContent)
-                    {
-                        if (ImGui.Button("Open Prefab"))
-                        {
-                            //GameEditor.Instance.OpenPrefab(prefabContent);
-                            ImGui.CloseCurrentPopup();
-                        }
-
-                        if (ImGui.Button("Instantiate as GameObject"))
-                        {
-                            // Logic to instantiate the prefab as a GameObject
-                            PrefabInstance prefabInstance = new PrefabInstance($"{prefabContent.Asset.FullPath}");
-                            GameObject instantiatedGameObject = prefabInstance.InstantiateAndLinkGameObject();
+                if (ImGui.Button("Instantiate as GameObject"))
+                {
+                    // Logic to instantiate the prefab as a GameObject
+                    PrefabInstance prefabInstance = new PrefabInstance($"{prefabContent.Asset.FullPath}");
+                    GameObject instantiatedGameObject = prefabInstance.InstantiateAndLinkGameObject();
                             
-                            // Add GameObject to the scene
-                            SceneManager.Instance.CurrentScene.AddRootGameObject(instantiatedGameObject);
+                    // Add GameObject to the scene
+                    SceneManager.Instance.CurrentScene.AddRootGameObject(instantiatedGameObject);
 
-                            _selected[n] = false;
-                            ImGui.CloseCurrentPopup();
-                        }
-                    }
-                    if (ImGui.Button("Delete"))
-                    {
-                        DeleteSelectedAssets();
-                    }
-                    ImGui.EndPopup();
+                    _selected[assetIndex] = false;
+                    ImGui.CloseCurrentPopup();
                 }
             }
+            if (ImGui.Button("Delete"))
+            {
+                DeleteAsset(_assets[assetIndex]);
+                ImGui.CloseCurrentPopup();
+            }
+
+            if (ImGui.Button("Show in explorer"))
+            {
+                ShowExplorer(string.Empty);
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.EndPopup();
+        }
+
+        private unsafe void HandBeginDragDropSource(int assetIndex)
+        {
+            if (!ImGui.BeginDragDropSource(ImGuiDragDropFlags.None)) 
+                return;
             
-            ImGui.EndChild();
+            // Set payload to carry the index of our item (could be anything)
+            ImGui.SetDragDropPayload("ASSET", (IntPtr)(&assetIndex), sizeof(int));
+
+            Clipboard.Content = _assets[assetIndex];
+
+            ImGui.Text(_assets[assetIndex].ToString());
+            ImGui.EndDragDropSource();
+        }
+
+        private unsafe void HandleBeginDragDropTarget(int assetIndex)
+        {
+            if (!ImGui.BeginDragDropTarget()) 
+                return;
+
+            if (!_assets[assetIndex].IsDirectory) 
+                return;
             
-            ImGui.End();
+            ImGuiDragDropFlags dropTargetFlags = ImGuiDragDropFlags.AcceptBeforeDelivery |
+                                                 ImGuiDragDropFlags.AcceptNoPreviewTooltip;
+            ImGuiPayloadPtr payload = ImGui.AcceptDragDropPayload("ASSET", dropTargetFlags);
+
+            if (payload.NativePtr != (void*)IntPtr.Zero)
+            {
+                if (payload.Delivery)
+                {
+                    int sourceIndex = *(int*)payload.Data;
+                    string oldPath = $"{_path}{_assets[sourceIndex].FullPath}";
+                    string newPath = $"{_path}{_assets[assetIndex].FullPath}{_assets[sourceIndex].FullPath}";
+
+                    if (Path.Exists(newPath))
+                        return; 
+                        
+                    if(_assets[sourceIndex].IsDirectory)
+                        Directory.Move(oldPath, newPath);
+                    else
+                        File.Move(oldPath, newPath);
+                        
+                    _assets[sourceIndex].SetPath(_path + _assets[assetIndex].FullPath);
+
+                    Reset();
+                }
+            }
+
+            ImGui.EndDragDropTarget();
         }
 
         private void CreateScript()
         {
-            string newFile = "newScript.cs";
+            string newFile = "NewScript.cs";
+            string newScriptPath = Path.Combine(_path, newFile);
+            int counter = 1;
 
-            using (StreamWriter sw = File.CreateText(Path.Combine(_path, newFile)))
+            while (File.Exists(newScriptPath))
             {
-                string defaultScript = "using Unify2D.Core;\r\nusing Input = Microsoft.Xna.Framework.Input;\r\n\r\nnamespace Game\r\n{\r\n    class NewScript : Component\r\n    {\r\n        public override void Update(GameCore game)\r\n        {\r\n\r\n        }\r\n    }\r\n}";
+                newFile = $"NewScript{counter}.cs";
+                newScriptPath = Path.Combine(_path, newFile);
+                counter++;
+            }
+            
+            string className = newFile.Replace(".cs", "");
+            using (StreamWriter sw = File.CreateText(newScriptPath))
+            {
+                string defaultScript = $"using Unify2D.Core;\r\nusing Input = Microsoft.Xna.Framework.Input;\r\n\r\nnamespace Game\r\n{{\r\n    class {className} : Component\r\n    {{\r\n        public override void Update(GameCore game)\r\n        {{\r\n\r\n        }}\r\n    }}\r\n}}";
                 sw.WriteLine(defaultScript);
             }
 
             Reset();
         }
 
-        private static void ShowExplorer()
+        private void CreateFolder()
         {
-            string path = GameEditor.Instance.AssetsPath + Path.DirectorySeparatorChar;
+            string folderName = "New Folder";
+            string newFolderPath = Path.Combine(_path, folderName);
+            int counter = 1;
 
-            if (Directory.Exists(path) == false)
-                Directory.CreateDirectory(path);
+            while (Directory.Exists(newFolderPath))
+            {
+                newFolderPath = Path.Combine(_path, $"New Folder ({counter})");
+                counter++;
+            }
 
-            System.Diagnostics.Process.Start("explorer.exe", path);
+            Directory.CreateDirectory(newFolderPath);
+
+            Reset();
         }
-        
+
+        private void DeleteAsset(Asset asset)
+        {
+            string path = $"{_path}{asset.FullPath}";
+            
+            if (Path.Exists(path))
+            {
+                if (asset.IsDirectory)
+                {
+                    string[] files = Directory.GetFiles(path);
+                    
+                    if (files.Length > 0)
+                    {
+                        foreach (string file in files)
+                            File.Delete(file);
+                    }
+                    
+                    Directory.Delete(path);
+                }
+                else
+                    File.Delete(path);
+            }
+
+            Reset();
+        }
+
+        private static void ShowExplorer(string path)
+        {
+            string fullPath = GameEditor.Instance.AssetsPath + Path.DirectorySeparatorChar + path;
+
+            if (Directory.Exists(fullPath) == false)
+                Directory.CreateDirectory(fullPath);
+
+            System.Diagnostics.Process.Start("explorer.exe", fullPath);
+        }
+
         private void DeleteSelectedAssets()
         {
             for (int n = 0; n < _assets.Count; n++)

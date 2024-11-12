@@ -93,10 +93,12 @@ namespace Unify2D.Toolbox
             _smallGridTexture = new Texture2D(_editor.GraphicsDevice, 1, 1);
             _smallGridTexture.SetData(new Color[] { new Color(1, 1, 1, .1f) });
         }
+
         public override void Update(GameTime gameTime)
         {
             Selection.Update(gameTime);
         }
+
         public override void Draw()
         {
             // Render target
@@ -154,13 +156,13 @@ namespace Unify2D.Toolbox
                         go.Name = asset.Name;
                         
                         go.Position = GetMousePosition();
-                        
+
                         Selection.SelectObject(go);
 
                         SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
                         renderer.Initialize(_editor, go, asset.FullPath);
                         
-                        asset?.AssetContent.OnDragDroppedInGame(_editor);
+                        //asset?.AssetContent.OnDragDroppedInGame(_editor);
                     }
                 }
             }
@@ -171,21 +173,21 @@ namespace Unify2D.Toolbox
             UpdateCamera();
 
             #region Drawing
-            // _editor.GameCore.BeginDraw(_gameCamera.Matrix);
-            ((GameCoreViewer)_tag).GameCore.BeginDraw(_gameCamera.Matrix);
+            //((GameCoreViewer)_tag).GameCore.BeginDraw(_gameCamera.Matrix);
+
+            _editor.GameCore.BeginDraw(_gameCamera.Matrix);
 
             //Draw the editor only grid
             DrawGrid();
 
             // Draw all game assets
             SceneManager.Instance.CurrentScene.Draw();
-            
             // Draw all debutg gizmo
-            // _editor.GameCore.DrawGizmo();
-            // _editor.GameCore.EndDraw();
-            ((GameCoreViewer)_tag).GameCore.DrawGizmo();
-            ((GameCoreViewer)_tag).GameCore.EndDraw();
+            // ((GameCoreViewer)_tag).GameCore.DrawGizmo();
+            // ((GameCoreViewer)_tag).GameCore.EndDraw();
+            _editor.GameCore.DrawGizmo();
 
+            _editor.GameCore.EndDraw();
             #endregion
 
             // Write camera data

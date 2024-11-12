@@ -12,7 +12,9 @@ namespace Unify2D.Toolbox
     internal class HierarchyToolbox : Toolbox
     {
         int _countGO = 0;
+        int _currentIndex = 0;
         GameObject _goToDestroy = null;
+        bool _isAnyWidgetHovered = false;
 
         public void SetCore(GameCoreViewer coreViewer)
         {
@@ -23,8 +25,13 @@ namespace Unify2D.Toolbox
         {
             ImGui.Begin("Hierarchy");
 
+            _isAnyWidgetHovered = false;
+
             if (ImGui.Button("Add GameObject", new System.Numerics.Vector2(-1, 0)))
             {
+                if (ImGui.IsItemHovered())
+                    _isAnyWidgetHovered = true;
+
                 if (Selection.Selected != null)
                 {
                     GameObject parent = Selection.Selected as GameObject;
@@ -59,66 +66,15 @@ namespace Unify2D.Toolbox
                 DrawNode(gameObject);
             }
 
+            if (_isAnyWidgetHovered == false && ImGui.IsMouseReleased(ImGuiMouseButton.Left) 
+                && ImGui.IsWindowFocused())
+            {
+                Selection.UnSelectObject();
+            }
             ImGui.BeginChild("gameObjectList");
 
             Selection.TryGameObject(out GameObject selectedGameObject);
 
-            int i = 0;
-
-            // if (_tag is GameCoreViewer { GameCore.GameObjects: not null })
-            // {
-            //     // Debug.ClearLogs();
-            //     // Debug.Log($"-- { (SceneManager.Instance.CurrentScene.GameObjects).Count}");
-            //     foreach (var item in (SceneManager.Instance.CurrentScene.GameObjects))
-            //     {
-            //         bool isPrefabInstance = item.PrefabInstance != null;
-            //
-            //         ImGui.PushID(i++);
-            //         if (isPrefabInstance)
-            //         {
-            //             ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.0f, 1.0f, 1.0f, 1.0f));
-            //             ImGui.PushStyleColor(ImGuiCol.HeaderHovered, new Vector4(0.0f, 1.0f, 1.0f, 0.5f));
-            //             ImGui.PushStyleColor(ImGuiCol.HeaderActive, new Vector4(0.0f, 1.0f, 1.0f, 1.0f));
-            //         }
-            //
-            //         //TODO Second way to Display to the hierarchy -> ImGui.Selectable allow to drag and drop but not to have children
-            //         // if (ImGui.Selectable($"{item.Name}", selectedGameObject == item))
-            //         // {
-            //         //     Selection.SelectObject(item);
-            //         // }
-            //         
-            //         if (isPrefabInstance)
-            //             ImGui.PopStyleColor(3);
-            //
-            //         if (ImGui.BeginPopupContextItem())
-            //         {
-            //             if (ImGui.Button("Destroy"))
-            //             {
-            //                 ImGui.CloseCurrentPopup();
-            //                 _goToDestroy = item;
-            //             }
-            //             ImGui.EndPopup();
-            //         }
-            //
-            //         if (ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
-            //         {
-            //             unsafe
-            //             {
-            //                 // Set payload to carry the index of our item (could be anything)
-            //                 ImGui.SetDragDropPayload("HIERARCHY", (IntPtr)(&i), sizeof(int));
-            //             }
-            //
-            //             Clipboard.Content = item;
-            //             Debug.Log($"HierarchyToolbox Dragging {item.Name}");
-            //
-            //             ImGui.Text(item.Name);
-            //             ImGui.EndDragDropSource();
-            //         }
-            //
-            //         ImGui.PopID();
-            //     }
-            // }
-            ImGui.EndChild();
             ImGui.End();
 
             if (_goToDestroy != null)
@@ -126,8 +82,8 @@ namespace Unify2D.Toolbox
                 SceneManager.Instance.CurrentScene.DestroyImmediate(_goToDestroy);
                 Selection.UnSelectObject();
                 _goToDestroy = null;
-                Debug.Log($"-- Destroy GO, count : { (SceneManager.Instance.CurrentScene.GameObjects).Count}");
             }
+
         }
 
         void DrawNode(GameObject go)
@@ -153,6 +109,9 @@ namespace Unify2D.Toolbox
                 {
                     Selection.SelectObject(go);
                 }
+
+                if (ImGui.IsItemHovered())
+                    _isAnyWidgetHovered = true;
 
                 if (ImGui.BeginPopupContextItem())
                 {
@@ -187,6 +146,9 @@ namespace Unify2D.Toolbox
                 {
                     Selection.SelectObject(go);
                 }
+
+                if (ImGui.IsItemHovered())
+                    _isAnyWidgetHovered = true;
 
                 if (ImGui.BeginPopupContextItem())
                 {
