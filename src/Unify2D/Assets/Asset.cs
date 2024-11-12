@@ -13,21 +13,24 @@ namespace Unify2D.Assets
         public string Extension => _extension;  
         public string Path  => _path; 
         public AssetContent AssetContent  => _content;
+        public bool IsDirectory => _isDirectory;
 
         public string FullPath => _fullPath; 
 
         private string _name;
         private string _extension;
         private string _path;
+        private bool _isDirectory;
         string _fullPath;
         AssetContent _content;
 
 
-        public Asset(string name, string extension, string path)
+        public Asset(string name, string extension, string path, bool isDirectory = false)
         {
             _name = name;
             _extension = extension;
             _path = path;
+            _isDirectory = isDirectory;
 
             if ( _extension == ".cs")
             {
@@ -37,10 +40,11 @@ namespace Unify2D.Assets
             _fullPath = ToolsEditor.CombinePath(path, name + extension);
         }
 
-        public Asset(string name, string path)
+        public Asset(string name, string path, bool isDirectory = false)
         {
             _name = name;
             _path = path;
+            _isDirectory = isDirectory;
             
             _fullPath = ToolsEditor.CombinePath(path, name);
         }

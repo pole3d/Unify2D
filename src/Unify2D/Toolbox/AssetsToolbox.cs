@@ -70,7 +70,7 @@ namespace Unify2D.Toolbox
             {
                 string relativeDirectory = directory.Replace(_path, string.Empty);
                 _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeDirectory),
-                    Path.GetDirectoryName(relativeDirectory)));
+                    Path.GetDirectoryName(relativeDirectory), true));
             }
 
             _selected = new bool[files.Length + directories.Length];
@@ -132,7 +132,7 @@ namespace Unify2D.Toolbox
             
             if (ImGui.Button("Delete"))
             {
-                DeleteAsset($"{_path}{_assets[assetIndex].FullPath}");
+                DeleteAsset(_assets[assetIndex]);
                 ImGui.CloseCurrentPopup();
             }
 
@@ -163,37 +163,37 @@ namespace Unify2D.Toolbox
         {
             if (!ImGui.BeginDragDropTarget()) 
                 return;
+
+            if (!_assets[assetIndex].IsDirectory) 
+                return;
             
-            if (String.IsNullOrEmpty(_assets[assetIndex].Extension))
+            ImGuiDragDropFlags dropTargetFlags = ImGuiDragDropFlags.AcceptBeforeDelivery |
+                                                 ImGuiDragDropFlags.AcceptNoPreviewTooltip;
+            ImGuiPayloadPtr payload = ImGui.AcceptDragDropPayload("ASSET", dropTargetFlags);
+
+            if (payload.NativePtr != (void*)IntPtr.Zero)
             {
-                ImGuiDragDropFlags dropTargetFlags = ImGuiDragDropFlags.AcceptBeforeDelivery |
-                                                     ImGuiDragDropFlags.AcceptNoPreviewTooltip;
-                ImGuiPayloadPtr payload = ImGui.AcceptDragDropPayload("ASSET", dropTargetFlags);
-
-                if (payload.NativePtr != (void*)IntPtr.Zero)
+                if (payload.Delivery)
                 {
-                    if (payload.Delivery)
-                    {
-                        int sourceIndex = *(int*)payload.Data;
-                        string oldPath = $"{_path}{_assets[sourceIndex].FullPath}";
-                        string newPath = $"{_path}{_assets[assetIndex].FullPath}{_assets[sourceIndex].FullPath}";
+                    int sourceIndex = *(int*)payload.Data;
+                    string oldPath = $"{_path}{_assets[sourceIndex].FullPath}";
+                    string newPath = $"{_path}{_assets[assetIndex].FullPath}{_assets[sourceIndex].FullPath}";
 
-                        if (Path.Exists(newPath))
-                            return; 
+                    if (Path.Exists(newPath))
+                        return; 
                         
-                        if(String.IsNullOrEmpty(_assets[sourceIndex].Extension))
-                            Directory.Move(oldPath, newPath);
-                        else
-                            File.Move(oldPath, newPath);
+                    if(_assets[sourceIndex].IsDirectory)
+                        Directory.Move(oldPath, newPath);
+                    else
+                        File.Move(oldPath, newPath);
                         
-                        _assets[sourceIndex].SetPath(_path + _assets[assetIndex].FullPath);
+                    _assets[sourceIndex].SetPath(_path + _assets[assetIndex].FullPath);
 
-                        Reset();
-                    }
+                    Reset();
                 }
-
-                ImGui.EndDragDropTarget();
             }
+
+            ImGui.EndDragDropTarget();
         }
 
         private void CreateScript()
@@ -236,11 +236,13 @@ namespace Unify2D.Toolbox
             Reset();
         }
 
-        private void DeleteAsset(string path)
+        private void DeleteAsset(Asset asset)
         {
+            string path = $"{_path}{asset.FullPath}";
+            
             if (Path.Exists(path))
             {
-                if (string.IsNullOrEmpty(Path.GetExtension(path)))
+                if (asset.IsDirectory)
                 {
                     string[] files = Directory.GetFiles(path);
                     
