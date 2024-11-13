@@ -17,6 +17,7 @@ namespace Unify2D.Core
         public string Text { get; set; } = "Lorem Ipsum";
         public Color VertexColor { get; set; } = Color.White;
         public SpriteFont Font { get; private set; }
+        public float FontSize { get; set; } = 12;
 
         [JsonProperty]
         private GameAsset _asset;
@@ -25,7 +26,19 @@ namespace Unify2D.Core
         {
             if (string.IsNullOrEmpty(Text) || Font == null) return;
 
-            GameCore.Current.SpriteBatch.DrawString(Font, Text,  GameObject.Position, VertexColor, GameObject.Rotation, Origin, GameObject.Scale, SpriteEffects.None, 0);
+            Vector2 stringSize = Font.MeasureString(Text);
+            Vector2 origin = Origin + stringSize * GetAnchorVector(Anchor);
+            
+            GameCore.Current.SpriteBatch.DrawString(
+                Font, 
+                Text,  
+                GameObject.Position, 
+                VertexColor, 
+                GameObject.Rotation, 
+                origin, 
+                Vector2.One * FontSize, 
+                SpriteEffects.None, 
+                0);
         }
         
         public void Initialize(GameObject go, string path)
@@ -33,7 +46,6 @@ namespace Unify2D.Core
             _gameObject = go;
             try
             {
-                // Font = GetSpriteFont(path);
                 _asset = new GameAsset(Font, path);
             }
             catch (Exception e)
@@ -51,5 +63,6 @@ namespace Unify2D.Core
         {
             Initialize(go, _asset.Name);
         }
+        
     }
 }
