@@ -28,41 +28,18 @@ namespace Unify2D.Core
             GameCore.Current.SpriteBatch.DrawString(Font, Text,  GameObject.Position, VertexColor, GameObject.Rotation, Origin, GameObject.Scale, SpriteEffects.None, 0);
         }
         
-        public bool Initialize(Game game, GameObject go, string path)
+        public void Initialize(GameObject go, string path)
         {
             _gameObject = go;
             try
             {
-                Font = GetSpriteFont(path);
+                // Font = GetSpriteFont(path);
                 _asset = new GameAsset(Font, path);
-
-                return true;
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-
-                return false;
             }
-        }
-
-        public static SpriteFont GetSpriteFont(string path)
-        {
-            TtfFontBakerResult fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(path),
-                25,
-                1024,
-                1024,
-                new[]
-                {
-                    CharacterRange.BasicLatin,
-                    CharacterRange.Latin1Supplement,
-                    CharacterRange.LatinExtendedA,
-                    CharacterRange.Cyrillic
-                }
-            );
-                
-            SpriteFont font = fontBakeResult.CreateSpriteFont(GameCore.Current.GraphicsDevice);
-            return font;
         }
         
         internal override void Destroy()
@@ -72,7 +49,7 @@ namespace Unify2D.Core
 
         public override void Load(Game game, GameObject go)
         {
-            Initialize(game, go, _asset.Name);
+            Initialize(go, _asset.Name);
         }
     }
 }
