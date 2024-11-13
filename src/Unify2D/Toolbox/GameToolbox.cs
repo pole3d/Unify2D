@@ -87,10 +87,12 @@ namespace Unify2D.Toolbox
             _smallGridTexture = new Texture2D(_editor.GraphicsDevice, 1, 1);
             _smallGridTexture.SetData(new Color[] { new Color(1, 1, 1, .1f) });
         }
+
         public override void Update(GameTime gameTime)
         {
             Selection.Update(gameTime);
         }
+
         public override void Draw()
         {
             // Render target
@@ -99,10 +101,6 @@ namespace Unify2D.Toolbox
 
             // clear la texture de render de la scéne
             ImGui.Begin("GAME", ImGuiWindowFlags.None);
-
-            // Declare style
-            ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, Num.Vector2.One);
-
 
             if (ImGui.MenuItem($"Resolution {_resolution}"))
             {
@@ -153,7 +151,6 @@ namespace Unify2D.Toolbox
                         
                         go.Position = GetMousePosition();
 
-
                         Selection.SelectObject(go);
 
                         SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
@@ -174,7 +171,7 @@ namespace Unify2D.Toolbox
             DrawGrid();
 
             // Draw all game assets
-            _editor.GameCore.Draw();
+            SceneManager.Instance.CurrentScene.Draw();
             // Draw all debutg gizmo
             _editor.GameCore.DrawGizmo();
 
@@ -187,7 +184,6 @@ namespace Unify2D.Toolbox
             // Close
             ImGui.EndChild();
 
-            ImGui.PopStyleVar();
             ImGui.End();
 
         }

@@ -2,10 +2,10 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Unify2D;
 using Unify2D.Core;
 using Unify2D.Core.Graphics;
 using Num = System.Numerics;
@@ -55,20 +55,7 @@ namespace UnifyGame
         {
             _core.Initialize(GraphicsDevice);
 
-            _core.GameObjects.Clear();
-            try
-            {
-                string text = File.ReadAllText("./test.scene");
-                JsonSerializerSettings settings = new JsonSerializerSettings();
-                settings.TypeNameHandling = TypeNameHandling.Auto;
-
-
-                _core.LoadScene(this, JsonConvert.DeserializeObject<List<GameObject>>(text, settings));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Can't load test.scene" + ex.ToString());
-            }
+            SceneManager.Instance.LoadScene("./test.scene");
 
             base.LoadContent();
         }
@@ -76,6 +63,7 @@ namespace UnifyGame
         protected override void Update(GameTime gameTime)
         {
             _core.Update(gameTime);
+            SceneManager.Instance.CurrentScene.Update(gameTime);
 
         }
 
@@ -95,7 +83,7 @@ namespace UnifyGame
                 GraphicsDevice.Clear(camera.Background);
 
                 _core.BeginDraw(camera.Matrix);
-                _core.Draw();
+                SceneManager.Instance.CurrentScene.Draw();
                 _core.EndDraw();
             }
             else

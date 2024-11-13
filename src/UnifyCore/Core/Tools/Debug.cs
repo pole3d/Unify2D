@@ -92,6 +92,11 @@ namespace Unify2D
         {
             _logs.Clear();
         }
+        
+        public static void Log(bool boolean)
+        {
+            Log(boolean.ToString());
+        }
     }
 }
 

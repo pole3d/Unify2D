@@ -108,7 +108,7 @@ namespace Unify2D.Toolbox
                  System.Numerics.Vector2 size =  ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin();
                 size.Y -= 40;
 
-                ImGui.InputTextMultiline("##source", ref scriptAsset.Content, ushort.MaxValue, size);
+                ImGui.InputTextMultiline("##source", ref scriptAsset.Content, ushort.MaxValue, size, ImGuiInputTextFlags.AllowTabInput);
          
             }
 

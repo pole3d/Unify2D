@@ -13,6 +13,8 @@ namespace Unify2D.Toolbox
 {
     internal class GameAssetPropertyViewer : PropertyViewer
     {
+
+
         public override void Draw(PropertyInfo property, object instance)
         {
             GameAsset value = property.GetValue(instance) as GameAsset;
@@ -57,6 +59,7 @@ namespace Unify2D.Toolbox
                 {
                     ImGui.Image(textureBound.IntPtr, new System.Numerics.Vector2(40, 40));
                 }
+
             }
         }
     }

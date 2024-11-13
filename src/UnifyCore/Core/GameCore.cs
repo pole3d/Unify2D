@@ -28,8 +28,10 @@ namespace Unify2D.Core
 
         public Game Game => _game;
 
+        public GraphicsDevice GraphicsDevice { get; private set; }
         public SpriteBatch SpriteBatch { get; private set; }
         public List<GameObject> GameObjects => _gameObjects;
+        public List<Canvas> CanvasList => _canvasList;
         public PhysicsSettings PhysicsSettings { get; private set; }
         public float DeltaTime { get; private set; }
 
@@ -39,6 +41,8 @@ namespace Unify2D.Core
         List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
         Game _game;
 
+        private List<Canvas> _canvasList = new List<Canvas>();
+        
         public GameCore(Game game)
         {
             _game = game;
@@ -57,11 +61,7 @@ namespace Unify2D.Core
 
             PhysicsSettings.Init();
         }
-
-        public void BeginDraw()
-        {
-            BeginDraw(Matrix.Identity);
-        }
+        
         public void BeginDraw(Matrix matrix)
         {
             SpriteBatch.Begin(SpriteSortMode.Deferred,
@@ -72,6 +72,7 @@ namespace Unify2D.Core
                         null,
                         matrix);
         }
+        
         public void Draw()
         {
             foreach (var item in _gameObjects)
@@ -82,7 +83,7 @@ namespace Unify2D.Core
         public void DrawGizmo()
         {
             Gizmo.SetColor(Color.White);
-            foreach (var item in _gameObjects)
+            foreach (var item in SceneManager.Instance.CurrentScene.GameObjects)
             {
                 item.DrawGizmo();
             }
@@ -111,6 +112,8 @@ namespace Unify2D.Core
 
         public void Initialize(GraphicsDevice graphicsDevice)
         {
+            GraphicsDevice = graphicsDevice;
+            
             SpriteBatch = new SpriteBatch(graphicsDevice);
 
             InitPhysics();
@@ -122,7 +125,7 @@ namespace Unify2D.Core
             {
                 _gameObjects.Add(item);
 
-                item.Load(game);
+                item.Init(game);
             }
         }
 
@@ -143,6 +146,24 @@ namespace Unify2D.Core
             PhysicsSettings.World.Step(DeltaTime);
 
             _gameObjectsToDestroy.Clear();
+        }
+
+        public bool HasCanvas(out Canvas canvas)
+        {
+            if (_canvasList == null)
+            {
+                _canvasList = new List<Canvas>();
+            }
+            
+            canvas = null;
+            if (_canvasList.Count <= 0) return false;
+
+            _canvasList.RemoveAll(x => x == null);
+            _canvasList.RemoveAll(x => _gameObjects.Contains(x.GameObject) == false);
+            
+            canvas = _canvasList[0];
+            
+            return true;
         }
     }
 }

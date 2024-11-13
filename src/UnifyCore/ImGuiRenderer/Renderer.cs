@@ -133,6 +133,9 @@ namespace Unify2D.ImGuiRenderer
             ImGui.Render();
 
             unsafe { RenderDrawData(ImGui.GetDrawData()); }
+            
+            ImGui.UpdatePlatformWindows();
+            ImGui.RenderPlatformWindowsDefault();
         }
 
         #endregion ImGuiRenderer

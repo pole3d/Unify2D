@@ -1,7 +1,10 @@
 ﻿using ImGuiNET;
+using NativeFileDialogs.Net;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime;
 using System.Text;
@@ -41,11 +44,14 @@ namespace Unify2D
                         _editor.Build();
                     if (ImGui.MenuItem("Save"))
                     {
-                        _editor.SceneEditorManager.Save("test");
+                        // _editor.SceneEditorManager.SaveCurrentScene();
+                        SaveCurrentScene();
                     }
                     if (ImGui.MenuItem("Load"))
                     {
-                        _editor.SceneEditorManager.LoadScene("test");
+                        //_editor.SceneEditorManager.LoadScene();
+                        LoadScene();
+                        Selection.UnSelectObject();
                     }
                     if (ImGui.MenuItem("Quit"))
                     {
@@ -53,6 +59,7 @@ namespace Unify2D
                     }
                     ImGui.EndMenu();
                 }
+
                 if (ImGui.MenuItem("Play"))
                 {
                     _editor.Build();
@@ -62,6 +69,38 @@ namespace Unify2D
 
                 ImGui.ShowDemoWindow();
 
+            }
+        }
+
+        private void LoadScene()
+        {
+            string path = string.Empty;
+
+            NfdStatus result = Nfd.OpenDialog(out path, new Dictionary<string, string>() { { "New Scene", "Scene" } }, Path.GetFullPath("./Assets"));
+
+            if (result == NfdStatus.Ok)
+            {
+                SceneManager.Instance.LoadScene(path);
+            }
+        }
+
+        private void SaveCurrentScene()
+        {
+            Scene scene = SceneManager.Instance.CurrentScene;
+
+            if (scene.Name == null)
+            {
+                string path = string.Empty;
+                NfdStatus result = Nfd.SaveDialog(out path, new Dictionary<string, string>() { { "New Scene", "scene" } }, "New Scene", Path.GetFullPath("./Assets").ToString());
+                if (result == NfdStatus.Ok)
+                {
+                    scene.SaveSceneNameAndPath(path, Path.GetFileName(path));
+                }
+            }
+
+            if (scene.Name != null)
+            {
+                SceneManager.Instance.Save(scene);
             }
         }
 

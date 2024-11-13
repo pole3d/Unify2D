@@ -49,7 +49,7 @@ namespace Unify2D
 
         public GameObject Selected => _selected;
 
-        public SceneEditorManager SceneEditorManager => _sceneEditorManager;
+        public SceneManager SceneEditorManager => _sceneEditorManager;
 
         internal InspectorToolbox InspectorToolbox { get; private set; }
         internal ScriptToolbox ScriptToolbox { get; private set; }
@@ -67,7 +67,7 @@ namespace Unify2D
         ImGuiRenderer.Renderer _imGuiRenderer;
         Scripting.Scripting _scripting;
         GameEditorSettings _settings;
-        SceneEditorManager _sceneEditorManager;
+        SceneManager _sceneEditorManager;
 
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
 
@@ -89,7 +89,7 @@ namespace Unify2D
             IsMouseVisible = true;
 
             _gameEditorUI = new GameEditorUI(this);
-            _sceneEditorManager = new SceneEditorManager(this);
+            _sceneEditorManager = SceneManager.Instance;
         }
 
         protected override void Initialize()
@@ -108,6 +108,7 @@ namespace Unify2D
             _imGuiRenderer = new ImGuiRenderer.Renderer(this);
             _imGuiRenderer.RebuildFontAtlas();
             ImGui.GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
+            ImGui.GetIO().ConfigFlags |= ImGuiConfigFlags.DockingEnable | ImGuiConfigFlags.ViewportsEnable;
 
             Window.AllowUserResizing = true;
             _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
@@ -195,6 +196,8 @@ namespace Unify2D
         {
             // Call BeforeLayout first to set things up
             _imGuiRenderer.BeforeLayout(gameTime);
+
+            ImGui.DockSpaceOverViewport();
 
             _gameEditorUI.DrawMainMenuBarUI();
 
