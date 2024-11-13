@@ -122,7 +122,7 @@ namespace Unify2D.Toolbox
                         ((PrefabAssetContent)prefabAsset.AssetContent).Save(go);
                         
                         ImGui.CloseCurrentPopup();
-                        Debug.Log($"Create Prefab : {prefabAsset}");
+                        Debug.Log($"Create Prefab: {prefabAsset}");
                     }
                     
                     if (ImGui.Button("Destroy"))

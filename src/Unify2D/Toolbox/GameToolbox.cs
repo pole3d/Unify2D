@@ -173,9 +173,9 @@ namespace Unify2D.Toolbox
             UpdateCamera();
 
             #region Drawing
-            //((GameCoreViewer)_tag).GameCore.BeginDraw(_gameCamera.Matrix);
 
-            _editor.GameCore.BeginDraw(_gameCamera.Matrix);
+            ((GameCoreViewer)_tag).GameCore.BeginDraw(_gameCamera.Matrix);
+            // _editor.GameCore.BeginDraw(_gameCamera.Matrix);
 
             //Draw the editor only grid
             DrawGrid();
@@ -183,11 +183,10 @@ namespace Unify2D.Toolbox
             // Draw all game assets
             SceneManager.Instance.CurrentScene.Draw();
             // Draw all debutg gizmo
-            // ((GameCoreViewer)_tag).GameCore.DrawGizmo();
-            // ((GameCoreViewer)_tag).GameCore.EndDraw();
-            _editor.GameCore.DrawGizmo();
-
-            _editor.GameCore.EndDraw();
+            ((GameCoreViewer)_tag).GameCore.DrawGizmo();
+            ((GameCoreViewer)_tag).GameCore.EndDraw();
+            // _editor.GameCore.DrawGizmo();
+            // _editor.GameCore.EndDraw();
             #endregion
 
             // Write camera data

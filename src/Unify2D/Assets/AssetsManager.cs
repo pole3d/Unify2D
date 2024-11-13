@@ -53,9 +53,9 @@ namespace Unify2D.Assets
             {
                 string relativeFile = file.Replace(path, string.Empty);
 
-                _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeFile),
-                    Path.GetExtension(relativeFile),
-                    Path.GetDirectoryName(relativeFile)));
+                // _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeFile),
+                //     Path.GetExtension(relativeFile),
+                //     Path.GetDirectoryName(relativeFile)));
             }
         }
         

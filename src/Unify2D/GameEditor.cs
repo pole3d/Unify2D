@@ -58,23 +58,20 @@ namespace Unify2D
         internal AssetsToolbox AssetsToolBox { get; private set; }
         internal AssetManager AssetManager { get; private set; }
 
+        public GameCoreViewer GameCoreViewerScene => _coreViewerScene;
+        public List<GameCoreViewer> GameCoreViewers => _coreViewers;
 
         #endregion
 
         #region Fields
 
-        GameCore _core;
         GraphicsDeviceManager _graphics;
         GameEditorUI _gameEditorUI;
         ImGuiRenderer.Renderer _imGuiRenderer;
         Scripting.Scripting _scripting;
         GameEditorSettings _settings;
         SceneManager _sceneEditorManager;
-        
-        public GameCore GameCore => _core;
-        public GameCoreViewer GameCoreViewerScene => _coreViewerScene;
         GameCoreViewer _coreViewerScene;
-        public List<GameCoreViewer> GameCoreViewers => _coreViewers;
         List<GameCoreViewer> _coreViewers = new List<GameCoreViewer>();
 
 
@@ -101,53 +98,23 @@ namespace Unify2D
             _gameEditorUI = new GameEditorUI(this);
             _sceneEditorManager = SceneManager.Instance;
         }
-
-        // protected override void Initialize()
-        // {
-        //     _settings = new GameEditorSettings();
-        //     _settings.Load(this);
-        //
-        //     Content.RootDirectory = ProjectPath;
-        //
-        //     _scripting = new Scripting.Scripting();
-        //     _scripting.Load(this);
-        //     
-        //     AssetManager = new AssetManager(this);
-        //     
-        //     //Create game core and load scene content
-        //     _coreViewerScene = new GameCoreViewer(
-        //         new GameCoreEditor(this), "./test.scene");
-        //     
-        //     Debug.Log($"_coreViewerScene: {_coreViewerScene.GameCore}");
-        //     _coreViewers.Add(_coreViewerScene);
-        //     GameCore.SetCurrent(_coreViewerScene.GameCore);
-        //     
-        //     
-        //
-        //     _imGuiRenderer = new ImGuiRenderer.Renderer(this);
-        //     _imGuiRenderer.RebuildFontAtlas();
-        //     ImGui.GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
-        //     ImGui.GetIO().ConfigFlags |= ImGuiConfigFlags.DockingEnable | ImGuiConfigFlags.ViewportsEnable;
-        //
-        //     Window.AllowUserResizing = true;
-        //     _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
-        //     _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 60;
-        //     _graphics.ApplyChanges();
-        //
-        //     InitializeToolBoxes();
-        //
-        //     ShowPopup(new LauncherPopup());
-        //
-        //     base.Initialize();
-        // }
         
         protected override void Initialize()
         {
-            _core = new GameCore(this);
-            GameCore.SetCurrent(_core);
-
+            // _core = new GameCore(this);
+            // GameCore.SetCurrent(_core);
             _settings = new GameEditorSettings();
             _settings.Load(this);
+
+            AssetManager = new AssetManager(this);
+            
+            //Create game core and load scene content
+            _coreViewerScene = new GameCoreViewer(
+                new GameCoreEditor(this), "./test.scene");
+            _coreViewers.Add(_coreViewerScene);
+            GameCore.SetCurrent(_coreViewerScene.GameCore);
+            
+
 
             Content.RootDirectory = ProjectPath;
 
@@ -176,7 +143,9 @@ namespace Unify2D
             ScriptToolbox = new ScriptToolbox();
             InspectorToolbox = new InspectorToolbox();
             GameToolbox = new GameToolbox();
+            GameToolbox.SetCore(_coreViewerScene);
             HierarchyToolbox = new HierarchyToolbox();
+            HierarchyToolbox.SetCore(_coreViewerScene);
             AssetsToolBox = new AssetsToolbox();
 
             _toolboxes.Add(AssetsToolBox);

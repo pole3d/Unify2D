@@ -7,10 +7,15 @@ using Unify2D.Core;
 
 namespace Unify2D.Assets
 {
-    internal class PrefabAssetContent() : AssetContent(null)
+    internal class PrefabAssetContent : AssetContent
     {
         private string _serializedText;
 
+        public PrefabAssetContent() : base(null) { }
+
+        public PrefabAssetContent(Asset asset) : base(asset)
+        {
+        }
         internal void Save(GameObject gameObject)
         {
             // Make so type name should be written in serialized data
