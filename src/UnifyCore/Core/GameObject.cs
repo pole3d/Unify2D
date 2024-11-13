@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 using Unify2D.Core.Graphics;
 
 namespace Unify2D.Core
@@ -89,10 +90,18 @@ namespace Unify2D.Core
 
             child.Parent = parent;
             parent.Children.Add(child);
-            
-            // SceneManager.Instance.CurrentScene.AddRootGameObject(child);
             return child;
         }
+
+        public static void SetChild(GameObject parent, GameObject child)
+        {
+            if (parent.Children == null)
+                parent.Children = new List<GameObject>();
+            
+            child.Parent = parent;
+            parent.Children.Add(child);
+        }
+
         public void Init(Game game)
         {
             if (Children != null)
@@ -145,6 +154,12 @@ namespace Unify2D.Core
             {
                 item.Draw();
             }
+
+            foreach (Component component in _components)
+            {
+                if (component is not UIComponent ui) continue;
+                ui.Draw();
+            }
         }
         internal void DrawGizmo()
         {
@@ -169,6 +184,38 @@ namespace Unify2D.Core
                 _renderers.Add(renderer);
             }
 
+            //ui
+            if (component is Canvas canvas)
+            {
+                GameCore.Current.CanvasList.Add(canvas);
+            }
+            else if (component is UIComponent)
+            {
+                if (HasCanvasInParents(out Canvas _) == false)
+                {
+                    if (Parent != null)
+                    {
+                        Parent.Children.Remove(this);
+                        Parent = null;
+                    }
+                    
+                    if (GameCore.Current.HasCanvas(out Canvas gameCoreCanvas) == false)
+                    {
+                        GameObject canvasGameObject = Create();
+                        canvasGameObject.Name = "Canvas";
+                        canvasGameObject.AddComponent<Canvas>();
+                        
+                        SetChild(canvasGameObject, this);
+                        
+                        GameCore.Current.CanvasList.Add(canvasGameObject.GetComponent<Canvas>());
+                    }
+                    else
+                    {
+                        SetChild(gameCoreCanvas.GameObject, this);
+                    }
+                }
+            }
+
             component.Initialize(this);
 
             _components.Add(component);
@@ -180,8 +227,7 @@ namespace Unify2D.Core
             {
                 item.Update(core);
             }
-
-
+            
             ///To be refactored as FixedUpdate later
             foreach (var item in _components)
             {
@@ -194,10 +240,7 @@ namespace Unify2D.Core
 
         public void RemoveComponent(Component item)
         {
-            if ( item is Renderer renderer)
-            {
-                _renderers.Remove(renderer);
-            }
+            DestroyComponent(item);
 
             item.Destroy();
             _components.Remove(item);
@@ -207,15 +250,26 @@ namespace Unify2D.Core
         {
             foreach (var item in _components)
             {
-                if (item is Renderer renderer)
-                {
-                    _renderers.Remove(renderer);
-                }
-
-                item.Destroy();
+                DestroyComponent(item);
             }
 
             _components.Clear();
+        }
+        
+        private void DestroyComponent(Component component)
+        {
+            if (component is Renderer renderer)
+            {
+                _renderers.Remove(renderer);
+            }
+            
+            if (component is Canvas canvas)
+            {
+                Debug.Log("remove from canvas list");
+                GameCore.Current.CanvasList.Remove(canvas);
+            }
+
+            component.Destroy();
         }
 
         Vector2 GetParentPosition()
@@ -230,6 +284,27 @@ namespace Unify2D.Core
             }
 
             return position;
+        }
+
+        public bool HasCanvasInParents(out Canvas canvas)
+        {
+            canvas = null;
+
+            GameObject currentParent = Parent;
+            while (currentParent != null)
+            {
+                foreach (var component in currentParent._components)
+                {
+                    if (component is Canvas parentCanvas)
+                    {
+                        canvas = parentCanvas;
+                        return true;
+                    }
+                }
+                currentParent = currentParent.Parent;
+            }
+
+            return false;
         }
         
         /// <summary>
