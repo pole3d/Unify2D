@@ -56,7 +56,7 @@ namespace Unify2D.Core
         
         internal override void Destroy()
         {
-            _asset.Release();
+            _asset?.Release();
         }
     }
 }

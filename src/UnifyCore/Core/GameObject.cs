@@ -181,6 +181,14 @@ namespace Unify2D.Core
             }
             else if (component is UIComponent)
             {
+                bool hasCanvas = GameCore.Current.HasCanvas(out Canvas gameCoreCanvas);
+                if (hasCanvas && gameCoreCanvas.GameObject == this)
+                {
+                    Debug.Log("You can't add an UI element to a canvas");
+                    component.Destroy();
+                    return;
+                }
+                
                 if (HasCanvasInParents(out Canvas _) == false)
                 {
                     if (Parent != null)
@@ -189,7 +197,7 @@ namespace Unify2D.Core
                         Parent = null;
                     }
                     
-                    if (GameCore.Current.HasCanvas(out Canvas gameCoreCanvas) == false)
+                    if (hasCanvas == false)
                     {
                         GameObject canvasGameObject = Create();
                         canvasGameObject.Name = "Canvas";

@@ -159,7 +159,8 @@ namespace Unify2D.Core
             if (_canvasList.Count <= 0) return false;
 
             _canvasList.RemoveAll(x => x == null);
-            _canvasList.RemoveAll(x => _gameObjects.Contains(x.GameObject) == false);
+            
+            if (_canvasList.Count <= 0) return false;
             
             canvas = _canvasList[0];
             
