@@ -160,11 +160,6 @@ namespace Unify2D.Toolbox
                     {
                         if (ImGui.Button("Sprite Editor"))
                         {
-                            //SpriteEditorToolbox spriteEditorToolbox = new SpriteEditorToolbox();
-                            //spriteEditorToolbox.Initialize(_editor, _gameObject, _asset.FullPath);
-
-                            // SpriteEditorToolbox.Open(component);
-
                             PropertyInfo[] properties = component.GetType().GetProperties();
 
                             foreach (PropertyInfo property in properties)
