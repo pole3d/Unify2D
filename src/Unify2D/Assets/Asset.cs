@@ -16,6 +16,7 @@ namespace Unify2D.Assets
         public bool IsDirectory => _isDirectory;
         public string FullPath => _fullPath;
         public List<Asset> Children => new(_children);
+        public Asset Parent => _parent;
 
         private string _name;
         private string _extension;
@@ -24,6 +25,7 @@ namespace Unify2D.Assets
         private List<Asset> _children = new();
         string _fullPath;
         AssetContent _content;
+        private Asset _parent;
 
         public Asset(string name, string extension, string path, bool isDirectory = false)
         {
@@ -54,14 +56,18 @@ namespace Unify2D.Assets
             if (_isDirectory)
             {
                 _children.Add(child);
+                child._parent = this;
                 Debug.Log($"Add {child.Name} as child of {_name}");
             }
         }
 
         public void RemoveChild(Asset child)
         {
-            if(_isDirectory)
+            if (_isDirectory)
+            {
                 _children.Remove(child);
+                child._parent = null;
+            }
         }
 
         public void SetPath(string path)
