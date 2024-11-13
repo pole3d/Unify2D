@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using ImGuiNET;
 using System.Reflection;
 using Microsoft.Xna.Framework.Graphics;
 using SpriteFontPlus;
-using Unify2D.Assets;
 using Unify2D.Core;
 
 namespace Unify2D.Toolbox
@@ -32,28 +30,13 @@ namespace Unify2D.Toolbox
             return font;
         }
 
-        protected override string GetAssetExtension()
-        {
-            return ".ttf";
-        }
+        protected override string GetPropertyName() => "Font";
+        protected override string GetAssetExtension() => ".ttf";
+        public override (string name, string path) GetBaseAsset() => ("Arial", ArialFontPath);
 
-        public override void InitializeProperty(ref SpriteFont asset, PropertyInfo property, object instance)
+        public override SpriteFont GetInitializeAsset()
         {
-            asset = GetAssetFromPath(ArialFontPath);
-            property.SetValue(instance, asset);
-        }
-
-        protected override (List<string> names, List<string> paths) GetAssetLists()
-        {
-            (List<string> names, List<string> paths) assetLists = base.GetAssetLists();
-
-            List<string> spriteFontNames = ["Arial"];
-            spriteFontNames.AddRange(assetLists.names);
-            
-            List<string> spriteFontPaths = [ArialFontPath];
-            spriteFontPaths.AddRange(assetLists.paths);
-            
-            return (spriteFontNames, spriteFontPaths);
+            return GetAssetFromPath(ArialFontPath);
         }
     }
 }

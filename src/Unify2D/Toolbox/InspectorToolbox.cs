@@ -42,8 +42,10 @@ namespace Unify2D.Toolbox
             _propertyViewers.Add(typeof(string), new StringPropertyViewer());
             _propertyViewers.Add(typeof(Vector2), new Vector2PropertyViewer());
             _propertyViewers.Add(typeof(GameAsset), new GameAssetPropertyViewer());
-            _propertyViewers.Add(typeof(SpriteFont), new SpriteFontPropertyViewer());
             _propertyViewers.Add(typeof(Enum), new EnumPropertyViewer());
+            
+            _propertyViewers.Add(typeof(SpriteFont), new SpriteFontPropertyViewer());
+            _propertyViewers.Add(typeof(Texture2D), new Texture2DPropertyViewer());
         }
 
         public void SetObject(object obj)
@@ -195,12 +197,17 @@ namespace Unify2D.Toolbox
                     {
                         viewer.Draw(property, component);
                     }
-                    else if (property.PropertyType.BaseType != null && _propertyViewers.TryGetValue(property.PropertyType.BaseType, out PropertyViewer baseClassViewer))
+                    else if (property.PropertyType.BaseType != null &&
+                             _propertyViewers.TryGetValue(property.PropertyType.BaseType,
+                                 out PropertyViewer baseClassViewer))
                     {
                         baseClassViewer.Draw(property, component);
                     }
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    Debug.Log(e.ToString());
+                }
             }
         }
 

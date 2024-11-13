@@ -22,6 +22,19 @@ namespace Unify2D.Core
         [JsonProperty]
         private GameAsset _asset;
 
+        public override void Load(Game game, GameObject go)
+        {
+            _gameObject = go;
+            try
+            {
+                _asset = new GameAsset(Font, _asset.Name);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+        }
+        
         public override void Draw()
         {
             if (string.IsNullOrEmpty(Text) || Font == null) return;
@@ -41,28 +54,9 @@ namespace Unify2D.Core
                 0);
         }
         
-        public void Initialize(GameObject go, string path)
-        {
-            _gameObject = go;
-            try
-            {
-                _asset = new GameAsset(Font, path);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-        }
-        
         internal override void Destroy()
         {
             _asset.Release();
         }
-
-        public override void Load(Game game, GameObject go)
-        {
-            Initialize(go, _asset.Name);
-        }
-        
     }
 }
