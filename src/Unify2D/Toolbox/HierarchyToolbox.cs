@@ -93,7 +93,6 @@ namespace Unify2D.Toolbox
             ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.OpenOnDoubleClick |
                                             ImGuiTreeNodeFlags.SpanAvailWidth;
 
-
             if (go.Children == null || go.Children.Count == 0)
             {
                 base_flags = ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.Leaf |
@@ -113,26 +112,7 @@ namespace Unify2D.Toolbox
                 if (ImGui.IsItemHovered())
                     _isAnyWidgetHovered = true;
 
-                if (ImGui.BeginPopupContextItem())
-                {
-                    if (ImGui.Button("Create Prefab"))
-                    {
-                        // Logique pour créer un prefab
-                        Asset prefabAsset = GameEditor.Instance.AssetManager.CreateAsset<PrefabAssetContent>(go.Name);
-                        ((PrefabAssetContent)prefabAsset.AssetContent).Save(go);
-                        
-                        ImGui.CloseCurrentPopup();
-                        Debug.Log($"Create Prefab: {prefabAsset}");
-                    }
-                    
-                    if (ImGui.Button("Destroy"))
-                    {
-                        ImGui.CloseCurrentPopup();
-                        _goToDestroy = go;
-                    }
-
-                    ImGui.EndPopup();
-                }
+                ShowContextMenu(go);
             }
             else
             {
@@ -150,16 +130,7 @@ namespace Unify2D.Toolbox
                 if (ImGui.IsItemHovered())
                     _isAnyWidgetHovered = true;
 
-                if (ImGui.BeginPopupContextItem())
-                {
-                    if (ImGui.Button("Destroy"))
-                    {
-                        ImGui.CloseCurrentPopup();
-                        _goToDestroy = go;
-                    }
-
-                    ImGui.EndPopup();
-                }
+                ShowContextMenu(go);
 
                 if (open)
                 {
@@ -176,6 +147,29 @@ namespace Unify2D.Toolbox
             }
 
             ImGui.PopID();
+        }
+        
+        void ShowContextMenu(GameObject go)
+        {
+            if (ImGui.BeginPopupContextItem())
+            {
+                if (ImGui.Button("Create Prefab"))
+                {
+                    // Prefab creation Logic
+                    Asset prefabAsset = GameEditor.Instance.AssetManager.CreateAsset<PrefabAssetContent>(go.Name);
+                    ((PrefabAssetContent)prefabAsset.AssetContent).Save(go);
+
+                    ImGui.CloseCurrentPopup();
+                }
+
+                if (ImGui.Button("Destroy"))
+                {
+                    ImGui.CloseCurrentPopup();
+                    _goToDestroy = go;
+                }
+
+                ImGui.EndPopup();
+            }
         }
     }
 }

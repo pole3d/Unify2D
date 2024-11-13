@@ -101,21 +101,18 @@ namespace Unify2D
         
         protected override void Initialize()
         {
-            // _core = new GameCore(this);
-            // GameCore.SetCurrent(_core);
             _settings = new GameEditorSettings();
             _settings.Load(this);
 
             AssetManager = new AssetManager(this);
             
-            //Create game core and load scene content
-            _coreViewerScene = new GameCoreViewer(
-                new GameCoreEditor(this), "./test.scene");
+            // Create game core and load scene content / Not useful for now
+            _coreViewerScene = new GameCoreViewer(new GameCoreEditor(this), ".scene");
             _coreViewers.Add(_coreViewerScene);
+            
+            // Set the current game core
             GameCore.SetCurrent(_coreViewerScene.GameCore);
             
-
-
             Content.RootDirectory = ProjectPath;
 
             _scripting = new Scripting.Scripting();
