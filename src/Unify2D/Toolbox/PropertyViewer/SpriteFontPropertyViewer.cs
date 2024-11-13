@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using ImGuiNET;
 using System.Reflection;
-using Microsoft.Xna.Framework.Graphics;
 using Unify2D.Assets;
 using Unify2D.Core;
 
@@ -18,18 +17,18 @@ namespace Unify2D.Toolbox
             
             if (text.Font == null)
             {
-                DrawFoldout(text, true);
+                DrawFoldoutFont(text, true);
                 return;
             }
             
-            DrawFoldout(text);
+            DrawFoldoutFont(text);
         }
 
         internal int _currentFoldoutItem = 0;
-        private void DrawFoldout(UIText text, bool forceInitialize = false)
+        private void DrawFoldoutFont(UIText text, bool forceInitialize = false)
         {
-            List<string> fontsNames = new List<string>() {"Arial"};
-            List<string> fontsPaths = new List<string>() {@"C:\\Windows\\Fonts\arial.ttf"};
+            List<string> fontsNames = ["Arial"];
+            List<string> fontsPaths = [@"C:\\Windows\\Fonts\arial.ttf"];
             
             //get all the fonts in the assets
             List<Asset> assets = GameEditor.Instance.AssetsToolBox.Assets;
@@ -50,13 +49,13 @@ namespace Unify2D.Toolbox
             //if the text font is null, initialize it
             if (forceInitialize)
             {
-                text.Initialize(GameCore.Current.Game, text.GameObject, fontsPaths[0]);
+                text.Initialize(text.GameObject, fontsPaths[0]);
             }
             
-            bool combo = ImGui.Combo("foldout", ref _currentFoldoutItem,  fontsNames.ToArray(), fontsNames.Count);
+            bool combo = ImGui.Combo("font", ref _currentFoldoutItem,  fontsNames.ToArray(), fontsNames.Count);
             if (combo)
             {
-                text.Initialize(GameCore.Current.Game, text.GameObject, fontsPaths[_currentFoldoutItem]);
+                text.Initialize(text.GameObject, fontsPaths[_currentFoldoutItem]);
             }
         }
     }

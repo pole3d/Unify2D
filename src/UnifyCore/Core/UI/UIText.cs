@@ -28,21 +28,17 @@ namespace Unify2D.Core
             GameCore.Current.SpriteBatch.DrawString(Font, Text,  GameObject.Position, VertexColor, GameObject.Rotation, Origin, GameObject.Scale, SpriteEffects.None, 0);
         }
         
-        public bool Initialize(Game game, GameObject go, string path)
+        public void Initialize(GameObject go, string path)
         {
             _gameObject = go;
             try
             {
                 Font = GetSpriteFont(path);
                 _asset = new GameAsset(Font, path);
-
-                return true;
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-
-                return false;
             }
         }
 
@@ -72,7 +68,7 @@ namespace Unify2D.Core
 
         public override void Load(Game game, GameObject go)
         {
-            Initialize(game, go, _asset.Name);
+            Initialize(go, _asset.Name);
         }
     }
 }
