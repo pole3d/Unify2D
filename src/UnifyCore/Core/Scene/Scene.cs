@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,6 +20,25 @@ namespace Unify2D
         public int BuildIndex { get; private set; }
 
         public List<GameObject> GameObjects { get; private set; } = new List<GameObject>();
+
+        public IEnumerable<GameObject> GameObjectsWithChildren
+        {
+            get
+            {
+                foreach (var gameObject in GameObjects)
+                {
+                    yield return gameObject;
+
+                    if (gameObject.Children != null)
+                    {
+                        foreach (var child in gameObject.Children)
+                        {
+                            yield return child;
+                        }
+                    }
+                }
+            }
+        }
 
         private List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
 

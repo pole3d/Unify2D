@@ -19,8 +19,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Cyotek.Drawing.BitmapFont" Version="2.0.4" />
 		<PackageReference Include="ImGui.NET.Branches.Docking" Version="1.88.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+		<PackageReference Include="StbImageSharp" Version="2.30.15" />
+		<PackageReference Include="StbTrueTypeSharp" Version="1.26.12" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="SharpFont">
+	    <HintPath>..\..\..\Downloads\FNT-master (1)\FNT-master\lib\SharpFont.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 </Project>
 
