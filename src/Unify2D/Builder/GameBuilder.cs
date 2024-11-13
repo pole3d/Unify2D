@@ -59,15 +59,45 @@ namespace Unify2D.Builder
             }
 
 
-            //SceneManager.Instance.SaveCurrentScene();
-            #region old
-            Save();
-            #endregion
+            SceneManager.Instance.SaveCurrentScene();
+
+
+            //SaveAllScene();
 
             CreateDll();
         }
 
+        private void SaveAllScene()
+        {
+            //if (Directory.Exists(_editor.AssetsPath))
+            //{
+            //    JsonSerializerSettings settings = new JsonSerializerSettings();
+            //    foreach (string item in Directory.GetFiles(_editor.AssetsPath, "*.scene", SearchOption.AllDirectories))
+            //    {
+            //        GameSettings.Instance.AddSceneToList(item);
 
+            //        settings.TypeNameHandling = TypeNameHandling.Auto;
+            //        string text = JsonConvert.SerializeObject(SceneManager.Instance.CurrentScene.GameObjects, settings);
+
+            //        //var test = _editor.Settings.Data.CurrentProjectPath;
+            //        string[] path = item.Split('\\');
+            //        StringBuilder pathBuild = new StringBuilder();
+
+            //        for (int i = 1; i < path.Length; i++)
+            //        {
+            //            if (i < path.Length - 1)
+            //                pathBuild.Append(path[i] + "\\");
+            //            else
+            //                pathBuild.Append(path[i]);
+            //        }
+
+                    
+
+            //        File.WriteAllText(ToolsEditor.CombinePath(BuildPathFull, $"{pathBuild}"), text);
+
+            //    }
+            //}
+        }
         private static void CopyFilesRecursively(string sourcePath, string targetPath)
         {
             //Now Create all of the directories
@@ -89,11 +119,12 @@ namespace Unify2D.Builder
 
             if (Directory.Exists(_editor.AssetsPath))
             {
-                foreach (var item in Directory.GetFiles(_editor.AssetsPath, "*.cs"))
+                foreach (string item in Directory.GetFiles(_editor.AssetsPath, "*.cs"))
                 {
                     string content = File.ReadAllText(item);
                     SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(content);
                     syntaxes.Add(syntaxTree);
+
                 }
             }
 
@@ -131,17 +162,6 @@ namespace Unify2D.Builder
 
             }
         }
-
-        #region old
-        void Save()
-        {
-            JsonSerializerSettings settings = new JsonSerializerSettings();
-            settings.TypeNameHandling = TypeNameHandling.Auto;
-            string text = JsonConvert.SerializeObject(SceneManager.Instance.CurrentScene.GameObjects, settings);
-
-            File.WriteAllText(ToolsEditor.CombinePath(BuildPathFull, "test.scene"), text);
-        }
-        #endregion
 
         public void StartBuild()
         {

@@ -31,6 +31,8 @@ namespace Unify2D
         public Scene CurrentScene => _currentScene;
         public int SceneCountInGameSettings => GameSettings.Instance.ScenesInGame.Count;
 
+        private List<Scene> _allScenes = new List<Scene>();
+
         public SceneManager()
         {
             _currentScene = new Scene();
@@ -75,11 +77,18 @@ namespace Unify2D
 
 
         #region Function
+
+
+
         public Scene GetActiveScene()
         {
             return CurrentScene;
         }
-
+        public void AddSceneToBuild(Scene scene)
+        {
+            if (_allScenes.Contains(scene) == false)
+                _allScenes.Add(scene);
+        }
 
         /// <summary>
         /// Get the Scene at index in the SceneManager's list of loaded Scenes.
@@ -94,7 +103,7 @@ namespace Unify2D
         /// </summary>
         public Scene GetSceneByBuildIndex(int buildIndex)
         {
-            return GameSettings.Instance.ScenesInGame[buildIndex];
+            return new Scene($"./{GameSettings.Instance.ScenesInGame[buildIndex]}.scene");
         }
 
         /// <summary>
@@ -102,12 +111,14 @@ namespace Unify2D
         /// </summary>
         public Scene GetSceneByName(string name)
         {
-            foreach (Scene scene in GameSettings.Instance.ScenesInGame)
+            foreach (string scene in GameSettings.Instance.ScenesInGame)
             {
-                if(scene.Name != name)
+                if (scene != name)
                     continue;
 
-                return scene;
+               return new Scene($"./{scene}.scene");
+                //LoadScene($"./{scene}.scene");
+                //return scene;
             }
 
             return null;

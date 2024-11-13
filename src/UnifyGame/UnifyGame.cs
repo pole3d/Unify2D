@@ -2,10 +2,12 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using Unify2D;
+using Unify2D.Builder;
 using Unify2D.Core;
 using Unify2D.Core.Graphics;
 using Num = System.Numerics;
@@ -55,19 +57,23 @@ namespace UnifyGame
         {
             _core.Initialize(GraphicsDevice);
 
+            Console.WriteLine(SceneManager.Instance.SceneCountInGameSettings);
+
+            //SceneManager.Instance.LoadScene(0);
+
+
             //_core.GameObjects.Clear();
             //try
             //{
-            //    string text = File.ReadAllText("./test.scene");
+            //    string text = File.ReadAllText($"./{GameSettings.Instance.ScenesInGame[0]}.scene");
             //    JsonSerializerSettings settings = new JsonSerializerSettings();
             //    settings.TypeNameHandling = TypeNameHandling.Auto;
 
-
-            //    _core.LoadScene(this, JsonConvert.DeserializeObject<List<GameObject>>(text, settings));
+            //    //_core.LoadScene(this, JsonConvert.DeserializeObject<List<GameObject>>(text, settings));
             //}
             //catch (Exception ex)
             //{
-            //    Console.WriteLine("Can't load test.scene" + ex.ToString());
+            //    Console.WriteLine($"Can't load ./{GameSettings.Instance.ScenesInGame[0]}.scene" + ex.ToString());
             //}
 
             base.LoadContent();
