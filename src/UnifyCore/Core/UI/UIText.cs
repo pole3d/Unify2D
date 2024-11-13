@@ -33,32 +33,13 @@ namespace Unify2D.Core
             _gameObject = go;
             try
             {
-                Font = GetSpriteFont(path);
+                // Font = GetSpriteFont(path);
                 _asset = new GameAsset(Font, path);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
             }
-        }
-
-        public static SpriteFont GetSpriteFont(string path)
-        {
-            TtfFontBakerResult fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(path),
-                25,
-                1024,
-                1024,
-                new[]
-                {
-                    CharacterRange.BasicLatin,
-                    CharacterRange.Latin1Supplement,
-                    CharacterRange.LatinExtendedA,
-                    CharacterRange.Cyrillic
-                }
-            );
-                
-            SpriteFont font = fontBakeResult.CreateSpriteFont(GameCore.Current.GraphicsDevice);
-            return font;
         }
         
         internal override void Destroy()

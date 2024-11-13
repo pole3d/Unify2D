@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using ImGuiNET;
 using System.Reflection;
+using Microsoft.Xna.Framework.Graphics;
+using SpriteFontPlus;
 using Unify2D.Assets;
 using Unify2D.Core;
 
@@ -10,27 +13,22 @@ namespace Unify2D.Toolbox
     {
         public override void Draw(PropertyInfo property, object instance) //instance = component
         {
-            if (instance is UIText text == false)
+            SpriteFont font = property.GetValue(instance) as SpriteFont;
+            
+            if (font == null)
             {
+                DrawFoldoutFont(ref font, property, instance, true);
                 return;
             }
             
-            if (text.Font == null)
-            {
-                DrawFoldoutFont(text, true);
-                return;
-            }
-            
-            DrawFoldoutFont(text);
+            DrawFoldoutFont(ref font, property, instance);
         }
 
-        internal int _currentFoldoutItem = 0;
-        private void DrawFoldoutFont(UIText text, bool forceInitialize = false)
+        private int _currentFoldoutItem = 0;
+        private void DrawFoldoutFont(ref SpriteFont font, PropertyInfo property, object instance, bool forceInitialize = false)
         {
             List<string> fontsNames = ["Arial"];
             List<string> fontsPaths = [@"C:\\Windows\\Fonts\arial.ttf"];
-            
-            //get all the fonts in the assets
             List<Asset> assets = GameEditor.Instance.AssetsToolBox.Assets;
             foreach (Asset asset in assets)
             {
@@ -46,17 +44,37 @@ namespace Unify2D.Toolbox
                 }
             }
             
-            //if the text font is null, initialize it
             if (forceInitialize)
             {
-                text.Initialize(text.GameObject, fontsPaths[0]);
+                font = GetSpriteFont(fontsPaths[0]);
+                property.SetValue(instance, font);
             }
             
             bool combo = ImGui.Combo("font", ref _currentFoldoutItem,  fontsNames.ToArray(), fontsNames.Count);
             if (combo)
             {
-                text.Initialize(text.GameObject, fontsPaths[_currentFoldoutItem]);
+                font = GetSpriteFont(fontsPaths[_currentFoldoutItem]);
+                property.SetValue(instance, font);
             }
+        }
+        
+        public static SpriteFont GetSpriteFont(string path)
+        {
+            TtfFontBakerResult fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(path),
+                25,
+                1024,
+                1024,
+                new[]
+                {
+                    CharacterRange.BasicLatin,
+                    CharacterRange.Latin1Supplement,
+                    CharacterRange.LatinExtendedA,
+                    CharacterRange.Cyrillic
+                }
+            );
+                
+            SpriteFont font = fontBakeResult.CreateSpriteFont(GameCore.Current.GraphicsDevice);
+            return font;
         }
     }
 }
