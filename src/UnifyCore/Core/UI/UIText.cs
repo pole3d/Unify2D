@@ -49,7 +49,7 @@ namespace Unify2D.Core
                 VertexColor, 
                 GameObject.Rotation, 
                 origin, 
-                Vector2.One * FontSize, 
+                Vector2.One * FontSize * GameObject.Scale, 
                 SpriteEffects.None, 
                 0);
         }

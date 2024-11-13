@@ -77,6 +77,9 @@ namespace Unify2D.Core
 
             child.Parent = parent;
             parent.Children.Add(child);
+            
+            SceneManager.Instance.CurrentScene.AddRootGameObject(child);
+            
             return child;
         }
 
@@ -193,8 +196,6 @@ namespace Unify2D.Core
                         canvasGameObject.AddComponent<Canvas>();
                         
                         SetChild(canvasGameObject, this);
-                        
-                        GameCore.Current.CanvasList.Add(canvasGameObject.GetComponent<Canvas>());
                     }
                     else
                     {
