@@ -57,24 +57,30 @@ namespace UnifyGame
         {
             _core.Initialize(GraphicsDevice);
 
-            Console.WriteLine(SceneManager.Instance.SceneCountInGameSettings);
+            //Console.WriteLine(GameSettings.Instance.ScenesInGame.Count + " scene count");
 
             //SceneManager.Instance.LoadScene(0);
 
-
-            //_core.GameObjects.Clear();
-            //try
-            //{
-            //    string text = File.ReadAllText($"./{GameSettings.Instance.ScenesInGame[0]}.scene");
-            //    JsonSerializerSettings settings = new JsonSerializerSettings();
-            //    settings.TypeNameHandling = TypeNameHandling.Auto;
-
-            //    //_core.LoadScene(this, JsonConvert.DeserializeObject<List<GameObject>>(text, settings));
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine($"Can't load ./{GameSettings.Instance.ScenesInGame[0]}.scene" + ex.ToString());
-            //}
+            _core.GameObjects.Clear();
+            try
+            {
+                string path = Directory.GetCurrentDirectory();
+                string pathJson = path+ "\\SceneJson.json";
+                if (File.Exists(pathJson))
+                {
+                    //string json = File.ReadAllText(pathJson);
+                    //List<SceneInfo> deserializedNames = System.Text.Json.JsonSerializer.Deserialize<List<SceneInfo>>(json);
+                    //foreach (var name in deserializedNames)
+                    //{
+                    //    GameSettings.Instance.AddSceneToList(name);
+                    //}
+                    //SceneManager.Instance.LoadScene(GameSettings.Instance.ScenesInGame[0]);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Can't load scene" + ex.ToString());
+            }
 
             base.LoadContent();
         }

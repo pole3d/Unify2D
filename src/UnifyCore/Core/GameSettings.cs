@@ -24,6 +24,7 @@ namespace Unify2D.Builder
                 return _instance;
             }
         }
+
         public List<string> ScenesInGame = new List<string>();
         public void AddSceneToGame()
         {
@@ -37,7 +38,7 @@ namespace Unify2D.Builder
 
         public void AddSceneToList(string sceneName)
         {
-            if (ScenesInGame.Contains(sceneName) == false)
+            if (ScenesInGame.Contains(sceneName) == true)
                 return;
 
             ScenesInGame.Add(sceneName);

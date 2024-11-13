@@ -1,7 +1,8 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis;
-using Newtonsoft.Json;
+//using Newtonsoft.Json;
+using System.Text.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,6 +12,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Unify2D.Core;
 using Unify2D.Tools;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Unify2D.Assets;
 
 namespace Unify2D.Builder
 {
@@ -18,8 +21,12 @@ namespace Unify2D.Builder
     {
         const string AssetsPath = "./Assets";
         const string TemplatePath = "./GameTemplate";
+        const string RuntimesFolderPath = "./runtimes";
         string AssetsPathFull => ToolsEditor.CombinePath(_editor.ProjectPath, AssetsPath);
         string BuildPathFull => ToolsEditor.CombinePath(_editor.ProjectPath, "./Build");
+        string RuntimesFolderPathFull => ToolsEditor.CombinePath(TemplatePath, RuntimesFolderPath);
+
+
         const string ExeName = "UnifyGame.exe";
 
         GameCore _core;
@@ -50,8 +57,17 @@ namespace Unify2D.Builder
                 File.Copy(file, newPath, true);
             }
 
-            Directory.CreateDirectory(BuildPathFull + AssetsPath);
 
+
+            Directory.CreateDirectory(BuildPathFull + RuntimesFolderPath);
+            if (Directory.Exists(RuntimesFolderPathFull))
+            {
+                string newPath = ToolsEditor.CombinePath(BuildPathFull, RuntimesFolderPath);
+                CopyFilesRecursively(RuntimesFolderPathFull, newPath);
+            }
+
+
+            Directory.CreateDirectory(BuildPathFull + AssetsPath);
             if (Directory.Exists(AssetsPathFull))
             {
                 string newPath = ToolsEditor.CombinePath(BuildPathFull, AssetsPath);
@@ -59,44 +75,39 @@ namespace Unify2D.Builder
             }
 
 
-            SceneManager.Instance.SaveCurrentScene();
+            //SceneManager.Instance.SaveCurrentScene();
 
 
-            //SaveAllScene();
+            SaveAllScene();
 
             CreateDll();
         }
 
         private void SaveAllScene()
         {
-            //if (Directory.Exists(_editor.AssetsPath))
-            //{
-            //    JsonSerializerSettings settings = new JsonSerializerSettings();
-            //    foreach (string item in Directory.GetFiles(_editor.AssetsPath, "*.scene", SearchOption.AllDirectories))
-            //    {
-            //        GameSettings.Instance.AddSceneToList(item);
+            if (Directory.Exists(_editor.AssetsPath))
+            {
+                List<SceneInfo> listSceneToJson = new List<SceneInfo>();
+                try
+                {
+                    // Récupérer tous les fichiers .scene dans le répertoire et ses sous-répertoires
+                    foreach (string item in Directory.GetFiles(_editor.AssetsPath, "*.scene", SearchOption.AllDirectories))
+                    {
+                        string name = item.Substring(item.LastIndexOf('\\') + 1);
+                        string path = item.Substring(item.IndexOf('\\') + 1);
+                        SceneInfo scene = new SceneInfo(name, path);
+                        listSceneToJson.Add(scene);
+                    }
 
-            //        settings.TypeNameHandling = TypeNameHandling.Auto;
-            //        string text = JsonConvert.SerializeObject(SceneManager.Instance.CurrentScene.GameObjects, settings);
-
-            //        //var test = _editor.Settings.Data.CurrentProjectPath;
-            //        string[] path = item.Split('\\');
-            //        StringBuilder pathBuild = new StringBuilder();
-
-            //        for (int i = 1; i < path.Length; i++)
-            //        {
-            //            if (i < path.Length - 1)
-            //                pathBuild.Append(path[i] + "\\");
-            //            else
-            //                pathBuild.Append(path[i]);
-            //        }
-
-                    
-
-            //        File.WriteAllText(ToolsEditor.CombinePath(BuildPathFull, $"{pathBuild}"), text);
-
-            //    }
-            //}
+                    string json = JsonSerializer.Serialize(listSceneToJson);
+                    string pathJson = ToolsEditor.CombinePath(BuildPathFull, "SceneJson.json");
+                    File.WriteAllText(pathJson, json);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Une erreur s'est produite : " + ex.Message);
+                }
+            }
         }
         private static void CopyFilesRecursively(string sourcePath, string targetPath)
         {

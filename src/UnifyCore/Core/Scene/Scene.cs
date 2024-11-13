@@ -7,15 +7,28 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Unify2D.Core;
 using Unify2D.Physics;
 
 namespace Unify2D
 {
+    public class SceneInfo
+    {
+        public SceneInfo(string name, string path)
+        {
+            Name = name;
+            Path = path;
+        }
+
+        public string Name { get; set; }
+        public string Path { get; set; }
+    }
     public class Scene
     {
-        public string Name { get; private set; }
-        public string Path { get; private set; }
+        private SceneInfo _sceneInfo;
+        public string Name => _sceneInfo.Name;
+        public string Path => _sceneInfo.Path;
         public int RootCount => GameObjects.Count;
         public int BuildIndex { get; private set; }
 
@@ -48,8 +61,11 @@ namespace Unify2D
 
         public Scene(string path)
         {
-            Path = path;
-            Name = System.IO.Path.GetFileName(path);
+            if (_sceneInfo == null)
+                _sceneInfo = new SceneInfo(path, System.IO.Path.GetFileName(path));
+            else
+                SaveSceneNameAndPath(path, System.IO.Path.GetFileName(path));
+
 
             try
             {
@@ -67,8 +83,8 @@ namespace Unify2D
 
         public void SaveSceneNameAndPath(string path, string name)
         {
-            Path = path;
-            Name = name;
+            _sceneInfo.Path = path;
+            _sceneInfo.Name = name;
         }
         public void Init()
         {
@@ -123,16 +139,12 @@ namespace Unify2D
         public void DestroyImmediate(GameObject gameObject)
         {
             if (gameObject.Parent != null)
-            {
                 gameObject.Parent.Children.Remove(gameObject);
-            }
             else
-            {
                 GameObjects.Remove(gameObject);
-            }
         }
 
-        
+
 
 
     }
