@@ -44,8 +44,8 @@ namespace UnifyCore.Core.Physics
             int pixelsWidth  = (int)Math.Round(_width * _gameObject.Scale.X * PhysicsSettings.UnitToPixelRatio);
             int pixelsHeight = (int)Math.Round(_height * _gameObject.Scale.Y * PhysicsSettings.UnitToPixelRatio);
 
-            float sin = MathF.Sin(_gameObject.Rotation);
-            float cos = MathF.Cos(_gameObject.Rotation);
+            float sin = (float) Math.Sin(_gameObject.Rotation);
+            float cos = (float) Math.Cos(_gameObject.Rotation);
 
             Vector2 offsettedPosition = new Vector2((_offset.X * cos) + (_offset.Y * sin), ((_offset.X * sin) - (_offset.Y * cos)));
 

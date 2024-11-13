@@ -102,6 +102,58 @@ namespace Unify2D.Core
             set { _matrix = value; }
         }
 
+        public void UpdateMatrix()
+        {
+            HasChanged = false;
+        
+            Matrix =
+            Matrix.CreateTranslation(new Vector3(-Position.X, -Position.Y, 0)) *
+            Matrix.CreateRotationZ(Rotation) *
+            Matrix.CreateScale(new Vector3(Zoom, Zoom, 1)) *
+            Matrix.CreateTranslation(new Vector3(Viewport.X * 0.5f, Viewport.Y * 0.5f, 0));
+        }
+
+        Vector2 ICamera2D.LocalToWorld(Vector2 local)
+        {
+            local -= Viewport * 0.5f;
+        
+            local /= Zoom; 
+        
+        
+            // on divise par le zoom car Matrix.Up est calculé avec.
+            Vector3 up = Matrix.Up / Zoom;
+            float sin = -up.X;
+            float cos = up.Y;
+        
+            Vector2 worldPosition = new Vector2(
+                (local.X * cos) + (local.Y * sin),
+                -((local.X * sin) - (local.Y * cos)));
+        
+            worldPosition += Position;
+        
+            return worldPosition;
+        }
+
+        Vector2 ICamera2D.WorldToViewport(Vector2 world)
+        {
+            world -= Position;
+        
+            Vector3 up = Matrix.Up;
+            float sin = -up.X;
+            float cos = up.Y;
+        
+            Vector2 local = new Vector2(
+                (world.X * cos) - (world.Y * sin),
+                (world.X * sin) + (world.Y * cos));
+        
+            // on multiplie pas par le zoom car Matrix.Up en prends deja compte
+            //local *= Zoom;
+        
+            local += Viewport * 0.5f;
+        
+            return local;
+        }
+
         internal Vector2 LocalToWorld(Vector2 mousePosition)
         {
             return ((ICamera2D)this).LocalToWorld(mousePosition);

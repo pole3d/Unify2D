@@ -34,7 +34,7 @@
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-      <Exec Command="xcopy &quot;$(SolutionDir)..\GameAssemblyProject\&quot; &quot;$(OutDir)GameAssemblyProject\&quot; /s /y  &#xD;&#xA;" />
+      <Exec Command="xcopy &quot;$(SolutionDir)..\GameAssemblyProject\&quot; &quot;$(OutDir)GameAssemblyProject\&quot; /s /y  &#xA;xcopy &quot;$(SolutionDir)..\mono\mscorlib.dll&quot; &quot;$(OutDir)mono\&quot; /s /y  &#xA;xcopy &quot;$(SolutionDir)..\mono\mono-2.0-sgen.dll&quot; &quot;$(OutDir)&quot; /s /y  &#xA;xcopy &quot;$(SolutionDir)..\bin\$(Configuration)\ScriptingBridge\ScriptingBridge.dll&quot; &quot;$(OutDir)&quot; /s /y  " />
     </Target>
 
 </Project>

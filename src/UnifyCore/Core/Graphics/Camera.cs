@@ -1,13 +1,7 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unify2D.Core.Tools;
-using Num = System.Numerics;
 
 namespace Unify2D.Core.Graphics
 {
@@ -47,7 +41,7 @@ namespace Unify2D.Core.Graphics
             get { return _zoomLevel; }
             set
             {
-                _zoomLevel = MathF.Max(value, 0.05f);
+                _zoomLevel = Math.Max(value, 0.05f);
                 Zoom = 1 / _zoomLevel;
             }
         }
@@ -73,10 +67,10 @@ namespace Unify2D.Core.Graphics
         [JsonIgnore]
         public float RotationEuleur
         {
-            get { return _rotation * 180 / MathF.PI; }
+            get { return _rotation * 180 / (float) Math.PI; }
             set
             {
-                _rotation = value * MathF.PI / 180;
+                _rotation = value * (float) Math.PI / 180;
                 HasChanged = true;
             }
         }
@@ -117,6 +111,58 @@ namespace Unify2D.Core.Graphics
 
         public static Camera Main;
 
+        public void UpdateMatrix()
+        {
+            HasChanged = false;
+        
+            Matrix =
+            Matrix.CreateTranslation(new Vector3(-Position.X, -Position.Y, 0)) *
+            Matrix.CreateRotationZ(Rotation) *
+            Matrix.CreateScale(new Vector3(Zoom, Zoom, 1)) *
+            Matrix.CreateTranslation(new Vector3(Viewport.X * 0.5f, Viewport.Y * 0.5f, 0));
+        }
+
+        Vector2 ICamera2D.LocalToWorld(Vector2 local)
+        {
+            local -= Viewport * 0.5f;
+        
+            local /= Zoom; 
+        
+        
+            // on divise par le zoom car Matrix.Up est calculé avec.
+            Vector3 up = Matrix.Up / Zoom;
+            float sin = -up.X;
+            float cos = up.Y;
+        
+            Vector2 worldPosition = new Vector2(
+                 (local.X * cos) + (local.Y * sin),
+               -((local.X * sin) - (local.Y * cos)));
+        
+            worldPosition += Position;
+        
+            return worldPosition;
+        }
+
+        Vector2 ICamera2D.WorldToViewport(Vector2 world)
+        {
+            world -= Position;
+        
+            Vector3 up = Matrix.Up;
+            float sin = -up.X;
+            float cos = up.Y;
+        
+            Vector2 local = new Vector2(
+                (world.X * cos) - (world.Y * sin),
+                (world.X * sin) + (world.Y * cos));
+        
+            // on multiplie pas par le zoom car Matrix.Up en prends deja compte
+            //local *= Zoom;
+        
+            local += Viewport * 0.5f;
+        
+            return local;
+        }
+
         internal Vector2 LocalToWorld(Vector2 mousePosition)
         {
             return ((ICamera2D)this).LocalToWorld(mousePosition);
@@ -139,7 +185,7 @@ namespace Unify2D.Core.Graphics
 
         internal override void DrawGizmo()
         {
-            Gizmo.DrawWireSquare(TopLeft, BottomRight, (int)MathF.Max(5 * ZoomLevel, 5));
+            Gizmo.DrawWireSquare(TopLeft, BottomRight, (int)Math.Max(5 * ZoomLevel, 5));
         }
 
         //some shortcuts

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Loader;
 using Unify2D.Core;
 
 namespace Unify2D.Scripting
@@ -12,21 +10,19 @@ namespace Unify2D.Scripting
     public class Scripting
     {
         List<Type> _types = new();
-        GameEditor _editor;
         
         private readonly string _programFilesPath = Environment.ExpandEnvironmentVariables("%ProgramFiles(x86)%");
-        private readonly string _msBuildPath;
+        private readonly string _cmakePath;
         
-        private AssemblyLoadContext _context;
         private bool _isAssemblyLoaded = false;
 
-        private string _currentScenePath;
-        
+        private ScriptingBridge _scriptingBridge;
+
         public Scripting()
         {
             ProcessStartInfo startInfo = new ProcessStartInfo(
                 $@"{_programFilesPath}\Microsoft Visual Studio\Installer\vswhere.exe",
-                @"-latest -prerelease -products * -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe"
+                "-find **/cmake.exe"
             );
 
             startInfo.RedirectStandardOutput = true;
@@ -40,104 +36,133 @@ namespace Unify2D.Scripting
             process.WaitForExit();
 
             using StreamReader reader = process.StandardOutput;
-            _msBuildPath = reader.ReadLine();
+            _cmakePath = reader.ReadLine();
+
+            _scriptingBridge = new ScriptingBridge();
+            _scriptingBridge.Open(Path.Combine(Directory.GetCurrentDirectory(), "UnifyCore.dll"));
         }
 
         public void Reload()
         {
-            if (!_isAssemblyLoaded)
+            _scriptingBridge.Reload();
+            _scriptingBridge.InstantiateClass("Hello");
+            
+            FetchTypes();
+        }
+
+        public void LoadDll()
+        {
+            FetchTypes();
+            
+            CreateBuildFiles();
+
+            string assemblyPath = $@"{GameEditor.Instance.ProjectPath}\build\Debug\GameAssembly.dll";
+            if (!File.Exists(assemblyPath))
             {
-                OnUnload(null);
                 return;
             }
             
-            _context.Unloading += OnUnload;
-            _context.Unload();
+            _scriptingBridge.Open(assemblyPath);
+            
+            // _types.AddRange(assembly.GetTypes().Where(type => type.IsSubclassOf(typeof(Component)) && type.IsAbstract == false));
+            
+            // ReplaceComponents();
         }
+        
+        // private void ReplaceComponents()
+        // {
+        //     foreach (GameObject go in SceneManager.Instance.CurrentScene.GameObjects)
+        //     {
+        //         List<Component> newComponents = new List<Component>();
+        //         foreach (Component oldComponent in go.Components)
+        //         {
+        //             Component newComp = Activator.CreateInstance(GetNewType(oldComponent.GetType())) as Component;
+        //             newComponents.Add(newComp);
+        //
+        //             FieldInfo[] oldFields = oldComponent.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        //     
+        //             foreach (FieldInfo oldField in oldFields)
+        //             {
+        //                 FieldInfo[] newFields = newComp.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        //     
+        //                 foreach (FieldInfo newField in newFields)
+        //                 {
+        //                     if (newField.Name == oldField.Name)
+        //                     {
+        //                         newField.SetValue(newComp, oldField.GetValue(oldComponent));
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     
+        //         go.ClearComponents();
+        //     
+        //         foreach (Component item in newComponents)
+        //         {
+        //             go.AddComponent(item);
+        //         }
+        //     }
+        // }
 
-        private void OnUnload(AssemblyLoadContext assemblyLoadContext)
+        // public void Load(GameEditor editor)
+        // {
+            // _editor = editor;
+            // Reload();
+        // }
+
+        private void CreateBuildFiles()
         {
-            _types.Clear();
-            _context = new AssemblyLoadContext(null, true);
+            string buildDirectory = $@"{GameEditor.Instance.ProjectPath}\build";
+            if (File.Exists(buildDirectory))
+            {
+                return;
+            }
 
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-
+            Directory.CreateDirectory(buildDirectory);
             ProcessStartInfo startInfo = new ProcessStartInfo(
-                _msBuildPath,
-                $@"{GameEditor.Instance.AssetsPath}\GameAssembly.sln"
+                _cmakePath,
+                ".."
             );
+
+            startInfo.WorkingDirectory = buildDirectory;
 
             Process process = Process.Start(startInfo);
             if (process == null)
             {
-                throw new Exception("Could not start MSBuild");
+                throw new Exception("Could not start CMake");
+            }
+
+            process.WaitForExit();
+
+            Build();
+        }
+        
+        public void Build()
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo(
+                _cmakePath,
+                "--build ."
+            );
+
+            startInfo.WorkingDirectory = $@"{GameEditor.Instance.ProjectPath}\build";
+            
+            Process process = Process.Start(startInfo);
+            if (process == null)
+            {
+                throw new Exception("Could not start CMake");
             }
             
             process.WaitForExit();
+        }
 
-            byte[] data = File.ReadAllBytes($@"{GameEditor.Instance.AssetsPath}\bin\Debug\net6.0\GameAssembly.dll");
-            
-            using MemoryStream stream = new MemoryStream(data);
-            Assembly assembly = _context.LoadFromStream(stream);
-            _isAssemblyLoaded = true;
-
+        private void FetchTypes()
+        {
             _types.AddRange(typeof(Component).Assembly.GetTypes().Where(type => type.IsSubclassOf(typeof(Component)) && type.IsAbstract == false));
-            _types.AddRange(assembly.GetTypes().Where(type => type.IsSubclassOf(typeof(Component)) && type.IsAbstract == false));
-            
-            ReplaceComponents();
-        }
-
-        private void ReplaceComponents()
-        {
-            foreach (GameObject go in SceneManager.Instance.CurrentScene.GameObjects)
-            {
-                List<Component> newComponents = new List<Component>();
-                foreach (Component oldComponent in go.Components)
-                {
-                    Component newComp = Activator.CreateInstance(GetNewType(oldComponent.GetType())) as Component;
-                    newComponents.Add(newComp);
-
-                    FieldInfo[] oldFields = oldComponent.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            
-                    foreach (FieldInfo oldField in oldFields)
-                    {
-                        FieldInfo[] newFields = newComp.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            
-                        foreach (FieldInfo newField in newFields)
-                        {
-                            if (newField.Name == oldField.Name)
-                            {
-                                newField.SetValue(newComp, oldField.GetValue(oldComponent));
-                            }
-                        }
-                    }
-                }
-            
-                go.ClearComponents();
-            
-                foreach (Component item in newComponents)
-                {
-                    go.AddComponent(item);
-                }
-            }
-        }
-
-        public void Load(GameEditor editor)
-        {
-            _editor = editor;
-            Reload();
-
-        }
-
-        public void Build()
-        {
-
         }
 
         public void Unload()
         {
-            _context.Unload();
+            // _context.Unload();
         }
 
         public List<Type> GetTypes()
@@ -145,9 +170,9 @@ namespace Unify2D.Scripting
             return _types;
         }
 
-        private Type GetNewType(Type oldType)
-        {
-            return _types.FirstOrDefault(type => type.ToString() == oldType.ToString());
-        }
+        // private Type GetNewType(Type oldType)
+        // {
+        //     return _types.FirstOrDefault(type => type.ToString() == oldType.ToString());
+        // }
     }
 }

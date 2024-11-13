@@ -102,7 +102,6 @@ namespace Unify2D
             Content.RootDirectory = ProjectPath;
 
             _scripting = new Scripting.Scripting();
-            _scripting.Load(this);
 
             _imGuiRenderer = new ImGuiRenderer.Renderer(this);
             _imGuiRenderer.RebuildFontAtlas();
@@ -239,6 +238,7 @@ namespace Unify2D
 
         public void BuildProject()
         {
+            Scripting.Build();
             Scripting.Reload();
         }
 

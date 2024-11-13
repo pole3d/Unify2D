@@ -69,9 +69,9 @@ namespace Unify2D.Core.Tools
             
 
             GameCore.Current.SpriteBatch.Draw(_texture, top, top, color, 0 + rotation, size / 2f, SpriteEffects.None, 1);
-            GameCore.Current.SpriteBatch.Draw(_texture, right, right, color, MathF.PI/2 + rotation, reverseSize / 2f, SpriteEffects.None, 1);
-            GameCore.Current.SpriteBatch.Draw(_texture, bottom, bottom, color, MathF.PI + rotation, size / 2f, SpriteEffects.None, 1);
-            GameCore.Current.SpriteBatch.Draw(_texture, left, left, color, 3 * MathF.PI/2 + rotation, reverseSize / 2f, SpriteEffects.None, 1);
+            GameCore.Current.SpriteBatch.Draw(_texture, right, right, color, (float) Math.PI/2 + rotation, reverseSize / 2f, SpriteEffects.None, 1);
+            GameCore.Current.SpriteBatch.Draw(_texture, bottom, bottom, color, (float) Math.PI + rotation, size / 2f, SpriteEffects.None, 1);
+            GameCore.Current.SpriteBatch.Draw(_texture, left, left, color, 3 * (float) Math.PI/2 + rotation, reverseSize / 2f, SpriteEffects.None, 1);
         }
     }
 }

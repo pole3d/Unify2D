@@ -58,6 +58,42 @@ namespace Unify2D.Toolbox
             Directory.CreateDirectory(_newProjectPath);
             Directory.CreateDirectory(Path.Combine(_newProjectPath, GameEditor.AssetsFolder));
 
+            using StreamWriter stream = File.CreateText(Path.Combine(_newProjectPath, "CMakeLists.txt"));
+            stream.WriteLine("""
+                             cmake_minimum_required(VERSION 3.21)
+                             
+                             set(CMAKE_GENERATOR "Visual Studio 16 2019 Win64")
+                             
+                             project(GameAssembly CSharp)
+                             
+                             add_library(GameAssembly SHARED
+                             )
+                             
+                             set_property(TARGET GameAssembly PROPERTY DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
+                             set_property(TARGET GameAssembly PROPERTY WIN32_EXECUTABLE FALSE)
+                             set_property(TARGET GameAssembly PROPERTY VS_CONFIGURATION_TYPE DynamicLibrary)
+                             set_property(TARGET GameAssembly PROPERTY VS_DOTNET_REFERENCES
+                                 "Microsoft.CSharp"
+                                 "PresentationCore"
+                                 "PresentationFramework"
+                                 "System"
+                                 "System.Core"
+                                 "System.Data"
+                                 "System.Data.DataSetExtensions"
+                                 "System.Windows.Forms"
+                                 "System.Net.Http"
+                                 "System.Xaml"
+                                 "System.Xml"
+                                 "System.Xml.Linq"
+                                 "WindowsBase"
+                             )
+                             
+                             """);
+            
+            string corePath = Path.Combine(Directory.GetCurrentDirectory(), "UnifyCore.dll");
+            string fnaPath = Path.Combine(Directory.GetCurrentDirectory(), "UnifyCore.dll");
+            stream.WriteLine($"set_target_properties(GameAssembly PROPERTIES VS_DOTNET_REFERENCE_UnifyCore \"{corePath.Replace('\\', '/')}\")");
+            stream.WriteLine($"set_target_properties(GameAssembly PROPERTIES VS_DOTNET_REFERENCE_FNA \"{fnaPath.Replace('\\', '/')}\")");
         }
 
         private void DrawExistingProject(GameEditor editor)
@@ -111,6 +147,8 @@ namespace Unify2D.Toolbox
         void LoadProject()
         {
             //_editor.SceneEditorManager.LoadScene();
+            
+            _editor.Scripting.LoadDll();
 
             _editor.HidePopup();
         }
