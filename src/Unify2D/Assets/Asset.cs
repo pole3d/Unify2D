@@ -31,12 +31,8 @@ namespace Unify2D.Assets
             _path = path;
             _isDirectory = isDirectory;
 
+            // Create the asset content depending on the extension. Example .jpg and .png will create a TextureAssetContent, .cs will create a ScriptAssetContent...
             AssetContent = (AssetContent)Activator.CreateInstance(GameEditor.Instance.AssetManager.ExtensionToAssetType[extension], this);
-            
-            if (_extension == ".cs")
-            {
-                AssetContent = new ScriptAssetContent(this);
-            }
 
             _fullPath = ToolsEditor.CombinePath(path, name + extension);
         }

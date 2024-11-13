@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 using Unify2D.Core;
 

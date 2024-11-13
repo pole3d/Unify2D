@@ -14,24 +14,31 @@ namespace Unify2D.Assets
         internal int NbOfFiles => _nbOfFiles;
         
         private GameEditor _editor;
-        private Dictionary<string, Type> _extensionToAssetType = new Dictionary<string, Type>();
-        private Dictionary<Type, string> _assetTypeToExtension = new Dictionary<Type, string>()
+        
+        private readonly Dictionary<string, Type> _extensionToAssetType = new Dictionary<string, Type>();
+        
+        // Add the supported extensions for each asset type here
+        private readonly Dictionary<Type, List<string>> _assetTypeToExtension = new Dictionary<Type, List<string>>()
         {
-            { typeof(ScriptAssetContent), ".cs" },
-            { typeof(PrefabAssetContent), ".prefab" },
-            // { typeof(TextureAssetContent), ".png" }
+            { typeof(ScriptAssetContent), new List<string> { ".cs" } },
+            { typeof(PrefabAssetContent), new List<string> { ".prefab" } },
+            { typeof(TextureAssetContent), new List<string> { ".png", ".jpg" } }
         };
         
         private List<Asset> _assets = new List<Asset>();
         private int _nbOfFiles;
 
+        
         internal AssetManager(GameEditor editor)
         {
             _editor = editor;
-            
-            foreach (KeyValuePair<Type,string> pair in _assetTypeToExtension)
+
+            foreach (KeyValuePair<Type, List<string>> pair in _assetTypeToExtension)
             {
-                _extensionToAssetType.Add(pair.Value, pair.Key);
+                foreach (string extension in pair.Value)
+                {
+                    _extensionToAssetType.Add(extension, pair.Key);
+                }
             }
         }
 
@@ -61,9 +68,11 @@ namespace Unify2D.Assets
         
         internal Asset CreateAsset<T>(string name) where T : AssetContent, new()
         {
-            string extension = _assetTypeToExtension[typeof(T)];
+            List<string> extensions = _assetTypeToExtension[typeof(T)];
+            string extension = extensions[0]; // Utilisez la première extension par défaut
             StringBuilder nameSb = new StringBuilder(name);
             int safeguard = 0;
+
             // Append number in filename if file already exists
             while (File.Exists(Path.Combine(_editor.AssetsPath, $"{nameSb}{extension}")))
             {
