@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using Unify2D.Assets;
 using Unify2D.Core;
+using Unify2D.Core.Graphics;
 
 namespace Unify2D.Toolbox
 {
@@ -153,15 +154,29 @@ namespace Unify2D.Toolbox
 
                     ImGui.SameLine();
 
-
-                    if (component.GetType().Name == "SpriteRenderer")
+                    if (component is SpriteRenderer)
                     {
                         if (ImGui.Button("Sprite Editor"))
                         {
-                            // SpriteEditorToolbox spriteEditorToolbox = new SpriteEditorToolbox();
-                            // spriteEditorToolbox.Initialize(_editor, _gameObject, _asset.FullPath);
+                            //SpriteEditorToolbox spriteEditorToolbox = new SpriteEditorToolbox();
+                            //spriteEditorToolbox.Initialize(_editor, _gameObject, _asset.FullPath);
 
-                            SpriteEditorToolbox.Open();
+                            // SpriteEditorToolbox.Open(component);
+
+                            PropertyInfo[] properties = component.GetType().GetProperties();
+
+                            foreach (PropertyInfo property in properties)
+                            {
+                                try
+                                {
+                                    _propertyViewers[property.PropertyType].Draw(property, component);
+                                }
+                                catch
+                                {
+                                }
+                            }
+                            GameEditor.Instance.SpriteEditorToolbox.Open(component);
+
                             Debug.Log("Sprite Editor is open !");
                         }
                     }
@@ -234,11 +249,11 @@ namespace Unify2D.Toolbox
 
             return null;
         }
-
-        public class TextureBound
-        {
-            public Texture2D Texture { get; set; }
-            public IntPtr IntPtr { get; set; }
-        }
+    }
+    
+    public class TextureBound
+    {
+        public Texture2D Texture { get; set; }
+        public IntPtr IntPtr { get; set; }
     }
 }

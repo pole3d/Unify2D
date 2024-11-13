@@ -44,12 +44,12 @@ namespace Unify2D.Toolbox
             if (value != null)
             {
                 Texture2D texture = value.Asset as Texture2D;
-                InspectorToolbox.TextureBound textureBound = GameEditor.Instance.InspectorToolbox.GetTextureBound(texture);
+                TextureBound textureBound = GameEditor.Instance.InspectorToolbox.GetTextureBound(texture);
                 if (textureBound == null)
                 {
                     IntPtr ptr = GameEditor.Instance.GuiRenderer.BindTexture(texture);
 
-                    textureBound = new InspectorToolbox.TextureBound { IntPtr = ptr, Texture = texture };
+                    textureBound = new TextureBound { IntPtr = ptr, Texture = texture };
                     GameEditor.Instance.InspectorToolbox.AddTextureBound(textureBound);
 
                 }
@@ -57,7 +57,6 @@ namespace Unify2D.Toolbox
                 {
                     ImGui.Image(textureBound.IntPtr, new System.Numerics.Vector2(40, 40));
                 }
-
             }
         }
     }
