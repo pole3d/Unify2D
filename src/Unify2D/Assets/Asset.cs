@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -70,10 +71,16 @@ namespace Unify2D.Assets
             }
         }
 
+        public void SetName(string name)
+        {
+            _name = name;
+            SetPath(_path);
+        }
+
         public void SetPath(string path)
         {
             _path = path;
-            _fullPath = ToolsEditor.CombinePath(path, _name);
+            _fullPath = ToolsEditor.CombinePath(path, _name + _extension);
         }
 
         public override string ToString()

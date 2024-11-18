@@ -67,19 +67,20 @@ namespace Unify2D.Toolbox
         private Asset CreateAssetFromDirectory(string directory)
         {
             string relativeDirectory = directory.Replace(_path, string.Empty);
-            Asset newAsset = new Asset(Path.GetFileNameWithoutExtension(relativeDirectory), Path.GetDirectoryName(relativeDirectory), true);
-                
+            Asset newAsset = new Asset(Path.GetFileNameWithoutExtension(relativeDirectory),
+                Path.GetDirectoryName(relativeDirectory), true);
+
             _assets.Add(newAsset);
 
             string[] filesInDirectory = Directory.GetFiles($"{_path}{newAsset.FullPath}");
             string[] directoriesInDirectory = Directory.GetDirectories($"{_path}{newAsset.FullPath}");
-                
+
             foreach (string file in filesInDirectory)
             {
-                Asset child = CreateAssetFromFile(file, true);
+                Asset child = CreateAssetFromFile(file);
                 newAsset.AddChild(child);
             }
-            
+
             foreach (string dir in directoriesInDirectory)
             {
                 Asset child = CreateAssetFromDirectory(dir);
@@ -89,7 +90,7 @@ namespace Unify2D.Toolbox
             return newAsset;
         }
 
-        private Asset CreateAssetFromFile(string file, bool isChild = false)
+        private Asset CreateAssetFromFile(string file)
         {
             string relativeFile = file.Replace(_path, string.Empty);
             string extension = Path.GetExtension(relativeFile);
@@ -99,7 +100,7 @@ namespace Unify2D.Toolbox
 
             Asset newAsset = new Asset(Path.GetFileNameWithoutExtension(relativeFile),
                 Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile));
-            
+
             _assets.Add(newAsset);
 
             return newAsset;
@@ -130,12 +131,12 @@ namespace Unify2D.Toolbox
 
                 ImGui.EndPopup();
             }
-            
+
             DrawAssetTree();
 
             ImGui.End();
         }
-        
+
         private void DrawAssetTree()
         {
             IEnumerable<Asset> rootAssets = _assets.Where(asset => asset.Parent == null).ToList();
@@ -151,29 +152,30 @@ namespace Unify2D.Toolbox
 
             if (node.Children.Count == 0)
             {
-                base_flags = ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen; // ImGuiTreeNodeFlags_Bullet
+                base_flags = ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.Leaf |
+                             ImGuiTreeNodeFlags.NoTreePushOnOpen; // ImGuiTreeNodeFlags_Bullet
 
                 if (Selection.Selected == node)
                     base_flags |= ImGuiTreeNodeFlags.Selected;
 
                 ImGui.TreeNodeEx($"{node.Name}##{node.GetHashCode()}", base_flags);
-                
+
                 SetNode(node);
             }
             else
             {
                 if (Selection.Selected == node)
                     base_flags |= ImGuiTreeNodeFlags.Selected;
-                
+
                 bool open = ImGui.TreeNodeEx($"{node.Name}##{node.GetHashCode()}", base_flags);
-                
+
                 SetNode(node);
 
                 if (open)
                 {
                     foreach (Asset child in node.Children)
-                        DrawNode(child); 
-                    
+                        DrawNode(child);
+
                     ImGui.TreePop();
                 }
             }
@@ -183,17 +185,20 @@ namespace Unify2D.Toolbox
         {
             if (ImGui.IsItemClicked())
                 Selection.SelectObject(node);
-            
+
             HandBeginDragDropSource(node);
             HandleBeginDragDropTarget(node);
             HandleBeginPopupContext(node);
         }
 
+        private string _newFileName = "";
+        private bool _canRefreshName = true;
+
         private void HandleBeginPopupContext(Asset asset)
         {
-            if (!ImGui.BeginPopupContextItem()) 
+            if (!ImGui.BeginPopupContextItem())
                 return;
-            
+
             if (ImGui.Button("Delete"))
             {
                 DeleteAsset(asset);
@@ -202,18 +207,52 @@ namespace Unify2D.Toolbox
 
             if (ImGui.Button("Show in explorer"))
             {
-                ShowExplorer(string.Empty);
+                ShowExplorer(asset.Path);
                 ImGui.CloseCurrentPopup();
             }
 
-            ImGui.EndPopup();
+            if (ImGui.Button("Rename"))
+            {
+                ImGui.OpenPopup("RenamePopup");
+            }
+
+            if (ImGui.BeginPopup("RenamePopup"))
+            {
+                ImGui.Text("Edit name:");
+
+                if (_canRefreshName)
+                {
+                    _newFileName = asset.Name;
+                    _canRefreshName = false;
+                }
+                    
+                ImGui.InputText("##edit", ref _newFileName, 40);
+
+                if (ImGui.Button("Apply"))
+                {
+                    string oldPath = asset.FullPath;
+                    asset.SetName(_newFileName);
+                    
+                    if(asset.IsDirectory)
+                        Directory.Move($"{_path}{oldPath}", $"{_path}{asset.FullPath}");
+                    else
+                        File.Move($"{_path}{oldPath}", $"{_path}{asset.FullPath}");
+                    
+                    _canRefreshName = true;
+                    ImGui.CloseCurrentPopup();
+                }
+
+                ImGui.EndPopup();
+            }
+
+            ImGui.EndPopup(); 
         }
 
         private unsafe void HandBeginDragDropSource(Asset asset)
         {
-            if (!ImGui.BeginDragDropSource(ImGuiDragDropFlags.None)) 
+            if (!ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
                 return;
-            
+
             int index = _assets.FindIndex(a => a == asset);
             ImGui.SetDragDropPayload("ASSET", (IntPtr)(&index), sizeof(int));
 
@@ -225,12 +264,12 @@ namespace Unify2D.Toolbox
 
         private unsafe void HandleBeginDragDropTarget(Asset asset)
         {
-            if (!ImGui.BeginDragDropTarget()) 
+            if (!ImGui.BeginDragDropTarget())
                 return;
 
-            if (!asset.IsDirectory) 
+            if (!asset.IsDirectory)
                 return;
-            
+
             ImGuiDragDropFlags dropTargetFlags = ImGuiDragDropFlags.AcceptBeforeDelivery |
                                                  ImGuiDragDropFlags.AcceptNoPreviewTooltip;
             ImGuiPayloadPtr payload = ImGui.AcceptDragDropPayload("ASSET", dropTargetFlags);
@@ -244,15 +283,15 @@ namespace Unify2D.Toolbox
                     string newPath = $"{_path}{asset.FullPath}{_assets[sourceIndex].FullPath}";
 
                     if (Path.Exists(newPath))
-                        return; 
-                        
-                    if(_assets[sourceIndex].IsDirectory)
+                        return;
+
+                    if (_assets[sourceIndex].IsDirectory)
                         Directory.Move(oldPath, newPath);
                     else
                         File.Move(oldPath, newPath);
-                        
-                    _assets[sourceIndex].SetPath(_path + asset.FullPath);
-  
+
+                    _assets[sourceIndex].SetPath(asset.Path);
+
                     Reset();
                 }
             }
@@ -272,11 +311,12 @@ namespace Unify2D.Toolbox
                 newScriptPath = Path.Combine(_path, newFile);
                 counter++;
             }
-            
+
             string className = newFile.Replace(".cs", "");
             using (StreamWriter sw = File.CreateText(newScriptPath))
             {
-                string defaultScript = $"using Unify2D.Core;\r\nusing Input = Microsoft.Xna.Framework.Input;\r\n\r\nnamespace Game\r\n{{\r\n    class {className} : Component\r\n    {{\r\n        public override void Update(GameCore game)\r\n        {{\r\n\r\n        }}\r\n    }}\r\n}}";
+                string defaultScript =
+                    $"using Unify2D.Core;\r\nusing Input = Microsoft.Xna.Framework.Input;\r\n\r\nnamespace Game\r\n{{\r\n    class {className} : Component\r\n    {{\r\n        public override void Update(GameCore game)\r\n        {{\r\n\r\n        }}\r\n    }}\r\n}}";
                 sw.WriteLine(defaultScript);
             }
 
@@ -303,19 +343,19 @@ namespace Unify2D.Toolbox
         private void DeleteAsset(Asset asset)
         {
             string path = $"{_path}{asset.FullPath}";
-            
+
             if (Path.Exists(path))
             {
                 if (asset.IsDirectory)
                 {
                     string[] files = Directory.GetFiles(path);
-                    
+
                     if (files.Length > 0)
                     {
                         foreach (string file in files)
                             File.Delete(file);
                     }
-                    
+
                     Directory.Delete(path);
                 }
                 else
@@ -327,7 +367,7 @@ namespace Unify2D.Toolbox
 
         private static void ShowExplorer(string path)
         {
-            string fullPath = GameEditor.Instance.AssetsPath + Path.DirectorySeparatorChar + path;
+            string fullPath = GameEditor.Instance.AssetsPath + path;
 
             if (Directory.Exists(fullPath) == false)
                 Directory.CreateDirectory(fullPath);
