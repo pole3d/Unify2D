@@ -19,6 +19,8 @@ namespace UnifyGame
     /// </summary>
     public class UnifyGame : Game
     {
+        const string JsonFolderSceneName = "\\SceneJson.json";
+
         private GraphicsDeviceManager _graphics;
         private Unify2D.ImGuiRenderer.Renderer _imGuiRenderer;
 
@@ -34,7 +36,7 @@ namespace UnifyGame
             _graphics.PreferredBackBufferHeight = 1080;
             _graphics.PreferMultiSampling = true;
             _graphics.SynchronizeWithVerticalRetrace = false;
-            
+
             IsMouseVisible = true;
         }
 
@@ -56,31 +58,37 @@ namespace UnifyGame
         protected override void LoadContent()
         {
             _core.Initialize(GraphicsDevice);
-
-            //Console.WriteLine(GameSettings.Instance.ScenesInGame.Count + " scene count");
-
-            //SceneManager.Instance.LoadScene(0);
-
             _core.GameObjects.Clear();
+
+            #region Load scene with json
             try
             {
-                string path = Directory.GetCurrentDirectory();
-                string pathJson = path+ "\\SceneJson.json";
+                string currentPath = Directory.GetCurrentDirectory();
+                string pathJson = currentPath + JsonFolderSceneName;
                 if (File.Exists(pathJson))
                 {
-                    //string json = File.ReadAllText(pathJson);
-                    //List<SceneInfo> deserializedNames = System.Text.Json.JsonSerializer.Deserialize<List<SceneInfo>>(json);
-                    //foreach (var name in deserializedNames)
-                    //{
-                    //    GameSettings.Instance.AddSceneToList(name);
-                    //}
-                    //SceneManager.Instance.LoadScene(GameSettings.Instance.ScenesInGame[0]);
+                    List<SceneInfo> deserializedJsonScene = System.Text.Json.JsonSerializer.Deserialize<List<SceneInfo>>(File.ReadAllText(pathJson));
+
+                    for (int i = 0; i < deserializedJsonScene.Count; i++)
+                    {
+                        SceneInfo sceneInfo = deserializedJsonScene[i];
+                        sceneInfo.Path = currentPath + "\\" + sceneInfo.Path;
+                        sceneInfo.BuildIndex = i;
+                        GameSettings.Instance.AddSceneToList(sceneInfo);
+                    }
+
+                    if (GameSettings.Instance.ScenesSave.Count > 0)
+                        SceneManager.Instance.LoadSceneWithPath(GameSettings.Instance.ScenesSave[0].Name);
+                        //SceneManager.Instance.LoadScene(GameSettings.Instance.ScenesSave[0].Path);
                 }
+                else
+                    Console.WriteLine("Problem with your folder json, here your path : " + pathJson);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Can't load scene" + ex.ToString());
             }
+            #endregion
 
             base.LoadContent();
         }
@@ -94,9 +102,9 @@ namespace UnifyGame
 
         protected override void Draw(GameTime gameTime)
         {
-            if ( Camera.Main == null)
+            if (Camera.Main == null)
             {
-                Console.WriteLine( "There's no camera on this scene" );
+                Console.WriteLine("There's no camera on this scene");
                 GameObject go = new GameObject();
                 go.AddComponent<Camera>();
             }

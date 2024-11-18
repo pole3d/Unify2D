@@ -56,8 +56,15 @@ namespace Unify2D
         {
             Save(_currentScene);
         }
+        public void LoadScene(string sceneName)
+        {
+            ClearScene();
 
-        public void LoadScene(string scenePath)
+            _currentScene = GetSceneByName(sceneName);
+            _currentScene.Init();
+        }
+
+        public void LoadSceneWithPath(string scenePath)
         {
             ClearScene();
 
@@ -72,6 +79,18 @@ namespace Unify2D
 
             _currentScene.Init();
         }
+        public void LoadNextSceneInBuild()
+        {
+            ClearScene();
+
+            _currentScene = GetSceneByBuildIndex(_currentScene.BuildIndex + 1);
+            Debug.Log("Next scene pls");
+            _currentScene.Init();
+        }
+
+
+
+
         #endregion
 
 
@@ -84,11 +103,7 @@ namespace Unify2D
         {
             return CurrentScene;
         }
-        public void AddSceneToBuild(Scene scene)
-        {
-            if (_allScenes.Contains(scene) == false)
-                _allScenes.Add(scene);
-        }
+
 
         /// <summary>
         /// Get the Scene at index in the SceneManager's list of loaded Scenes.
@@ -98,12 +113,13 @@ namespace Unify2D
         //    return _loadedScene[index];
         //}
 
+
         /// <summary>
-        /// Get a Scene struct from a build index.
+        /// Get a Scene from a build index.
         /// </summary>
         public Scene GetSceneByBuildIndex(int buildIndex)
         {
-            return new Scene($"./{GameSettings.Instance.ScenesInGame[buildIndex]}.scene");
+            return new Scene(GameSettings.Instance.ScenesSave[buildIndex].Path);
         }
 
         /// <summary>
@@ -111,16 +127,13 @@ namespace Unify2D
         /// </summary>
         public Scene GetSceneByName(string name)
         {
-            foreach (string scene in GameSettings.Instance.ScenesInGame)
+            foreach (SceneInfo scene in GameSettings.Instance.ScenesSave)
             {
-                if (scene != name)
+                if (scene.Name != name)
                     continue;
-
-               return new Scene($"./{scene}.scene");
-                //LoadScene($"./{scene}.scene");
-                //return scene;
+                return new Scene(scene.Path);
             }
-
+            Console.WriteLine("No scene with the name : " + name);
             return null;
         }
 

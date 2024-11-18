@@ -80,7 +80,7 @@ namespace Unify2D
 
             if (result == NfdStatus.Ok)
             {
-                SceneManager.Instance.LoadScene(path);
+                SceneManager.Instance.LoadSceneWithPath(path);
             }
         }
 

@@ -13,17 +13,6 @@ using Unify2D.Physics;
 
 namespace Unify2D
 {
-    public class SceneInfo
-    {
-        public SceneInfo(string name, string path)
-        {
-            Name = name;
-            Path = path;
-        }
-
-        public string Name { get; set; }
-        public string Path { get; set; }
-    }
     public class Scene
     {
         private SceneInfo _sceneInfo;
@@ -65,7 +54,6 @@ namespace Unify2D
                 _sceneInfo = new SceneInfo(path, System.IO.Path.GetFileName(path));
             else
                 SaveSceneNameAndPath(path, System.IO.Path.GetFileName(path));
-
 
             try
             {
@@ -143,9 +131,18 @@ namespace Unify2D
             else
                 GameObjects.Remove(gameObject);
         }
+    }
+    public class SceneInfo
+    {
+        public SceneInfo(string name, string path)
+        {
+            Name = name;
+            Path = path;
+        }
 
-
-
+        public string Name { get; set; }
+        public string Path { get; set; }
+        public int BuildIndex { get; set; }
 
     }
 }

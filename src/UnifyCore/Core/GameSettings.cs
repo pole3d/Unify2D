@@ -26,6 +26,7 @@ namespace Unify2D.Builder
         }
 
         public List<string> ScenesInGame = new List<string>();
+        public List<SceneInfo> ScenesSave = new List<SceneInfo>();
         public void AddSceneToGame()
         {
             Scene currentScene = SceneManager.Instance.CurrentScene;
@@ -42,6 +43,13 @@ namespace Unify2D.Builder
                 return;
 
             ScenesInGame.Add(sceneName);
+        }
+        public void AddSceneToList(SceneInfo scene)
+        {
+            if (ScenesSave.Contains(scene) == true)
+                return;
+
+            ScenesSave.Add(scene);
         }
     }
 }

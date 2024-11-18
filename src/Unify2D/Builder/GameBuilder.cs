@@ -22,11 +22,12 @@ namespace Unify2D.Builder
         const string AssetsPath = "./Assets";
         const string TemplatePath = "./GameTemplate";
         const string RuntimesFolderPath = "./runtimes";
+        const string JsonFolderSceneName = "SceneJson.json";
         string AssetsPathFull => ToolsEditor.CombinePath(_editor.ProjectPath, AssetsPath);
         string BuildPathFull => ToolsEditor.CombinePath(_editor.ProjectPath, "./Build");
         string RuntimesFolderPathFull => ToolsEditor.CombinePath(TemplatePath, RuntimesFolderPath);
 
-
+        const string AssemblyName = "GameAssembly";
         const string ExeName = "UnifyGame.exe";
 
         GameCore _core;
@@ -100,7 +101,7 @@ namespace Unify2D.Builder
                     }
 
                     string json = JsonSerializer.Serialize(listSceneToJson);
-                    string pathJson = ToolsEditor.CombinePath(BuildPathFull, "SceneJson.json");
+                    string pathJson = ToolsEditor.CombinePath(BuildPathFull, JsonFolderSceneName);
                     File.WriteAllText(pathJson, json);
                 }
                 catch (Exception ex)
@@ -139,7 +140,7 @@ namespace Unify2D.Builder
                 }
             }
 
-            string assemblyName = "GameAssembly";
+          
             List<MetadataReference> references = new();
 
             foreach (var r in ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")).Split(Path.PathSeparator))
@@ -148,12 +149,12 @@ namespace Unify2D.Builder
             }
 
             CSharpCompilation compilation = CSharpCompilation.Create(
-            assemblyName,
+            AssemblyName,
             syntaxTrees: syntaxes,
             references: references,
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-            string dllPath = ToolsEditor.CombinePath(BuildPathFull, "GameAssembly.dll");
+            string dllPath = ToolsEditor.CombinePath(BuildPathFull, $"{AssemblyName}.dll");
 
             EmitResult result = compilation.Emit(dllPath);
 
