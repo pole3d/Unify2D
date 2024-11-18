@@ -31,6 +31,8 @@ namespace Unify2D
         public Scene CurrentScene => _currentScene;
         public int SceneCountInGameSettings => GameSettings.Instance.ScenesInGame.Count;
 
+        private List<Scene> _allScenes = new List<Scene>();
+
         public SceneManager()
         {
             _currentScene = new Scene();
@@ -40,9 +42,9 @@ namespace Unify2D
         public void Save(Scene scene)
         {
             if (scene.Name == null)
-            {
                 return;
-            }
+
+            Debug.Log("Save scene");
 
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
@@ -56,11 +58,17 @@ namespace Unify2D
         {
             Save(_currentScene);
         }
-
-        public void LoadScene(string scenePath)
+        public void LoadScene(string sceneName)
         {
             ClearScene();
 
+            _currentScene = GetSceneByName(sceneName);
+            _currentScene.Init();
+        }
+
+        public void LoadSceneWithPath(string scenePath)
+        {
+            ClearScene();
             _currentScene = new Scene(scenePath);
             _currentScene.Init();
         }
@@ -70,6 +78,14 @@ namespace Unify2D
 
             _currentScene = GetSceneByBuildIndex(sceneBuildIndex);
 
+            _currentScene.Init();
+        }
+        public void LoadNextSceneInBuild()
+        {
+            ClearScene();
+
+            _currentScene = GetSceneByBuildIndex(_currentScene.BuildIndex + 1);
+            Debug.Log("Next scene pls");
             _currentScene.Init();
         }
         #endregion
@@ -86,17 +102,18 @@ namespace Unify2D
         /// <summary>
         /// Get the Scene at index in the SceneManager's list of loaded Scenes.
         /// </summary>
-        //public Scene GetSceneAt(int index)
-        //{
-        //    return _loadedScene[index];
-        //}
+        public Scene GetSceneAt(int index)
+        {
+            return new Scene(GameSettings.Instance.ScenesSave[index].Path);
+        }
+
 
         /// <summary>
-        /// Get a Scene struct from a build index.
+        /// Get a Scene from a build index.
         /// </summary>
         public Scene GetSceneByBuildIndex(int buildIndex)
         {
-            return GameSettings.Instance.ScenesInGame[buildIndex];
+            return new Scene(GameSettings.Instance.ScenesSave[buildIndex].Path);
         }
 
         /// <summary>
@@ -104,14 +121,13 @@ namespace Unify2D
         /// </summary>
         public Scene GetSceneByName(string name)
         {
-            foreach (Scene scene in GameSettings.Instance.ScenesInGame)
+            foreach (SceneInfo scene in GameSettings.Instance.ScenesSave)
             {
-                if(scene.Name != name)
+                if (scene.Name != name)
                     continue;
-
-                return scene;
+                return new Scene(scene.Path);
             }
-
+            Console.WriteLine("No scene with the name : " + name);
             return null;
         }
 
@@ -124,7 +140,15 @@ namespace Unify2D
 
         private void ClearScene()
         {
-            CurrentScene.GameObjects.Clear();
+            CurrentScene.ClearScene();
+        }
+
+        public void AddGameObject(GameObject go)
+        {
+            if (CurrentScene.GameObjects.Contains(go))
+                return;
+
+            CurrentScene.GameObjects.Add(go);
         }
 
         private void SilentErrors(object sender, Newtonsoft.Json.Serialization.ErrorEventArgs e)

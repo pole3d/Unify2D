@@ -24,19 +24,32 @@ namespace Unify2D.Builder
                 return _instance;
             }
         }
-        public List<Scene> ScenesInGame = new List<Scene>();
+
+        public List<string> ScenesInGame = new List<string>();
+        public List<SceneInfo> ScenesSave = new List<SceneInfo>();
         public void AddSceneToGame()
         {
-            Scene currentScene =  SceneManager.Instance.CurrentScene;
-            if (ScenesInGame.Contains(currentScene) == false)
+            Scene currentScene = SceneManager.Instance.CurrentScene;
+
+            if (ScenesInGame.Contains(currentScene.Name) == false)
                 return;
 
-            ScenesInGame.Add(currentScene);
+            ScenesInGame.Add(currentScene.Name);
         }
 
+        public void AddSceneToList(string sceneName)
+        {
+            if (ScenesInGame.Contains(sceneName) == true)
+                return;
 
+            ScenesInGame.Add(sceneName);
+        }
+        public void AddSceneToList(SceneInfo scene)
+        {
+            if (ScenesSave.Contains(scene) == true)
+                return;
+
+            ScenesSave.Add(scene);
+        }
     }
-
-
-
 }

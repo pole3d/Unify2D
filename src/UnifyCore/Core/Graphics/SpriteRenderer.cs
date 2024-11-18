@@ -43,12 +43,14 @@ namespace Unify2D.Core.Graphics
         internal override void Destroy()
         {
             _texture = null;
-            _asset.Release();
+            if (_asset != null)
+                _asset.Release();
         }
 
         public override void Load(Game game, GameObject go)
         {
-            Initialize(game, go, _asset.Name);
+            if (_asset != null)
+                Initialize(game, go, _asset.Name);
         }
 
         public override void Draw()
