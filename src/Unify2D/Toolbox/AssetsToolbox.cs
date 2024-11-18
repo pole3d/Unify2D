@@ -293,7 +293,7 @@ namespace Unify2D.Toolbox
                 {
                     int sourceIndex = *(int*)payload.Data;
                     string oldPath = $"{_path}{_assets[sourceIndex].FullPath}";
-                    string newPath = $"{_path}{asset.FullPath}{_assets[sourceIndex].FullPath}";
+                    string newPath = $"{_path}{asset.FullPath}/{_assets[sourceIndex].Name}{_assets[sourceIndex].Extension}";
 
                     if (Path.Exists(newPath))
                         return;
