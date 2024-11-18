@@ -25,7 +25,7 @@ namespace Unify2D.Builder
         GameCore _core;
         GameEditor _editor;
 
-        public void Build(GameCore core, GameEditor editor)
+        public bool Build(GameCore core, GameEditor editor)
         {
             _core = core;
             _editor = editor;
@@ -40,7 +40,7 @@ namespace Unify2D.Builder
             {
                 Console.WriteLine($"There's no template at the given path {TemplatePath}");
 
-                return;
+                return false;
             }
 
             foreach (string file in Directory.GetFiles(TemplatePath))
@@ -65,6 +65,8 @@ namespace Unify2D.Builder
             #endregion
 
             CreateDll();
+
+            return true;
         }
 
 

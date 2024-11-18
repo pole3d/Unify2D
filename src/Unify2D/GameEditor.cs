@@ -234,8 +234,9 @@ namespace Unify2D
         public void Build()
         {
             GameBuilder builder = new GameBuilder();
-            builder.Build(_core, this);
-            builder.StartBuild();
+            
+            if ( builder.Build(_core, this))
+                builder.StartBuild();
         }
 
         #endregion
