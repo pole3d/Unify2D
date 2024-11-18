@@ -64,12 +64,12 @@ namespace Unify2D.Toolbox
             _selected = new bool[_assets.Count];
         }
 
-        private Asset CreateAssetFromDirectory(string directory, bool isChild = false)
+        private Asset CreateAssetFromDirectory(string directory)
         {
             string relativeDirectory = directory.Replace(_path, string.Empty);
             Asset newAsset = new Asset(Path.GetFileNameWithoutExtension(relativeDirectory), Path.GetDirectoryName(relativeDirectory), true);
                 
-                _assets.Add(newAsset);
+            _assets.Add(newAsset);
 
             string[] filesInDirectory = Directory.GetFiles($"{_path}{newAsset.FullPath}");
             string[] directoriesInDirectory = Directory.GetDirectories($"{_path}{newAsset.FullPath}");
@@ -82,7 +82,7 @@ namespace Unify2D.Toolbox
             
             foreach (string dir in directoriesInDirectory)
             {
-                Asset child = CreateAssetFromDirectory(dir, true);
+                Asset child = CreateAssetFromDirectory(dir);
                 newAsset.AddChild(child);
             }
 
@@ -151,19 +151,23 @@ namespace Unify2D.Toolbox
 
             if (node.Children.Count == 0)
             {
-                base_flags |= ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
+                base_flags = ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen; // ImGuiTreeNodeFlags_Bullet
 
                 if (Selection.Selected == node)
                     base_flags |= ImGuiTreeNodeFlags.Selected;
 
                 ImGui.TreeNodeEx($"{node.Name}##{node.GetHashCode()}", base_flags);
-
-                if (ImGui.IsItemClicked())
-                    Selection.SelectObject(node);
+                
+                SetNode(node);
             }
             else
             {
+                if (Selection.Selected == node)
+                    base_flags |= ImGuiTreeNodeFlags.Selected;
+                
                 bool open = ImGui.TreeNodeEx($"{node.Name}##{node.GetHashCode()}", base_flags);
+                
+                SetNode(node);
 
                 if (open)
                 {
@@ -173,6 +177,12 @@ namespace Unify2D.Toolbox
                     ImGui.TreePop();
                 }
             }
+        }
+
+        private void SetNode(Asset node)
+        {
+            if (ImGui.IsItemClicked())
+                Selection.SelectObject(node);
             
             HandBeginDragDropSource(node);
             HandleBeginDragDropTarget(node);
