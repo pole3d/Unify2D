@@ -85,7 +85,6 @@ namespace Unify2D
             ClearScene();
 
             _currentScene = GetSceneByBuildIndex(_currentScene.BuildIndex + 1);
-            Debug.Log("Next scene pls");
             _currentScene.Init();
         }
         #endregion
