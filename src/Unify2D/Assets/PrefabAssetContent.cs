@@ -11,6 +11,8 @@ namespace Unify2D.Assets
     /// </summary>
     internal class PrefabAssetContent : AssetContent
     {
+        public GameObject InstantiatedGameObject { get; private set; }
+        
         private string _serializedText;
 
         public PrefabAssetContent() : base(null) { }
@@ -18,6 +20,19 @@ namespace Unify2D.Assets
         public PrefabAssetContent(Asset asset) : base(asset)
         {
         }
+
+        public override void Load()
+        {
+            base.Load();
+            InstantiateGameObject();
+        }
+
+        public void InstantiateGameObject()
+        {
+            PrefabInstance prefabInstance = new PrefabInstance($"{Asset.FullPath}");
+            InstantiatedGameObject = prefabInstance.InstantiateAndLinkGameObject();
+        }
+
         internal void Save(GameObject gameObject)
         {
             // Make so type name should be written in serialized data

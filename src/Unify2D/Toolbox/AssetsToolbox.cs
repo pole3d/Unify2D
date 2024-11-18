@@ -123,8 +123,8 @@ namespace Unify2D.Toolbox
                         }
                     }
 
-                    _selected[n] = !_selected[n];
                     Selection.SelectObject(_assets[n]);
+                    _selected[n] = !_selected[n];
                 }
 
                 HandBeginDragDropSource(n);
@@ -150,12 +150,11 @@ namespace Unify2D.Toolbox
 
                 if (ImGui.Button(InstantiateAsGameObjectButtonLabel))
                 {
-                    // Logic to instantiate the prefab as a GameObject
-                    PrefabInstance prefabInstance = new PrefabInstance($"{prefabContent.Asset.FullPath}");
-                    GameObject instantiatedGameObject = prefabInstance.InstantiateAndLinkGameObject();
-                            
+                    // Load the prefab content
+                    prefabContent.Load();
+                    
                     // Add GameObject to the scene
-                    SceneManager.Instance.CurrentScene.AddRootGameObject(instantiatedGameObject);
+                    SceneManager.Instance.CurrentScene.AddRootGameObject(prefabContent.InstantiatedGameObject);
 
                     _selected[assetIndex] = false;
                     ImGui.CloseCurrentPopup();
@@ -163,7 +162,6 @@ namespace Unify2D.Toolbox
             }
             if (ImGui.Button(DeleteButtonLabel))
             {
-                // DeleteAsset(_assets[assetIndex]);
                 DeleteSelectedAssets();
                 ImGui.CloseCurrentPopup();
             }
@@ -268,11 +266,6 @@ namespace Unify2D.Toolbox
             Reset();
         }
 
-        private void SelectAsset(Asset asset)
-        {
-            Selection.SelectObject(asset);
-        }
-        
         private static void ShowExplorer(string path)
         {
             string fullPath = GameEditor.Instance.AssetsPath + Path.DirectorySeparatorChar + path;

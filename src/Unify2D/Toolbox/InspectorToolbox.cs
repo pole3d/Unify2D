@@ -118,6 +118,18 @@ namespace Unify2D.Toolbox
                     _editor.Scripting.Reload();
                 }
             }
+
+            if (_asset.AssetContent is PrefabAssetContent prefabAsset)
+            {
+                // Load the prefab asset content if not already loaded
+                if (!prefabAsset.IsLoaded)
+                    prefabAsset.Load();
+                
+                // Set _gameObject to the instantiated prefab game object to show its properties
+                _gameObject = prefabAsset.InstantiatedGameObject;
+                
+                ShowGameObject();
+            }
         }
 
         private void ShowGameObject()
