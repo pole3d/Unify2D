@@ -76,7 +76,7 @@ namespace Unify2D.Scripting
 
                     foreach (Diagnostic diagnostic in failures)
                     {
-                        Console.Error.WriteLine("{0}: {1}", diagnostic.Id, diagnostic.GetMessage());
+                        Debug.LogError($"{diagnostic.Id}: {diagnostic.GetMessage()}");
                     }
                 }
                 else
