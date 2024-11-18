@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using Unify2D.Core.Graphics;
+using UnifyCore.Scripting;
 
 namespace Unify2D.Core
 {
@@ -41,6 +42,7 @@ namespace Unify2D.Core
         public GameObject Parent { get; set; }
         [JsonIgnore]
         public IEnumerable<Component> Components => _components;
+        public IEnumerable<ClassInstance> NativeComponents => _nativeComponents;
 
         private Vector2 m_position;
         private float m_rotation;
@@ -50,9 +52,11 @@ namespace Unify2D.Core
 
 
         List<Renderer> _renderers;
-
+        List<ClassInstance> _nativeRenderers = new();
+        
         [JsonProperty]
         List<Component> _components;
+        List<ClassInstance> _nativeComponents = new();
 
         public GameObject()
         {
@@ -163,6 +167,25 @@ namespace Unify2D.Core
             _components.Add(component);
         }
 
+        public void AddComponent(ClassInstance component)
+        {
+            if (component.IsNative)
+            {
+                if (component.IsRenderer())
+                {
+                    _nativeRenderers.Add(component);
+                }
+
+                component.Initialize(this);
+                // todo: component.Initialize(this);
+                _nativeComponents.Add(component);
+            }
+            else
+            {
+                AddComponent(component.CSharpObject);
+            }
+        }
+
         internal void Update(GameCore core)
         {
             foreach (var item in _components)
@@ -190,6 +213,22 @@ namespace Unify2D.Core
 
             item.Destroy();
             _components.Remove(item);
+        }
+
+        public void RemoveComponent(ClassInstance component)
+        {
+            if (!component.IsNative)
+            {
+                return;
+            }
+            
+            if (component.IsRenderer())
+            {
+                _nativeRenderers.Remove(component);
+            }
+
+            // todo: component.Destroy();
+            _nativeComponents.Remove(component);
         }
 
         public void ClearComponents()

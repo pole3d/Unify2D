@@ -18,9 +18,19 @@ void CSharpAssembly::Reload()
     m_Image = mono_assembly_get_image(m_Assembly);
 }
 
-MonoClass* CSharpAssembly::GetClass(const std::string& ClassName) const
+MonoClass* CSharpAssembly::GetClass(const std::string& ClassName, const std::string& NameSpace) const
 {
-    return mono_class_from_name(m_Image, "", ClassName.c_str());
+    return mono_class_from_name(m_Image, NameSpace.c_str(), ClassName.c_str());
+}
+
+MonoImage* CSharpAssembly::GetImage() const
+{
+    return m_Image;
+}
+
+std::string CSharpAssembly::GetAssemblyPath() const
+{
+    return m_AssemblyPath;
 }
 
 MonoAssembly* CSharpAssembly::LoadAssembly(const std::string& Path)

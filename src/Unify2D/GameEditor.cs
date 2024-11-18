@@ -14,6 +14,7 @@ using Unify2D.Core;
 using Unify2D.Toolbox;
 using Unify2D.Toolbox.Popup;
 using Unify2D.Tools;
+using UnifyCore.Scripting;
 
 namespace Unify2D
 {
@@ -44,7 +45,6 @@ namespace Unify2D
 
         public GameCore GameCore => _core;
         public GameEditorSettings Settings => _settings;
-        public Scripting.Scripting Scripting => _scripting;
         public ImGuiRenderer.Renderer GuiRenderer => _imGuiRenderer;
 
         public GameObject Selected => _selected;
@@ -64,7 +64,6 @@ namespace Unify2D
         GraphicsDeviceManager _graphics;
         GameEditorUI _gameEditorUI;
         ImGuiRenderer.Renderer _imGuiRenderer;
-        Scripting.Scripting _scripting;
         GameEditorSettings _settings;
         SceneManager _sceneEditorManager;
 
@@ -100,8 +99,6 @@ namespace Unify2D
             _settings.Load(this);
 
             Content.RootDirectory = ProjectPath;
-
-            _scripting = new Scripting.Scripting();
 
             _imGuiRenderer = new ImGuiRenderer.Renderer(this);
             _imGuiRenderer.RebuildFontAtlas();
@@ -238,8 +235,8 @@ namespace Unify2D
 
         public void BuildProject()
         {
-            Scripting.Build();
-            Scripting.Reload();
+            Scripting.Instance.Build($@"{GameEditor.Instance.ProjectPath}\build");
+            Scripting.Instance.Reload();
         }
 
         public void BuildAndRun()

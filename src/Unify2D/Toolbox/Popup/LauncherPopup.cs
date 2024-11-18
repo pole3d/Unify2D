@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using Unify2D.Toolbox.Popup;
 using Unify2D.Tools;
+using UnifyCore.Scripting;
 
 namespace Unify2D.Toolbox
 {
@@ -91,7 +92,7 @@ namespace Unify2D.Toolbox
                              """);
             
             string corePath = Path.Combine(Directory.GetCurrentDirectory(), "UnifyCore.dll");
-            string fnaPath = Path.Combine(Directory.GetCurrentDirectory(), "UnifyCore.dll");
+            string fnaPath = Path.Combine(Directory.GetCurrentDirectory(), "FNA.dll");
             stream.WriteLine($"set_target_properties(GameAssembly PROPERTIES VS_DOTNET_REFERENCE_UnifyCore \"{corePath.Replace('\\', '/')}\")");
             stream.WriteLine($"set_target_properties(GameAssembly PROPERTIES VS_DOTNET_REFERENCE_FNA \"{fnaPath.Replace('\\', '/')}\")");
         }
@@ -148,7 +149,7 @@ namespace Unify2D.Toolbox
         {
             //_editor.SceneEditorManager.LoadScene();
             
-            _editor.Scripting.LoadDll();
+            Scripting.Instance.LoadDll($@"{GameEditor.Instance.ProjectPath}\build\Debug\GameAssembly.dll");
 
             _editor.HidePopup();
         }

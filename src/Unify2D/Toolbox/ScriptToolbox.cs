@@ -10,6 +10,7 @@ using System.Reflection;
 using Unify2D.Assets;
 using Unify2D.Core;
 using Unify2D.Tools;
+using UnifyCore.Scripting;
 
 namespace Unify2D.Toolbox
 {
@@ -97,7 +98,7 @@ namespace Unify2D.Toolbox
             if (ImGui.Button("Save"))
             {
                 scriptAsset.Save();
-                _editor.Scripting.Reload();
+                Scripting.Instance.Reload();
             }
 
             if (scriptAsset != null)

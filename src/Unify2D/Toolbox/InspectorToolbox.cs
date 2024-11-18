@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using Unify2D.Assets;
 using Unify2D.Core;
+using UnifyCore.Scripting;
 
 namespace Unify2D.Toolbox
 {
@@ -111,7 +112,7 @@ namespace Unify2D.Toolbox
                 if (ImGui.Button("Save"))
                 {
                     scriptAsset.Save();
-                    _editor.Scripting.Reload();
+                    Scripting.Instance.Reload();
                 }
             }
         }
@@ -134,6 +135,7 @@ namespace Unify2D.Toolbox
             _gameObject.Scale = new Vector2(scale.X, scale.Y);
 
             List<Component> toRemove = new List<Component>();
+            List<ClassInstance> nativeComponentsToRemove = new();
             foreach (var component in _gameObject.Components)
             {
                 ImGui.SetNextItemOpen(true, ImGuiCond.Once);
@@ -156,22 +158,49 @@ namespace Unify2D.Toolbox
                 ImGui.Separator();
             }
 
+            foreach (ClassInstance component in _gameObject.NativeComponents)
+            {
+                ImGui.SetNextItemOpen(true, ImGuiCond.Once);
+                if (ImGui.TreeNode(component.ClassName))
+                {
+                    
+                    ImGui.PushStyleColor(ImGuiCol.Button, ToolsUI.ToColor32(230, 50, 60, 255));
+                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ToolsUI.ToColor32(250, 70, 80, 255));
+                    ImGui.PushStyleColor(ImGuiCol.ButtonActive, ToolsUI.ToColor32(255, 90, 100, 255));
+
+                    if (ImGui.Button("Delete"))
+                    {
+                        nativeComponentsToRemove.Add(component);
+                    }
+                    ImGui.PopStyleColor(3);
+                    
+                    ImGui.TreePop();
+                }
+
+                ImGui.Separator();
+            }
+
             foreach (var item in toRemove)
             {
                 _gameObject.RemoveComponent(item);
             }
 
-            if (_gameObject.Components.Count() == 0)
+            foreach (ClassInstance component in nativeComponentsToRemove)
+            {
+                _gameObject.RemoveComponent(component);
+            }
+
+            if (!(_gameObject.Components.Any() || _gameObject.NativeComponents.Any()))
                 ImGui.Separator();
 
             if (ImGui.CollapsingHeader("Add Component"))
             {
-                foreach (var item in _editor.Scripting.GetTypes())
+                foreach (var item in Scripting.Instance.GetTypes())
                 {
-                    if (ImGui.Button(item.Name))
+                    if (ImGui.Button(item.ClassName))
                     {
-                        var component = Activator.CreateInstance(item);
-                        _gameObject.AddComponent(component as Component);
+                        ClassInstance component = item.Instantiate();
+                        _gameObject.AddComponent(component);
                     }
                 }
             }
