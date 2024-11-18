@@ -78,8 +78,7 @@ namespace UnifyGame
                     }
 
                     if (GameSettings.Instance.ScenesSave.Count > 0)
-                        SceneManager.Instance.LoadSceneWithPath(GameSettings.Instance.ScenesSave[0].Name);
-                        //SceneManager.Instance.LoadScene(GameSettings.Instance.ScenesSave[0].Path);
+                        SceneManager.Instance.LoadScene(GameSettings.Instance.ScenesSave[0].Name);
                 }
                 else
                     Console.WriteLine("Problem with your folder json, here your path : " + pathJson);
@@ -93,12 +92,11 @@ namespace UnifyGame
             base.LoadContent();
         }
 
-        // protected override void Update(GameTime gameTime)
-        // {
-        //     _core.Update(gameTime);
-        //     SceneManager.Instance.CurrentScene.Update(gameTime);
-        //
-        // }
+        protected override void Update(GameTime gameTime)
+        {
+            if (SceneManager.Instance.CurrentScene != null)
+                SceneManager.Instance.CurrentScene.Update(gameTime);
+        }
 
         protected override void Draw(GameTime gameTime)
         {
