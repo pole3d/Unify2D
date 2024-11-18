@@ -123,8 +123,8 @@ namespace Unify2D.Toolbox
                         }
                     }
 
-                    Selection.SelectObject(_assets[n]);
                     _selected[n] = !_selected[n];
+                    Selection.SelectObject(_assets[n]);
                 }
 
                 HandBeginDragDropSource(n);
@@ -163,7 +163,8 @@ namespace Unify2D.Toolbox
             }
             if (ImGui.Button(DeleteButtonLabel))
             {
-                DeleteAsset(_assets[assetIndex]);
+                // DeleteAsset(_assets[assetIndex]);
+                DeleteSelectedAssets();
                 ImGui.CloseCurrentPopup();
             }
 
@@ -267,6 +268,33 @@ namespace Unify2D.Toolbox
             Reset();
         }
 
+        private void SelectAsset(Asset asset)
+        {
+            Selection.SelectObject(asset);
+        }
+        
+        private static void ShowExplorer(string path)
+        {
+            string fullPath = GameEditor.Instance.AssetsPath + Path.DirectorySeparatorChar + path;
+
+            if (Directory.Exists(fullPath) == false)
+                Directory.CreateDirectory(fullPath);
+
+            System.Diagnostics.Process.Start("explorer.exe", fullPath);
+        }
+
+        private void DeleteSelectedAssets()
+        {
+            for (int n = 0; n < _assets.Count; n++)
+            {
+                if (_selected[n])
+                {
+                    DeleteAsset(_assets[n]);
+                }
+            }
+            Reset();
+        }
+        
         private void DeleteAsset(Asset asset)
         {
             string path = $"{_path}{asset.FullPath}";
@@ -288,30 +316,6 @@ namespace Unify2D.Toolbox
                 else
                     File.Delete(path);
             }
-
-            Reset();
-        }
-
-        private static void ShowExplorer(string path)
-        {
-            string fullPath = GameEditor.Instance.AssetsPath + Path.DirectorySeparatorChar + path;
-
-            if (Directory.Exists(fullPath) == false)
-                Directory.CreateDirectory(fullPath);
-
-            System.Diagnostics.Process.Start("explorer.exe", fullPath);
-        }
-
-        private void DeleteSelectedAssets()
-        {
-            for (int n = 0; n < _assets.Count; n++)
-            {
-                if (_selected[n])
-                {
-                    File.Delete(GameEditor.Instance.AssetsPath + _assets[n].FullPath);
-                }
-            }
-            Reset();
         }
     }
 }
