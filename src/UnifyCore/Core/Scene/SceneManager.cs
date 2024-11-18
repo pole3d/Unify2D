@@ -42,9 +42,9 @@ namespace Unify2D
         public void Save(Scene scene)
         {
             if (scene.Name == null)
-            {
                 return;
-            }
+
+            Debug.Log("Save scene");
 
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
@@ -69,7 +69,6 @@ namespace Unify2D
         public void LoadSceneWithPath(string scenePath)
         {
             ClearScene();
-
             _currentScene = new Scene(scenePath);
             _currentScene.Init();
         }
@@ -89,18 +88,11 @@ namespace Unify2D
             Debug.Log("Next scene pls");
             _currentScene.Init();
         }
-
-
-
-
         #endregion
 
 
 
         #region Function
-
-
-
         public Scene GetActiveScene()
         {
             return CurrentScene;
@@ -110,10 +102,10 @@ namespace Unify2D
         /// <summary>
         /// Get the Scene at index in the SceneManager's list of loaded Scenes.
         /// </summary>
-        //public Scene GetSceneAt(int index)
-        //{
-        //    return _loadedScene[index];
-        //}
+        public Scene GetSceneAt(int index)
+        {
+            return new Scene(GameSettings.Instance.ScenesSave[index].Path);
+        }
 
 
         /// <summary>
@@ -148,7 +140,15 @@ namespace Unify2D
 
         private void ClearScene()
         {
-            CurrentScene.GameObjects.Clear();
+            CurrentScene.ClearScene();
+        }
+
+        public void AddGameObject(GameObject go)
+        {
+            if (CurrentScene.GameObjects.Contains(go))
+                return;
+
+            CurrentScene.GameObjects.Add(go);
         }
 
         private void SilentErrors(object sender, Newtonsoft.Json.Serialization.ErrorEventArgs e)

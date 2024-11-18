@@ -76,7 +76,7 @@ namespace Unify2D.Builder
             }
 
 
-            //SceneManager.Instance.SaveCurrentScene();
+           
 
 
             SaveAllScene();
@@ -88,6 +88,8 @@ namespace Unify2D.Builder
 
         private void SaveAllScene()
         {
+            SceneManager.Instance.SaveCurrentScene();
+
             if (Directory.Exists(_editor.AssetsPath))
             {
                 List<SceneInfo> listSceneToJson = new List<SceneInfo>();
@@ -145,7 +147,9 @@ namespace Unify2D.Builder
           
             List<MetadataReference> references = new();
 
-            foreach (var r in ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")).Split(Path.PathSeparator))
+            var libs = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")).Split(Path.PathSeparator);
+
+            foreach (var r in libs)
             {
                 references.Add(MetadataReference.CreateFromFile(r));
             }
