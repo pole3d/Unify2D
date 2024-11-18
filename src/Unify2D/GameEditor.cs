@@ -249,8 +249,11 @@ namespace Unify2D
         public void Build()
         {
             GameBuilder builder = new GameBuilder();
-            builder.Build(_coreViewerScene.GameCore, this);
-            builder.StartBuild();
+
+            
+            if ( builder.Build(_coreViewerScene.GameCore, this))
+                builder.StartBuild();
+
         }
 
         #endregion
