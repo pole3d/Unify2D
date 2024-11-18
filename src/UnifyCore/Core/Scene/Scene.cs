@@ -16,10 +16,13 @@ namespace Unify2D
     {
         public string Name { get; private set; }
         public string Path { get; private set; }
-        public int RootCount => GameObjects.Count;
         public int BuildIndex { get; private set; }
-
-        public List<GameObject> GameObjects { get; private set; } = new List<GameObject>();
+        public List<GameObject> GameObjects { get; private set; } = new();
+        public int RootCount => GameObjects.Count;
+        public List<Canvas> CanvasList => _canvasList;
+        
+        
+        private List<Canvas> _canvasList = new List<Canvas>();
 
         public IEnumerable<GameObject> GameObjectsWithChildren
         {
@@ -96,8 +99,12 @@ namespace Unify2D
             foreach (GameObject item in GameObjects)
             {
                 item.Draw();
+
+                var canvas = item.GetComponent<Canvas>();
+                if (canvas != null) canvas.Draw();
             }
         }
+        
         public void Update(GameTime gameTime)
         {
             foreach (GameObject item in GameObjects)
@@ -132,8 +139,28 @@ namespace Unify2D
             }
         }
 
-        
+        public bool HasCanvas(out Canvas canvas)
+        {
+            if (_canvasList == null)
+            {
+                _canvasList = new List<Canvas>();
+            }
+            
+            canvas = null;
+            if (_canvasList.Count <= 0) return false;
 
+            _canvasList.RemoveAll(x => x == null);
+            
+            if (_canvasList.Count <= 0) return false;
+            
+            canvas = _canvasList[0];
+            
+            return true;
+        }
 
+        public void UpdateCanvas()
+        {
+            _canvasList.ForEach(x => x.UpdateList());
+        }
     }
 }

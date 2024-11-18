@@ -4,11 +4,13 @@ using Microsoft.Xna.Framework;
 namespace Unify2D.Core
 {
     /// <summary>
-    /// The <see cref="n"/> class, an abstract extension of <see cref="Component"/>,
+    /// The <see cref="UIComponent"/> class, an abstract extension of <see cref="Component"/>,
     /// it serves as a base class for UI elements in the game view.
     /// </summary>
     public abstract class UIComponent : Component
     {
+        public Canvas ParentCanvas { get; set; }
+        
         public Vector2 Origin { get; set; }
 
         public enum AnchorType

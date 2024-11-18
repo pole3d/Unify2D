@@ -140,15 +140,9 @@ namespace Unify2D.Core
 
         internal void Draw()
         {
-            foreach (var item in _renderers)
+            foreach (Renderer renderer in _renderers)
             {
-                item.Draw();
-            }
-
-            foreach (Component component in _components)
-            {
-                if (component is not UIComponent ui) continue;
-                ui.Draw();
+                renderer.Draw();
             }
         }
         internal void DrawGizmo()
@@ -175,13 +169,14 @@ namespace Unify2D.Core
             }
 
             //ui
+            Scene scene = SceneManager.Instance.CurrentScene;
             if (component is Canvas canvas)
             {
-                GameCore.Current.CanvasList.Add(canvas);
+                scene.CanvasList.Add(canvas);
             }
             else if (component is UIComponent)
             {
-                bool hasCanvas = GameCore.Current.HasCanvas(out Canvas gameCoreCanvas);
+                bool hasCanvas = scene.HasCanvas(out Canvas gameCoreCanvas);
                 if (hasCanvas && gameCoreCanvas.GameObject == this)
                 {
                     Debug.Log("You can't add an UI element to a canvas");
@@ -215,6 +210,8 @@ namespace Unify2D.Core
             component.Initialize(this);
 
             _components.Add(component);
+            
+            SceneManager.Instance.CurrentScene.UpdateCanvas();
         }
 
         internal void Update(GameCore core)
@@ -261,11 +258,12 @@ namespace Unify2D.Core
             
             if (component is Canvas canvas)
             {
-                Debug.Log("remove from canvas list");
-                GameCore.Current.CanvasList.Remove(canvas);
+                SceneManager.Instance.CurrentScene.CanvasList.Remove(canvas);
             }
 
             component.Destroy();
+            
+            SceneManager.Instance.CurrentScene.UpdateCanvas();
         }
 
         Vector2 GetParentPosition()

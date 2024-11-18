@@ -90,13 +90,13 @@ namespace UnifyGame
             {
                 GraphicsDevice.Clear(Color.Gray);
             }
+            
             // Call BeforeLayout first to set things up
             _imGuiRenderer.BeforeLayout(gameTime);
 
             // Draw our UI
             ImGuiLayout();
-
-
+            
             // Call AfterLayout now to finish up and draw all the things
             _imGuiRenderer.AfterLayout();
         }

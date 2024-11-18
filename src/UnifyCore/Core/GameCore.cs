@@ -31,7 +31,6 @@ namespace Unify2D.Core
         public GraphicsDevice GraphicsDevice { get; private set; }
         public SpriteBatch SpriteBatch { get; private set; }
         public List<GameObject> GameObjects => _gameObjects;
-        public List<Canvas> CanvasList => _canvasList;
         public PhysicsSettings PhysicsSettings { get; private set; }
         public float DeltaTime { get; private set; }
 
@@ -41,7 +40,6 @@ namespace Unify2D.Core
         List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
         Game _game;
 
-        private List<Canvas> _canvasList = new List<Canvas>();
         
         public GameCore(Game game)
         {
@@ -49,15 +47,9 @@ namespace Unify2D.Core
             _gameObjects = new List<GameObject>();
         }
 
-        internal void AddRootGameObject(GameObject go)
-        {
-            _gameObjects.Add(go);
-        }
-
         public void InitPhysics()
         {
-            if (PhysicsSettings == null)
-                PhysicsSettings = new PhysicsSettings();
+            PhysicsSettings ??= new PhysicsSettings();
 
             PhysicsSettings.Init();
         }
@@ -73,13 +65,6 @@ namespace Unify2D.Core
                         matrix);
         }
         
-        public void Draw()
-        {
-            foreach (var item in _gameObjects)
-            {
-                item.Draw();
-            }
-        }
         public void DrawGizmo()
         {
             Gizmo.SetColor(Color.White);
@@ -88,26 +73,10 @@ namespace Unify2D.Core
                 item.DrawGizmo();
             }
         }
+        
         public void EndDraw()
         {
             SpriteBatch.End();
-        }
-
-        public void Destroy(GameObject item)
-        {
-            _gameObjectsToDestroy.Remove(item);
-        }
-
-        public void DestroyImmediate(GameObject item)
-        {
-            if (item.Parent != null)
-            {
-                item.Parent.Children.Remove(item);
-            }
-            else
-            {
-                _gameObjects.Remove(item);
-            }
         }
 
         public void Initialize(GraphicsDevice graphicsDevice)
@@ -117,16 +86,6 @@ namespace Unify2D.Core
             SpriteBatch = new SpriteBatch(graphicsDevice);
 
             InitPhysics();
-        }
-
-        public void LoadScene(Game game,  List<GameObject> gameObjects)
-        {
-            foreach (var item in gameObjects)
-            {
-                _gameObjects.Add(item);
-
-                item.Init(game);
-            }
         }
 
         public void Update(GameTime gameTime)
@@ -146,25 +105,6 @@ namespace Unify2D.Core
             PhysicsSettings.World.Step(DeltaTime);
 
             _gameObjectsToDestroy.Clear();
-        }
-
-        public bool HasCanvas(out Canvas canvas)
-        {
-            if (_canvasList == null)
-            {
-                _canvasList = new List<Canvas>();
-            }
-            
-            canvas = null;
-            if (_canvasList.Count <= 0) return false;
-
-            _canvasList.RemoveAll(x => x == null);
-            
-            if (_canvasList.Count <= 0) return false;
-            
-            canvas = _canvasList[0];
-            
-            return true;
         }
     }
 }
