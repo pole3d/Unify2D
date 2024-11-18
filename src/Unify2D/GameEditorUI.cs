@@ -88,17 +88,19 @@ namespace Unify2D
         {
             Scene scene = SceneManager.Instance.CurrentScene;
 
-            if (scene.Name == null)
+            
+
+            if (scene.SceneInfo == null)
             {
                 string path = string.Empty;
                 NfdStatus result = Nfd.SaveDialog(out path, new Dictionary<string, string>() { { "New Scene", "scene" } }, "New Scene", Path.GetFullPath("./Assets").ToString());
                 if (result == NfdStatus.Ok)
                 {
-                    scene.SaveSceneNameAndPath(path, Path.GetFileName(path));
+                    scene.SaveSceneNameAndPath(Path.GetFileName(path), path);
                 }
             }
 
-            if (scene.Name != null)
+            if (scene.SceneInfo != null)
             {
                 SceneManager.Instance.Save(scene);
             }
