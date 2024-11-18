@@ -251,7 +251,7 @@ namespace Unify2D
             GameBuilder builder = new GameBuilder();
 
             
-            if ( builder.Build(_core, this))
+            if ( builder.Build(_coreViewerScene.GameCore, this))
                 builder.StartBuild();
 
         }
