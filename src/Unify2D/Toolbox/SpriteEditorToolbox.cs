@@ -16,12 +16,27 @@ namespace Unify2D.Toolbox
 
         private readonly List<TextureBound> _texturesBound = new List<TextureBound>();
 
-        int _pixelSizeX = 64;
-        int _pixelSizeY = 64;
+        private int _pixelSizeX = 64;
+        private int _pixelSizeY = 64;
 
         private ColorPixel[,] _texture;
         private List<ColorPixel[,]> _slicedTextures = new List<ColorPixel[,]>();
 
+        private enum SliceMode
+        {
+            ByPixelSize,
+            ByCellCount
+        }
+
+        private SliceMode _sliceMode = SliceMode.ByPixelSize;
+        private int _pixelCountX = 64;
+        private int _pixelCountY = 64;
+        private int _cellCountX = 8;
+        private int _cellCountY = 8;
+
+        private int _spriteWidth = 0;
+        private int _spriteHeight = 0;
+        
         // Debug
         private bool _hasSlicedTextures = false;
         //End Debug
@@ -35,9 +50,11 @@ namespace Unify2D.Toolbox
         {
             _component = component;
             AddTextureBound(GetSpriteTextureBoundToSlice());
+            _pixelCountX = _pixelSizeX;
+            _pixelCountY = _pixelSizeY;
             _isOpen = true;
         }
-        
+
         public override void Draw()
         {
             if (!_isOpen)
@@ -45,34 +62,62 @@ namespace Unify2D.Toolbox
 
             if (ImGui.Begin("Sprite Editor Toolbox", ref _isOpen))
             {
+                ImGui.Text("Slice Mode:");
+                if (ImGui.RadioButton("By Pixel Size", _sliceMode == SliceMode.ByPixelSize))
+                {
+                    _sliceMode = SliceMode.ByPixelSize;
+                }
+
+                ImGui.SameLine();
+                if (ImGui.RadioButton("By Cell Count", _sliceMode == SliceMode.ByCellCount))
+                {
+                    _sliceMode = SliceMode.ByCellCount;
+                }
+
+                ImGui.Separator();
+
                 if (ImGui.Button("Slice"))
                 {
                     SliceTexture();
                 }
-                
+
                 DrawTexturePreviewWithGrid();
 
-                //Debug
                 if (_hasSlicedTextures)
                 {
                     ImGui.Separator();
                     DrawSlicedTextures();
                 }
-                //End Debug
             }
 
             ImGui.End();
         }
-        
+
         private void DrawTexturePreviewWithGrid()
         {
-            ImGui.InputInt("Pixel Size X", ref _pixelSizeX, 1, 1);
-            ImGui.InputInt("Pixel Size Y", ref _pixelSizeY, 1, 1);
-            _pixelSizeX = Math.Max(1, _pixelSizeX);
-            _pixelSizeY = Math.Max(1, _pixelSizeY);
+            _spriteWidth = _texturesBound[0].Texture.Width;
+            _spriteHeight = _texturesBound[0].Texture.Height;
+            
+            if (_sliceMode == SliceMode.ByPixelSize)
+            {
+                ImGui.InputInt("Pixel Size X", ref _pixelCountX, 1, 1);
+                ImGui.InputInt("Pixel Size Y", ref _pixelCountY, 1, 1);
+                _pixelSizeX = Math.Max(1, _pixelCountX);
+                _pixelSizeY = Math.Max(1, _pixelCountY);
+            }
+            else if (_sliceMode == SliceMode.ByCellCount)
+            {
+                ImGui.InputInt("Cell Count X", ref _cellCountX, 1, 1);
+                ImGui.InputInt("Cell Count Y", ref _cellCountY, 1, 1);
+                _cellCountX = Math.Max(1, _cellCountX);
+                _cellCountY = Math.Max(1, _cellCountY);
+
+                _pixelSizeX = _spriteWidth / _cellCountX;
+                _pixelSizeY = _spriteHeight / _cellCountY;
+            }
 
             ImGui.Image(_texturesBound[0].IntPtr,
-                new System.Numerics.Vector2(_texturesBound[0].Texture.Width, _texturesBound[0].Texture.Height));
+                new System.Numerics.Vector2(_spriteWidth, _spriteHeight));
 
             var imageMin = ImGui.GetItemRectMin();
             var imageMax = ImGui.GetItemRectMax();
@@ -81,35 +126,25 @@ namespace Unify2D.Toolbox
             uint redColor = ImGui.GetColorU32(new System.Numerics.Vector4(1.0f, 0.0f, 0.0f, 1.0f));
             float lineThickness = 1.0f;
 
-            // Calcul de la grille
-            int lastVerticalLine =
-                (_texturesBound[0].Texture.Width / _pixelSizeX) * _pixelSizeX; // Dernière position verticale valide
-            int lastHorizontalLine =
-                (_texturesBound[0].Texture.Height / _pixelSizeY) * _pixelSizeY; // Dernière position horizontale valide
-
-            // Lignes verticales
-            for (int x = 0; x < _texturesBound[0].Texture.Width; x += _pixelSizeX)
+            for (int x = 0; x <= _spriteWidth; x += _pixelSizeX)
             {
-                if (x + _pixelSizeX > lastVerticalLine)
-                    break;
-
+                float height = _spriteHeight - _spriteHeight % _pixelSizeY;
+                
                 drawList.AddLine(
                     new System.Numerics.Vector2(imageMin.X + x, imageMin.Y),
-                    new System.Numerics.Vector2(imageMin.X + x, imageMax.Y),
+                    new System.Numerics.Vector2(imageMin.X + x, imageMin.Y + height),
                     redColor,
                     lineThickness
                 );
             }
 
-            // Lignes horizontales
-            for (int y = 0; y < _texturesBound[0].Texture.Height; y += _pixelSizeY)
+            for (int y = 0; y <= _spriteHeight; y += _pixelSizeY)
             {
-                if (y + _pixelSizeY > lastHorizontalLine)
-                    break;
-
+                float width = _spriteWidth - _spriteWidth % _pixelSizeX;
+                
                 drawList.AddLine(
                     new System.Numerics.Vector2(imageMin.X, imageMin.Y + y),
-                    new System.Numerics.Vector2(imageMax.X, imageMin.Y + y),
+                    new System.Numerics.Vector2(imageMin.X + width, imageMin.Y + y),
                     redColor,
                     lineThickness
                 );
@@ -134,8 +169,23 @@ namespace Unify2D.Toolbox
             int textureWidth = _texture.GetLength(0);
             int textureHeight = _texture.GetLength(1);
 
-            int columns = textureWidth / _pixelSizeX;
-            int rows = textureHeight / _pixelSizeY;
+            int columns, rows;
+
+            if (_sliceMode == SliceMode.ByPixelSize)
+            {
+                columns = textureWidth / _pixelCountX;
+                rows = textureHeight / _pixelCountY;
+            }
+            else
+            {
+                columns = _cellCountX;
+                rows = _cellCountY;
+
+                _pixelSizeX = textureWidth / _cellCountX;
+                _pixelSizeY = textureHeight / _cellCountY;
+            }
+
+            _slicedTextures.Clear();
 
             for (int y = 0; y < rows; y++)
             {
@@ -159,8 +209,7 @@ namespace Unify2D.Toolbox
             }
 
             _hasSlicedTextures = true;
-            Debug.Log(
-                $"Slicing complete. {_slicedTextures.Count} cells created."); // Print the number of sub-textures created
+            Debug.Log($"Slicing complete. {_slicedTextures.Count} cells created.");
         }
 
         private ColorPixel[,] ConvertToColorArray(byte[] imageData, int width, int height)
