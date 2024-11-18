@@ -5,6 +5,10 @@ using Unify2D.Core;
 
 namespace Unify2D.Assets
 {
+    /// <summary>
+    /// The PrefabAssetContent class is responsible for managing the content of prefab assets.
+    /// It provides functionality to save a GameObject to a file in a serialized format using JSON.
+    /// </summary>
     internal class PrefabAssetContent : AssetContent
     {
         private string _serializedText;

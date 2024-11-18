@@ -20,8 +20,6 @@ namespace Unify2D
     /// It represents the whole editor window 
     /// This class inherits from Game which creates the Game window, handles the gameloop, the assets...
     /// This class handles the different windows of the game editor
-    /// 
-    /// 
     /// </summary>
     public class GameEditor : Game
     {
@@ -268,6 +266,7 @@ namespace Unify2D
         }
 
 
+        // Waiting to resolve operation
         internal void OpenPrefab(PrefabAssetContent content)
         {
             GameCoreViewer prefabCoreViewer = new GameCoreViewer(
@@ -283,6 +282,7 @@ namespace Unify2D
             // GameObject.Instantiate(content.Asset.FullPath);
         }
 
+        // Waiting to resolve operation
         internal void CloseGameCore(GameCoreViewer gameCoreViewer)
         {
             _coreViewers.Remove(gameCoreViewer);

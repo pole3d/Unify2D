@@ -11,11 +11,19 @@ namespace Unify2D.Toolbox
 {
     internal class HierarchyToolbox : Toolbox
     {
-        int _countGO = 0;
-        int _currentIndex = 0;
-        GameObject _goToDestroy = null;
-        bool _isAnyWidgetHovered = false;
+        private int _countGO = 0;
+        private int _currentIndex = 0;
+        private GameObject _goToDestroy = null;
+        private bool _isAnyWidgetHovered = false;
 
+        private const string CreatePrefabButtonLabel = "Create Prefab";
+        private const string DestroyButtonLabel = "Destroy";
+        private const string AddGameObjectButtonLabel = "Add GameObject";
+        private const string HierarchyWindowLabel = "Hierarchy";
+        private const string GameObjectNamePrefix = "GameObject_";
+        private const string GameObjectListChildLabel = "gameObjectList";
+
+        
         public void SetCore(GameCoreViewer coreViewer)
         {
             _tag = coreViewer;
@@ -23,11 +31,11 @@ namespace Unify2D.Toolbox
 
         public override void Draw()
         {
-            ImGui.Begin("Hierarchy");
+            ImGui.Begin(HierarchyWindowLabel);
 
             _isAnyWidgetHovered = false;
 
-            if (ImGui.Button("Add GameObject", new System.Numerics.Vector2(-1, 0)))
+            if (ImGui.Button(AddGameObjectButtonLabel, new System.Numerics.Vector2(-1, 0)))
             {
                 if (ImGui.IsItemHovered())
                     _isAnyWidgetHovered = true;
@@ -36,17 +44,16 @@ namespace Unify2D.Toolbox
                 {
                     GameObject parent = Selection.Selected as GameObject;
                     GameObject go = GameObject.CreateChild(parent);
-                    go.Name = $"GameObject_{_countGO++}";
-                    Debug.Log("Add GO - parent selected");
+                    go.Name = $"{GameObjectNamePrefix}{_countGO++}";
                 }
                 else
                 {
                     GameObject go = GameObject.Create();
-                    go.Name = $"GameObject_{_countGO++}";
-                    Debug.Log("Add GO - No parent selected");
+                    go.Name = $"{GameObjectNamePrefix}{_countGO++}";
                 }
             }
 
+            // Commented because waiting resolve operation 
             // if (_tag is GameCoreViewer coreViewer && coreViewer.AssetType == GameCoreViewer.Type.Prefab)
             // {
             //     if (ImGui.Button("Close prefab", new Vector2(ImGui.GetWindowWidth(), 20.0f)))
@@ -71,7 +78,7 @@ namespace Unify2D.Toolbox
             {
                 Selection.UnSelectObject();
             }
-            ImGui.BeginChild("gameObjectList");
+            ImGui.BeginChild(GameObjectListChildLabel);
 
             Selection.TryGameObject(out GameObject selectedGameObject);
 
@@ -153,7 +160,7 @@ namespace Unify2D.Toolbox
         {
             if (ImGui.BeginPopupContextItem())
             {
-                if (ImGui.Button("Create Prefab"))
+                if (ImGui.Button(CreatePrefabButtonLabel))
                 {
                     // Prefab creation Logic
                     Asset prefabAsset = GameEditor.Instance.AssetManager.CreateAsset<PrefabAssetContent>(go.Name);
@@ -162,7 +169,7 @@ namespace Unify2D.Toolbox
                     ImGui.CloseCurrentPopup();
                 }
 
-                if (ImGui.Button("Destroy"))
+                if (ImGui.Button(DestroyButtonLabel))
                 {
                     ImGui.CloseCurrentPopup();
                     _goToDestroy = go;

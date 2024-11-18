@@ -42,6 +42,7 @@ namespace Unify2D.Assets
             }
         }
 
+        // Old code from FirstPrefab Code
         internal void RefreshDatabase()
         {
             _assets.Clear();

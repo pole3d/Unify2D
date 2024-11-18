@@ -20,15 +20,18 @@ namespace Unify2D.Assets
         public GameCore GameCore => _gameCore;
         public string AssetPath => _assetPath;
         public Type AssetType => _assetType;
+        
+        private const string PrefabExtension = ".prefab";
+        private const string SceneExtension = ".scene";
 
         public GameCoreViewer(GameCore core, string assetPath)
         {
             _gameCore = core;
             _assetPath = assetPath;
             
-            if (assetPath.EndsWith(".prefab"))
+            if (assetPath.EndsWith(PrefabExtension))
                 _assetType = Type.Prefab;
-            else if (assetPath.EndsWith(".scene"))
+            else if (assetPath.EndsWith(SceneExtension))
                 _assetType = Type.Scene;
             else
                 throw new Exception("Unknown asset type for a GameCore. Very weird!");

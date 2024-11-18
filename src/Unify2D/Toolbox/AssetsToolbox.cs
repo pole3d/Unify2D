@@ -16,17 +16,21 @@ namespace Unify2D.Toolbox
     {
         public List<Asset> Assets => _assets;
         
-        string _path;
-        bool[] _selected;
-        List<Asset> _assets = new List<Asset>();
-        HashSet<string> _extensionsToIgnore;
+        private string _path;
+        private bool[] _selected;
+        private List<Asset> _assets = new List<Asset>();
+        private HashSet<string> _extensionsToIgnore = new HashSet<string> { ".csproj", ".dll", ".sln" };
+        
+        private const string OpenPrefabButtonLabel = "Open Prefab";
+        private const string InstantiateAsGameObjectButtonLabel = "Instantiate as GameObject";
+        private const string DeleteButtonLabel = "Delete";
+        private const string ShowInExplorerButtonLabel = "Show in explorer";
+        private const string AssetDragDropPayloadType = "ASSET";
+
 
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
-
-            _extensionsToIgnore = new HashSet<string> { ".csproj", ".dll", ".sln" };
-
             Reset();
         }
 
@@ -40,6 +44,9 @@ namespace Unify2D.Toolbox
             return null;
         }
 
+        /// <summary>
+        /// Resets the assets list by reloading all assets from the assets directory.
+        /// </summary>
         internal override void Reset()
         {
             _assets.Clear();
@@ -135,13 +142,13 @@ namespace Unify2D.Toolbox
             
             if (_assets[assetIndex].AssetContent is PrefabAssetContent prefabContent)
             {
-                if (ImGui.Button("Open Prefab"))
+                if (ImGui.Button(OpenPrefabButtonLabel))
                 {
                     //GameEditor.Instance.OpenPrefab(prefabContent);
                     ImGui.CloseCurrentPopup();
                 }
 
-                if (ImGui.Button("Instantiate as GameObject"))
+                if (ImGui.Button(InstantiateAsGameObjectButtonLabel))
                 {
                     // Logic to instantiate the prefab as a GameObject
                     PrefabInstance prefabInstance = new PrefabInstance($"{prefabContent.Asset.FullPath}");
@@ -154,13 +161,13 @@ namespace Unify2D.Toolbox
                     ImGui.CloseCurrentPopup();
                 }
             }
-            if (ImGui.Button("Delete"))
+            if (ImGui.Button(DeleteButtonLabel))
             {
                 DeleteAsset(_assets[assetIndex]);
                 ImGui.CloseCurrentPopup();
             }
 
-            if (ImGui.Button("Show in explorer"))
+            if (ImGui.Button(ShowInExplorerButtonLabel))
             {
                 ShowExplorer(string.Empty);
                 ImGui.CloseCurrentPopup();
@@ -175,7 +182,7 @@ namespace Unify2D.Toolbox
                 return;
             
             // Set payload to carry the index of our item (could be anything)
-            ImGui.SetDragDropPayload("ASSET", (IntPtr)(&assetIndex), sizeof(int));
+            ImGui.SetDragDropPayload(AssetDragDropPayloadType, (IntPtr)(&assetIndex), sizeof(int));
 
             Clipboard.Content = _assets[assetIndex];
 
@@ -193,7 +200,7 @@ namespace Unify2D.Toolbox
             
             ImGuiDragDropFlags dropTargetFlags = ImGuiDragDropFlags.AcceptBeforeDelivery |
                                                  ImGuiDragDropFlags.AcceptNoPreviewTooltip;
-            ImGuiPayloadPtr payload = ImGui.AcceptDragDropPayload("ASSET", dropTargetFlags);
+            ImGuiPayloadPtr payload = ImGui.AcceptDragDropPayload(AssetDragDropPayloadType, dropTargetFlags);
 
             if (payload.NativePtr != (void*)IntPtr.Zero)
             {
