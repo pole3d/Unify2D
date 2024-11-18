@@ -4,6 +4,7 @@ using System.Reflection;
 using Unify2D.Core;
 using Microsoft.Xna.Framework.Graphics;
 using ImGuiNET;
+using Microsoft.Xna.Framework;
 
 namespace Unify2D.Toolbox
 {
@@ -21,28 +22,22 @@ namespace Unify2D.Toolbox
         private ColorPixel[,] _texture;
         private List<ColorPixel[,]> _slicedTextures = new List<ColorPixel[,]>();
 
+        // Debug
+        private bool _hasSlicedTextures = false;
+        //End Debug
+
         public override void Initialize(GameEditor editor)
         {
             _editor = editor;
         }
 
-        private void AddTextureBound(TextureBound textureBound)
+        public void Open(Component component)
         {
-            _texturesBound.Add(textureBound);
-            Debug.Log(_texturesBound.Count.ToString());
+            _component = component;
+            AddTextureBound(GetSpriteTextureBoundToSlice());
+            _isOpen = true;
         }
-
-        private TextureBound GetTextureBound(Texture2D texture)
-        {
-            foreach (var item in _texturesBound)
-            {
-                if (item.Texture == texture)
-                    return item;
-            }
-
-            return null;
-        }
-
+        
         public override void Draw()
         {
             if (!_isOpen)
@@ -50,114 +45,25 @@ namespace Unify2D.Toolbox
 
             if (ImGui.Begin("Sprite Editor Toolbox", ref _isOpen))
             {
-                //DrawInputField();
-
-                DrawSprite();
                 if (ImGui.Button("Slice"))
                 {
-                    //SliceTexture();
+                    SliceTexture();
                 }
-
+                
                 DrawTexturePreviewWithGrid();
+
+                //Debug
+                if (_hasSlicedTextures)
+                {
+                    ImGui.Separator();
+                    DrawSlicedTextures();
+                }
+                //End Debug
             }
 
             ImGui.End();
         }
-
-        private void DrawInputField()
-        {
-            ImGui.InputInt("Pixel Size X", ref _pixelSizeX, 1, 1);
-            ImGui.InputInt("Pixel Size Y", ref _pixelSizeY, 1, 1);
-
-            _pixelSizeX = Math.Max(1, _pixelSizeX);
-            _pixelSizeY = Math.Max(1, _pixelSizeY);
-
-            if (ImGui.Button("Slice"))
-            {
-                //SliceTexture();
-            }
-        }
-
-        private void DrawSprite()
-        {
-            PropertyInfo[] properties = _component.GetType().GetProperties();
-            //Debug.Log($"Properties loaded");
-
-            foreach (PropertyInfo property in properties)
-            {
-                _gameAsset = property.GetValue(_component) as GameAsset;
-
-                //Debug.Log($"Game Asset loaded");
-
-                if (_gameAsset != null)
-                {
-                    Texture2D texture = _gameAsset.Asset as Texture2D;
-                    // if (texture != null)
-                    //     Debug.Log($"Texture loaded");
-                    // else
-                    //     Debug.LogError($"Texture loading failed");
-
-                    TextureBound textureBound = GetTextureBound(texture);
-
-                    if (textureBound == null)
-                    {
-                        // TODO : handle unbind
-                        IntPtr ptr = GameEditor.Instance.GuiRenderer.BindTexture(texture);
-
-                        textureBound = new TextureBound { IntPtr = ptr, Texture = texture };
-                        AddTextureBound(textureBound);
-                    }
-                    // else
-                    // {
-                    //     //Debug.Log($"Texture bound loaded");
-                    //     ImGui.Image(textureBound.IntPtr,
-                    //         new System.Numerics.Vector2(textureBound.Texture.Width, textureBound.Texture.Height));
-                    //
-                    //     //Debug.Log("Sprite Editor Toolbox: Texture bound changed!");
-                    // }
-                }
-            }
-        }
-
-        // private void SliceTexture()
-        // {
-        //     byte[] imageData = LoadImageAsColorArray();
-        //     
-        //     _texture = ConvertToColorArray(imageData, _texturesBound[0].Texture.Width, _texturesBound[0].Texture.Height);
-        //
-        //     int textureWidth = _texture.GetLength(0);
-        //     int textureHeight = _texture.GetLength(1);
-        //
-        //     int columns = textureWidth / _pixelSizeX;
-        //     int rows = textureHeight / _pixelSizeY;
-        //
-        //     for (int y = 0; y < rows; y++)
-        //     {
-        //         for (int x = 0; x < columns; x++)
-        //         {
-        //             int startX = x * _pixelSizeX;
-        //             int startY = y * _pixelSizeY;
-        //
-        //             ColorPixel[,] cell = new ColorPixel[_pixelSizeX, _pixelSizeY];
-        //     
-        //             for (int i = 0; i < _pixelSizeX; i++)
-        //             {
-        //                 for (int j = 0; j < _pixelSizeY; j++)
-        //                 {
-        //                     cell[i, j] = _texture[startX + i, startY + j];
-        //                 }
-        //             }
-        //             _slicedTextures.Add(cell);
-        //         }
-        //     }
-        //}
-
-        public void Open(Component component)
-        {
-            _component = component;
-            _isOpen = true;
-        }
-
+        
         private void DrawTexturePreviewWithGrid()
         {
             ImGui.InputInt("Pixel Size X", ref _pixelSizeX, 1, 1);
@@ -210,30 +116,171 @@ namespace Unify2D.Toolbox
             }
         }
 
-        public ColorPixel[,] ConvertToColorArray(byte[] imageData, int width, int height)
+        // Slice Texture
+        private void SliceTexture()
         {
-            // Initialise le tableau 2D pour stocker les couleurs de chaque pixel
+            if (_texturesBound.Count == 0)
+            {
+                Debug.Log("No texture bound to slice.");
+                return;
+            }
+
+            Texture2D texture = _texturesBound[0].Texture;
+            byte[] imageData = new byte[4 * texture.Width * texture.Height];
+            texture.GetData(imageData);
+
+            _texture = ConvertToColorArray(imageData, texture.Width, texture.Height);
+
+            int textureWidth = _texture.GetLength(0);
+            int textureHeight = _texture.GetLength(1);
+
+            int columns = textureWidth / _pixelSizeX;
+            int rows = textureHeight / _pixelSizeY;
+
+            for (int y = 0; y < rows; y++)
+            {
+                for (int x = 0; x < columns; x++)
+                {
+                    int startX = x * _pixelSizeX;
+                    int startY = y * _pixelSizeY;
+
+                    ColorPixel[,] cell = new ColorPixel[_pixelSizeX, _pixelSizeY];
+
+                    for (int i = 0; i < _pixelSizeX; i++)
+                    {
+                        for (int j = 0; j < _pixelSizeY; j++)
+                        {
+                            cell[i, j] = _texture[startX + i, startY + j];
+                        }
+                    }
+
+                    _slicedTextures.Add(cell);
+                }
+            }
+
+            _hasSlicedTextures = true;
+            Debug.Log(
+                $"Slicing complete. {_slicedTextures.Count} cells created."); // Print the number of sub-textures created
+        }
+
+        private ColorPixel[,] ConvertToColorArray(byte[] imageData, int width, int height)
+        {
             ColorPixel[,] colorArray = new ColorPixel[width, height];
 
-            // Parcours des données brutes de l'image (4 octets par pixel : R, G, B, A)
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    int index = (y * width + x) * 4; // 4 canaux RGBA
+                    int index = (y * width + x) * 4;
 
-                    // Convertit les octets (0-255) en valeurs flottantes (0-1)
                     float r = imageData[index] / 255f;
                     float g = imageData[index + 1] / 255f;
                     float b = imageData[index + 2] / 255f;
                     float a = imageData[index + 3] / 255f;
 
-                    // Crée et stocke la couleur dans le tableau
                     colorArray[x, y] = new ColorPixel(r, g, b, a);
                 }
             }
 
             return colorArray;
+        }
+
+        // Draw SubTextures
+        private void DrawSlicedTextures()
+        {
+            if (_slicedTextures.Count == 0)
+            {
+                ImGui.Text("No sliced textures to display.");
+                return;
+            }
+
+            ImGui.Text("Sliced Textures Preview:");
+
+            float cellSizeX = _pixelSizeX;
+            float cellSizeY = _pixelSizeY;
+            float padding = 10.0f;
+            float windowWidth = ImGui.GetContentRegionAvail().X;
+            float cursorX = 0.0f;
+
+            foreach (var cell in _slicedTextures)
+            {
+                Texture2D cellTexture = CreateTextureFromColorArray(cell);
+                IntPtr cellPtr = GameEditor.Instance.GuiRenderer.BindTexture(cellTexture);
+
+                ImGui.Image(cellPtr, new System.Numerics.Vector2(cellSizeX, cellSizeY));
+
+                cursorX += _pixelSizeX + padding;
+                if (cursorX + _pixelSizeX + padding > windowWidth)
+                {
+                    cursorX = 0.0f;
+                    ImGui.NewLine();
+                }
+            }
+        }
+
+        private Texture2D CreateTextureFromColorArray(ColorPixel[,] colorArray)
+        {
+            int width = colorArray.GetLength(0);
+            int height = colorArray.GetLength(1);
+
+            Texture2D texture = new Texture2D(GameEditor.Instance.GraphicsDevice, width, height);
+
+            Color[] colorData = new Color[width * height];
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    var pixel = colorArray[x, y];
+                    colorData[y * width + x] = new Color(pixel.R, pixel.G, pixel.B, pixel.A);
+                }
+            }
+
+            texture.SetData(colorData);
+            return texture;
+        }
+
+        // Utilities
+        private void AddTextureBound(TextureBound textureBound)
+        {
+            _texturesBound.Add(textureBound);
+        }
+
+        private TextureBound GetSpriteTextureBoundToSlice()
+        {
+            PropertyInfo[] properties = _component.GetType().GetProperties();
+
+            foreach (PropertyInfo property in properties)
+            {
+                _gameAsset = property.GetValue(_component) as GameAsset;
+
+                if (_gameAsset != null)
+                {
+                    Texture2D texture = _gameAsset.Asset as Texture2D;
+                    TextureBound textureBound = GetGameAssetTextureBound(texture);
+
+                    if (textureBound == null)
+                    {
+                        // TODO : handle unbind
+                        IntPtr ptr = GameEditor.Instance.GuiRenderer.BindTexture(texture);
+
+                        textureBound = new TextureBound { IntPtr = ptr, Texture = texture };
+                        return textureBound;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private TextureBound GetGameAssetTextureBound(Texture2D texture)
+        {
+            foreach (var item in _texturesBound)
+            {
+                if (item.Texture == texture)
+                    return item;
+            }
+
+            return null;
         }
     }
 
