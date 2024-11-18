@@ -26,9 +26,12 @@ namespace Unify2D.Toolbox
         private const string InstantiateAsGameObjectButtonLabel = "Instantiate as GameObject";
         private const string DeleteButtonLabel = "Delete";
         private const string ShowInExplorerButtonLabel = "Show in explorer";
+        private const string RenameButtonLabel = "Rename";
+        private const string ApplyRenameButtonLabel = "Apply";
+        private const string CreateNewScriptButtonLabel = "Create New Script";
+        private const string CreateNewFolderButtonLabel = "Create New Folder";
         private const string AssetDragDropPayloadType = "ASSET";
-
-
+        
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
@@ -125,13 +128,13 @@ namespace Unify2D.Toolbox
 
             if (ImGui.BeginPopupContextWindow())
             {
-                if (ImGui.Button("Create New Script"))
+                if (ImGui.Button(CreateNewScriptButtonLabel))
                 {
                     ImGui.CloseCurrentPopup();
                     CreateScript();
                 }
 
-                if (ImGui.Button("Create New Folder"))
+                if (ImGui.Button(CreateNewFolderButtonLabel))
                 {
                     ImGui.CloseCurrentPopup();
                     CreateFolder();
@@ -207,7 +210,7 @@ namespace Unify2D.Toolbox
             if (!ImGui.BeginPopupContextItem())
                 return;
 
-            if (ImGui.Button("Delete"))
+            if (ImGui.Button(DeleteButtonLabel))
             {
                 DeleteAsset(asset);
                 ImGui.CloseCurrentPopup();
@@ -219,12 +222,14 @@ namespace Unify2D.Toolbox
                 ImGui.CloseCurrentPopup();
             }
 
-            if (ImGui.Button("Rename"))
+            string renamePopup = "RenamePopup";
+            
+            if (ImGui.Button(RenameButtonLabel))
             {
-                ImGui.OpenPopup("RenamePopup");
+                ImGui.OpenPopup(renamePopup);
             }
 
-            if (ImGui.BeginPopup("RenamePopup"))
+            if (ImGui.BeginPopup(renamePopup))
             {
                 ImGui.Text("Edit name:");
 
@@ -236,7 +241,7 @@ namespace Unify2D.Toolbox
                     
                 ImGui.InputText("##edit", ref _newFileName, 40);
 
-                if (ImGui.Button("Apply"))
+                if (ImGui.Button(ApplyRenameButtonLabel))
                 {
                     string oldPath = asset.FullPath;
                     asset.SetName(_newFileName);
