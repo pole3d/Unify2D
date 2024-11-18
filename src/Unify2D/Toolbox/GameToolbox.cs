@@ -59,6 +59,11 @@ namespace Unify2D.Toolbox
         private Texture2D _gridTexture;
         private Texture2D _smallGridTexture;
 
+        
+        public void SetCore(GameCoreViewer coreViewer)
+        {
+            _tag = coreViewer;
+        }
 
         private void SetResolution(Vector2 resolution)
         {
@@ -156,6 +161,8 @@ namespace Unify2D.Toolbox
 
                         SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
                         renderer.Initialize(_editor, go, asset.FullPath);
+                        
+                        //asset?.AssetContent.OnDragDroppedInGame(_editor);
                     }
                 }
             }
@@ -166,17 +173,16 @@ namespace Unify2D.Toolbox
             UpdateCamera();
 
             #region Drawing
-            _editor.GameCore.BeginDraw(_gameCamera.Matrix);
 
+            ((GameCoreViewer)_tag).GameCore.BeginDraw(_gameCamera.Matrix);
             //Draw the editor only grid
             DrawGrid();
 
             // Draw all game assets
             SceneManager.Instance.CurrentScene.Draw();
             // Draw all debutg gizmo
-            _editor.GameCore.DrawGizmo();
-
-            _editor.GameCore.EndDraw();
+            ((GameCoreViewer)_tag).GameCore.DrawGizmo();
+            ((GameCoreViewer)_tag).GameCore.EndDraw();
             #endregion
 
             // Write camera data

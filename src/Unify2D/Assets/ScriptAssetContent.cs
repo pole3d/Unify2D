@@ -14,12 +14,7 @@ namespace Unify2D.Assets
     {
         public string Content = String.Empty;
         public string Path => Tools.ToolsEditor.CombinePath(GameEditor.Instance.AssetsPath, _asset.FullPath);
-        Asset _asset;
-
-        public ScriptAssetContent(Asset asset)
-        {
-            _asset = asset;
-        }
+        public ScriptAssetContent(Asset asset) : base(asset) { }
 
         public override void Load()
         {
@@ -42,7 +37,14 @@ namespace Unify2D.Assets
 
 
         }
-
+        
+        public override void OnDragDroppedInGame(GameEditor editor)
+        {
+            GameObject go = new GameObject() { Name = _asset.Name };
+            // GameCore.Current.AddGameObjectImmediate(go);
+            //TODO : Add component to the gameObject
+            Selection.SelectObject(go);
+        }
         internal void Save()
         {
             string path = ToolsEditor.CombinePath(GameEditor.Instance.AssetsPath, _asset.FullPath);

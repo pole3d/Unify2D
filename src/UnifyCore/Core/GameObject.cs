@@ -1,4 +1,8 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using Unify2D.Core.Graphics;
@@ -45,11 +49,20 @@ namespace Unify2D.Core
         private Vector2 m_position;
         private float m_rotation;
         private bool m_positionUpdated, m_rotationUpdated;
+
+
+        [JsonIgnore]
+        public PrefabInstance PrefabInstance => _prefabInstance;
+
+        private static JsonSerializerSettings s_serializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto }; //type name should be read
         
         List<Renderer> _renderers;
 
         [JsonProperty]
         List<Component> _components;
+        
+        [JsonIgnore]
+        private PrefabInstance _prefabInstance;
 
         public GameObject()
         {
@@ -77,6 +90,9 @@ namespace Unify2D.Core
 
             child.Parent = parent;
             parent.Children.Add(child);
+            
+            SceneManager.Instance.CurrentScene.AddRootGameObject(child);
+            
             return child;
         }
 
@@ -178,6 +194,14 @@ namespace Unify2D.Core
             }
             else if (component is UIComponent)
             {
+                bool hasCanvas = GameCore.Current.HasCanvas(out Canvas gameCoreCanvas);
+                if (hasCanvas && gameCoreCanvas.GameObject == this)
+                {
+                    Debug.Log("You can't add an UI element to a canvas");
+                    component.Destroy();
+                    return;
+                }
+                
                 if (HasCanvasInParents(out Canvas _) == false)
                 {
                     if (Parent != null)
@@ -186,15 +210,13 @@ namespace Unify2D.Core
                         Parent = null;
                     }
                     
-                    if (GameCore.Current.HasCanvas(out Canvas gameCoreCanvas) == false)
+                    if (hasCanvas == false)
                     {
                         GameObject canvasGameObject = Create();
                         canvasGameObject.Name = "Canvas";
                         canvasGameObject.AddComponent<Canvas>();
                         
                         SetChild(canvasGameObject, this);
-                        
-                        GameCore.Current.CanvasList.Add(canvasGameObject.GetComponent<Canvas>());
                     }
                     else
                     {
@@ -292,6 +314,41 @@ namespace Unify2D.Core
             }
 
             return false;
+        }
+        
+        /// <summary>
+        ///  Deserialize a prefab asset into a gameObject, load it and add it to the current core.
+        /// </summary>
+         public static GameObject InstantiateFromPrefab(string originalAssetName)
+         {
+              StringBuilder sb = new StringBuilder(originalAssetName);
+             // if (sb.ToString().StartsWith("/") == false)
+             //     sb.Insert(0, "/");
+             sb.Insert(0, GameCore.Current.Game.AssetsPath);
+             // if (sb.ToString().EndsWith(".prefab") == false)
+             //     sb.Append(".prefab");
+              
+             // Get serialized text
+             string serializedText = File.ReadAllText(Path.GetFullPath(sb.ToString()));
+             
+             // Create gameObject
+             GameObject go = JsonConvert.DeserializeObject<GameObject>(serializedText, s_serializerSettings);
+             go.Init(GameCore.Current.Game);
+
+             return go;
+         }
+
+        internal void LinkToPrefabInstance(PrefabInstance prefabInstance)
+        {
+            _prefabInstance = prefabInstance;
+            ApplyOverridesFromPrefabInstance(prefabInstance);
+        }
+
+        internal void ApplyOverridesFromPrefabInstance(PrefabInstance prefabInstance)
+        {
+            if (string.IsNullOrEmpty(prefabInstance.Name) == false)
+                Name = prefabInstance.Name; //Temporary, overridden name should be saved in the override list, instead of using PrefabInstance.Name.
+            // apply overrides here
         }
     }
 }
