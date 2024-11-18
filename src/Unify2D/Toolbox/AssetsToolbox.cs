@@ -26,6 +26,7 @@ namespace Unify2D.Toolbox
         private const string InstantiateAsGameObjectButtonLabel = "Instantiate as GameObject";
         private const string DeleteButtonLabel = "Delete";
         private const string ShowInExplorerButtonLabel = "Show in explorer";
+        private const string ShowExplorerButtonLabel = "Show explorer";
         private const string RenameButtonLabel = "Rename";
         private const string ApplyRenameButtonLabel = "Apply";
         private const string CreateNewScriptButtonLabel = "Create New Script";
@@ -101,6 +102,7 @@ namespace Unify2D.Toolbox
             return newAsset;
         }
 
+
         private Asset CreateAssetFromFile(string file)
         {
             string relativeFile = file.Replace(_path, string.Empty);
@@ -121,7 +123,7 @@ namespace Unify2D.Toolbox
         {
             ImGui.Begin("Assets");
 
-            if (ImGui.Button("Show Explorer", new System.Numerics.Vector2(-1, 0)))
+            if (ImGui.Button(ShowExplorerButtonLabel, new System.Numerics.Vector2(-1, 0)))
             {
                 ShowExplorer(string.Empty);
             }
@@ -197,7 +199,7 @@ namespace Unify2D.Toolbox
             if (ImGui.IsItemClicked())
                 Selection.SelectObject(node);
 
-            HandBeginDragDropSource(node);
+            HandleBeginDragDropSource(node);
             HandleBeginDragDropTarget(node);
             HandleBeginPopupContext(node);
         }
@@ -261,7 +263,7 @@ namespace Unify2D.Toolbox
             ImGui.EndPopup(); 
         }
 
-        private unsafe void HandBeginDragDropSource(Asset asset)
+        private unsafe void HandleBeginDragDropSource(Asset asset)
         {
             if (!ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
                 return;
