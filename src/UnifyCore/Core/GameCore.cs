@@ -30,21 +30,18 @@ namespace Unify2D.Core
 
         public GraphicsDevice GraphicsDevice { get; private set; }
         public SpriteBatch SpriteBatch { get; private set; }
-        public List<GameObject> GameObjects => _gameObjects;
+        public List<GameObject> GameObjects => SceneManager.Instance.CurrentScene.GameObjects;
+        
         public PhysicsSettings PhysicsSettings { get; private set; }
         public float DeltaTime { get; private set; }
 
         static GameCore s_current;
-
-        List<GameObject> _gameObjects;
-        List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
-        Game _game;
-
+        
+        private Game _game;
         
         public GameCore(Game game)
         {
             _game = game;
-            _gameObjects = new List<GameObject>();
         }
 
         public void InitPhysics()
@@ -52,6 +49,11 @@ namespace Unify2D.Core
             PhysicsSettings ??= new PhysicsSettings();
 
             PhysicsSettings.Init();
+        }
+        
+        public void BeginDraw()
+        {
+            BeginDraw(Matrix.Identity);
         }
         
         public void BeginDraw(Matrix matrix)
@@ -73,7 +75,6 @@ namespace Unify2D.Core
                 item.DrawGizmo();
             }
         }
-        
         public void EndDraw()
         {
             SpriteBatch.End();
@@ -86,25 +87,6 @@ namespace Unify2D.Core
             SpriteBatch = new SpriteBatch(graphicsDevice);
 
             InitPhysics();
-        }
-
-        public void Update(GameTime gameTime)
-        {
-            DeltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            foreach (var item in _gameObjects)
-            {
-                item.Update(this);
-            }
-
-            foreach (var item in _gameObjectsToDestroy)
-            {
-                _gameObjects.Remove(item);
-            }
-
-            PhysicsSettings.World.Step(DeltaTime);
-
-            _gameObjectsToDestroy.Clear();
         }
     }
 }

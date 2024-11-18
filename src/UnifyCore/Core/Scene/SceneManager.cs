@@ -40,7 +40,9 @@ namespace Unify2D
         public void Save(Scene scene)
         {
             if (scene.Name == null)
+            {
                 return;
+            }
 
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;

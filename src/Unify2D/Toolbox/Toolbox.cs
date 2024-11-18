@@ -16,7 +16,10 @@ namespace Unify2D.Toolbox
     /// </summary>
     public abstract class Toolbox
     {
+        public object Tag { get => _tag; }
+
         protected GameEditor _editor;
+        protected object _tag;
 
         public abstract void Draw();
 

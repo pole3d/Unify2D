@@ -16,17 +16,21 @@ namespace Unify2D.Toolbox
     {
         public List<Asset> Assets => _assets;
         
-        string _path;
-        bool[] _selected;
-        List<Asset> _assets = new List<Asset>();
-        HashSet<string> _extensionsToIgnore;
+        private string _path;
+        private bool[] _selected;
+        private List<Asset> _assets = new List<Asset>();
+        private HashSet<string> _extensionsToIgnore = new HashSet<string> { ".csproj", ".dll", ".sln" };
+        
+        private const string OpenPrefabButtonLabel = "Open Prefab";
+        private const string InstantiateAsGameObjectButtonLabel = "Instantiate as GameObject";
+        private const string DeleteButtonLabel = "Delete";
+        private const string ShowInExplorerButtonLabel = "Show in explorer";
+        private const string AssetDragDropPayloadType = "ASSET";
+
 
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
-
-            _extensionsToIgnore = new HashSet<string> { ".csproj", ".dll", ".sln" };
-
             Reset();
         }
 
@@ -37,10 +41,12 @@ namespace Unify2D.Toolbox
                 if (path == asset.FullPath)
                     return asset;
             }
-
             return null;
         }
 
+        /// <summary>
+        /// Resets the assets list by reloading all assets from the assets directory.
+        /// </summary>
         internal override void Reset()
         {
             _assets.Clear();
@@ -112,11 +118,13 @@ namespace Unify2D.Toolbox
                     if (!ImGui.GetIO().KeyCtrl)
                     {
                         for (int i = 0; i < _assets.Count; i++)
+                        {
                             _selected[i] = false;
+                        }
                     }
 
-                    Selection.SelectObject(_assets[n]);
                     _selected[n] = !_selected[n];
+                    Selection.SelectObject(_assets[n]);
                 }
 
                 HandBeginDragDropSource(n);
@@ -132,13 +140,35 @@ namespace Unify2D.Toolbox
             if (!ImGui.BeginPopupContextItem()) 
                 return;
             
-            if (ImGui.Button("Delete"))
+            if (_assets[assetIndex].AssetContent is PrefabAssetContent prefabContent)
             {
-                DeleteAsset(_assets[assetIndex]);
+                if (ImGui.Button(OpenPrefabButtonLabel))
+                {
+                    //GameEditor.Instance.OpenPrefab(prefabContent);
+                    ImGui.CloseCurrentPopup();
+                }
+
+                if (ImGui.Button(InstantiateAsGameObjectButtonLabel))
+                {
+                    // Logic to instantiate the prefab as a GameObject
+                    PrefabInstance prefabInstance = new PrefabInstance($"{prefabContent.Asset.FullPath}");
+                    GameObject instantiatedGameObject = prefabInstance.InstantiateAndLinkGameObject();
+                            
+                    // Add GameObject to the scene
+                    SceneManager.Instance.CurrentScene.AddRootGameObject(instantiatedGameObject);
+
+                    _selected[assetIndex] = false;
+                    ImGui.CloseCurrentPopup();
+                }
+            }
+            if (ImGui.Button(DeleteButtonLabel))
+            {
+                // DeleteAsset(_assets[assetIndex]);
+                DeleteSelectedAssets();
                 ImGui.CloseCurrentPopup();
             }
 
-            if (ImGui.Button("Show in explorer"))
+            if (ImGui.Button(ShowInExplorerButtonLabel))
             {
                 ShowExplorer(string.Empty);
                 ImGui.CloseCurrentPopup();
@@ -153,7 +183,7 @@ namespace Unify2D.Toolbox
                 return;
             
             // Set payload to carry the index of our item (could be anything)
-            ImGui.SetDragDropPayload("ASSET", (IntPtr)(&assetIndex), sizeof(int));
+            ImGui.SetDragDropPayload(AssetDragDropPayloadType, (IntPtr)(&assetIndex), sizeof(int));
 
             Clipboard.Content = _assets[assetIndex];
 
@@ -171,7 +201,7 @@ namespace Unify2D.Toolbox
             
             ImGuiDragDropFlags dropTargetFlags = ImGuiDragDropFlags.AcceptBeforeDelivery |
                                                  ImGuiDragDropFlags.AcceptNoPreviewTooltip;
-            ImGuiPayloadPtr payload = ImGui.AcceptDragDropPayload("ASSET", dropTargetFlags);
+            ImGuiPayloadPtr payload = ImGui.AcceptDragDropPayload(AssetDragDropPayloadType, dropTargetFlags);
 
             if (payload.NativePtr != (void*)IntPtr.Zero)
             {
@@ -238,6 +268,33 @@ namespace Unify2D.Toolbox
             Reset();
         }
 
+        private void SelectAsset(Asset asset)
+        {
+            Selection.SelectObject(asset);
+        }
+        
+        private static void ShowExplorer(string path)
+        {
+            string fullPath = GameEditor.Instance.AssetsPath + Path.DirectorySeparatorChar + path;
+
+            if (Directory.Exists(fullPath) == false)
+                Directory.CreateDirectory(fullPath);
+
+            System.Diagnostics.Process.Start("explorer.exe", fullPath);
+        }
+
+        private void DeleteSelectedAssets()
+        {
+            for (int n = 0; n < _assets.Count; n++)
+            {
+                if (_selected[n])
+                {
+                    DeleteAsset(_assets[n]);
+                }
+            }
+            Reset();
+        }
+        
         private void DeleteAsset(Asset asset)
         {
             string path = $"{_path}{asset.FullPath}";
@@ -259,18 +316,6 @@ namespace Unify2D.Toolbox
                 else
                     File.Delete(path);
             }
-
-            Reset();
-        }
-
-        private static void ShowExplorer(string path)
-        {
-            string fullPath = GameEditor.Instance.AssetsPath + Path.DirectorySeparatorChar + path;
-
-            if (Directory.Exists(fullPath) == false)
-                Directory.CreateDirectory(fullPath);
-
-            System.Diagnostics.Process.Start("explorer.exe", fullPath);
         }
     }
 }
