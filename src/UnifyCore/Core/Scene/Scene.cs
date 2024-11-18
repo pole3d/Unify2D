@@ -97,7 +97,7 @@ namespace Unify2D
 
         public void Draw()
         {
-            foreach (var item in GameObjects)
+            foreach (GameObject item in GameObjects)
             {
                 item.Draw();
             }

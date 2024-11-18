@@ -17,62 +17,46 @@ namespace Unify2D.Core
         public string Text { get; set; } = "Lorem Ipsum";
         public Color VertexColor { get; set; } = Color.White;
         public SpriteFont Font { get; private set; }
+        public float FontSize { get; set; } = 12;
 
         [JsonProperty]
         private GameAsset _asset;
 
-        public override void Draw()
-        {
-            if (string.IsNullOrEmpty(Text) || Font == null) return;
-
-            GameCore.Current.SpriteBatch.DrawString(Font, Text,  GameObject.Position, VertexColor, GameObject.Rotation, Origin, GameObject.Scale, SpriteEffects.None, 0);
-        }
-        
-        public bool Initialize(Game game, GameObject go, string path)
+        public override void Load(Game game, GameObject go)
         {
             _gameObject = go;
             try
             {
-                Font = GetSpriteFont(path);
-                _asset = new GameAsset(Font, path);
-
-                return true;
+                _asset = new GameAsset(Font, _asset.Name);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-
-                return false;
             }
         }
-
-        public static SpriteFont GetSpriteFont(string path)
+        
+        public override void Draw()
         {
-            TtfFontBakerResult fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(path),
-                25,
-                1024,
-                1024,
-                new[]
-                {
-                    CharacterRange.BasicLatin,
-                    CharacterRange.Latin1Supplement,
-                    CharacterRange.LatinExtendedA,
-                    CharacterRange.Cyrillic
-                }
-            );
-                
-            SpriteFont font = fontBakeResult.CreateSpriteFont(GameCore.Current.GraphicsDevice);
-            return font;
+            if (string.IsNullOrEmpty(Text) || Font == null) return;
+
+            Vector2 stringSize = Font.MeasureString(Text);
+            Vector2 origin = Origin + stringSize * GetAnchorVector(Anchor);
+            
+            GameCore.Current.SpriteBatch.DrawString(
+                Font, 
+                Text,  
+                GameObject.Position, 
+                VertexColor, 
+                GameObject.Rotation, 
+                origin, 
+                Vector2.One * FontSize * GameObject.Scale, 
+                SpriteEffects.None, 
+                0);
         }
         
         internal override void Destroy()
         {
-            _asset.Release();
-        }
-
-        public override void Load(Game game, GameObject go)
-        {
-            Initialize(game, go, _asset.Name);
+            _asset?.Release();
         }
     }
 }

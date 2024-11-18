@@ -93,12 +93,12 @@ namespace UnifyGame
             base.LoadContent();
         }
 
-        protected override void Update(GameTime gameTime)
-        {
-            _core.Update(gameTime);
-            SceneManager.Instance.CurrentScene.Update(gameTime);
-
-        }
+        // protected override void Update(GameTime gameTime)
+        // {
+        //     _core.Update(gameTime);
+        //     SceneManager.Instance.CurrentScene.Update(gameTime);
+        //
+        // }
 
         protected override void Draw(GameTime gameTime)
         {
