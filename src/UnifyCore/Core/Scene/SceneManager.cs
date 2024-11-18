@@ -97,13 +97,13 @@ namespace Unify2D
 
         /// <summary>
         /// Get the Scene at index in the SceneManager's list of loaded Scenes.
+        /// <summary>
         public Scene GetSceneAt(int index)
         {
             return new Scene(GameSettings.Instance.ScenesSave[index].Path);
         }
 
-        //}
-
+        /// </summary>
         /// Get a Scene from a build index.
         /// Get a Scene struct from a build index.
         /// </summary>
