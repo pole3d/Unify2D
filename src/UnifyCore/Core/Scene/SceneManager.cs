@@ -31,8 +31,6 @@ namespace Unify2D
         public Scene CurrentScene => _currentScene;
         public int SceneCountInGameSettings => GameSettings.Instance.ScenesInGame.Count;
 
-        private List<Scene> _allScenes = new List<Scene>();
-
         public SceneManager()
         {
             _currentScene = new Scene();
@@ -43,8 +41,6 @@ namespace Unify2D
         {
             if (scene.Name == null)
                 return;
-
-            Debug.Log("Save scene");
 
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
@@ -69,6 +65,7 @@ namespace Unify2D
         public void LoadSceneWithPath(string scenePath)
         {
             ClearScene();
+
             _currentScene = new Scene(scenePath);
             _currentScene.Init();
         }
@@ -100,15 +97,15 @@ namespace Unify2D
 
         /// <summary>
         /// Get the Scene at index in the SceneManager's list of loaded Scenes.
-        /// </summary>
         public Scene GetSceneAt(int index)
         {
             return new Scene(GameSettings.Instance.ScenesSave[index].Path);
         }
 
+        //}
 
-        /// <summary>
         /// Get a Scene from a build index.
+        /// Get a Scene struct from a build index.
         /// </summary>
         public Scene GetSceneByBuildIndex(int buildIndex)
         {
