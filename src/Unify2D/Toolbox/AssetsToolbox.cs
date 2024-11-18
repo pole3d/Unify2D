@@ -352,16 +352,6 @@ namespace Unify2D.Toolbox
         {
             Selection.SelectObject(asset);
         }
-        
-        private static void ShowExplorer(string path)
-        {
-            string fullPath = GameEditor.Instance.AssetsPath + Path.DirectorySeparatorChar + path;
-
-            if (Directory.Exists(fullPath) == false)
-                Directory.CreateDirectory(fullPath);
-
-            System.Diagnostics.Process.Start("explorer.exe", fullPath);
-        }
 
         private void DeleteSelectedAssets()
         {
