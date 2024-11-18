@@ -37,9 +37,8 @@ namespace Unify2D.Core
         public float DeltaTime { get; private set; }
 
         static GameCore s_current;
-
-        Game _game;
-
+        
+        private Game _game;
         private List<Canvas> _canvasList = new List<Canvas>();
         
         public GameCore(Game game)
@@ -93,7 +92,6 @@ namespace Unify2D.Core
             InitPhysics();
         }
 
-
         public bool HasCanvas(out Canvas canvas)
         {
             if (_canvasList == null)
@@ -106,6 +104,8 @@ namespace Unify2D.Core
 
             _canvasList.RemoveAll(x => x == null);
             _canvasList.RemoveAll(x => GameObjects.Contains(x.GameObject) == false);
+            
+            if (_canvasList.Count <= 0) return false;
             
             canvas = _canvasList[0];
             
