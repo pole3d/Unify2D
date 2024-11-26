@@ -56,16 +56,6 @@ namespace Unify2D.Assets
             {
                 _children.Add(child);
                 child._parent = this;
-                Debug.Log($"Add {child.Name} as child of {_name}");
-            }
-        }
-
-        public void RemoveChild(Asset child)
-        {
-            if (_isDirectory)
-            {
-                _children.Remove(child);
-                child._parent = null;
             }
         }
 

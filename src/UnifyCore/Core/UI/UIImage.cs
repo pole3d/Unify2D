@@ -7,6 +7,7 @@ namespace Unify2D.Core;
 
 public class UIImage : UIComponent, IPointerEventReceiver
 {
+    [JsonIgnore]
     public Texture2D Sprite { get; set; }
     public Color Color { get; set; } = Color.White;
     
