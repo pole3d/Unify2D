@@ -36,7 +36,15 @@ namespace Unify2D.Toolbox
 
         private int _spriteWidth = 0;
         private int _spriteHeight = 0;
-        
+
+        private float _imageOffsetY = 50.0f;
+
+        private bool _isScaleLocked = false;
+        private float _lockedScale = 1.0f;
+        private float _zoomLevel = 1.0f;
+        private float _minZoom = 0.1f;
+        private float _maxZoom = 10.0f;
+
         // Debug
         private bool _hasSlicedTextures = false;
         //End Debug
@@ -62,24 +70,45 @@ namespace Unify2D.Toolbox
 
             if (ImGui.Begin("Sprite Editor Toolbox", ref _isOpen))
             {
-                ImGui.Text("Slice Mode:");
-                if (ImGui.RadioButton("By Pixel Size", _sliceMode == SliceMode.ByPixelSize))
+                if (ImGui.Button("Slice"))
+                {
+                    SliceTexture();
+                }
+
+                ImGui.SameLine();
+                ImGui.Text("by :");
+                ImGui.SameLine();
+                if (ImGui.RadioButton("Pixel Size", _sliceMode == SliceMode.ByPixelSize))
                 {
                     _sliceMode = SliceMode.ByPixelSize;
                 }
 
                 ImGui.SameLine();
-                if (ImGui.RadioButton("By Cell Count", _sliceMode == SliceMode.ByCellCount))
+                if (ImGui.RadioButton("Cell Count", _sliceMode == SliceMode.ByCellCount))
                 {
                     _sliceMode = SliceMode.ByCellCount;
                 }
 
-                ImGui.Separator();
-
-                if (ImGui.Button("Slice"))
+                if (_sliceMode == SliceMode.ByPixelSize)
                 {
-                    SliceTexture();
+                    ImGui.InputInt("Pixel Size X", ref _pixelCountX, 1, 1);
+                    ImGui.InputInt("Pixel Size Y", ref _pixelCountY, 1, 1);
+                    _pixelSizeX = Math.Max(1, _pixelCountX);
+                    _pixelSizeY = Math.Max(1, _pixelCountY);
                 }
+                else if (_sliceMode == SliceMode.ByCellCount)
+                {
+                    ImGui.InputInt("Cell Count X", ref _cellCountX, 1, 1);
+                    ImGui.InputInt("Cell Count Y", ref _cellCountY, 1, 1);
+                    _cellCountX = Math.Max(1, _cellCountX);
+                    _cellCountY = Math.Max(1, _cellCountY);
+
+                    _pixelSizeX = _spriteWidth / _cellCountX;
+                    _pixelSizeY = _spriteHeight / _cellCountY;
+                }
+
+
+                ImGui.Separator();
 
                 DrawTexturePreviewWithGrid();
 
@@ -97,27 +126,47 @@ namespace Unify2D.Toolbox
         {
             _spriteWidth = _texturesBound[0].Texture.Width;
             _spriteHeight = _texturesBound[0].Texture.Height;
-            
-            if (_sliceMode == SliceMode.ByPixelSize)
-            {
-                ImGui.InputInt("Pixel Size X", ref _pixelCountX, 1, 1);
-                ImGui.InputInt("Pixel Size Y", ref _pixelCountY, 1, 1);
-                _pixelSizeX = Math.Max(1, _pixelCountX);
-                _pixelSizeY = Math.Max(1, _pixelCountY);
-            }
-            else if (_sliceMode == SliceMode.ByCellCount)
-            {
-                ImGui.InputInt("Cell Count X", ref _cellCountX, 1, 1);
-                ImGui.InputInt("Cell Count Y", ref _cellCountY, 1, 1);
-                _cellCountX = Math.Max(1, _cellCountX);
-                _cellCountY = Math.Max(1, _cellCountY);
 
-                _pixelSizeX = _spriteWidth / _cellCountX;
-                _pixelSizeY = _spriteHeight / _cellCountY;
+            var availableSize = ImGui.GetContentRegionAvail();
+
+            float scale = _isScaleLocked
+                ? _lockedScale
+                : Math.Min(availableSize.X / _spriteWidth, (availableSize.Y - _imageOffsetY) / _spriteHeight);
+
+            scale *= _zoomLevel;
+
+            float scaledWidth = _spriteWidth * scale;
+            float scaledHeight = _spriteHeight * scale;
+
+            if (ImGui.Button("-"))
+            {
+                _zoomLevel = Math.Max(_minZoom, _zoomLevel - 0.1f);
             }
 
-            ImGui.Image(_texturesBound[0].IntPtr,
-                new System.Numerics.Vector2(_spriteWidth, _spriteHeight));
+            ImGui.SameLine();
+            if (ImGui.Button("+"))
+            {
+                _zoomLevel = Math.Min(_maxZoom, _zoomLevel + 0.1f);
+            }
+
+            ImGui.SameLine();
+            ImGui.Text($"Zoom: {_zoomLevel * 100:0}%");
+
+            if (ImGui.Button("Lock Scale"))
+            {
+                _isScaleLocked = !_isScaleLocked;
+                if (_isScaleLocked)
+                {
+                    _lockedScale = scale / _zoomLevel;
+                }
+            }
+
+            ImGui.SameLine();
+            ImGui.Text(_isScaleLocked ? "Scale Locked" : "Scale Unlocked");
+
+            ImGui.Image(_texturesBound[0].IntPtr, new System.Numerics.Vector2(scaledWidth, scaledHeight));
+
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + _imageOffsetY);
 
             var imageMin = ImGui.GetItemRectMin();
             var imageMax = ImGui.GetItemRectMax();
@@ -126,25 +175,24 @@ namespace Unify2D.Toolbox
             uint redColor = ImGui.GetColorU32(new System.Numerics.Vector4(1.0f, 0.0f, 0.0f, 1.0f));
             float lineThickness = 1.0f;
 
-            for (int x = 0; x <= _spriteWidth; x += _pixelSizeX)
+            float scaledPixelSizeX = _pixelSizeX * scale;
+            float scaledPixelSizeY = _pixelSizeY * scale;
+
+            for (int x = 0; x <= scaledWidth; x += (int)scaledPixelSizeX)
             {
-                float height = _spriteHeight - _spriteHeight % _pixelSizeY;
-                
                 drawList.AddLine(
                     new System.Numerics.Vector2(imageMin.X + x, imageMin.Y),
-                    new System.Numerics.Vector2(imageMin.X + x, imageMin.Y + height),
+                    new System.Numerics.Vector2(imageMin.X + x, imageMin.Y + scaledHeight),
                     redColor,
                     lineThickness
                 );
             }
 
-            for (int y = 0; y <= _spriteHeight; y += _pixelSizeY)
+            for (int y = 0; y <= scaledHeight; y += (int)scaledPixelSizeY)
             {
-                float width = _spriteWidth - _spriteWidth % _pixelSizeX;
-                
                 drawList.AddLine(
                     new System.Numerics.Vector2(imageMin.X, imageMin.Y + y),
-                    new System.Numerics.Vector2(imageMin.X + width, imageMin.Y + y),
+                    new System.Numerics.Vector2(imageMin.X + scaledWidth, imageMin.Y + y),
                     redColor,
                     lineThickness
                 );
