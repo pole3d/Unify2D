@@ -40,7 +40,7 @@ namespace Unify2D
             int count = 0;
             if (File.Exists(path + "\\SampleScene.scene"))
             {
-                while (File.Exists(path + "\\SampleScene" + count + ".scene"))
+                while (File.Exists(path + "\\SampleScene_" + count + ".scene"))
                     count++;
 
                 _currentScene = new Scene(path + "\\SampleScene_" + count + ".scene", true);
