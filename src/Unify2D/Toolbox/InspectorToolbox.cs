@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using Unify2D.Assets;
 using Unify2D.Core;
+using Unify2D.Core.Graphics;
 
 namespace Unify2D.Toolbox
 {
@@ -110,7 +111,8 @@ namespace Unify2D.Toolbox
                 if (scriptAsset.IsLoaded == false)
                     scriptAsset.Load();
 
-                ImGui.InputTextMultiline("##source", ref scriptAsset.Content, ushort.MaxValue, new System.Numerics.Vector2(340, 550));
+                ImGui.InputTextMultiline("##source", ref scriptAsset.Content, ushort.MaxValue,
+                    new System.Numerics.Vector2(340, 550));
                 if (ImGui.Button("Save"))
                 {
                     scriptAsset.Save();
@@ -149,7 +151,8 @@ namespace Unify2D.Toolbox
 
             ImGui.InputText("name", ref name, 40);
             _gameObject.Name = name;
-            System.Numerics.Vector2 position = new System.Numerics.Vector2(_gameObject.Position.X, _gameObject.Position.Y);
+            System.Numerics.Vector2 position =
+                new System.Numerics.Vector2(_gameObject.Position.X, _gameObject.Position.Y);
             float rotation = MathHelper.ToDegrees(_gameObject.Rotation);
             System.Numerics.Vector2 scale = new System.Numerics.Vector2(_gameObject.Scale.X, _gameObject.Scale.Y);
             ImGui.InputFloat2("position", ref position);
@@ -175,7 +178,33 @@ namespace Unify2D.Toolbox
                     {
                         toRemove.Add(component);
                     }
+
                     ImGui.PopStyleColor(3);
+
+                    ImGui.SameLine();
+
+                    if (component is SpriteRenderer)
+                    {
+                        if (ImGui.Button("Sprite Editor"))
+                        {
+                            PropertyInfo[] properties = component.GetType().GetProperties();
+
+                            foreach (PropertyInfo property in properties)
+                            {
+                                try
+                                {
+                                    _propertyViewers[property.PropertyType].Draw(property, component);
+                                }
+                                catch
+                                {
+                                }
+                            }
+                            GameEditor.Instance.SpriteEditorToolbox.Open(component);
+
+                            Debug.Log("Sprite Editor is open !");
+                        }
+                    }
+
 
                     ImGui.TreePop();
                 }
@@ -234,7 +263,7 @@ namespace Unify2D.Toolbox
             }
         }
 
-        public void AddTextureBound( TextureBound textureBound)
+        public void AddTextureBound(TextureBound textureBound)
         {
             _texturesBound.Add(textureBound);
         }

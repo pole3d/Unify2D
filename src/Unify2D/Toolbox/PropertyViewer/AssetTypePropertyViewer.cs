@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using ImGuiNET;
 using Unify2D.Assets;
@@ -42,11 +42,11 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
     /// This method search in the assets of the project and get all assets with the right extension.
     /// </summary>
     /// <returns>A tuple with 2 list : names with asset names, paths with assets paths</returns>
-    protected virtual (List<string> names, List<string> paths) GetAssetLists()
+    protected virtual Dictionary<string, string> GetAssetLists()
     {
+        Dictionary<string, string> dictionary = new();
         (string name, string path) baseAsset = GetBaseAsset();
-        List<string> assetNames = new(){baseAsset.name};
-        List<string> assetPaths = new(){baseAsset.path};
+        dictionary.Add(baseAsset.name, baseAsset.path);
         
         List<Asset> assets = GameEditor.Instance.AssetsToolBox.Assets;
         string extension = GetAssetExtension();
@@ -59,15 +59,15 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
                 path = path.Remove(0,1);
                 path = $"{GameCore.Current.Game.Content.RootDirectory}/Assets/{path}";
                     
-                assetNames.Add(name);
-                assetPaths.Add(path);
+                dictionary.Add(name,path);
             }
         }
 
-        return (assetNames, assetPaths);
+        return dictionary;
     }
 
-    protected int CurrentFoldoutIndex;
+    private int _currentFoldoutIndex;
+    private string _search = string.Empty;
     /// <summary>
     /// This method draw the foldout for the asset property with all the files in the project that can be chosen.
     /// </summary>
@@ -76,22 +76,37 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
     /// <param name="instance">The component owning the property</param>
     protected void DrawFoldout(ref T asset, PropertyInfo property, object instance)
     {
-        (List<string> names, List<string> paths) lists = GetAssetLists();
-        
-        bool combo = ImGui.Combo(GetPropertyName(), ref CurrentFoldoutIndex,  lists.names.ToArray(), lists.names.Count);
-        if (combo)
+        Dictionary<string, string> dictionary = GetAssetLists();
+        var dictionaryList = dictionary.ToList();
+
+        if (ImGui.BeginCombo($"{GetPropertyName()}", dictionaryList[_currentFoldoutIndex].Key))
         {
-            if (CurrentFoldoutIndex == 0)
+            ImGui.InputText("search", ref _search, 100);
+            Dictionary<string, string> filteredFileDictionary = new();
+            foreach (KeyValuePair<string, string> pair in dictionary)
             {
-                asset = GetInitializeAsset();
-            }
-            else
-            {
-                asset = GetAssetFromPath(lists.paths[CurrentFoldoutIndex]);
+                if (pair.Key.ToUpper().Contains(_search.ToUpper()) == false) continue;
+                filteredFileDictionary.Add(pair.Key, pair.Value);
             }
             
-            property.SetValue(instance, asset);
+            for (int i = 0; i < dictionary.Count; i++)
+            {
+                bool isSelected = (_currentFoldoutIndex == i);
+                bool isInFilter = string.IsNullOrEmpty(_search) || filteredFileDictionary.ContainsKey(dictionaryList[i].Key);
+                if (isInFilter && ImGui.Selectable(dictionaryList[i].Key, isSelected))
+                {
+                    _currentFoldoutIndex = i;
+                }
+                if (isSelected)
+                {
+                    ImGui.SetItemDefaultFocus(); 
+                }
+            }
+            ImGui.EndCombo();
         }
+        
+        asset = _currentFoldoutIndex == 0 ? GetInitializeAsset() : GetAssetFromPath(dictionaryList[_currentFoldoutIndex].Value);
+        property.SetValue(instance, asset);
     }
     
 }

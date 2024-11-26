@@ -12,7 +12,6 @@ using Unify2D.Core.Graphics;
 using Unify2D.Core;
 using Unify2D.Tools;
 using Microsoft.Xna.Framework;
-
 using Num = System.Numerics;
 
 namespace Unify2D.Toolbox

@@ -53,7 +53,8 @@ namespace Unify2D
         internal ScriptToolbox ScriptToolbox { get; private set; }
         internal GameToolbox GameToolbox { get; private set; }
         internal HierarchyToolbox HierarchyToolbox { get; private set; }
-        internal AssetsToolbox AssetsToolBox { get; private set; }
+        internal AssetsToolbox AssetsToolBox{ get; private set; }
+        internal SpriteEditorToolbox SpriteEditorToolbox { get; private set; }
         internal AssetManager AssetManager { get; private set; }
 
         public GameCoreViewer GameCoreViewerScene => _coreViewerScene;
@@ -142,9 +143,11 @@ namespace Unify2D
             HierarchyToolbox = new HierarchyToolbox();
             HierarchyToolbox.SetCore(_coreViewerScene);
             AssetsToolBox = new AssetsToolbox();
-
+            SpriteEditorToolbox = new SpriteEditorToolbox();
+            
             _toolboxes.Add(AssetsToolBox);
             _toolboxes.Add(HierarchyToolbox);
+            _toolboxes.Add(SpriteEditorToolbox);
             _toolboxes.Add(new ConsoleToolbox());
 
             _toolboxes.Add(ScriptToolbox);
@@ -249,8 +252,11 @@ namespace Unify2D
         public void Build()
         {
             GameBuilder builder = new GameBuilder();
-            builder.Build(_coreViewerScene.GameCore, this);
-            builder.StartBuild();
+
+            
+            if ( builder.Build(_coreViewerScene.GameCore, this))
+                builder.StartBuild();
+
         }
 
         #endregion
@@ -264,7 +270,7 @@ namespace Unify2D
         {
             _unbindTargets.Add((sceneRenderTarget, renderTargetId));
         }
-
+        
 
         // Waiting to resolve operation
         internal void OpenPrefab(PrefabAssetContent content)

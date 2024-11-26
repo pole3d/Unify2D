@@ -21,6 +21,8 @@ namespace Unify2D.Assets
         private readonly Dictionary<Type, List<string>> _assetTypeToExtension = new Dictionary<Type, List<string>>()
         {
             { typeof(ScriptAssetContent), new List<string> { ".cs" } },
+            { typeof(FontAssetContent), new List<string> { ".ttf" } },
+            { typeof(SceneAssetContent), new List<string> { ".scene" } },
             { typeof(PrefabAssetContent), new List<string> { ".prefab" } },
             { typeof(TextureAssetContent), new List<string> { ".png", ".jpg" } }
         };

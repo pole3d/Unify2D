@@ -31,15 +31,13 @@ namespace Unify2D.Core
         public GraphicsDevice GraphicsDevice { get; private set; }
         public SpriteBatch SpriteBatch { get; private set; }
         public List<GameObject> GameObjects => SceneManager.Instance.CurrentScene.GameObjects;
-
-        public List<Canvas> CanvasList => _canvasList;
+        
         public PhysicsSettings PhysicsSettings { get; private set; }
         public float DeltaTime { get; private set; }
 
         static GameCore s_current;
         
         private Game _game;
-        private List<Canvas> _canvasList = new List<Canvas>();
         
         public GameCore(Game game)
         {
@@ -48,8 +46,7 @@ namespace Unify2D.Core
 
         public void InitPhysics()
         {
-            if (PhysicsSettings == null)
-                PhysicsSettings = new PhysicsSettings();
+            PhysicsSettings ??= new PhysicsSettings();
 
             PhysicsSettings.Init();
         }
@@ -90,26 +87,6 @@ namespace Unify2D.Core
             SpriteBatch = new SpriteBatch(graphicsDevice);
 
             InitPhysics();
-        }
-
-        public bool HasCanvas(out Canvas canvas)
-        {
-            if (_canvasList == null)
-            {
-                _canvasList = new List<Canvas>();
-            }
-            
-            canvas = null;
-            if (_canvasList.Count <= 0) return false;
-
-            _canvasList.RemoveAll(x => x == null);
-            _canvasList.RemoveAll(x => GameObjects.Contains(x.GameObject) == false);
-            
-            if (_canvasList.Count <= 0) return false;
-            
-            canvas = _canvasList[0];
-            
-            return true;
         }
     }
 }
