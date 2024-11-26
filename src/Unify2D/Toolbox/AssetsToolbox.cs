@@ -18,7 +18,7 @@ namespace Unify2D.Toolbox
         public List<Asset> Assets => _assets;
         
         private string _path;
-        private bool[] _selected;
+        private List<Asset> _selectedAssets = new List<Asset>();
         private List<Asset> _assets = new List<Asset>();
         private HashSet<string> _extensionsToIgnore = new HashSet<string> { ".csproj", ".dll", ".sln" };
         
@@ -51,6 +51,7 @@ namespace Unify2D.Toolbox
         internal override void Reset()
         {
             _assets.Clear();
+            _selectedAssets.Clear();
             _path = _editor.AssetsPath;
 
             if (String.IsNullOrEmpty(_path))
@@ -68,8 +69,6 @@ namespace Unify2D.Toolbox
 
             foreach (string directory in directories)
                 CreateAssetFromDirectory(directory);
-
-            _selected = new bool[_assets.Count];
         }
 
         private Asset CreateAssetFromDirectory(string directory)
@@ -169,6 +168,7 @@ namespace Unify2D.Toolbox
                 ImGui.TreeNodeEx($"{node.Name}##{node.GetHashCode()}", base_flags);
 
                 SetNode(node);
+                _selectedAssets.Add(node);
             }
             else
             {
@@ -178,6 +178,7 @@ namespace Unify2D.Toolbox
                 bool open = ImGui.TreeNodeEx($"{node.Name}##{node.GetHashCode()}", base_flags);
 
                 SetNode(node);
+                _selectedAssets.Add(node);
 
                 if (open)
                 {
@@ -206,20 +207,19 @@ namespace Unify2D.Toolbox
         {
             if (!ImGui.BeginPopupContextItem())
                 return;
-            if (ImGui.Button("Delete"))
+            
+            // Clear selection when CTRL is not held
+            if (!ImGui.GetIO().KeyCtrl)
             {
-                DeleteAsset(asset);
-                ImGui.CloseCurrentPopup();
+                _selectedAssets.Clear();
             }
+            _selectedAssets.Add(asset);
             
             if (asset.AssetContent is PrefabAssetContent prefabContent)
             {
                 if (ImGui.Button(OpenPrefabButtonLabel))
                 {
-                    for (int i = 0; i < _assets.Count; i++)
-                    {
-                        _selected[i] = false;
-                    }
+                    _selectedAssets.Clear();
                     
                     GameEditor.Instance.OpenPrefab(prefabContent);
                     
@@ -230,6 +230,7 @@ namespace Unify2D.Toolbox
                     
                     // _selected[assetIndex] = true;
                     // Selection.SelectObject(_assets[assetIndex]);
+                    _selectedAssets.Add(asset);
                     
                     ImGui.CloseCurrentPopup();
                 }
@@ -290,12 +291,6 @@ namespace Unify2D.Toolbox
             if (ImGui.Button(DeleteButtonLabel))
             {
                 DeleteSelectedAssets();
-                ImGui.CloseCurrentPopup();
-            }
-
-            if (ImGui.Button(ShowInExplorerButtonLabel))
-            {
-                ShowExplorer(string.Empty);
                 ImGui.CloseCurrentPopup();
             }
 
@@ -401,12 +396,9 @@ namespace Unify2D.Toolbox
 
         private void DeleteSelectedAssets()
         {
-            for (int n = 0; n < _assets.Count; n++)
+            for (int n = 0; n < _selectedAssets.Count; n++)
             {
-                if (_selected[n])
-                {
-                    DeleteAsset(_assets[n]);
-                }
+                DeleteAsset(_selectedAssets[n]);
             }
             Reset();
         }

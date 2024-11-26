@@ -26,13 +26,14 @@ namespace Unify2D.Toolbox
         private List<TextureBound> _texturesBound = new List<TextureBound>();
         private List<TextureBound> _texturesToUnbind = new List<TextureBound>();
 
-        private Dictionary<Type,PropertyViewer> _propertyViewers = new Dictionary<Type,PropertyViewer>();
+        private Dictionary<Type, PropertyViewer> _propertyViewers = new Dictionary<Type, PropertyViewer>();
 
         /// <summary>
         /// WORKAROUND : Add one frame delay to avoid modifying another gameobject when
         /// switching between gameobjects
         /// </summary>
         private int _changeCount = 0;
+
         private PrefabAssetContent _currentPrefabAsset;
 
         public override void Initialize(GameEditor editor)
@@ -46,7 +47,7 @@ namespace Unify2D.Toolbox
             _propertyViewers.Add(typeof(Vector2), new Vector2PropertyViewer());
             _propertyViewers.Add(typeof(GameAsset), new GameAssetPropertyViewer());
             _propertyViewers.Add(typeof(Enum), new EnumPropertyViewer());
-            
+
             _propertyViewers.Add(typeof(SpriteFont), new SpriteFontPropertyViewer());
             _propertyViewers.Add(typeof(Texture2D), new Texture2DPropertyViewer());
         }
@@ -75,7 +76,7 @@ namespace Unify2D.Toolbox
 
             _texturesBound.Clear();
         }
-        
+
         public override void Draw()
         {
             foreach (var item in _texturesToUnbind)
@@ -142,8 +143,9 @@ namespace Unify2D.Toolbox
                 // Add a button to save the prefab
                 if (ImGui.Button("Save Prefab"))
                 {
-                    _currentPrefabAsset.Save(_gameObject);
+                    _currentPrefabAsset.SavePrefab(_gameObject);
                 }
+
                 ImGui.Separator();
             }
 
@@ -199,6 +201,7 @@ namespace Unify2D.Toolbox
                                 {
                                 }
                             }
+
                             GameEditor.Instance.SpriteEditorToolbox.Open(component);
 
                             Debug.Log("Sprite Editor is open !");
@@ -284,17 +287,18 @@ namespace Unify2D.Toolbox
             return null;
         }
 
-        public class TextureBound
-        {
-            public Texture2D Texture { get; set; }
-            public IntPtr IntPtr { get; set; }
-        }
-        
+
         public void Save(GameObject gameObject)
         {
             // Serialize the gameObject and save it as a prefab
             string json = JsonConvert.SerializeObject(gameObject, Formatting.Indented);
             // File.WriteAllText(Asset.FullPath, json);
         }
+    }
+
+    public class TextureBound
+    {
+        public Texture2D Texture { get; set; }
+        public IntPtr IntPtr { get; set; }
     }
 }
