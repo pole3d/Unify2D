@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Genbox.VelcroPhysics.Tools.PathGenerator;
+using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
@@ -7,21 +8,29 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Unify2D.Core;
 using Unify2D.Physics;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Unify2D
 {
     public class Scene
     {
-        public string Name { get; private set; }
-        public string Path { get; private set; }
-        public int BuildIndex { get; private set; }
-        public List<GameObject> GameObjects { get; private set; } = new();
+        private SceneInfo _sceneInfo;
+        public SceneInfo SceneInfo => _sceneInfo;
+
+        public string Name => _sceneInfo.Name;
+        public string Path => _sceneInfo.Path;
         public int RootCount => GameObjects.Count;
+        public int BuildIndex { get; private set; }
+        public List<GameObject> GameObjects { get; private set; } = new List<GameObject>();
+
+        private bool _isLoaded = false;
+
+        private bool _isDirty = false;
+
         public List<Canvas> CanvasList => _canvasList;
-        
-        
         private List<Canvas> _canvasList = new List<Canvas>();
 
         public IEnumerable<GameObject> GameObjectsWithChildren
@@ -45,14 +54,12 @@ namespace Unify2D
 
         private List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
 
-        public Scene()
+        public Scene(string path, bool save = false)
         {
-        }
+            SaveSceneNameAndPath(System.IO.Path.GetFileName(path), path);
 
-        public Scene(string path)
-        {
-            Path = path;
-            Name = System.IO.Path.GetFileName(path);
+            if (save == true)
+                SceneManager.Instance.Save(this);
 
             try
             {
@@ -68,19 +75,25 @@ namespace Unify2D
             }
         }
 
-        public void SaveSceneNameAndPath(string path, string name)
+        public void SaveSceneNameAndPath(string name, string path)
         {
-            Path = path;
-            Name = name;
+            if (_sceneInfo == null)
+                _sceneInfo = new SceneInfo(name, path);
+            else
+            {
+                _sceneInfo.Name = name;
+                _sceneInfo.Path = path;
+            }
         }
         public void Init()
         {
             GameCore.Current.InitPhysics();
-
             foreach (GameObject gameObject in GameObjects)
             {
                 gameObject.Init(GameCore.Current.Game);
             }
+
+            _isLoaded = true;
         }
 
 
@@ -96,32 +109,40 @@ namespace Unify2D
 
         public void Draw()
         {
-            foreach (GameObject item in GameObjects)
-            {
-                item.Draw();
+            if (_isLoaded == false)
+                return;
 
-                var canvas = item.GetComponent<Canvas>();
+            for (int i = 0; i < GameObjects.Count; i++)
+            {
+                GameObject go = GameObjects[i];
+                go.Draw();
+
+                Canvas canvas = go.GetComponent<Canvas>();
                 if (canvas != null) canvas.Draw();
             }
         }
-        
         public void Update(GameTime gameTime)
         {
-            foreach (GameObject item in GameObjects)
+            if (_isLoaded == false)
+                return;
+
+            for (int i = 0; i < GameObjects.Count; i++)
             {
-                item.Update(GameCore.Current);
+                GameObject go = GameObjects[i];
+                go.Update(GameCore.Current);
             }
 
-            foreach (GameObject item in _gameObjectsToDestroy)
-            {
-                GameObjects.Remove(item);
-            }
+            for (int i = 0; i < _gameObjectsToDestroy.Count; i++)
+                GameObjects.Remove(_gameObjectsToDestroy[i]);
 
             PhysicsSettings.World.Step(GameCore.Current.DeltaTime);
 
             _gameObjectsToDestroy.Clear();
         }
-
+        public void UpdateCanvas()
+        {
+            _canvasList.ForEach(x => x.UpdateList());
+        }
         public void Destroy(GameObject gameObject)
         {
             _gameObjectsToDestroy.Add(gameObject);
@@ -130,13 +151,9 @@ namespace Unify2D
         public void DestroyImmediate(GameObject gameObject)
         {
             if (gameObject.Parent != null)
-            {
                 gameObject.Parent.Children.Remove(gameObject);
-            }
             else
-            {
                 GameObjects.Remove(gameObject);
-            }
         }
 
         public bool HasCanvas(out Canvas canvas)
@@ -145,22 +162,37 @@ namespace Unify2D
             {
                 _canvasList = new List<Canvas>();
             }
-            
+
             canvas = null;
             if (_canvasList.Count <= 0) return false;
 
             _canvasList.RemoveAll(x => x == null);
-            
+
             if (_canvasList.Count <= 0) return false;
-            
+
             canvas = _canvasList[0];
-            
+
             return true;
         }
 
-        public void UpdateCanvas()
+        public void ClearScene()
         {
-            _canvasList.ForEach(x => x.UpdateList());
+            _isLoaded = false;
+            GameObjects.Clear();
         }
+    }
+
+    public class SceneInfo
+    {
+        public SceneInfo(string name, string path)
+        {
+            Name = name;
+            Path = path;
+        }
+
+        public string Name { get; set; }
+        public string Path { get; set; }
+        public int BuildIndex { get; set; }
+
     }
 }
