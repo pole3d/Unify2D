@@ -52,6 +52,11 @@ namespace Unify2D.Assets
             _fullPath = ToolsEditor.CombinePath(path, _name);
         }
 
+        public void SetFullPath(string fullpath)
+        {
+            _fullPath = fullpath;
+        }
+
         public override string ToString()
         {
             return Name;

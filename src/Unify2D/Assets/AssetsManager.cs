@@ -41,31 +41,6 @@ namespace Unify2D.Assets
                 }
             }
         }
-
-        // Old code from FirstPrefab Code
-        internal void RefreshDatabase()
-        {
-            _assets.Clear();
-            string path = _editor.AssetsPath;
-
-            if (String.IsNullOrEmpty(path))
-                return;
-
-            if (Directory.Exists(path) == false)
-                Directory.CreateDirectory(path);
-
-            var files = Directory.GetFiles(path);
-            _nbOfFiles = files.Length;
-
-            foreach (var file in files)
-            {
-                string relativeFile = file.Replace(path, string.Empty);
-
-                // _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeFile),
-                //     Path.GetExtension(relativeFile),
-                //     Path.GetDirectoryName(relativeFile)));
-            }
-        }
         
         internal Asset CreateAsset<T>(string name) where T : AssetContent, new()
         {
