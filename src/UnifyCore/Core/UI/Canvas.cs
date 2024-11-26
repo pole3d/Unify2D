@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Unify2D.Core;
 
@@ -10,8 +9,6 @@ public class Canvas : Component
 {
     public int SortOrder { get; set; }
     public bool IsVisible { get; set; } = true;
-
-    [JsonIgnore]
     public List<UIComponent> Elements { get; set; } = new();
 
     public void UpdateList()
