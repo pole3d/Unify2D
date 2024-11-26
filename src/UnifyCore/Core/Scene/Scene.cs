@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Unify2D.Core;
 using Unify2D.Physics;
+using Object = System.Object;
 
 namespace Unify2D
 {
@@ -29,6 +30,9 @@ namespace Unify2D
 
         public List<Canvas> CanvasList => _canvasList;
         private List<Canvas> _canvasList = new List<Canvas>();
+
+        public EventSystem EventSystem => _eventSystem;
+        private EventSystem _eventSystem;
 
         public IEnumerable<GameObject> GameObjectsWithChildren
         {
@@ -181,6 +185,11 @@ namespace Unify2D
         {
             _isLoaded = false;
             GameObjects.Clear();
+        }
+
+        public void AddEventSystem(EventSystem eventSystem)
+        {
+            _eventSystem = eventSystem;
         }
     }
 

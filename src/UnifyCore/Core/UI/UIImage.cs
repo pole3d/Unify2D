@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Unify2D.Core;
 
-public class UIImage : UIComponent
+public class UIImage : UIComponent, IPointerEventReceiver
 {
     public Texture2D Sprite { get; set; }
     public Color Color { get; set; } = Color.White;
@@ -35,5 +35,22 @@ public class UIImage : UIComponent
         GameCore.Current.SpriteBatch.Draw(Sprite, _gameObject.Position,
             null, Color, _gameObject.Rotation, origin, _gameObject.Scale,
             SpriteEffects.None, 0);
+    }
+
+    public Action OnClick { get; set; }
+    public Action OnPressed { get; set; }
+    public Action OnRelease { get; set; }
+    
+    public void OnPointerClick()
+    {
+        OnClick?.Invoke();
+
+        foreach (var component in GameObject.Components)
+        {
+            if (component is UIButton button)
+            {
+                button.OnButtonPressed?.Invoke();
+            }
+        }
     }
 }

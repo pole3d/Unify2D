@@ -118,7 +118,8 @@ namespace Unify2D
                         && worldPosition.Y >= item.Position.Y - item.BoundingSize.Y / 2 && worldPosition.Y <= item.Position.Y + item.BoundingSize.Y / 2)
                     {
                         if(item == _gameObject && gameTime.TotalGameTime.Seconds - _timeAtLastClick < 0.5f)
-                        {// Double click, focus
+                        {
+                            // Double click, focus
                             GameEditor.Instance.GameToolbox.GoTo(item.Position);
                         }
 
