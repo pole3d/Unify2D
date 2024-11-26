@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Reflection;
+using Unify2D.Assets;
 using Unify2D.Core;
 using Unify2D.Core.Graphics;
 
@@ -27,9 +28,9 @@ namespace Unify2D.Toolbox
 
             if (name != "none")
             {
-                var asset = GameEditor.Instance.AssetsToolBox.GetAssetFromPath(name);
+                bool getAsset = GameEditor.Instance.AssetsToolBox.TryGetAssetFromPath(name, out Asset asset);
 
-                if (asset != null && (value == null || asset != value.Asset))
+                if (getAsset && (value == null || asset != value.Asset))
                 {
                     if (instance is SpriteRenderer spriteRenderer)
                     {
