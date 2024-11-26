@@ -68,8 +68,14 @@ namespace Unify2D.Toolbox
                 if (_extensionsToIgnore.Contains(extension))
                     continue;
 
-                _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeFile),
-                    Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile)));
+                _assets.Add(new Asset(
+                    Path.GetFileNameWithoutExtension(relativeFile),
+                    Path.GetExtension(relativeFile),
+                    Path.GetDirectoryName(relativeFile)));
+                // _assets.Add(new Asset(
+                //     Path.GetFileNameWithoutExtension(relativeFile),
+                //     Path.GetExtension(relativeFile),
+                //     _editor.AssetsPath));
             }
 
             string[] directories = Directory.GetDirectories(_path);
@@ -77,8 +83,14 @@ namespace Unify2D.Toolbox
             foreach (string directory in directories)
             {
                 string relativeDirectory = directory.Replace(_path, string.Empty);
-                _assets.Add(new Asset(Path.GetFileNameWithoutExtension(relativeDirectory),
-                    Path.GetDirectoryName(relativeDirectory), true));
+                _assets.Add(new Asset(
+                    Path.GetFileNameWithoutExtension(relativeDirectory),
+                    Path.GetDirectoryName(relativeDirectory),
+                    true));
+                // _assets.Add(new Asset(
+                //     Path.GetFileNameWithoutExtension(relativeDirectory),
+                //     _editor.AssetsPath, 
+                //     true));
             }
 
             _selected = new bool[files.Length + directories.Length];
@@ -144,7 +156,21 @@ namespace Unify2D.Toolbox
             {
                 if (ImGui.Button(OpenPrefabButtonLabel))
                 {
-                    //GameEditor.Instance.OpenPrefab(prefabContent);
+                    for (int i = 0; i < _assets.Count; i++)
+                    {
+                        _selected[i] = false;
+                    }
+                    
+                    GameEditor.Instance.OpenPrefab(prefabContent);
+                    
+                    if(prefabContent.IsLoaded == false)
+                        prefabContent.Load();
+                    
+                    SceneManager.Instance.CurrentScene.AddRootGameObject(prefabContent.InstantiatedGameObject);
+                    
+                    _selected[assetIndex] = true;
+                    Selection.SelectObject(_assets[assetIndex]);
+                    
                     ImGui.CloseCurrentPopup();
                 }
 

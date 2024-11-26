@@ -24,13 +24,14 @@ namespace Unify2D.Assets
         public override void Load()
         {
             base.Load();
-            InstantiateGameObject();
+            InstantiateGameObjectOnLoad();
         }
 
-        public void InstantiateGameObject()
+        private void InstantiateGameObjectOnLoad()
         {
             PrefabInstance prefabInstance = new PrefabInstance($"{Asset.FullPath}");
             InstantiatedGameObject = prefabInstance.InstantiateAndLinkGameObject();
+            Asset.SetFullPath(InstantiatedGameObject.GetOriginalAssetPath());
         }
 
         internal void Save(GameObject gameObject)
@@ -39,11 +40,11 @@ namespace Unify2D.Assets
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
             
-            // Write serialized data to file
+            // Write serialized data to new file
             _serializedText = JsonConvert.SerializeObject(gameObject, settings);
-            File.WriteAllText($"{_asset.FullPath}", _serializedText);
+            File.WriteAllText(_asset.FullPath, _serializedText);
             
-            Console.WriteLine($"Prefab {gameObject.Name} saved to {Path.GetFullPath(_asset.FullPath)}");
+            Console.WriteLine($"Prefab {gameObject.Name} saved!");// to {Path.GetFullPath(_asset.FullPath)}");
         }
     }
 }
