@@ -101,7 +101,7 @@ public class ScriptingBridge
     
     private static IntPtr GetPointer(object managedObject)
     {
-        GCHandle handle = GCHandle.Alloc(managedObject, GCHandleType.Normal);
+        GCHandle handle = GCHandle.Alloc(managedObject);
         return GCHandle.ToIntPtr(handle);
     }
 }

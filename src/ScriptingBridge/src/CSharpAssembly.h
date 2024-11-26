@@ -19,7 +19,7 @@ public:
 public:
     void Reload();
 
-    [[nodiscard]] MonoClass* GetClass(const std::string& ClassName, const std::string& NameSpace = "") const;
+    [[nodiscard]] MonoClass* GetClass(const std::string& NameSpace, const std::string& ClassName) const;
     [[nodiscard]] MonoImage* GetImage() const;
     [[nodiscard]] std::string GetAssemblyPath() const;
 

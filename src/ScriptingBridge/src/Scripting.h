@@ -23,15 +23,22 @@ private:
 
     std::vector<CSharpAssembly> m_Assemblies;
 
+    MonoClass* m_ComponentClass;
+
 public:
     Scripting();
     ~Scripting();
 
     [[nodiscard]] MonoDomain* GetAppDomain() const;
     [[nodiscard]] std::vector<CSharpAssembly>& GetAssemblies();
+    [[nodiscard]] MonoClass* GetComponentClass();
 
-public:
+    [[nodiscard]] MonoClass* FindClassInAssemblies(const std::string& NamespaceName, const std::string& ClassName);
+
     void CreateAppDomain();
+    void ForceFindComponentClass();
+
+    [[nodiscard]] static MonoMethod* FindMethodInObjectRecursively(MonoObject* Object, const std::string& MethodName, bool HasParameter);
 };
 
 SCRIPTING_API void* CreateEngine();
