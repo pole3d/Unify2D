@@ -58,7 +58,7 @@ namespace UnifyGame
         protected override void LoadContent()
         {
             _core.Initialize(GraphicsDevice);
-            _core.GameObjects.Clear();
+          //  _core.GameObjects.Clear();
 
             #region Load scene with json
             try

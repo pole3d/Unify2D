@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using Unify2D.Core;
 using System.IO;
 using UnifyCore;
@@ -136,7 +135,8 @@ namespace Unify2D
 
         private void ClearScene()
         {
-            CurrentScene.ClearScene();
+            if (CurrentScene != null)
+                CurrentScene.ClearScene();
         }
 
         public void AddGameObject(GameObject go)
