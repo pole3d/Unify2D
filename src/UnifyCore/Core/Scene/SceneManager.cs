@@ -4,16 +4,19 @@ using System.Collections.Generic;
 using Unify2D.Core;
 using System.IO;
 using UnifyCore;
+using System.Text.Json;
 using Unify2D.Builder;
-
-namespace Unify2D
+using Unify2D;
+using System.Runtime.CompilerServices;
+using Genbox.VelcroPhysics.Tools.PathGenerator;
+namespace UnifyCore
 {
+
     public class SceneManager
     {
         private static SceneManager _instance;
 
         private Scene _currentScene;
-
         public static SceneManager Instance
         {
             get
@@ -21,34 +24,62 @@ namespace Unify2D
                 if (_instance == null)
                 {
                     _instance = new SceneManager();
+
                 }
 
                 return _instance;
             }
         }
 
-
         public Scene CurrentScene => _currentScene;
         public int SceneCountInGameSettings => GameSettings.Instance.ScenesInGame.Count;
-
+        private string _currentProjectPath;
+        private string _sceneFolder;
         public SceneManager()
         {
         }
 
-        public void CreateOrOpenSceneAtStart(string path)
+        public void CreateOrOpenSceneAtStart(string path, string sceneFolder)
         {
-            int count = 0;
-            if (File.Exists(path + "\\SampleScene.scene"))
+            _currentProjectPath = path;
+            _sceneFolder = sceneFolder;
+
+            string currentPath = path + sceneFolder;
+
+            #region Load scene with json
+            try
             {
-                while (File.Exists(path + "\\SampleScene_" + count + ".scene"))
-                    count++;
+                string pathJson = System.IO.Path.Combine(_currentProjectPath, JsonFolderSceneName);
+                if (File.Exists(pathJson))
+                {
+                    List<SceneInfo> deserializedJsonScene = System.Text.Json.JsonSerializer.Deserialize<List<SceneInfo>>(File.ReadAllText(pathJson));
 
-                _currentScene = new Scene(path + "\\SampleScene_" + count + ".scene", true);
+                    for (int i = 0; i < deserializedJsonScene.Count; i++)
+                    {
+                        SceneInfo sceneInfo = deserializedJsonScene[i];
+                        sceneInfo.BuildIndex = i;
+                        GameSettings.Instance.AddSceneToList(sceneInfo);
+                    }
+
+                    if (GameSettings.Instance.ScenesSave.Count > 0)
+                        LoadScene(GameSettings.Instance.ScenesSave[0].Name);
+                    else
+                        CreateNewScene(path, sceneFolder);
+                }
+                else
+                {
+                    CreateNewScene(path, sceneFolder);
+                    Console.WriteLine("Problem with your folder json, here your path : " + pathJson);
+                }
             }
-            else
-                _currentScene = new Scene(path + "\\SampleScene.scene", true);
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Can't load scene" + ex.ToString());
+            }
+            #endregion
 
-            _currentScene.Init();
+
+
         }
 
         #region Save/Load
@@ -64,7 +95,25 @@ namespace Unify2D
 
             File.WriteAllText(scene.Path, sceneContent);
         }
+        public void CreateNewScene(string path, string sceneFolder)
+        {
+            _currentProjectPath = path;
+            _sceneFolder = sceneFolder;
 
+            string currentPath = path + sceneFolder;
+            int count = 0;
+            if (File.Exists(System.IO.Path.Combine(currentPath, "SampleScene.scene")))
+            {
+                while (File.Exists(System.IO.Path.Combine(currentPath, "SampleScene_" + count + ".scene")))
+                    count++;
+
+                _currentScene = new Scene(System.IO.Path.Combine(currentPath, "SampleScene_" + count + ".scene"), true);
+            }
+            else
+                _currentScene = new Scene(System.IO.Path.Combine(currentPath, "SampleScene.scene"), true);
+
+            _currentScene.Init();
+        }
         public void SaveCurrentScene()
         {
             Save(_currentScene);
@@ -98,6 +147,44 @@ namespace Unify2D
 
             _currentScene = GetSceneByBuildIndex(_currentScene.BuildIndex + 1);
             _currentScene.Init();
+        }
+
+        private const string AssetsPath = "Assets";
+        const string JsonFolderSceneName = "SceneJson.json";
+
+        public void SaveAllSceneToJson()
+        {
+            SaveCurrentScene();
+            if (Directory.Exists(_currentProjectPath))
+            {
+                List<SceneInfo> listSceneToJson = new List<SceneInfo>();
+                try
+                {
+                    // Récupérer tous les fichiers .scene dans le répertoire et ses sous-répertoires
+                    foreach (string item in Directory.GetFiles(_currentProjectPath, "*.scene", SearchOption.AllDirectories))
+                    {
+                        string name = item.Substring(item.LastIndexOf('\\') + 1);
+                        //string path = item.Substring(item.IndexOf('\\') + 1);
+                        SceneInfo scene = new SceneInfo(name, item);
+                        listSceneToJson.Add(scene);
+                    }
+                    string json = System.Text.Json.JsonSerializer.Serialize(listSceneToJson);
+                    string pathJson = System.IO.Path.Combine(_currentProjectPath, JsonFolderSceneName);
+                    Console.WriteLine("path json : " + pathJson);
+
+                    if (File.Exists(pathJson))
+                        File.Delete(pathJson);
+                    
+                    File.Create(pathJson).Close();
+                    File.WriteAllText(pathJson, json);
+                    FileInfo jsonFile = new FileInfo(pathJson);
+                    jsonFile.Attributes = FileAttributes.Hidden;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Une erreur s'est produite : " + ex.Message);
+                }
+            }
         }
         #endregion
 
@@ -138,7 +225,7 @@ namespace Unify2D
                     continue;
                 return new Scene(scene.Path);
             }
-            Console.WriteLine("No scene with the name : " + name);
+            Debug.Log("No scene with the name : " + name);
             return null;
         }
 
@@ -151,7 +238,8 @@ namespace Unify2D
 
         private void ClearScene()
         {
-            CurrentScene.ClearScene();
+            if (CurrentScene != null)
+                CurrentScene.ClearScene();
         }
 
         public void AddGameObject(GameObject go)
