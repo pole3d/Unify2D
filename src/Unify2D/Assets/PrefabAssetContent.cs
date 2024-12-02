@@ -31,6 +31,7 @@ namespace Unify2D.Assets
         {
             PrefabInstance prefabInstance = new PrefabInstance($"{Asset.FullPath}");
             InstantiatedGameObject = prefabInstance.InstantiateAndLinkGameObject();
+            InstantiatedGameObject.Name = Asset.Name;
             Asset.SetMegaPath(InstantiatedGameObject.GetOriginalAssetPath());
         }
 
@@ -47,6 +48,7 @@ namespace Unify2D.Assets
             Console.WriteLine($"Prefab {gameObject.Name} saved on file!");// to {Path.GetFullPath(_asset.FullPath)}");
         }
         
+        // TODO: Merge both function because path problems
         internal void SavePrefab(GameObject gameObject)
         {
             // Make so type name should be written in serialized data
