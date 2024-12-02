@@ -320,6 +320,7 @@ namespace Unify2D.Toolbox
                         // SceneManager.Instance.CurrentScene.AddRootGameObject(prefabContent.InstantiatedGameObject);
                         
                         var newGameObject = prefabContent.InstantiatedGameObject.DeepCopy();
+                        newGameObject.Tag = prefabContent;
                         prefabContent.AddGoInstantiated(newGameObject);
                         
                         SceneManager.Instance.CurrentScene.AddRootGameObject(newGameObject);

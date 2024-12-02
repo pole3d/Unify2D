@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using Unify2D.Core;
+using Unify2D.Tools;
 
 namespace Unify2D.Assets
 {
@@ -13,12 +14,12 @@ namespace Unify2D.Assets
     internal class PrefabAssetContent : AssetContent
     {
         public GameObject InstantiatedGameObject { get; private set; }
+        public List<GameObject> GameObjectsInstantiated => _gameObjectsInstantiated;
         public string SerializedText => _serializedText;
         
-        public List<GameObject> GameObjectsInstantiated => _gameObjectsInstantiated;
         
-        private string _serializedText;
         private List<GameObject> _gameObjectsInstantiated = new List<GameObject>();
+        private string _serializedText;
 
         public PrefabAssetContent() : base(null) { }
 
@@ -41,27 +42,11 @@ namespace Unify2D.Assets
             InstantiatedGameObject = prefabInstance.InstantiateAndLinkGameObject();
             InstantiatedGameObject.Name = Asset.Name;
             InstantiatedGameObject.Tag = this;
-            // _gameObjectsInstantiated.Add(InstantiatedGameObject);
-            // AddGameObject(InstantiatedGameObject);
             
             Asset.SetMegaPath(InstantiatedGameObject.GetOriginalAssetPath());
         }
 
         internal void Save(GameObject gameObject)
-        {
-            // Make so type name should be written in serialized data
-            JsonSerializerSettings settings = new JsonSerializerSettings();
-            settings.TypeNameHandling = TypeNameHandling.Auto;
-            
-            // Write serialized data to new file
-            _serializedText = JsonConvert.SerializeObject(gameObject, settings);
-            File.WriteAllText(_asset.FullPath, _serializedText);
-            
-            Console.WriteLine($"Prefab {gameObject.Name} saved on file!");// to {Path.GetFullPath(_asset.FullPath)}");
-        }
-        
-        // TODO: Merge both function because path problems
-        internal void SavePrefab(GameObject gameObject)
         {
             // Make so type name should be written in serialized data
             JsonSerializerSettings settings = new JsonSerializerSettings
@@ -72,14 +57,22 @@ namespace Unify2D.Assets
             
             // Write serialized data to new file
             _serializedText = JsonConvert.SerializeObject(gameObject, settings);
-            File.WriteAllText(_asset.MegaPath, _serializedText);
+            File.WriteAllText( ToolsEditor.CombinePath(GameCore.Current.Game.AssetsPath, _asset.FullPath), _serializedText);
+            
+            Console.WriteLine($"Prefab {gameObject.Name} saved on file!");
+        }
+        
+        internal void SavePrefab(GameObject gameObject)
+        {
+            Save(gameObject);
+            
+            // Update InstantiatedGameObject to show good infos
+            InstantiatedGameObject = gameObject.DeepCopy();
 
             foreach (var go in _gameObjectsInstantiated)
             {
                 go.UpdateFromPrefab(InstantiatedGameObject.DeepCopy());
             }
-            
-            Console.WriteLine($"Prefab {gameObject.Name} saved!");// to {Path.GetFullPath(_asset.FullPath)}");
         }
         
         public void AddGoInstantiated(GameObject go)

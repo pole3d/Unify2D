@@ -37,6 +37,7 @@ namespace Unify2D.Toolbox
         private PrefabAssetContent _currentPrefabAsset;
         
         private const string SavePrefabButtonLabel = "Save Prefab";
+        private const string ApplyPrefabButtonLabel = "Apply to Prefab";
 
         public override void Initialize(GameEditor editor)
         {
@@ -151,10 +152,19 @@ namespace Unify2D.Toolbox
                 if (ImGui.Button(SavePrefabButtonLabel))
                 {
                     _currentPrefabAsset.SavePrefab(_gameObject);
+                    
+                    Debug.Log($"Prefab {_gameObject.Name} saved!");
                     Console.WriteLine($"Prefab {_gameObject.Name} saved!");
                 }
 
                 ImGui.Separator();
+            }
+            else if (_gameObject.Tag is PrefabAssetContent)
+            {
+                if (ImGui.Button(ApplyPrefabButtonLabel))
+                {
+                    SavePrefabFromHierarchy(_gameObject);
+                }
             }
 
             string name = _gameObject.Name;
@@ -295,12 +305,16 @@ namespace Unify2D.Toolbox
             return null;
         }
 
-
-        public void Save(GameObject gameObject)
+        private void SavePrefabFromHierarchy(GameObject gameObject)
         {
-            // Serialize the gameObject and save it as a prefab
-            string json = JsonConvert.SerializeObject(gameObject, Formatting.Indented);
-            // File.WriteAllText(Asset.FullPath, json);
+            if (gameObject.Tag is PrefabAssetContent prefabAssetContent)
+            {
+                if (prefabAssetContent != null)
+                {
+                    prefabAssetContent.SavePrefab(gameObject);
+                }                
+                Console.WriteLine($"Prefab {gameObject.Name} saved from hierarchy!");
+            }
         }
     }
 
