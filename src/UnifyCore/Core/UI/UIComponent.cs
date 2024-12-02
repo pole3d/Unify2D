@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.Xna.Framework;
+using Newtonsoft.Json;
 
 namespace Unify2D.Core
 {
@@ -9,6 +10,7 @@ namespace Unify2D.Core
     /// </summary>
     public abstract class UIComponent : Component
     {
+        [JsonIgnore]
         public Canvas ParentCanvas { get; set; }
         
         public Vector2 Origin { get; set; }
