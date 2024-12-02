@@ -35,6 +35,8 @@ namespace Unify2D.Toolbox
         private int _changeCount = 0;
 
         private PrefabAssetContent _currentPrefabAsset;
+        
+        private const string SavePrefabButtonLabel = "Save Prefab";
 
         public override void Initialize(GameEditor editor)
         {
@@ -58,6 +60,7 @@ namespace Unify2D.Toolbox
 
             _asset = null;
             _gameObject = null;
+            _currentPrefabAsset = null;
 
             if (obj is GameObject)
                 _gameObject = obj as GameObject;
@@ -134,6 +137,10 @@ namespace Unify2D.Toolbox
 
                 _currentPrefabAsset = prefabAsset;
             }
+            else
+            {
+                _currentPrefabAsset = null;
+            }
         }
 
         private void ShowGameObject()
@@ -141,9 +148,10 @@ namespace Unify2D.Toolbox
             if (_currentPrefabAsset != null)
             {
                 // Add a button to save the prefab
-                if (ImGui.Button("Save Prefab"))
+                if (ImGui.Button(SavePrefabButtonLabel))
                 {
                     _currentPrefabAsset.SavePrefab(_gameObject);
+                    Console.WriteLine($"Prefab {_gameObject.Name} saved!");
                 }
 
                 ImGui.Separator();
