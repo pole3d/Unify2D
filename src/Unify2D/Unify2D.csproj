@@ -38,7 +38,7 @@
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-      <Exec Command="xcopy &quot;$(SolutionDir)..\GameAssemblyProject\&quot; &quot;$(OutDir)GameAssemblyProject\&quot; /s /y;&#xA;xcopy &quot;$(SolutionDir)..\DefaultConfigs&quot; &quot;$(OutDir)&quot; /Y /D:01-01-1980" />
+      <Exec Command="xcopy &quot;$(SolutionDir)..\GameAssemblyProject\&quot; &quot;$(OutDir)GameAssemblyProject\&quot; /s /y;&#xA;xcopy &quot;$(SolutionDir)..\DefaultConfigs&quot; &quot;$(OutDir)&quot; /Y /D" />
     </Target>
 
 </Project>
