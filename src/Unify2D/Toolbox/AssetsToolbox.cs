@@ -32,26 +32,43 @@ namespace Unify2D.Toolbox
         private const string CreateNewScriptButtonLabel = "Create New Script";
         private const string CreateNewFolderButtonLabel = "Create New Folder";
         private const string AssetDragDropPayloadType = "ASSET";
+
+        private FileSystemWatcher _watcher;
         
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
-            // SetWatcher();
+            SetWatcher();
             Reset();
         }
 
         private void SetWatcher()
         {
+            if (_watcher != null)
+            {
+                _watcher.Renamed -= OnRenamed;
+                _watcher.Deleted -= OnDeleted;
+            }
+            
             string path = Path.GetFullPath(_editor.AssetsPath);
             FileSystemWatcher watcher = new FileSystemWatcher(path);
 
-            watcher.NotifyFilter = NotifyFilters.DirectoryName |
-                                   NotifyFilters.FileName;
+            watcher.NotifyFilter = NotifyFilters.Attributes
+                                   | NotifyFilters.CreationTime
+                                   | NotifyFilters.DirectoryName
+                                   | NotifyFilters.FileName
+                                   | NotifyFilters.LastAccess
+                                   | NotifyFilters.LastWrite
+                                   | NotifyFilters.Security
+                                   | NotifyFilters.Size;
             
             watcher.Renamed += OnRenamed;
+            watcher.Deleted += OnDeleted;
 
             watcher.IncludeSubdirectories = true;
             watcher.EnableRaisingEvents = true;
+            
+            _watcher = watcher;
         }
 
         public bool TryGetAssetFromPath(string path, out Asset assetFromPath)
@@ -130,6 +147,12 @@ namespace Unify2D.Toolbox
                 string lastFragment = Path.GetFileNameWithoutExtension(e.FullPath);
                 asset.SetName(lastFragment);
             }
+        }
+        
+        private void OnDeleted(object sender, FileSystemEventArgs e)
+        {
+            string replace = e.FullPath.Replace(_path, "");
+            DeleteAsset(replace);
         }
         
         private Asset CreateAssetFromFile(string file)
@@ -243,7 +266,7 @@ namespace Unify2D.Toolbox
 
             if (ImGui.Button(DeleteButtonLabel))
             {
-                DeleteAsset(asset);
+                DeleteAsset(asset.FullPath);
                 ImGui.CloseCurrentPopup();
             }
 
@@ -395,17 +418,17 @@ namespace Unify2D.Toolbox
             {
                 if (_selected[n])
                 {
-                    DeleteAsset(_assets[n]);
+                    DeleteAsset(_assets[n].FullPath);
                 }
             }
             Reset();
         }
         
-        private void DeleteAsset(Asset asset)
+        private void DeleteAsset(string fullPath)
         {
-            string path = $"{_path}{asset.FullPath}";
-
-            if (Path.Exists(path))
+            string path = $"{_path}{fullPath}";
+            
+            if (TryGetAssetFromPath(fullPath, out Asset asset))
             {
                 if (asset.IsDirectory)
                 {
