@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Unify2D.Toolbox;
 using Unify2D.Toolbox.Popup;
+using UnifyCore;
 
 namespace Unify2D
 {
@@ -28,7 +29,7 @@ namespace Unify2D
 
         public void DrawMainMenuBarUI()
         {
-            if ( ImGui.BeginMainMenuBar())
+            if (ImGui.BeginMainMenuBar())
             {
                 if (ImGui.BeginMenu("File"))
                 {
@@ -42,12 +43,19 @@ namespace Unify2D
                     }
                     if (ImGui.MenuItem("Build"))
                         _editor.Build();
-                    if (ImGui.MenuItem("Save"))
+                    if (ImGui.MenuItem("Create scene"))
+                    {
+                        // _editor.SceneEditorManager.SaveCurrentScene();
+                        string pathProject = Path.Combine(Directory.GetCurrentDirectory(), _editor.Settings.Data.CurrentProjectPath);
+
+                        SceneManager.Instance.CreateNewScene(pathProject, GameEditor.ScenesFolder);
+                    }
+                    if (ImGui.MenuItem("Save scene"))
                     {
                         // _editor.SceneEditorManager.SaveCurrentScene();
                         SaveCurrentScene();
                     }
-                    if (ImGui.MenuItem("Load"))
+                    if (ImGui.MenuItem("Load scene"))
                     {
                         //_editor.SceneEditorManager.LoadScene();
                         LoadScene();
@@ -88,7 +96,7 @@ namespace Unify2D
         {
             Scene scene = SceneManager.Instance.CurrentScene;
 
-            
+
 
             if (scene.SceneInfo == null)
             {

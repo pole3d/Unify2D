@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Genbox.VelcroPhysics.Tools.PathGenerator;
+using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
@@ -10,7 +11,8 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Unify2D.Core;
 using Unify2D.Physics;
-using Object = System.Object;
+using UnifyCore;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Unify2D
 {
@@ -27,6 +29,7 @@ namespace Unify2D
 
         private bool _isLoaded = false;
 
+        private bool _isDirty = false;
 
         public List<Canvas> CanvasList => _canvasList;
         private List<Canvas> _canvasList = new List<Canvas>();
@@ -55,16 +58,11 @@ namespace Unify2D
 
         private List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
 
-        public Scene()
+        public Scene(string path, bool save = false)
         {
-        }
-
-        public Scene(string path)
-        {
-            if (_sceneInfo == null)
-                _sceneInfo = new SceneInfo(System.IO.Path.GetFileName(path), path);
-            else
-                SaveSceneNameAndPath(System.IO.Path.GetFileName(path), path);
+            SaveSceneNameAndPath(System.IO.Path.GetFileName(path), path);
+            if (save == true)
+                SceneManager.Instance.Save(this);
 
             try
             {
@@ -93,7 +91,6 @@ namespace Unify2D
         public void Init()
         {
             GameCore.Current.InitPhysics();
-
             foreach (GameObject gameObject in GameObjects)
             {
                 gameObject.Init(GameCore.Current.Game);

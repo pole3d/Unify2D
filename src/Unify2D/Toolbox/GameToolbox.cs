@@ -13,6 +13,7 @@ using Unify2D.Core;
 using Unify2D.Tools;
 using Microsoft.Xna.Framework;
 using Num = System.Numerics;
+using UnifyCore;
 
 namespace Unify2D.Toolbox
 {
@@ -32,7 +33,7 @@ namespace Unify2D.Toolbox
             new Vector2(1280, 1024),
         };
 
-        readonly Num.Vector2 _bottomOffset   = new Num.Vector2(0, 20);
+        readonly Num.Vector2 _bottomOffset = new Num.Vector2(0, 20);
         Vector2 _resolution = new Vector2(1920, 1080);
 
         public Vector2 Position { get; private set; }
@@ -58,7 +59,7 @@ namespace Unify2D.Toolbox
         private Texture2D _gridTexture;
         private Texture2D _smallGridTexture;
 
-        
+
         public void SetCore(GameCoreViewer coreViewer)
         {
             _tag = coreViewer;
@@ -80,7 +81,7 @@ namespace Unify2D.Toolbox
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
-            
+
             _gameCamera = new CameraEditor(new Vector2(_resolution.X, _resolution.Y), new Vector2(0, 0));
 
             _sceneRenderTarget = new RenderTarget2D(editor.GraphicsDevice, (int)_resolution.X, (int)_resolution.Y);
@@ -153,14 +154,14 @@ namespace Unify2D.Toolbox
                         Asset asset = Clipboard.Content as Asset;
                         GameObject go = GameObject.Create();
                         go.Name = asset.Name;
-                        
+
                         go.Position = GetMousePosition();
 
                         Selection.SelectObject(go);
 
                         SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
                         renderer.Initialize(_editor, go, asset.FullPath);
-                        
+
                         //asset?.AssetContent.OnDragDroppedInGame(_editor);
                     }
                 }
@@ -178,7 +179,8 @@ namespace Unify2D.Toolbox
             DrawGrid();
 
             // Draw all game assets
-            SceneManager.Instance.CurrentScene.Draw();
+            if (SceneManager.Instance.CurrentScene != null)
+                SceneManager.Instance.CurrentScene.Draw();
             // Draw all debutg gizmo
             ((GameCoreViewer)_tag).GameCore.DrawGizmo();
             ((GameCoreViewer)_tag).GameCore.EndDraw();
@@ -216,7 +218,7 @@ namespace Unify2D.Toolbox
                 lowStep = step;
 
                 step *= multiple;
-                
+
                 rowX /= multiple;
                 rowY /= multiple;
             }
@@ -241,7 +243,7 @@ namespace Unify2D.Toolbox
         {
             for (int x = 0; x <= rowX; x++)
             {
-                if(ignore == 1 || (x + startX) % ignore != 0)
+                if (ignore == 1 || (x + startX) % ignore != 0)
                 {
                     Rectangle rectangle = new Rectangle(((startX + x) * step) - (width / 2), (startY - 1) * step, width, viewY + step * 2);
                     GameCore.Current.SpriteBatch.Draw(texture, rectangle, Color.Gray);
@@ -262,7 +264,7 @@ namespace Unify2D.Toolbox
             MouseState mouseState = Mouse.GetState();
 
             #region Move Camera
-            
+
             if (mouseState.RightButton == ButtonState.Pressed | mouseState.MiddleButton == ButtonState.Pressed)
             {
                 // si on viens de clicker et qu'on est dans la fenêtre
@@ -290,7 +292,7 @@ namespace Unify2D.Toolbox
 
             #region Zoom Camera
 
-            if (mouseState.ScrollWheelValue != _lastMouseSroll & ! Keyboard.GetState().IsKeyDown(Keys.LeftControl))
+            if (mouseState.ScrollWheelValue != _lastMouseSroll & !Keyboard.GetState().IsKeyDown(Keys.LeftControl))
             {
                 if (IsMouseInWindow())
                 {

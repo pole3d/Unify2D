@@ -10,6 +10,7 @@ using Unify2D;
 using Unify2D.Builder;
 using Unify2D.Core;
 using Unify2D.Core.Graphics;
+using UnifyCore;
 using Num = System.Numerics;
 
 namespace UnifyGame
@@ -72,7 +73,7 @@ namespace UnifyGame
                     for (int i = 0; i < deserializedJsonScene.Count; i++)
                     {
                         SceneInfo sceneInfo = deserializedJsonScene[i];
-                        sceneInfo.Path = currentPath + "\\" + sceneInfo.Path;
+                        sceneInfo.Path = Path.Combine(currentPath, sceneInfo.Path);
                         sceneInfo.BuildIndex = i;
                         GameSettings.Instance.AddSceneToList(sceneInfo);
                     }

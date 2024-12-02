@@ -32,7 +32,7 @@ namespace Unify2D.Toolbox
 
             if (name != "none")
             { 
-                var asset = GameEditor.Instance.AssetsToolBox.GetAssetFromPath(name);
+                GameEditor.Instance.AssetsToolBox.TryGetAssetFromPath(name, out var asset);
 
                 if (asset != null && (value == null || asset != value.Asset))
                 {

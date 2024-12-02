@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using Unify2D.Toolbox.Popup;
 using Unify2D.Tools;
+using UnifyCore;
 
 namespace Unify2D.Toolbox
 {
@@ -13,7 +14,6 @@ namespace Unify2D.Toolbox
         GameEditor _editor;
         string _newProjectPath = String.Empty;
         string _newProjectName = "NEW_PROJECT";
-
         protected override void DrawInternal(GameEditor editor)
         {
             _editor = editor;
@@ -57,7 +57,7 @@ namespace Unify2D.Toolbox
         {
             Directory.CreateDirectory(_newProjectPath);
             Directory.CreateDirectory(Path.Combine(_newProjectPath, GameEditor.AssetsFolder));
-
+            Directory.CreateDirectory(_newProjectPath + "\\" + GameEditor.ScenesFolder);
         }
 
         private void DrawExistingProject(GameEditor editor)
@@ -72,6 +72,8 @@ namespace Unify2D.Toolbox
                 ImGui.PushStyleColor(ImGuiCol.ButtonActive, ToolsUI.ToColor32(255, 70, 50, 255));
                 if (ImGui.Button(Path.GetFileName(editor.Settings.Data.CurrentProjectPath)))
                 {
+                    string pathProject = Path.Combine(Directory.GetCurrentDirectory(), editor.Settings.Data.CurrentProjectPath);
+                    SceneManager.Instance.CreateOrOpenSceneAtStart(pathProject, GameEditor.ScenesFolder);
                     LoadProject();
                 }
                 ImGui.PopStyleColor();
@@ -100,12 +102,16 @@ namespace Unify2D.Toolbox
         private void OnOpenProjectPathSelected(string path)
         {
             _editor.Settings.Data.CurrentProjectPath = path;
+
+            SceneManager.Instance.CreateOrOpenSceneAtStart(path, GameEditor.ScenesFolder);
+
             LoadProject();
         }
 
         private void OnNewProjectPathSelected(string path)
         {
             _newProjectPath = path;
+            SceneManager.Instance.CreateOrOpenSceneAtStart(path, GameEditor.ScenesFolder);
         }
 
         void LoadProject()
@@ -113,6 +119,7 @@ namespace Unify2D.Toolbox
             //_editor.SceneEditorManager.LoadScene();
 
             _editor.HidePopup();
+
         }
 
 

@@ -15,6 +15,7 @@ using Unify2D.ImGuiRenderer;
 using Unify2D.Toolbox;
 using Unify2D.Toolbox.Popup;
 using Unify2D.Tools;
+using UnifyCore;
 using Num = System.Numerics;
 
 namespace Unify2D
@@ -33,7 +34,7 @@ namespace Unify2D
         }
         private static SelectedState _selectState = SelectedState.None;
 
-        public static object Selected 
+        public static object Selected
         {
             get
             {
@@ -62,7 +63,7 @@ namespace Unify2D
         }
         public static void SelectObject(object obj)
         {
-            if ( Selected == obj ) return;
+            if (Selected == obj) return;
 
             Selected = obj;
 
@@ -104,35 +105,37 @@ namespace Unify2D
         internal static void Update(GameTime gameTime)
         {
             var mouseState = Mouse.GetState();
-            if(_selectState == SelectedState.Empty && mouseState.LeftButton == ButtonState.Released)
+            if (_selectState == SelectedState.Empty && mouseState.LeftButton == ButtonState.Released)
             {
                 _selectState = SelectedState.None;
             }
             else if (_selectState == SelectedState.None && mouseState.LeftButton == ButtonState.Pressed && GameEditor.Instance.IsMouseInGameWindow())
             {
                 Vector2 worldPosition = GameEditor.Instance.GetWorldMousePosition();
-
-                foreach (var item in SceneManager.Instance.CurrentScene.GameObjectsWithChildren)
+                if (SceneManager.Instance.CurrentScene != null)
                 {
-                    if (worldPosition.X >= item.Position.X - item.BoundingSize.X / 2 && worldPosition.X <= item.Position.X + item.BoundingSize.X / 2
-                        && worldPosition.Y >= item.Position.Y - item.BoundingSize.Y / 2 && worldPosition.Y <= item.Position.Y + item.BoundingSize.Y / 2)
+
+                    foreach (var item in SceneManager.Instance.CurrentScene.GameObjectsWithChildren)
                     {
-                        if(item == _gameObject && gameTime.TotalGameTime.Seconds - _timeAtLastClick < 0.5f)
+                        if (worldPosition.X >= item.Position.X - item.BoundingSize.X / 2 && worldPosition.X <= item.Position.X + item.BoundingSize.X / 2
+                            && worldPosition.Y >= item.Position.Y - item.BoundingSize.Y / 2 && worldPosition.Y <= item.Position.Y + item.BoundingSize.Y / 2)
                         {
-                            // Double click, focus
-                            GameEditor.Instance.GameToolbox.GoTo(item.Position);
+                            if (item == _gameObject && gameTime.TotalGameTime.Seconds - _timeAtLastClick < 0.5f)
+                            {// Double click, focus
+                                GameEditor.Instance.GameToolbox.GoTo(item.Position);
+                            }
+
+                            SelectObject(item);
+                            _selectState = SelectedState.Select;
+                            _dragOffset = GameEditor.Instance.GetWorldMousePosition() - item.Position;
+
+                            _timeAtLastClick = gameTime.TotalGameTime.Seconds;
+                            break;
                         }
-
-                        SelectObject(item);
-                        _selectState = SelectedState.Select;
-                        _dragOffset = GameEditor.Instance.GetWorldMousePosition() - item.Position;
-
-                        _timeAtLastClick = gameTime.TotalGameTime.Seconds;
-                        break;
                     }
                 }
 
-                if(_selectState == SelectedState.None)
+                if (_selectState == SelectedState.None)
                 {
                     _selectState = SelectedState.Empty;
                 }
@@ -152,7 +155,7 @@ namespace Unify2D
 
         public static void CircleSelected()
         {
-            if (! TryGameObject(out GameObject go)) return;
+            if (!TryGameObject(out GameObject go)) return;
 
             var p0 = ImGui.GetItemRectMin();
             var p1 = ImGui.GetItemRectMax();

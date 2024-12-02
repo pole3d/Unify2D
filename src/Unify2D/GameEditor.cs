@@ -12,6 +12,7 @@ using Unify2D.Core;
 using Unify2D.Toolbox;
 using Unify2D.Toolbox.Popup;
 using Unify2D.Tools;
+using UnifyCore;
 
 namespace Unify2D
 {
@@ -32,6 +33,7 @@ namespace Unify2D
         #endregion
 
         public const string AssetsFolder = "\\Assets";
+        public const string ScenesFolder = "\\Assets\\Scenes";
 
         #region Properties
 
@@ -96,9 +98,11 @@ namespace Unify2D
 
             _gameEditorUI = new GameEditorUI(this);
             _sceneEditorManager = SceneManager.Instance;
-            
+
+
+            Exiting += (object _, EventArgs _) => { _sceneEditorManager.SaveCurrentSceneToJson(); };
         }
-        
+
         protected override void Initialize()
         {
             _settings = new GameEditorSettings();
@@ -112,7 +116,7 @@ namespace Unify2D
             
             // Set the current game core
             GameCore.SetCurrent(_coreViewerScene.GameCore);
-            _sceneEditorManager.Initialize();
+         //   _sceneEditorManager.Initialize();
 
             
             Content.RootDirectory = ProjectPath;
