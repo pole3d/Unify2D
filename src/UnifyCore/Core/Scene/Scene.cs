@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Unify2D.Core;
 using Unify2D.Physics;
+using UnifyCore;
 using static System.Formats.Asn1.AsnWriter;
 
 namespace Unify2D
@@ -57,7 +58,6 @@ namespace Unify2D
         public Scene(string path, bool save = false)
         {
             SaveSceneNameAndPath(System.IO.Path.GetFileName(path), path);
-
             if (save == true)
                 SceneManager.Instance.Save(this);
 
