@@ -76,6 +76,7 @@ namespace Unify2D.Toolbox
         internal override void Reset()
         {
             _assets.Clear();
+            _selectedAssets.Clear();
             _path = _editor.AssetsPath;
 
             if (String.IsNullOrEmpty(_path))
@@ -219,12 +220,33 @@ namespace Unify2D.Toolbox
                     ImGui.TreePop();
                 }
             }
+            
+            // Draw visual indicator for selected nodes
+            if (_selectedAssets.Contains(node))
+            {
+                DrawSelectionIndicator();
+            }
+        }
+        
+        private void DrawSelectionIndicator()
+        {
+            var drawList = ImGui.GetWindowDrawList();
+            var min = ImGui.GetItemRectMin();
+            var max = ImGui.GetItemRectMax();
+            drawList.AddRect(min, max, ImGui.ColorConvertFloat4ToU32(new System.Numerics.Vector4(1, 1, 0, 1)), 0, ImDrawFlags.None, 2.0f);
         }
 
         private void SetNode(Asset node)
         {
             if (ImGui.IsItemClicked())
-                Selection.SelectObject(node);
+            {
+                // Clear selection when CTRL is not held
+                if (!ImGui.GetIO().KeyCtrl)
+                {
+                    _selectedAssets.Clear();
+                }
+                SelectAsset(node);
+            }
 
             HandleBeginDragDropSource(node);
             HandleBeginDragDropTarget(node);
@@ -238,32 +260,27 @@ namespace Unify2D.Toolbox
         {
             if (!ImGui.BeginPopupContextItem())
                 return;
-
-            if (ImGui.Button(DeleteButtonLabel))
             
-            // Clear selection when CTRL is not held
-            if (!ImGui.GetIO().KeyCtrl)
+            // Select the asset if it's not already selected
+            if (!_selectedAssets.Contains(asset))
             {
-                _selectedAssets.Clear();
+                if (!ImGui.GetIO().KeyCtrl)
+                {
+                    _selectedAssets.Clear();
+                }
+                SelectAsset(asset);
             }
-            _selectedAssets.Add(asset);
-            
+
             if (asset.AssetContent is PrefabAssetContent prefabContent)
             {
                 if (ImGui.Button(OpenPrefabButtonLabel))
                 {
-                    _selectedAssets.Clear();
-                    
                     GameEditor.Instance.OpenPrefab(prefabContent);
                     
                     if(prefabContent.IsLoaded == false)
                         prefabContent.Load();
                     
                     SceneManager.Instance.CurrentScene.AddRootGameObject(prefabContent.InstantiatedGameObject);
-                    
-                    // _selected[assetIndex] = true;
-                    // Selection.SelectObject(_assets[assetIndex]);
-                    _selectedAssets.Add(asset);
                     
                     ImGui.CloseCurrentPopup();
                 }
@@ -276,7 +293,6 @@ namespace Unify2D.Toolbox
                     // Add GameObject to the scene
                     SceneManager.Instance.CurrentScene.AddRootGameObject(prefabContent.InstantiatedGameObject);
 
-                    // _selected[assetIndex] = false;
                     ImGui.CloseCurrentPopup();
                 }
             }
@@ -427,6 +443,7 @@ namespace Unify2D.Toolbox
         private void SelectAsset(Asset asset)
         {
             Selection.SelectObject(asset);
+            _selectedAssets.Add(asset);
         }
 
         private void DeleteSelectedAssets()
@@ -459,8 +476,6 @@ namespace Unify2D.Toolbox
                 else
                     File.Delete(path);
             }
-
-            Reset();
         }
 
         private static void ShowExplorer(string path)
