@@ -46,9 +46,12 @@ namespace Unify2D.Core
         [JsonIgnore]
         public IEnumerable<Component> Components => _components;
 
+        private static string _originalAssetPath;
+        
         private Vector2 m_position;
         private float m_rotation;
         private bool m_positionUpdated, m_rotationUpdated;
+
 
 
         [JsonIgnore]
@@ -333,7 +336,10 @@ namespace Unify2D.Core
              sb.Insert(0, GameCore.Current.Game.AssetsPath);
              // if (sb.ToString().EndsWith(".prefab") == false)
              //     sb.Append(".prefab");
-              
+             
+             // Set original asset path for prefab instance 
+             _originalAssetPath = sb.ToString();
+             
              // Get serialized text
              string serializedText = File.ReadAllText(Path.GetFullPath(sb.ToString()));
              
@@ -341,8 +347,14 @@ namespace Unify2D.Core
              GameObject go = JsonConvert.DeserializeObject<GameObject>(serializedText, s_serializerSettings);
              go.Init(GameCore.Current.Game);
 
+             
              return go;
          }
+
+        public string GetOriginalAssetPath()
+        {
+            return _originalAssetPath;
+        }
 
         internal void LinkToPrefabInstance(PrefabInstance prefabInstance)
         {

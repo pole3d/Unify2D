@@ -7,7 +7,7 @@
         <RootNamespace>Unify2D</RootNamespace>
         <TargetFramework>net8.0</TargetFramework>
         <OutputType>Exe</OutputType>
-        <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+        <RunPostBuildEvent>Always</RunPostBuildEvent>
     </PropertyGroup>
 
     <ItemGroup>
@@ -38,7 +38,7 @@
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-      <Exec Command="xcopy &quot;$(SolutionDir)..\GameAssemblyProject\&quot; &quot;$(OutDir)GameAssemblyProject\&quot; /s /y  &#xD;&#xA;" />
+      <Exec Command="xcopy &quot;$(SolutionDir)..\GameAssemblyProject\&quot; &quot;$(OutDir)GameAssemblyProject\&quot; /s /y;&#xA;xcopy &quot;$(SolutionDir)..\DefaultConfigs&quot; &quot;$(OutDir)&quot; /Y /D" />
     </Target>
 
 </Project>

@@ -275,8 +275,7 @@ namespace Unify2D
         // Waiting to resolve operation
         internal void OpenPrefab(PrefabAssetContent content)
         {
-            GameCoreViewer prefabCoreViewer = new GameCoreViewer(
-                new GameCore(this),
+            GameCoreViewer prefabCoreViewer = new GameCoreViewer(new GameCore(this),
                 content.Asset.FullPath);
             _coreViewers.Add(prefabCoreViewer);
             prefabCoreViewer.GameCore.Initialize(GraphicsDevice);
@@ -285,6 +284,10 @@ namespace Unify2D
             HierarchyToolbox.SetCore(prefabCoreViewer);
 
             GameCore.SetCurrent(prefabCoreViewer.GameCore);
+            
+            if(content.IsLoaded == false)
+                content.Load();
+            
             // GameObject.Instantiate(content.Asset.FullPath);
         }
 

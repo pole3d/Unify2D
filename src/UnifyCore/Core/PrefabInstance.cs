@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Newtonsoft.Json;
 
 namespace Unify2D.Core
@@ -20,6 +21,7 @@ namespace Unify2D.Core
         public GameObject InstantiateAndLinkGameObject()
         {
             _gameObject = GameObject.InstantiateFromPrefab(_prefabAssetPath);
+            _prefabAssetPath = _gameObject.GetOriginalAssetPath();
             
             // Get GameObject Infos from prefab
             _gameObject.LinkToPrefabInstance(this);

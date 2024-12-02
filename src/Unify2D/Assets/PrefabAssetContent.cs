@@ -11,6 +11,8 @@ namespace Unify2D.Assets
     /// </summary>
     internal class PrefabAssetContent : AssetContent
     {
+        public GameObject InstantiatedGameObject { get; private set; }
+        
         private string _serializedText;
 
         public PrefabAssetContent() : base(null) { }
@@ -18,17 +20,44 @@ namespace Unify2D.Assets
         public PrefabAssetContent(Asset asset) : base(asset)
         {
         }
+
+        public override void Load()
+        {
+            base.Load();
+            InstantiateGameObjectOnLoad();
+        }
+
+        private void InstantiateGameObjectOnLoad()
+        {
+            PrefabInstance prefabInstance = new PrefabInstance($"{Asset.FullPath}");
+            InstantiatedGameObject = prefabInstance.InstantiateAndLinkGameObject();
+            Asset.SetMegaPath(InstantiatedGameObject.GetOriginalAssetPath());
+        }
+
         internal void Save(GameObject gameObject)
         {
             // Make so type name should be written in serialized data
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
             
-            // Write serialized data to file
+            // Write serialized data to new file
             _serializedText = JsonConvert.SerializeObject(gameObject, settings);
-            File.WriteAllText($"{_asset.FullPath}", _serializedText);
+            File.WriteAllText(_asset.FullPath, _serializedText);
             
-            Console.WriteLine($"Prefab {gameObject.Name} saved to {Path.GetFullPath(_asset.FullPath)}");
+            Console.WriteLine($"Prefab {gameObject.Name} saved on file!");// to {Path.GetFullPath(_asset.FullPath)}");
+        }
+        
+        internal void SavePrefab(GameObject gameObject)
+        {
+            // Make so type name should be written in serialized data
+            JsonSerializerSettings settings = new JsonSerializerSettings();
+            settings.TypeNameHandling = TypeNameHandling.Auto;
+            
+            // Write serialized data to new file
+            _serializedText = JsonConvert.SerializeObject(gameObject, settings);
+            File.WriteAllText(_asset.MegaPath, _serializedText);
+            
+            Console.WriteLine($"Prefab {gameObject.Name} saved!");// to {Path.GetFullPath(_asset.FullPath)}");
         }
     }
 }

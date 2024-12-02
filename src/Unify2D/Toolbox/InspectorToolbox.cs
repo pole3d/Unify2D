@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Unify2D.Assets;
@@ -19,19 +20,21 @@ namespace Unify2D.Toolbox
     /// </summary>
     public class InspectorToolbox : Toolbox
     {
-        GameObject _gameObject;
-        Asset _asset;
+        private GameObject _gameObject;
+        private Asset _asset;
 
-        List<TextureBound> _texturesBound = new List<TextureBound>();
-        List<TextureBound> _texturesToUnbind = new List<TextureBound>();
+        private List<TextureBound> _texturesBound = new List<TextureBound>();
+        private List<TextureBound> _texturesToUnbind = new List<TextureBound>();
 
-        Dictionary<Type, PropertyViewer> _propertyViewers = new Dictionary<Type, PropertyViewer>();
+        private Dictionary<Type, PropertyViewer> _propertyViewers = new Dictionary<Type, PropertyViewer>();
 
         /// <summary>
         /// WORKAROUND : Add one frame delay to avoid modifying another gameobject when
         /// switching between gameobjects
         /// </summary>
-        int _changeCount = 0;
+        private int _changeCount = 0;
+
+        private PrefabAssetContent _currentPrefabAsset;
 
         public override void Initialize(GameEditor editor)
         {
@@ -44,7 +47,7 @@ namespace Unify2D.Toolbox
             _propertyViewers.Add(typeof(Vector2), new Vector2PropertyViewer());
             _propertyViewers.Add(typeof(GameAsset), new GameAssetPropertyViewer());
             _propertyViewers.Add(typeof(Enum), new EnumPropertyViewer());
-            
+
             _propertyViewers.Add(typeof(SpriteFont), new SpriteFontPropertyViewer());
             _propertyViewers.Add(typeof(Texture2D), new Texture2DPropertyViewer());
         }
@@ -73,7 +76,6 @@ namespace Unify2D.Toolbox
 
             _texturesBound.Clear();
         }
-
 
         public override void Draw()
         {
@@ -118,10 +120,35 @@ namespace Unify2D.Toolbox
                     _editor.Scripting.Reload();
                 }
             }
+
+            if (_asset.AssetContent is PrefabAssetContent prefabAsset)
+            {
+                // Load the prefab asset content if not already loaded
+                if (!prefabAsset.IsLoaded)
+                    prefabAsset.Load();
+
+                // Set _gameObject to the instantiated prefab game object to show its properties
+                _gameObject = prefabAsset.InstantiatedGameObject;
+
+                ShowGameObject();
+
+                _currentPrefabAsset = prefabAsset;
+            }
         }
 
         private void ShowGameObject()
         {
+            if (_currentPrefabAsset != null)
+            {
+                // Add a button to save the prefab
+                if (ImGui.Button("Save Prefab"))
+                {
+                    _currentPrefabAsset.SavePrefab(_gameObject);
+                }
+
+                ImGui.Separator();
+            }
+
             string name = _gameObject.Name;
 
             ImGui.InputText("name", ref name, 40);
@@ -174,6 +201,7 @@ namespace Unify2D.Toolbox
                                 {
                                 }
                             }
+
                             GameEditor.Instance.SpriteEditorToolbox.Open(component);
 
                             Debug.Log("Sprite Editor is open !");
@@ -231,8 +259,9 @@ namespace Unify2D.Toolbox
                         baseClassViewer.Draw(property, component);
                     }
                 }
-                catch
+                catch (Exception e)
                 {
+                    Debug.Log(e.ToString());
                 }
             }
         }
@@ -257,8 +286,16 @@ namespace Unify2D.Toolbox
 
             return null;
         }
+
+
+        public void Save(GameObject gameObject)
+        {
+            // Serialize the gameObject and save it as a prefab
+            string json = JsonConvert.SerializeObject(gameObject, Formatting.Indented);
+            // File.WriteAllText(Asset.FullPath, json);
+        }
     }
-    
+
     public class TextureBound
     {
         public Texture2D Texture { get; set; }
