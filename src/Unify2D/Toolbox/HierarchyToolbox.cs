@@ -113,7 +113,17 @@ namespace Unify2D.Toolbox
                     base_flags |= ImGuiTreeNodeFlags.Selected;
                 }
 
-                ImGui.TreeNodeEx($"{go.Name}##{go.GetHashCode()}", base_flags);
+                if (go.Tag is PrefabAssetContent)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.0f, 1.0f, 1.0f, 1.0f)); // Cyan color for prefabs
+                    ImGui.TreeNodeEx($"{go.Name}##{go.GetHashCode()}", base_flags);
+                    ImGui.PopStyleColor();
+                }
+                else
+                {
+                    ImGui.TreeNodeEx($"{go.Name}##{go.GetHashCode()}", base_flags);
+                }
+                
                 if (ImGui.IsItemClicked())
                 {
                     Selection.SelectObject(go);

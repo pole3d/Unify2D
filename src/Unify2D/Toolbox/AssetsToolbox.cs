@@ -223,8 +223,17 @@ namespace Unify2D.Toolbox
                 if (Selection.Selected == node)
                     base_flags |= ImGuiTreeNodeFlags.Selected;
 
-                ImGui.TreeNodeEx($"{node.Name}##{node.GetHashCode()}", base_flags);
-
+                if (node.AssetContent is PrefabAssetContent)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(0.0f, 1.0f, 1.0f, 1.0f)); // Blue color for prefabs
+                    ImGui.TreeNodeEx($"{node.Name}##{node.GetHashCode()}", base_flags);
+                    ImGui.PopStyleColor();
+                }
+                else
+                {
+                    ImGui.TreeNodeEx($"{node.Name}##{node.GetHashCode()}", base_flags);
+                }
+                
                 SetNode(node);
             }
             else
@@ -323,6 +332,7 @@ namespace Unify2D.Toolbox
 
             if (_selectedAssets.Count == 1)
             {
+                // TODO: Improve the system because not really open 
                 if (ImGui.Button(OpenPrefabButtonLabel))
                 {
                     var prefabContent = asset.AssetContent as PrefabAssetContent;
