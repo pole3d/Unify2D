@@ -27,7 +27,7 @@ public class Canvas : Component
         foreach (Component component in parent.Components)
         {
             if (component is not UIComponent ui) continue;
-            ui.ParentCanvas = canvas;
+            ui.ParentCanvas = canvas.GameObject;
             canvas.Elements.Add(ui);
         }
 

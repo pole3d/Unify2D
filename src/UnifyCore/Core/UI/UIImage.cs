@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
@@ -7,12 +8,28 @@ namespace Unify2D.Core;
 
 public class UIImage : UIComponent, IPointerEventReceiver
 {
-    public Texture2D Sprite { get; set; }
+    [JsonIgnore] public Texture2D Sprite { get; private set; }
+    public string SpritePath { get; set; }
+
     public Color Color { get; set; } = Color.White;
     
     [JsonProperty]
     private GameAsset _asset;
 
+
+    public void SetSprite(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            return;
+        }
+        
+        SpritePath = path;
+        using FileStream filestream = new FileStream(path, FileMode.Open);
+        Texture2D texture = Texture2D.FromStream(GameCore.Current.GraphicsDevice, filestream);
+        Sprite = texture;
+    }
+    
     public override void Load(Game game, GameObject go)
     {
         _gameObject = go;
@@ -24,11 +41,21 @@ public class UIImage : UIComponent, IPointerEventReceiver
         {
             Console.WriteLine(e.ToString());
         }
+        SetSprite(SpritePath);
     }
     
     public override void Draw()
     {
-        if (Sprite == null) return;
+        if (_gameObject == null)
+        {
+            return;
+        }
+        
+        if (Sprite == null)
+        {
+            SetSprite(SpritePath);
+            return;
+        }
         
         Vector2 origin = Origin + (new Vector2(Sprite.Width, Sprite.Height)) * GetAnchorVector(Anchor);
         
@@ -52,5 +79,9 @@ public class UIImage : UIComponent, IPointerEventReceiver
                 button.OnButtonPressed?.Invoke();
             }
         }
+
+        //TEST
+        _gameObject.Scale *= 2;
+        //---
     }
 }

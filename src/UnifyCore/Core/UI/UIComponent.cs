@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.Xna.Framework;
+using Newtonsoft.Json;
 
 namespace Unify2D.Core
 {
@@ -9,8 +10,9 @@ namespace Unify2D.Core
     /// </summary>
     public abstract class UIComponent : Component
     {
-        public Canvas ParentCanvas { get; set; }
-        
+        [JsonIgnore]
+        public GameObject ParentCanvas { get; set; }
+
         public Vector2 Origin { get; set; }
 
         public enum AnchorType
