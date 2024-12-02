@@ -270,67 +270,75 @@ namespace Unify2D.Toolbox
                 }
                 SelectAsset(asset);
             }
+            
+            // Check if all selected assets are prefabs
+            bool allArePrefabs = _selectedAssets.All(a => a.AssetContent is PrefabAssetContent);
 
-            if (asset.AssetContent is PrefabAssetContent prefabContent)
+            if (allArePrefabs)
+            {
+                if (ImGui.Button(InstantiateAsGameObjectButtonLabel))
+                {
+                    foreach (var selectedAsset in _selectedAssets)
+                    {
+                        var prefabContent = selectedAsset.AssetContent as PrefabAssetContent;
+                        prefabContent.Load();
+                        SceneManager.Instance.CurrentScene.AddRootGameObject(prefabContent.InstantiatedGameObject);
+                    }
+                    ImGui.CloseCurrentPopup();
+                    
+                    Reset();
+                }
+            }
+
+            if (_selectedAssets.Count == 1)
             {
                 if (ImGui.Button(OpenPrefabButtonLabel))
                 {
+                    var prefabContent = asset.AssetContent as PrefabAssetContent;
                     GameEditor.Instance.OpenPrefab(prefabContent);
-                    
-                    if(prefabContent.IsLoaded == false)
+
+                    if (prefabContent.IsLoaded == false)
                         prefabContent.Load();
-                    
-                    SceneManager.Instance.CurrentScene.AddRootGameObject(prefabContent.InstantiatedGameObject);
-                    
-                    ImGui.CloseCurrentPopup();
-                }
 
-                if (ImGui.Button(InstantiateAsGameObjectButtonLabel))
-                {
-                    // Load the prefab content
-                    prefabContent.Load();
-                    
-                    // Add GameObject to the scene
                     SceneManager.Instance.CurrentScene.AddRootGameObject(prefabContent.InstantiatedGameObject);
 
                     ImGui.CloseCurrentPopup();
                 }
-            }
-
-            string renamePopup = "RenamePopup";
+                
+                string renamePopup = "RenamePopup"; 
             
-            if (ImGui.Button(RenameButtonLabel))
-            {
-                ImGui.OpenPopup(renamePopup);
-            }
-
-            if (ImGui.BeginPopup(renamePopup))
-            {
-                ImGui.Text("Edit name:");
-
-                if (_canRefreshName)
+                if (ImGui.Button(RenameButtonLabel))
                 {
-                    _newFileName = asset.Name;
-                    _canRefreshName = false;
+                    ImGui.OpenPopup(renamePopup);
                 }
-                    
-                ImGui.InputText("##edit", ref _newFileName, 40);
-
-                if (ImGui.Button(ApplyRenameButtonLabel))
+                if (ImGui.BeginPopup(renamePopup))
                 {
-                    string oldPath = asset.FullPath;
-                    asset.SetName(_newFileName);
-                    
-                    if(asset.IsDirectory)
-                        Directory.Move($"{_path}{oldPath}", $"{_path}{asset.FullPath}");
-                    else
-                        File.Move($"{_path}{oldPath}", $"{_path}{asset.FullPath}");
-                    
-                    _canRefreshName = true;
-                    ImGui.CloseCurrentPopup();
-                }
+                    ImGui.Text("Edit name:");
 
-                ImGui.EndPopup();
+                    if (_canRefreshName)
+                    {
+                        _newFileName = asset.Name;
+                        _canRefreshName = false;
+                    }
+                        
+                    ImGui.InputText("##edit", ref _newFileName, 40);
+
+                    if (ImGui.Button(ApplyRenameButtonLabel))
+                    {
+                        string oldPath = asset.FullPath;
+                        asset.SetName(_newFileName);
+                        
+                        if(asset.IsDirectory)
+                            Directory.Move($"{_path}{oldPath}", $"{_path}{asset.FullPath}");
+                        else
+                            File.Move($"{_path}{oldPath}", $"{_path}{asset.FullPath}");
+                        
+                        _canRefreshName = true;
+                        ImGui.CloseCurrentPopup();
+                    }
+
+                    ImGui.EndPopup();
+                }
             }
             
             if (ImGui.Button(ShowInExplorerButtonLabel))
