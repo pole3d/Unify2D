@@ -137,20 +137,6 @@ namespace Unify2D.Toolbox
 
             return newAsset;
         }
-
-        private void OnRenamed(object sender, RenamedEventArgs e)
-        {
-            if (TryGetAssetFromPath($"\\{e.OldName}", out Asset asset))
-            {
-                string lastFragment = Path.GetFileNameWithoutExtension(e.FullPath);
-                asset.SetName(lastFragment);
-            }
-        }
-        
-        private void OnDeleted(object sender, FileSystemEventArgs e)
-        {
-            Reset();
-        }
         
         private Asset CreateAssetFromFile(string file)
         {
@@ -166,6 +152,20 @@ namespace Unify2D.Toolbox
             _assets.Add(newAsset);
 
             return newAsset;
+        }
+        
+        private void OnRenamed(object sender, RenamedEventArgs e)
+        {
+            if (TryGetAssetFromPath($"\\{e.OldName}", out Asset asset))
+            {
+                string lastFragment = Path.GetFileNameWithoutExtension(e.FullPath);
+                asset.SetName(lastFragment);
+            }
+        }
+        
+        private void OnDeleted(object sender, FileSystemEventArgs e)
+        {
+            Reset();
         }
 
         public override void Draw()
@@ -408,21 +408,20 @@ namespace Unify2D.Toolbox
                 if (payload.Delivery)
                 {
                     int sourceIndex = *(int*)payload.Data;
-                    string oldPath = ToolsEditor.CombinePath(_path, _assets[sourceIndex].FullPath);
+                    Asset movingAsset = _assets[sourceIndex];
+                    string oldPath = ToolsEditor.CombinePath(_path, movingAsset.FullPath);
                     string combinePath = ToolsEditor.CombinePath(_path, asset.FullPath);
-                    string newPath = ToolsEditor.CombinePath(combinePath, _assets[sourceIndex].Name) + _assets[sourceIndex].Extension;
+                    string newPath = ToolsEditor.CombinePath(combinePath, movingAsset.Name) + movingAsset.Extension;
 
                     if (Path.Exists(newPath))
                         return;
 
-                    if (_assets[sourceIndex].IsDirectory)
+                    if (movingAsset.IsDirectory)
                         Directory.Move(oldPath, newPath);
                     else
                         File.Move(oldPath, newPath);
 
-                    _assets[sourceIndex].SetPath(asset.FullPath);
-
-                    Reset();
+                    movingAsset.SetPath(asset.FullPath);
                 }
             }
 
