@@ -30,8 +30,27 @@ public class Tweener<T1, T2, TOptions> : Tween where TOptions : struct
             }
         }
 
+        if (!PlayedOnce)
+        {
+            PlayedOnce = true;
+            onPlay?.Invoke();
+        }
+
+        if (IsComplete)
+        {
+            return true;
+        }
+
+        onUpdate?.Invoke();
+
         Position += deltaTime;
         TweenPlugin.Apply(TweenOption, this, IsRelative, Getter, Setter, Position, StartValue, EndValue, Duration);
         return IsComplete;
+    }
+
+    public void Complete()
+    {
+        TweenPlugin.Apply(TweenOption, this, IsRelative, Getter, Setter, Duration, StartValue, EndValue, Duration);
+        Position = Duration + 1.0f;
     }
 }

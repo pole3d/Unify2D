@@ -18,10 +18,13 @@ public class TweenManager
         bool killTweens = false;
         foreach (Tween tween in m_Tweens)
         {
-            if (tween.Update(deltaTime))
+            if (!tween.Update(deltaTime))
             {
-                killTweens = true;
+                continue;
             }
+            
+            tween.onComplete();
+            killTweens = true;
         }
 
         if (killTweens)

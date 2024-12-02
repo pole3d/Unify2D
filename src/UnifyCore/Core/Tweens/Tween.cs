@@ -1,12 +1,10 @@
-﻿using System;
-
-namespace UnifyCore.Core.Tweens;
+﻿namespace UnifyCore.Core.Tweens;
 
 public abstract class Tween
 {
-    public Action onPlay;
-    public Action onUpdate;
-    public Action onComplete;
+    public TweenCallback onPlay;
+    public TweenCallback onUpdate;
+    public TweenCallback onComplete;
 
     public object Target;
     
@@ -14,6 +12,7 @@ public abstract class Tween
     public float Position;
     public bool IsRelative;
     public bool StartupDone;
+    public bool PlayedOnce;
     public bool IsComplete => Position >= Duration;
 
     public abstract bool Startup();
