@@ -48,14 +48,11 @@ namespace Unify2D
             string sceneContent = JsonConvert.SerializeObject(scene.GameObjects, settings);
 
             File.WriteAllText(scene.Path, sceneContent);
-            
-            scene.Init();
         }
 
         public void SaveCurrentScene()
         {
             Save(_currentScene);
-            _currentScene.Init();
         }
         public void LoadScene(string sceneName)
         {
