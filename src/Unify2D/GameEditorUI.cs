@@ -29,7 +29,7 @@ namespace Unify2D
 
         public void DrawMainMenuBarUI()
         {
-            if ( ImGui.BeginMainMenuBar())
+            if (ImGui.BeginMainMenuBar())
             {
                 if (ImGui.BeginMenu("File"))
                 {
@@ -43,6 +43,13 @@ namespace Unify2D
                     }
                     if (ImGui.MenuItem("Build"))
                         _editor.Build();
+                    if (ImGui.MenuItem("Create scene"))
+                    {
+                        // _editor.SceneEditorManager.SaveCurrentScene();
+                        string pathProject = Path.Combine(Directory.GetCurrentDirectory(), _editor.Settings.Data.CurrentProjectPath);
+
+                        SceneManager.Instance.CreateNewScene(pathProject, GameEditor.ScenesFolder);
+                    }
                     if (ImGui.MenuItem("Save scene"))
                     {
                         // _editor.SceneEditorManager.SaveCurrentScene();
@@ -89,7 +96,7 @@ namespace Unify2D
         {
             Scene scene = SceneManager.Instance.CurrentScene;
 
-            
+
 
             if (scene.SceneInfo == null)
             {
