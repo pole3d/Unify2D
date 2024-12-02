@@ -93,6 +93,11 @@ namespace UnifyCore
             settings.Formatting = Formatting.Indented;
             string sceneContent = JsonConvert.SerializeObject(scene.GameObjects, settings);
 
+            string directory = Path.GetDirectoryName(scene.Path);
+
+            if (Directory.Exists(directory) == false)
+                Directory.CreateDirectory(directory);
+
             File.WriteAllText(scene.Path, sceneContent);
         }
         public void CreateNewScene(string path, string sceneFolder)
