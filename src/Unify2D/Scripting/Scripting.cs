@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using Unify2D.Core;
+using UnifyCore;
 
 namespace Unify2D.Scripting
 {

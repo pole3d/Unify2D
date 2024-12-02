@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Unify2D.Toolbox;
 using Unify2D.Toolbox.Popup;
+using UnifyCore;
 
 namespace Unify2D
 {
@@ -42,12 +43,12 @@ namespace Unify2D
                     }
                     if (ImGui.MenuItem("Build"))
                         _editor.Build();
-                    if (ImGui.MenuItem("Save"))
+                    if (ImGui.MenuItem("Save scene"))
                     {
                         // _editor.SceneEditorManager.SaveCurrentScene();
                         SaveCurrentScene();
                     }
-                    if (ImGui.MenuItem("Load"))
+                    if (ImGui.MenuItem("Load scene"))
                     {
                         //_editor.SceneEditorManager.LoadScene();
                         LoadScene();
