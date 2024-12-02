@@ -43,12 +43,16 @@ namespace Unify2D.Toolbox
             Reset();
         }
 
+
+        /// <summary>
+        /// Set the watcher to the assets directory.
+        /// </summary>
         private void SetWatcher()
         {
             if (_watcher != null)
             {
                 _watcher.Renamed -= OnRenamed;
-                _watcher.Deleted -= OnDeleted;
+                _watcher.Deleted -= OnChanged;
             }
             
             string path = Path.GetFullPath(_editor.AssetsPath);
@@ -64,13 +68,19 @@ namespace Unify2D.Toolbox
                                     | NotifyFilters.Size;
             
             _watcher.Renamed += OnRenamed;
-            _watcher.Deleted += OnDeleted;
-            _watcher.Created += OnDeleted;
+            _watcher.Deleted += OnChanged;
+            _watcher.Created += OnChanged;
 
             _watcher.IncludeSubdirectories = true;
             _watcher.EnableRaisingEvents = true;
         }
 
+        /// <summary>
+        /// Get the asset from a given path.
+        /// </summary>
+        /// <param name="path"> The asset's full path. </param>
+        /// <param name="assetFromPath"> Out the asset if found.</param>
+        /// <returns></returns>
         public bool TryGetAssetFromPath(string path, out Asset assetFromPath)
         {
             assetFromPath = null;
@@ -113,6 +123,11 @@ namespace Unify2D.Toolbox
                 CreateAssetFromDirectory(directory);
         }
 
+        /// <summary>
+        /// Create an asset from a directory and add it to the assets list.
+        /// </summary>
+        /// <param name="directory"> The directory path.</param>
+        /// <returns></returns>
         private Asset CreateAssetFromDirectory(string directory)
         {
             string relativeDirectory = directory.Replace(_path, string.Empty);
@@ -139,6 +154,11 @@ namespace Unify2D.Toolbox
             return newAsset;
         }
         
+        /// <summary>
+        /// Create an asset from a file and add it to the assets list.
+        /// </summary>
+        /// <param name="file"> The file path.</param>
+        /// <returns></returns>
         private Asset CreateAssetFromFile(string file)
         {
             string relativeFile = file.Replace(_path, string.Empty);
@@ -155,6 +175,12 @@ namespace Unify2D.Toolbox
             return newAsset;
         }
         
+        
+        /// <summary>
+        /// Called when a file or directory as been renamed.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"> The file that is being renamed.</param>
         private void OnRenamed(object sender, RenamedEventArgs e)
         {
             if (TryGetAssetFromPath($"\\{e.OldName}", out Asset asset))
@@ -164,7 +190,12 @@ namespace Unify2D.Toolbox
             }
         }
         
-        private void OnDeleted(object sender, FileSystemEventArgs e)
+        /// <summary>
+        /// Called when a file or directory as been created or deleted.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e">The file that is being changed.</param>
+        private void OnChanged(object sender, FileSystemEventArgs e)
         {
             Reset();
         }
@@ -200,6 +231,9 @@ namespace Unify2D.Toolbox
             ImGui.End();
         }
 
+        /// <summary>
+        /// Draw only the file with no parent, so we can draw the first layer of the tree
+        /// </summary>
         private void DrawAssetTree()
         {
             IEnumerable<Asset> rootAssets = _assets.Where(asset => asset.Parent == null).ToList();
@@ -208,6 +242,10 @@ namespace Unify2D.Toolbox
                 DrawNode(rootAsset);
         }
 
+        /// <summary>
+        /// Draw the asset node and its children recursively.
+        /// </summary>
+        /// <param name="node"> Node asset.</param>
         private void DrawNode(Asset node)
         {
             ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.OpenOnDoubleClick |
@@ -258,6 +296,10 @@ namespace Unify2D.Toolbox
             drawList.AddRect(min, max, ImGui.ColorConvertFloat4ToU32(new System.Numerics.Vector4(1, 1, 0, 1)), 0, ImDrawFlags.None, 2.0f);
         }
 
+        /// <summary>
+        /// Set the node's behavior.
+        /// </summary>
+        /// <param name="node"></param>
         private void SetNode(Asset node)
         {
             if (ImGui.IsItemClicked())
@@ -278,6 +320,10 @@ namespace Unify2D.Toolbox
         private string _newFileName = "";
         private bool _canRefreshName = true;
 
+        /// <summary>
+        /// Handle right click on an asset.
+        /// </summary>
+        /// <param name="asset"></param>
         private void HandleBeginPopupContext(Asset asset)
         {
             if (!ImGui.BeginPopupContextItem())
@@ -378,6 +424,10 @@ namespace Unify2D.Toolbox
             ImGui.EndPopup(); 
         }
 
+        /// <summary>
+        /// Asset being dragged.
+        /// </summary>
+        /// <param name="asset"></param>
         private unsafe void HandleBeginDragDropSource(Asset asset)
         {
             if (!ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
@@ -392,6 +442,10 @@ namespace Unify2D.Toolbox
             ImGui.EndDragDropSource();
         }
 
+        /// <summary>
+        /// Asset receiving a dragged asset.
+        /// </summary>
+        /// <param name="asset"></param>
         private unsafe void HandleBeginDragDropTarget(Asset asset)
         {
             if (!ImGui.BeginDragDropTarget())
@@ -429,6 +483,9 @@ namespace Unify2D.Toolbox
             ImGui.EndDragDropTarget();
         }
 
+        /// <summary>
+        /// Create a script with .cs extension.
+        /// </summary>
         private void CreateScript()
         {
             string newFile = "NewScript.cs";
@@ -452,7 +509,10 @@ namespace Unify2D.Toolbox
 
             // CreateAssetFromFile(newFile);
         }
-
+        
+        /// <summary>
+        /// Create a folder.
+        /// </summary>
         private void CreateFolder()
         {
             string folderName = "New Folder";
@@ -482,6 +542,10 @@ namespace Unify2D.Toolbox
                 DeleteAsset(_selectedAssets[n].FullPath);
         }
         
+        /// <summary>
+        /// Delete an asset from the assets directory.
+        /// </summary>
+        /// <param name="fullPath"></param>
         private void DeleteAsset(string fullPath)
         {
             string path = ToolsEditor.CombinePath(_path, fullPath);
@@ -505,6 +569,10 @@ namespace Unify2D.Toolbox
             }
         }
 
+        /// <summary>
+        /// Open a path in the explorer.
+        /// </summary>
+        /// <param name="path"></param>
         private static void ShowExplorer(string path)
         {
             string fullPath = GameEditor.Instance.AssetsPath + path;
