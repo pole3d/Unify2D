@@ -99,7 +99,7 @@ namespace Unify2D
             _gameEditorUI = new GameEditorUI(this);
             _sceneEditorManager = SceneManager.Instance;
 
-            Exiting += (object _, EventArgs _) => { _sceneEditorManager.SaveAllSceneToJson(); };
+            Exiting += (object _, EventArgs _) => { _sceneEditorManager.SaveCurrentSceneToJson(); };
         }
 
         protected override void Initialize()

@@ -31,6 +31,7 @@ namespace UnifyCore
             }
         }
 
+        const string JsonFolderSceneName = "SceneJson.json";
         public Scene CurrentScene => _currentScene;
         public int SceneCountInGameSettings => GameSettings.Instance.ScenesInGame.Count;
         private string _currentProjectPath;
@@ -41,34 +42,41 @@ namespace UnifyCore
 
         public void CreateOrOpenSceneAtStart(string path, string sceneFolder)
         {
+            //TODO check only once
+            GetAllSceneInProject();
+
             _currentProjectPath = path;
             _sceneFolder = sceneFolder;
 
             string currentPath = path + sceneFolder;
 
-            #region Load scene with json
+            #region Load old scene with json
             try
             {
                 string pathJson = System.IO.Path.Combine(_currentProjectPath, JsonFolderSceneName);
                 if (File.Exists(pathJson))
                 {
-                    List<SceneInfo> deserializedJsonScene = System.Text.Json.JsonSerializer.Deserialize<List<SceneInfo>>(File.ReadAllText(pathJson));
+                    SceneInfo deserializedJsonScene = System.Text.Json.JsonSerializer.Deserialize<SceneInfo>(File.ReadAllText(pathJson));
 
-                    for (int i = 0; i < deserializedJsonScene.Count; i++)
-                    {
-                        SceneInfo sceneInfo = deserializedJsonScene[i];
-                        sceneInfo.BuildIndex = i;
-                        GameSettings.Instance.AddSceneToList(sceneInfo);
-                    }
+                    SceneInfo sceneInfo = deserializedJsonScene;
 
-                    if (GameSettings.Instance.ScenesSave.Count > 0)
-                        LoadScene(GameSettings.Instance.ScenesSave[0].Name);
+                    if (sceneInfo != null && File.Exists(sceneInfo.Path))
+                        LoadSceneWithPath(sceneInfo.Path);
                     else
-                        CreateNewScene(path, sceneFolder);
+                    {
+                        if (GameSettings.Instance.ScenesSave.Count > 0)
+                            LoadSceneWithPath(GameSettings.Instance.ScenesSave[0].Path);
+                        else
+                            CreateNewScene(path, sceneFolder);
+                    }
                 }
                 else
                 {
-                    CreateNewScene(path, sceneFolder);
+                    if (GameSettings.Instance.ScenesSave.Count > 0)
+                        LoadSceneWithPath(GameSettings.Instance.ScenesSave[0].Path);
+                    else
+                        CreateNewScene(path, sceneFolder);
+
                     Console.WriteLine("Problem with your folder json, here your path : " + pathJson);
                 }
             }
@@ -154,36 +162,25 @@ namespace UnifyCore
             _currentScene.Init();
         }
 
-        private const string AssetsPath = "Assets";
-        const string JsonFolderSceneName = "SceneJson.scene";
 
-        public void SaveAllSceneToJson()
+        public void SaveCurrentSceneToJson()
         {
-            SaveCurrentScene();
             if (Directory.Exists(_currentProjectPath))
             {
-                List<SceneInfo> listSceneToJson = new List<SceneInfo>();
+                SceneInfo currentSceneToJson;
                 try
                 {
-                    // Récupérer tous les fichiers .scene dans le répertoire et ses sous-répertoires
-                    foreach (string item in Directory.GetFiles(_currentProjectPath, "*.scene", SearchOption.AllDirectories))
-                    {
-                        string name = item.Substring(item.LastIndexOf('\\') + 1);
-                        //string path = item.Substring(item.IndexOf('\\') + 1);
-                        SceneInfo scene = new SceneInfo(name, item);
-                        listSceneToJson.Add(scene);
-                    }
-                    string json = System.Text.Json.JsonSerializer.Serialize(listSceneToJson);
+                    currentSceneToJson = new SceneInfo(_currentScene.Name, _currentScene.Path);
+
+                    string json = System.Text.Json.JsonSerializer.Serialize(currentSceneToJson);
                     string pathJson = System.IO.Path.Combine(_currentProjectPath, JsonFolderSceneName);
                     Console.WriteLine("path json : " + pathJson);
 
+                    // TODO WTF
                     if (File.Exists(pathJson))
                         File.Delete(pathJson);
-                    
-                    File.Create(pathJson).Close();
+
                     File.WriteAllText(pathJson, json);
-                    FileInfo jsonFile = new FileInfo(pathJson);
-                    jsonFile.Attributes = FileAttributes.Hidden;
                 }
                 catch (Exception ex)
                 {
@@ -196,6 +193,17 @@ namespace UnifyCore
 
 
         #region Function
+        private void GetAllSceneInProject()
+        {
+            //Récupérer tous les fichiers .scene dans le répertoire et ses sous - répertoires
+            foreach (string path in Directory.GetFiles(GameCore.Current.Game.AssetsPath, "*.scene", SearchOption.AllDirectories))
+            {
+                string name = path.Substring(path.LastIndexOf('\\') + 1);
+                SceneInfo scene = new SceneInfo(name, path);
+                GameSettings.Instance.AddSceneToList(scene);
+            }
+        }
+
         public Scene GetActiveScene()
         {
             return CurrentScene;
