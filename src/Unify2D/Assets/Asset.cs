@@ -16,6 +16,8 @@ namespace Unify2D.Assets
         public AssetContent AssetContent  { get; set; }
         public bool IsDirectory => _isDirectory;
         public string FullPath => _fullPath;
+        
+        public string MegaPath { get; set; }
         public List<Asset> Children => new(_children);
         public Asset Parent => _parent;
 
@@ -69,6 +71,11 @@ namespace Unify2D.Assets
         {
             _path = path;
             _fullPath = ToolsEditor.CombinePath(path, _name + _extension);
+        }
+
+        public void SetMegaPath(string megaPath)
+        {
+            MegaPath = megaPath;
         }
 
         public override string ToString()

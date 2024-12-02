@@ -14,6 +14,7 @@ using Unify2D.Core;
 using Unify2D.Tools;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Unify2D.Assets;
+using UnifyCore;
 
 namespace Unify2D.Builder
 {

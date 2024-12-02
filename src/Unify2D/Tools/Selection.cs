@@ -15,6 +15,7 @@ using Unify2D.ImGuiRenderer;
 using Unify2D.Toolbox;
 using Unify2D.Toolbox.Popup;
 using Unify2D.Tools;
+using UnifyCore;
 using Num = System.Numerics;
 
 namespace Unify2D
