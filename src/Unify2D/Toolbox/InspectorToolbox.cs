@@ -313,6 +313,8 @@ namespace Unify2D.Toolbox
                 {
                     prefabAssetContent.SavePrefab(gameObject);
                 }                
+
+                Debug.Log($"Prefab {_gameObject.Name} saved from hierarchy!");
                 Console.WriteLine($"Prefab {gameObject.Name} saved from hierarchy!");
             }
         }
