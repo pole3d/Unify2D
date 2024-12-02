@@ -65,6 +65,7 @@ namespace Unify2D.Toolbox
             
             _watcher.Renamed += OnRenamed;
             _watcher.Deleted += OnDeleted;
+            _watcher.Created += OnDeleted;
 
             _watcher.IncludeSubdirectories = true;
             _watcher.EnableRaisingEvents = true;
@@ -148,7 +149,7 @@ namespace Unify2D.Toolbox
 
             Asset newAsset = new Asset(Path.GetFileNameWithoutExtension(relativeFile),
                 Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile));
-
+            
             _assets.Add(newAsset);
 
             return newAsset;
@@ -449,7 +450,7 @@ namespace Unify2D.Toolbox
                 sw.WriteLine(defaultScript);
             }
 
-            CreateAssetFromFile(newFile);
+            // CreateAssetFromFile(newFile);
         }
 
         private void CreateFolder()
@@ -466,7 +467,7 @@ namespace Unify2D.Toolbox
 
             Directory.CreateDirectory(newFolderPath);
 
-            CreateAssetFromDirectory(newFolderPath);
+            // CreateAssetFromDirectory(newFolderPath);
         }
 
         private void SelectAsset(Asset asset)
@@ -478,10 +479,7 @@ namespace Unify2D.Toolbox
         private void DeleteSelectedAssets()
         {
             for (int n = 0; n < _selectedAssets.Count; n++)
-            {
                 DeleteAsset(_selectedAssets[n].FullPath);
-            }
-            Reset();
         }
         
         private void DeleteAsset(string fullPath)
