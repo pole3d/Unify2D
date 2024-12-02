@@ -1,9 +1,8 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
-using UnifyCore.Core.Tweens.Options;
 using UnifyCore.Core.Utils;
 
-namespace UnifyCore.Core.Tweens.Plugins;
+namespace UnifyCore.Core.Tweens;
 
 public class Vector2TweenPlugin : TweenPlugin<Vector2, Vector2, VectorOptions>
 {

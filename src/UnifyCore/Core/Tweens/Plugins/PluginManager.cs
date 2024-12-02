@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 
-namespace UnifyCore.Core.Tweens.Plugins;
+namespace UnifyCore.Core.Tweens;
 
 public class PluginManager
 {

@@ -1,4 +1,4 @@
-﻿namespace UnifyCore.Core.Tweens.Options;
+﻿namespace UnifyCore.Core.Tweens;
 
 public struct VectorOptions
 {

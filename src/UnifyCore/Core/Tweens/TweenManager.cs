@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Unify2D.Core;
-using UnifyCore.Core.Tweens.Options;
-using UnifyCore.Core.Tweens.Plugins;
 
 namespace UnifyCore.Core.Tweens;
 

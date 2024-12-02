@@ -1,4 +1,4 @@
-﻿namespace UnifyCore.Core.Tweens.Plugins;
+﻿namespace UnifyCore.Core.Tweens;
 
 public interface ITweenPlugin
 {

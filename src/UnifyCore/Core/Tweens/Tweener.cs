@@ -1,6 +1,4 @@
-﻿using UnifyCore.Core.Tweens.Plugins;
-
-namespace UnifyCore.Core.Tweens;
+﻿namespace UnifyCore.Core.Tweens;
 
 public class Tweener<T1, T2, TOptions> : Tween where TOptions : struct
 {
