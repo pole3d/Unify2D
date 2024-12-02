@@ -5,6 +5,7 @@ using Unify2D.Core;
 using Microsoft.Xna.Framework.Graphics;
 using ImGuiNET;
 using Microsoft.Xna.Framework;
+using Unify2D.Assets;
 
 namespace Unify2D.Toolbox
 {
@@ -73,10 +74,12 @@ namespace Unify2D.Toolbox
                 if (ImGui.Button("Slice"))
                 {
                     SliceTexture();
+                    SaveSlicedTexture();
                 }
 
                 ImGui.SameLine();
                 ImGui.Text("by :");
+                
                 ImGui.SameLine();
                 if (ImGui.RadioButton("Pixel Size", _sliceMode == SliceMode.ByPixelSize))
                 {
@@ -196,6 +199,22 @@ namespace Unify2D.Toolbox
                     redColor,
                     lineThickness
                 );
+            }
+        }
+
+        // Save Slice Texture
+        private void SaveSlicedTexture()
+        {
+            for (var i = 0; i < _slicedTextures.Count; i++)
+            {
+                // Convert to texture2D
+                Texture2D cellTexture = CreateTextureFromColorArray(_slicedTextures[i]);
+
+                string subtextureAssetName = _gameAsset.Name.Split('.')[0];
+                if (subtextureAssetName[0] == '\\')
+                    subtextureAssetName = subtextureAssetName.Substring(1);
+                
+                Asset subTextureAsset = GameEditor.Instance.AssetManager.CreateAsset<SubTextureAssetContent>($"{subtextureAssetName}_{i}");
             }
         }
 
