@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Unify2D.Assets;
 using Unify2D.Core;
 using Unify2D.Tools;
@@ -32,6 +33,8 @@ namespace Unify2D.Toolbox
         private const string CreateNewScriptButtonLabel = "Create New Script";
         private const string CreateNewFolderButtonLabel = "Create New Folder";
         private const string AssetDragDropPayloadType = "ASSET";
+
+        private FileSystemWatcher _watcher;
         
         public override void Initialize(GameEditor editor)
         {
@@ -42,16 +45,30 @@ namespace Unify2D.Toolbox
 
         private void SetWatcher()
         {
-            string path = Path.GetFullPath(_editor.AssetsPath);
-            FileSystemWatcher watcher = new FileSystemWatcher(path);
-
-            watcher.NotifyFilter = NotifyFilters.DirectoryName |
-                                   NotifyFilters.FileName;
+            if (_watcher != null)
+            {
+                _watcher.Renamed -= OnRenamed;
+                _watcher.Deleted -= OnDeleted;
+            }
             
-            watcher.Renamed += OnRenamed;
+            string path = Path.GetFullPath(_editor.AssetsPath);
+            _watcher = new FileSystemWatcher(path);
 
-            watcher.IncludeSubdirectories = true;
-            watcher.EnableRaisingEvents = true;
+            _watcher.NotifyFilter = NotifyFilters.Attributes
+                                    | NotifyFilters.CreationTime
+                                    | NotifyFilters.DirectoryName
+                                    | NotifyFilters.FileName
+                                    | NotifyFilters.LastAccess
+                                    | NotifyFilters.LastWrite
+                                    | NotifyFilters.Security
+                                    | NotifyFilters.Size;
+            
+            _watcher.Renamed += OnRenamed;
+            _watcher.Deleted += OnDeleted;
+            _watcher.Created += OnDeleted;
+
+            _watcher.IncludeSubdirectories = true;
+            _watcher.EnableRaisingEvents = true;
         }
 
         public bool TryGetAssetFromPath(string path, out Asset assetFromPath)
@@ -121,15 +138,6 @@ namespace Unify2D.Toolbox
 
             return newAsset;
         }
-
-        private void OnRenamed(object sender, RenamedEventArgs e)
-        {
-            if (TryGetAssetFromPath($"\\{e.OldName}", out Asset asset))
-            {
-                string lastFragment = Path.GetFileNameWithoutExtension(e.FullPath);
-                asset.SetName(lastFragment);
-            }
-        }
         
         private Asset CreateAssetFromFile(string file)
         {
@@ -141,10 +149,24 @@ namespace Unify2D.Toolbox
 
             Asset newAsset = new Asset(Path.GetFileNameWithoutExtension(relativeFile),
                 Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile));
-
+            
             _assets.Add(newAsset);
 
             return newAsset;
+        }
+        
+        private void OnRenamed(object sender, RenamedEventArgs e)
+        {
+            if (TryGetAssetFromPath($"\\{e.OldName}", out Asset asset))
+            {
+                string lastFragment = Path.GetFileNameWithoutExtension(e.FullPath);
+                asset.SetName(lastFragment);
+            }
+        }
+        
+        private void OnDeleted(object sender, FileSystemEventArgs e)
+        {
+            Reset();
         }
 
         public override void Draw()
@@ -387,20 +409,20 @@ namespace Unify2D.Toolbox
                 if (payload.Delivery)
                 {
                     int sourceIndex = *(int*)payload.Data;
-                    string oldPath = $"{_path}{_assets[sourceIndex].FullPath}";
-                    string newPath = $"{_path}{asset.FullPath}\\{_assets[sourceIndex].Name}{_assets[sourceIndex].Extension}";
+                    Asset movingAsset = _assets[sourceIndex];
+                    string oldPath = ToolsEditor.CombinePath(_path, movingAsset.FullPath);
+                    string combinePath = ToolsEditor.CombinePath(_path, asset.FullPath);
+                    string newPath = ToolsEditor.CombinePath(combinePath, movingAsset.Name) + movingAsset.Extension;
 
                     if (Path.Exists(newPath))
                         return;
 
-                    if (_assets[sourceIndex].IsDirectory)
+                    if (movingAsset.IsDirectory)
                         Directory.Move(oldPath, newPath);
                     else
                         File.Move(oldPath, newPath);
 
-                    _assets[sourceIndex].SetPath(asset.Path);
-
-                    Reset();
+                    movingAsset.SetPath(asset.FullPath);
                 }
             }
 
@@ -428,7 +450,7 @@ namespace Unify2D.Toolbox
                 sw.WriteLine(defaultScript);
             }
 
-            CreateAssetFromFile(newFile);
+            // CreateAssetFromFile(newFile);
         }
 
         private void CreateFolder()
@@ -445,7 +467,7 @@ namespace Unify2D.Toolbox
 
             Directory.CreateDirectory(newFolderPath);
 
-            CreateAssetFromDirectory(newFolderPath);
+            // CreateAssetFromDirectory(newFolderPath);
         }
 
         private void SelectAsset(Asset asset)
@@ -457,17 +479,14 @@ namespace Unify2D.Toolbox
         private void DeleteSelectedAssets()
         {
             for (int n = 0; n < _selectedAssets.Count; n++)
-            {
-                DeleteAsset(_selectedAssets[n]);
-            }
-            Reset();
+                DeleteAsset(_selectedAssets[n].FullPath);
         }
         
-        private void DeleteAsset(Asset asset)
+        private void DeleteAsset(string fullPath)
         {
-            string path = $"{_path}{asset.FullPath}";
-
-            if (Path.Exists(path))
+            string path = ToolsEditor.CombinePath(_path, fullPath);
+            
+            if (TryGetAssetFromPath(fullPath, out Asset asset))
             {
                 if (asset.IsDirectory)
                 {
