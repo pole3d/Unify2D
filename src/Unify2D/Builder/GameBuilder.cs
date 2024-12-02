@@ -23,7 +23,7 @@ namespace Unify2D.Builder
         const string AssetsPath = "./Assets";
         const string TemplatePath = "./GameTemplate";
         const string RuntimesFolderPath = "./runtimes";
-        const string JsonFolderSceneName = "SceneJson.scene";
+        const string JsonFolderSceneName = "SceneJson.json";
         string AssetsPathFull => ToolsEditor.CombinePath(_editor.ProjectPath, AssetsPath);
         string BuildPathFull => ToolsEditor.CombinePath(_editor.ProjectPath, "./Build");
         string RuntimesFolderPathFull => ToolsEditor.CombinePath(TemplatePath, RuntimesFolderPath);
