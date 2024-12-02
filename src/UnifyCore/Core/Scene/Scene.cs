@@ -31,8 +31,8 @@ namespace Unify2D
 
         private bool _isDirty = false;
 
-        public List<Canvas> CanvasList => _canvasList;
-        private List<Canvas> _canvasList = new List<Canvas>();
+        [JsonIgnore] public List<Canvas> CanvasList => _canvasList;
+        [JsonIgnore] private List<Canvas> _canvasList = new List<Canvas>();
 
         public EventSystem EventSystem => _eventSystem;
         private EventSystem _eventSystem;
@@ -97,6 +97,9 @@ namespace Unify2D
             }
 
             _isLoaded = true;
+
+            UpdateCanvasList();
+            _canvasList.ForEach(x => x.UpdateList());
         }
 
 
@@ -184,6 +187,22 @@ namespace Unify2D
             GameObjects.Clear();
         }
 
+        public void UpdateCanvasList()
+        {
+            Debug.Log("update canvas list");
+        
+            CanvasList.Clear();
+
+            foreach (GameObject go in GameObjects)
+            {
+                Canvas canvas = go.GetComponent<Canvas>();
+                if (canvas != null)
+                {
+                    CanvasList.Add(canvas);
+                }
+            }
+        }
+        
         public void AddEventSystem(EventSystem eventSystem)
         {
             _eventSystem = eventSystem;

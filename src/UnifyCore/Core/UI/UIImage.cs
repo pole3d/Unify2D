@@ -32,7 +32,8 @@ public class UIImage : UIComponent, IPointerEventReceiver
     
     public override void Load(Game game, GameObject go)
     {
-        _gameObject = go;
+        base.Load(game,go);
+        
         try
         {
             _asset = new GameAsset(Sprite, _asset.Name);

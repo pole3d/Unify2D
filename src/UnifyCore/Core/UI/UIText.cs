@@ -39,7 +39,8 @@ namespace Unify2D.Core
         
         public override void Load(Game game, GameObject go)
         {
-            _gameObject = go;
+            base.Load(game, go);
+            
             try
             {
                 _asset = new GameAsset(Font, _asset.Name);
