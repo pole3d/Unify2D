@@ -16,27 +16,12 @@ namespace Unify2D.Core
         /// Properties
         public string Text { get; set; } = "Lorem Ipsum";
         public Color VertexColor { get; set; } = Color.White;
-        
-        [JsonIgnore] public SpriteFont Font { get; private set; }
-        public string FontPath { get; set; }
-        
+        public SpriteFont Font { get; private set; }
         public float FontSize { get; set; } = 12;
 
         [JsonProperty]
         private GameAsset _asset;
 
-        public void SetFont(string path)
-        {
-            if (string.IsNullOrEmpty(path)) return;
-            
-            FontPath = path;
-            TtfFontBakerResult fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(path),
-                25, 1024, 1024,
-                new[] { CharacterRange.BasicLatin, CharacterRange.Latin1Supplement, CharacterRange.LatinExtendedA, CharacterRange.Cyrillic }
-            );
-            Font = fontBakeResult.CreateSpriteFont(GameCore.Current.GraphicsDevice);
-        }
-        
         public override void Load(Game game, GameObject go)
         {
             _gameObject = go;
@@ -48,18 +33,11 @@ namespace Unify2D.Core
             {
                 Console.WriteLine(e.ToString());
             }
-            SetFont(FontPath);
         }
         
         public override void Draw()
         {
-            if (_gameObject == null) return;
-            
-            if (string.IsNullOrEmpty(Text) || Font == null)
-            {
-                SetFont(FontPath);
-                return;
-            }
+            if (string.IsNullOrEmpty(Text) || Font == null) return;
 
             Vector2 stringSize = Font.MeasureString(Text);
             Vector2 origin = Origin + stringSize * GetAnchorVector(Anchor);

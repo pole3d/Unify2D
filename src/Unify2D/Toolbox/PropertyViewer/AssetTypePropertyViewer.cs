@@ -18,7 +18,6 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
     protected abstract string GetAssetExtension(); //TODO add the possibility to have multiple extension, maybe create a subclass "extension to asset" ? 
     public abstract T GetInitializeAsset();
     public abstract (string name, string path) GetBaseAsset();
-    public abstract void SetAsset(T asset, PropertyInfo propertyInfo, Component component, string path);
     
     /// <summary>
     /// This method is called from the inspector toolbox to draw the property.
@@ -80,7 +79,6 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
         Dictionary<string, string> dictionary = GetAssetLists();
         var dictionaryList = dictionary.ToList();
 
-        int foldoutIndex = _currentFoldoutIndex;
         if (ImGui.BeginCombo($"{GetPropertyName()}", dictionaryList[_currentFoldoutIndex].Key))
         {
             ImGui.InputText("search", ref _search, 100);
@@ -97,7 +95,7 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
                 bool isInFilter = string.IsNullOrEmpty(_search) || filteredFileDictionary.ContainsKey(dictionaryList[i].Key);
                 if (isInFilter && ImGui.Selectable(dictionaryList[i].Key, isSelected))
                 {
-                    foldoutIndex = i;
+                    _currentFoldoutIndex = i;
                 }
                 if (isSelected)
                 {
@@ -106,15 +104,9 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
             }
             ImGui.EndCombo();
         }
-
-        if (foldoutIndex == _currentFoldoutIndex) return;
-        _currentFoldoutIndex = foldoutIndex;
-        Debug.Log("SET ASSET");
         
         asset = _currentFoldoutIndex == 0 ? GetInitializeAsset() : GetAssetFromPath(dictionaryList[_currentFoldoutIndex].Value);
-        SetAsset(asset, property, instance as Component, dictionaryList[_currentFoldoutIndex].Value);
-        
-        // property.SetValue(instance, asset);
+        property.SetValue(instance, asset);
     }
     
 }

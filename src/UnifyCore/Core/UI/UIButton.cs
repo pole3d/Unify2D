@@ -13,9 +13,11 @@ public class UIButton : UIComponent
     public Color PressedColor { get; set; } = Color.White;
     public Color DisableColor { get; set; } = Color.Black;
 
-    public bool Enabled { get; set; }
+    public bool Enabled { get; set; } = true;
     
-    public Action OnButtonPressed { get; set; }
+    public Action OnClick { get; set; }
+    public Action OnPressed { get; set; }
+    public Action OnRelease { get; set; }
     
     private bool _isPressed;
 

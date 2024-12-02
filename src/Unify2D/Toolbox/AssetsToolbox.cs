@@ -28,6 +28,11 @@ namespace Unify2D.Toolbox
         private const string InstantiateAsGameObjectButtonLabel = "Instantiate as GameObject";
         private const string DeleteButtonLabel = "Delete";
         private const string ShowInExplorerButtonLabel = "Show in explorer";
+        private const string ShowExplorerButtonLabel = "Show explorer";
+        private const string RenameButtonLabel = "Rename";
+        private const string ApplyRenameButtonLabel = "Apply";
+        private const string CreateNewScriptButtonLabel = "Create New Script";
+        private const string CreateNewFolderButtonLabel = "Create New Folder";
         private const string AssetDragDropPayloadType = "ASSET";
 
         private FileSystemWatcher _watcher;
@@ -35,10 +40,11 @@ namespace Unify2D.Toolbox
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
+            SetWatcher();
             Reset();
         }
 
-        public Asset GetAssetFromPath(string path)
+        private void SetWatcher()
         {
             if (_watcher != null)
             {
@@ -73,9 +79,13 @@ namespace Unify2D.Toolbox
             foreach (Asset asset in _assets)
             {
                 if (path == asset.FullPath)
-                    return asset;
+                {
+                    assetFromPath = asset;
+                    return true;
+                }
             }
-            return null;
+            
+            return false;
         }
 
         /// <summary>
@@ -84,6 +94,7 @@ namespace Unify2D.Toolbox
         internal override void Reset()
         {
             _assets.Clear();
+            _selectedAssets.Clear();
             _path = _editor.AssetsPath;
 
             if (String.IsNullOrEmpty(_path))
@@ -129,15 +140,6 @@ namespace Unify2D.Toolbox
             return newAsset;
         }
         
-        private void OnRenamed(object sender, RenamedEventArgs e)
-        {
-            if (TryGetAssetFromPath($"\\{e.OldName}", out Asset asset))
-            {
-                string lastFragment = Path.GetFileNameWithoutExtension(e.FullPath);
-                asset.SetName(lastFragment);
-            }
-        }
-        
         private Asset CreateAssetFromFile(string file)
         {
             string relativeFile = file.Replace(_path, string.Empty);
@@ -172,20 +174,20 @@ namespace Unify2D.Toolbox
         {
             ImGui.Begin("Assets");
 
-            if (ImGui.Button("Show Explorer", new System.Numerics.Vector2(-1, 0)))
+            if (ImGui.Button(ShowExplorerButtonLabel, new System.Numerics.Vector2(-1, 0)))
             {
                 ShowExplorer(string.Empty);
             }
 
             if (ImGui.BeginPopupContextWindow())
             {
-                if (ImGui.Button("Create New Script"))
+                if (ImGui.Button(CreateNewScriptButtonLabel))
                 {
                     ImGui.CloseCurrentPopup();
                     CreateScript();
                 }
 
-                if (ImGui.Button("Create New Folder"))
+                if (ImGui.Button(CreateNewFolderButtonLabel))
                 {
                     ImGui.CloseCurrentPopup();
                     CreateFolder();
@@ -316,6 +318,15 @@ namespace Unify2D.Toolbox
                 if (ImGui.Button(OpenPrefabButtonLabel))
                 {
                     var prefabContent = asset.AssetContent as PrefabAssetContent;
+                    GameEditor.Instance.OpenPrefab(prefabContent);
+
+                    if (prefabContent.IsLoaded == false)
+                        prefabContent.Load();
+
+                    SceneManager.Instance.CurrentScene.AddRootGameObject(prefabContent.InstantiatedGameObject);
+
+                    ImGui.CloseCurrentPopup();
+                }
                 
                 string renamePopup = "RenamePopup"; 
             
@@ -326,15 +337,15 @@ namespace Unify2D.Toolbox
                 if (ImGui.BeginPopup(renamePopup))
                 {
                     ImGui.Text("Edit name:");
-            
-            if (ImGui.Button(RenameButtonLabel))
-            {
-                ImGui.OpenPopup(renamePopup);
-            }
 
-            if (ImGui.BeginPopup(renamePopup))
-            {
-                ImGui.Text("Edit name:");
+                    if (_canRefreshName)
+                    {
+                        _newFileName = asset.Name;
+                        _canRefreshName = false;
+                    }
+                        
+                    ImGui.InputText("##edit", ref _newFileName, 40);
+
                     if (ImGui.Button(ApplyRenameButtonLabel))
                     {
                         string oldPath = asset.FullPath;
@@ -348,15 +359,6 @@ namespace Unify2D.Toolbox
                         _canRefreshName = true;
                         ImGui.CloseCurrentPopup();
                     }
-                    
-                    if(asset.IsDirectory)
-                        Directory.Move($"{_path}{oldPath}", $"{_path}{asset.FullPath}");
-                    else
-                        File.Move($"{_path}{oldPath}", $"{_path}{asset.FullPath}");
-                    
-                    _canRefreshName = true;
-                    ImGui.CloseCurrentPopup();
-                }
 
                     ImGui.EndPopup();
                 }

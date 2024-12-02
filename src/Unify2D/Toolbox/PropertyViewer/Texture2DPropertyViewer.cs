@@ -1,5 +1,5 @@
-﻿using System.IO;
-using System.Reflection;
+﻿using System;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Unify2D.Core;
@@ -39,16 +39,5 @@ public class Texture2DPropertyViewer : AssetTypePropertyViewer<Texture2D>
     public override (string name, string path) GetBaseAsset()
     {
         return ("Rectangle", "null");
-    }
-
-    public override void SetAsset(Texture2D asset, PropertyInfo propertyInfo, Component component, string path)
-    {
-        propertyInfo.SetValue(component, asset);
-        
-        //find a way to make this dynamic
-        if (component is UIImage uiImage)
-        {
-            uiImage.SetSprite(path);
-        }
     }
 }
