@@ -8,6 +8,8 @@ using Unify2D.Builder;
 using Unify2D;
 using System.Runtime.CompilerServices;
 using Genbox.VelcroPhysics.Tools.PathGenerator;
+using static System.Formats.Asn1.AsnWriter;
+using System.Collections.Generic;
 namespace UnifyCore
 {
 
@@ -84,9 +86,6 @@ namespace UnifyCore
                 Console.WriteLine($"Can't load scene" + ex.ToString());
             }
             #endregion
-
-
-
         }
 
         #region Save/Load
@@ -119,10 +118,10 @@ namespace UnifyCore
                 while (File.Exists(System.IO.Path.Combine(currentPath, "SampleScene_" + count + ".scene")))
                     count++;
 
-                _currentScene = new Scene(System.IO.Path.Combine(currentPath, "SampleScene_" + count + ".scene"), true);
+                _currentScene = new Scene(System.IO.Path.Combine(currentPath, "SampleScene_" + count + ".scene"));
             }
             else
-                _currentScene = new Scene(System.IO.Path.Combine(currentPath, "SampleScene.scene"), true);
+                _currentScene = new Scene(System.IO.Path.Combine(currentPath, "SampleScene.scene"));
 
             _currentScene.Init();
         }
@@ -142,7 +141,7 @@ namespace UnifyCore
         {
             ClearScene();
 
-            _currentScene = new Scene(scenePath);
+            _currentScene = new Scene(scenePath,false);
             _currentScene.Init();
         }
         public void LoadScene(int sceneBuildIndex)
@@ -214,7 +213,7 @@ namespace UnifyCore
         /// <summary>
         public Scene GetSceneAt(int index)
         {
-            return new Scene(GameSettings.Instance.ScenesSave[index].Path);
+            return new Scene(GameSettings.Instance.ScenesSave[index].Path,false);
         }
 
         /// </summary>
@@ -223,7 +222,7 @@ namespace UnifyCore
         /// </summary>
         public Scene GetSceneByBuildIndex(int buildIndex)
         {
-            return new Scene(GameSettings.Instance.ScenesSave[buildIndex].Path);
+            return new Scene(GameSettings.Instance.ScenesSave[buildIndex].Path, false);
         }
 
         /// <summary>
@@ -235,7 +234,7 @@ namespace UnifyCore
             {
                 if (scene.Name != name)
                     continue;
-                return new Scene(scene.Path);
+                return new Scene(scene.Path, false);
             }
             Debug.Log("No scene with the name : " + name);
             return null;
@@ -244,7 +243,7 @@ namespace UnifyCore
 
         public Scene GetSceneByPath(string scenePath)
         {
-            return new Scene(scenePath);
+            return new Scene(scenePath,false);
         }
 
 
