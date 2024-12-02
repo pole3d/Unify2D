@@ -1,0 +1,37 @@
+﻿using UnifyCore.Core.Tweens.Plugins;
+
+namespace UnifyCore.Core.Tweens;
+
+public class Tweener<T1, T2, TOptions> : Tween where TOptions : struct
+{
+    public TweenGetter<T1> Getter;
+    public TweenSetter<T1> Setter;
+    public T2 StartValue;
+    public T2 EndValue;
+    public TOptions TweenOption;
+    public TweenPlugin<T1, T2, TOptions> TweenPlugin;
+
+    public override bool Startup()
+    {
+        StartupDone = true;
+        
+        TweenPlugin.SetFrom(this, IsRelative);
+
+        return true;
+    }
+
+    public override bool Update(float deltaTime)
+    {
+        if (!StartupDone)
+        {
+            if (!Startup())
+            {
+                return true;
+            }
+        }
+
+        Position += deltaTime;
+        TweenPlugin.Apply(TweenOption, this, IsRelative, Getter, Setter, Position, StartValue, EndValue, Duration);
+        return IsComplete;
+    }
+}
