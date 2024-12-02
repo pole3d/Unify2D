@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Unify2D.Toolbox;
 using Unify2D.Toolbox.Popup;
 using UnifyCore;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Unify2D
 {
@@ -46,9 +47,7 @@ namespace Unify2D
                     if (ImGui.MenuItem("Create scene"))
                     {
                         // _editor.SceneEditorManager.SaveCurrentScene();
-                        string pathProject = Path.Combine(Directory.GetCurrentDirectory(), _editor.Settings.Data.CurrentProjectPath);
-
-                        SceneManager.Instance.CreateNewScene(pathProject, GameEditor.ScenesFolder);
+                        CreateNewScene();
                     }
                     if (ImGui.MenuItem("Save scene"))
                     {
@@ -92,6 +91,25 @@ namespace Unify2D
             }
         }
 
+        private void CreateNewScene(bool inAssetsToolBox = false)
+        {
+            if (inAssetsToolBox == false)
+            {
+                string path = string.Empty;
+                NfdStatus result = Nfd.SaveDialog(out path, new Dictionary<string, string>() { { "New Scene", "scene" } }, "New Scene", Path.GetFullPath("./Assets").ToString());
+                if (result == NfdStatus.Ok)
+                {
+                    Scene scene = new Scene(path);
+                    scene.SaveSceneNameAndPath(Path.GetFileName(path), path);
+                    SceneManager.Instance.LoadSceneWithPath(path);
+                }
+            }
+            else
+            {
+                string pathProject = Path.Combine(Directory.GetCurrentDirectory(), _editor.Settings.Data.CurrentProjectPath);
+                SceneManager.Instance.CreateNewScene(pathProject, GameEditor.ScenesFolder);
+            }
+        }
         private void SaveCurrentScene()
         {
             Scene scene = SceneManager.Instance.CurrentScene;
