@@ -96,6 +96,7 @@ namespace Unify2D
 
             _gameEditorUI = new GameEditorUI(this);
             _sceneEditorManager = SceneManager.Instance;
+            
         }
         
         protected override void Initialize()
@@ -111,6 +112,8 @@ namespace Unify2D
             
             // Set the current game core
             GameCore.SetCurrent(_coreViewerScene.GameCore);
+            _sceneEditorManager.Initialize();
+
             
             Content.RootDirectory = ProjectPath;
 

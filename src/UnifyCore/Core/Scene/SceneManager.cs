@@ -32,7 +32,13 @@ namespace Unify2D
 
         public SceneManager()
         {
-            _currentScene = new Scene();
+          
+        }
+        
+        public void Initialize()
+        {
+           _currentScene = new Scene();
+           _currentScene.Init();
         }
 
         #region Save/Load
@@ -152,5 +158,7 @@ namespace Unify2D
             e.ErrorContext.Handled = true;
         }
         #endregion
+
+
     }
 }
