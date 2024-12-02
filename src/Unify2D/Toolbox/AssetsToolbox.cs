@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Unify2D.Assets;
 using Unify2D.Core;
 using Unify2D.Tools;
@@ -27,63 +26,23 @@ namespace Unify2D.Toolbox
         private const string InstantiateAsGameObjectButtonLabel = "Instantiate as GameObject";
         private const string DeleteButtonLabel = "Delete";
         private const string ShowInExplorerButtonLabel = "Show in explorer";
-        private const string ShowExplorerButtonLabel = "Show explorer";
-        private const string RenameButtonLabel = "Rename";
-        private const string ApplyRenameButtonLabel = "Apply";
-        private const string CreateNewScriptButtonLabel = "Create New Script";
-        private const string CreateNewFolderButtonLabel = "Create New Folder";
         private const string AssetDragDropPayloadType = "ASSET";
 
-        private FileSystemWatcher _watcher;
-        
+
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
             Reset();
         }
 
-        private void SetWatcher()
+        public Asset GetAssetFromPath(string path)
         {
-            if (_watcher != null)
-            {
-                _watcher.Renamed -= OnRenamed;
-                _watcher.Deleted -= OnDeleted;
-            }
-            
-            string path = Path.GetFullPath(_editor.AssetsPath);
-            _watcher = new FileSystemWatcher(path);
-
-            _watcher.NotifyFilter = NotifyFilters.Attributes
-                                    | NotifyFilters.CreationTime
-                                    | NotifyFilters.DirectoryName
-                                    | NotifyFilters.FileName
-                                    | NotifyFilters.LastAccess
-                                    | NotifyFilters.LastWrite
-                                    | NotifyFilters.Security
-                                    | NotifyFilters.Size;
-            
-            _watcher.Renamed += OnRenamed;
-            _watcher.Deleted += OnDeleted;
-            _watcher.Created += OnDeleted;
-
-            _watcher.IncludeSubdirectories = true;
-            _watcher.EnableRaisingEvents = true;
-        }
-
-        public bool TryGetAssetFromPath(string path, out Asset assetFromPath)
-        {
-            assetFromPath = null;
-            
-            foreach (Asset asset in _assets)
+            foreach (var asset in _assets)
             {
                 if (path == asset.FullPath)
-                {
-                    assetFromPath = asset;
-                    return true;
-                }
+                    return asset;
             }
-            
-            return false;
+            return null;
         }
 
         /// <summary>
@@ -136,7 +95,7 @@ namespace Unify2D.Toolbox
 
             return newAsset;
         }
-        
+
         private Asset CreateAssetFromFile(string file)
         {
             string relativeFile = file.Replace(_path, string.Empty);
@@ -147,44 +106,30 @@ namespace Unify2D.Toolbox
 
             Asset newAsset = new Asset(Path.GetFileNameWithoutExtension(relativeFile),
                 Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile));
-            
+
             _assets.Add(newAsset);
 
             return newAsset;
-        }
-        
-        private void OnRenamed(object sender, RenamedEventArgs e)
-        {
-            if (TryGetAssetFromPath($"\\{e.OldName}", out Asset asset))
-            {
-                string lastFragment = Path.GetFileNameWithoutExtension(e.FullPath);
-                asset.SetName(lastFragment);
-            }
-        }
-        
-        private void OnDeleted(object sender, FileSystemEventArgs e)
-        {
-            Reset();
         }
 
         public override void Draw()
         {
             ImGui.Begin("Assets");
 
-            if (ImGui.Button(ShowExplorerButtonLabel, new System.Numerics.Vector2(-1, 0)))
+            if (ImGui.Button("Show Explorer", new System.Numerics.Vector2(-1, 0)))
             {
                 ShowExplorer(string.Empty);
             }
 
             if (ImGui.BeginPopupContextWindow())
             {
-                if (ImGui.Button(CreateNewScriptButtonLabel))
+                if (ImGui.Button("Create New Script"))
                 {
                     ImGui.CloseCurrentPopup();
                     CreateScript();
                 }
 
-                if (ImGui.Button(CreateNewFolderButtonLabel))
+                if (ImGui.Button("Create New Folder"))
                 {
                     ImGui.CloseCurrentPopup();
                     CreateFolder();
@@ -290,75 +235,65 @@ namespace Unify2D.Toolbox
                 }
                 SelectAsset(asset);
             }
-            
-            // Check if all selected assets are prefabs
-            bool allArePrefabs = _selectedAssets.All(a => a.AssetContent is PrefabAssetContent);
 
-            if (allArePrefabs)
-            {
-                if (ImGui.Button(InstantiateAsGameObjectButtonLabel))
-                {
-                    foreach (var selectedAsset in _selectedAssets)
-                    {
-                        var prefabContent = selectedAsset.AssetContent as PrefabAssetContent;
-                        prefabContent.Load();
-                        SceneManager.Instance.CurrentScene.AddRootGameObject(prefabContent.InstantiatedGameObject);
-                    }
-                    ImGui.CloseCurrentPopup();
-                    
-                    Reset();
-                }
-            }
-
-            if (_selectedAssets.Count == 1)
+            if (asset.AssetContent is PrefabAssetContent prefabContent)
             {
                 if (ImGui.Button(OpenPrefabButtonLabel))
                 {
-                    var prefabContent = asset.AssetContent as PrefabAssetContent;
                     GameEditor.Instance.OpenPrefab(prefabContent);
-
-                    if (prefabContent.IsLoaded == false)
+                    
+                    if(prefabContent.IsLoaded == false)
                         prefabContent.Load();
+                    
+                    SceneManager.Instance.CurrentScene.AddRootGameObject(prefabContent.InstantiatedGameObject);
+                    
+                    ImGui.CloseCurrentPopup();
+                }
 
+                if (ImGui.Button(InstantiateAsGameObjectButtonLabel))
+                {
+                    // Load the prefab content
+                    prefabContent.Load();
+                    
+                    // Add GameObject to the scene
                     SceneManager.Instance.CurrentScene.AddRootGameObject(prefabContent.InstantiatedGameObject);
 
                     ImGui.CloseCurrentPopup();
                 }
-                
-                string renamePopup = "RenamePopup"; 
-            
-                if (ImGui.Button(RenameButtonLabel))
+            }
+
+            if (ImGui.Button("Rename"))
+            {
+                ImGui.OpenPopup("RenamePopup");
+            }
+
+            if (ImGui.BeginPopup("RenamePopup"))
+            {
+                ImGui.Text("Edit name:");
+
+                if (_canRefreshName)
                 {
-                    ImGui.OpenPopup(renamePopup);
+                    _newFileName = asset.Name;
+                    _canRefreshName = false;
                 }
-                if (ImGui.BeginPopup(renamePopup))
+                    
+                ImGui.InputText("##edit", ref _newFileName, 40);
+
+                if (ImGui.Button("Apply"))
                 {
-                    ImGui.Text("Edit name:");
-
-                    if (_canRefreshName)
-                    {
-                        _newFileName = asset.Name;
-                        _canRefreshName = false;
-                    }
-                        
-                    ImGui.InputText("##edit", ref _newFileName, 40);
-
-                    if (ImGui.Button(ApplyRenameButtonLabel))
-                    {
-                        string oldPath = asset.FullPath;
-                        asset.SetName(_newFileName);
-                        
-                        if(asset.IsDirectory)
-                            Directory.Move($"{_path}{oldPath}", $"{_path}{asset.FullPath}");
-                        else
-                            File.Move($"{_path}{oldPath}", $"{_path}{asset.FullPath}");
-                        
-                        _canRefreshName = true;
-                        ImGui.CloseCurrentPopup();
-                    }
-
-                    ImGui.EndPopup();
+                    string oldPath = asset.FullPath;
+                    asset.SetName(_newFileName);
+                    
+                    if(asset.IsDirectory)
+                        Directory.Move($"{_path}{oldPath}", $"{_path}{asset.FullPath}");
+                    else
+                        File.Move($"{_path}{oldPath}", $"{_path}{asset.FullPath}");
+                    
+                    _canRefreshName = true;
+                    ImGui.CloseCurrentPopup();
                 }
+
+                ImGui.EndPopup();
             }
             
             if (ImGui.Button(ShowInExplorerButtonLabel))
@@ -407,20 +342,20 @@ namespace Unify2D.Toolbox
                 if (payload.Delivery)
                 {
                     int sourceIndex = *(int*)payload.Data;
-                    Asset movingAsset = _assets[sourceIndex];
-                    string oldPath = ToolsEditor.CombinePath(_path, movingAsset.FullPath);
-                    string combinePath = ToolsEditor.CombinePath(_path, asset.FullPath);
-                    string newPath = ToolsEditor.CombinePath(combinePath, movingAsset.Name) + movingAsset.Extension;
+                    string oldPath = $"{_path}{_assets[sourceIndex].FullPath}";
+                    string newPath = $"{_path}{asset.FullPath}\\{_assets[sourceIndex].Name}{_assets[sourceIndex].Extension}";
 
                     if (Path.Exists(newPath))
                         return;
 
-                    if (movingAsset.IsDirectory)
+                    if (_assets[sourceIndex].IsDirectory)
                         Directory.Move(oldPath, newPath);
                     else
                         File.Move(oldPath, newPath);
 
-                    movingAsset.SetPath(asset.FullPath);
+                    _assets[sourceIndex].SetPath(asset.Path);
+
+                    Reset();
                 }
             }
 
@@ -448,7 +383,7 @@ namespace Unify2D.Toolbox
                 sw.WriteLine(defaultScript);
             }
 
-            // CreateAssetFromFile(newFile);
+            CreateAssetFromFile(newFile);
         }
 
         private void CreateFolder()
@@ -465,7 +400,7 @@ namespace Unify2D.Toolbox
 
             Directory.CreateDirectory(newFolderPath);
 
-            // CreateAssetFromDirectory(newFolderPath);
+            CreateAssetFromDirectory(newFolderPath);
         }
 
         private void SelectAsset(Asset asset)
@@ -477,14 +412,17 @@ namespace Unify2D.Toolbox
         private void DeleteSelectedAssets()
         {
             for (int n = 0; n < _selectedAssets.Count; n++)
-                DeleteAsset(_selectedAssets[n].FullPath);
+            {
+                DeleteAsset(_selectedAssets[n]);
+            }
+            Reset();
         }
         
-        private void DeleteAsset(string fullPath)
+        private void DeleteAsset(Asset asset)
         {
-            string path = ToolsEditor.CombinePath(_path, fullPath);
-            
-            if (TryGetAssetFromPath(fullPath, out Asset asset))
+            string path = $"{_path}{asset.FullPath}";
+
+            if (Path.Exists(path))
             {
                 if (asset.IsDirectory)
                 {
