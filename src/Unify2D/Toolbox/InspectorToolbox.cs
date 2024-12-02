@@ -35,6 +35,9 @@ namespace Unify2D.Toolbox
         private int _changeCount = 0;
 
         private PrefabAssetContent _currentPrefabAsset;
+        
+        private const string SavePrefabButtonLabel = "Save Prefab";
+        private const string ApplyPrefabButtonLabel = "Apply to Prefab";
 
         public override void Initialize(GameEditor editor)
         {
@@ -58,6 +61,7 @@ namespace Unify2D.Toolbox
 
             _asset = null;
             _gameObject = null;
+            _currentPrefabAsset = null;
 
             if (obj is GameObject)
                 _gameObject = obj as GameObject;
@@ -134,6 +138,10 @@ namespace Unify2D.Toolbox
 
                 _currentPrefabAsset = prefabAsset;
             }
+            else
+            {
+                _currentPrefabAsset = null;
+            }
         }
 
         private void ShowGameObject()
@@ -141,12 +149,22 @@ namespace Unify2D.Toolbox
             if (_currentPrefabAsset != null)
             {
                 // Add a button to save the prefab
-                if (ImGui.Button("Save Prefab"))
+                if (ImGui.Button(SavePrefabButtonLabel))
                 {
                     _currentPrefabAsset.SavePrefab(_gameObject);
+                    
+                    Debug.Log($"Prefab {_gameObject.Name} saved!");
+                    Console.WriteLine($"Prefab {_gameObject.Name} saved!");
                 }
 
                 ImGui.Separator();
+            }
+            else if (_gameObject.Tag is PrefabAssetContent)
+            {
+                if (ImGui.Button(ApplyPrefabButtonLabel))
+                {
+                    SavePrefabFromHierarchy(_gameObject);
+                }
             }
 
             string name = _gameObject.Name;
@@ -287,12 +305,18 @@ namespace Unify2D.Toolbox
             return null;
         }
 
-
-        public void Save(GameObject gameObject)
+        private void SavePrefabFromHierarchy(GameObject gameObject)
         {
-            // Serialize the gameObject and save it as a prefab
-            string json = JsonConvert.SerializeObject(gameObject, Formatting.Indented);
-            // File.WriteAllText(Asset.FullPath, json);
+            if (gameObject.Tag is PrefabAssetContent prefabAssetContent)
+            {
+                if (prefabAssetContent != null)
+                {
+                    prefabAssetContent.SavePrefab(gameObject);
+                }                
+
+                Debug.Log($"Prefab {_gameObject.Name} saved from hierarchy!");
+                Console.WriteLine($"Prefab {gameObject.Name} saved from hierarchy!");
+            }
         }
     }
 

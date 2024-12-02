@@ -55,7 +55,7 @@ namespace Unify2D
 
         private List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
 
-        public Scene(string path, bool save = false)
+        public Scene(string path, bool save = true)
         {
             SaveSceneNameAndPath(System.IO.Path.GetFileName(path), path);
             if (save == true)

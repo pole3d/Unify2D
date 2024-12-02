@@ -94,7 +94,7 @@ namespace Unify2D.Toolbox
         internal override void Reset()
         {
             _assets.Clear();
-            _selectedAssets.Clear();
+            DeselectedAssets();
             _path = _editor.AssetsPath;
 
             if (String.IsNullOrEmpty(_path))
@@ -181,6 +181,8 @@ namespace Unify2D.Toolbox
 
             if (ImGui.BeginPopupContextWindow())
             {
+                DeselectedAssets();
+                
                 if (ImGui.Button(CreateNewScriptButtonLabel))
                 {
                     ImGui.CloseCurrentPopup();
@@ -222,8 +224,17 @@ namespace Unify2D.Toolbox
                 if (Selection.Selected == node)
                     base_flags |= ImGuiTreeNodeFlags.Selected;
 
-                ImGui.TreeNodeEx($"{node.Name}##{node.GetHashCode()}", base_flags);
-
+                if (node.AssetContent is PrefabAssetContent)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(0.0f, 1.0f, 1.0f, 1.0f)); // Blue color for prefabs
+                    ImGui.TreeNodeEx($"{node.Name}##{node.GetHashCode()}", base_flags);
+                    ImGui.PopStyleColor();
+                }
+                else
+                {
+                    ImGui.TreeNodeEx($"{node.Name}##{node.GetHashCode()}", base_flags);
+                }
+                
                 SetNode(node);
             }
             else
@@ -266,7 +277,7 @@ namespace Unify2D.Toolbox
                 // Clear selection when CTRL is not held
                 if (!ImGui.GetIO().KeyCtrl)
                 {
-                    _selectedAssets.Clear();
+                    DeselectedAssets();
                 }
                 SelectAsset(node);
             }
@@ -289,7 +300,7 @@ namespace Unify2D.Toolbox
             {
                 if (!ImGui.GetIO().KeyCtrl)
                 {
-                    _selectedAssets.Clear();
+                    DeselectedAssets();
                 }
                 SelectAsset(asset);
             }
@@ -303,18 +314,27 @@ namespace Unify2D.Toolbox
                 {
                     foreach (var selectedAsset in _selectedAssets)
                     {
-                        var prefabContent = selectedAsset.AssetContent as PrefabAssetContent;
+                        PrefabAssetContent prefabContent = selectedAsset.AssetContent as PrefabAssetContent;
                         prefabContent.Load();
-                        SceneManager.Instance.CurrentScene.AddRootGameObject(prefabContent.InstantiatedGameObject);
+                        
+                        // Old way of instantiating prefabs
+                        // SceneManager.Instance.CurrentScene.AddRootGameObject(prefabContent.InstantiatedGameObject);
+                        
+                        var newGameObject = prefabContent.InstantiatedGameObject.DeepCopy();
+                        newGameObject.Tag = prefabContent;
+                        prefabContent.AddGoInstantiated(newGameObject);
+                        
+                        SceneManager.Instance.CurrentScene.AddRootGameObject(newGameObject);
                     }
                     ImGui.CloseCurrentPopup();
                     
-                    Reset();
+                    DeselectedAssets();
                 }
             }
 
             if (_selectedAssets.Count == 1)
             {
+                // TODO: Improve the system because not really open 
                 if (ImGui.Button(OpenPrefabButtonLabel))
                 {
                     var prefabContent = asset.AssetContent as PrefabAssetContent;
@@ -476,6 +496,12 @@ namespace Unify2D.Toolbox
             Selection.SelectObject(asset);
             _selectedAssets.Add(asset);
         }
+        
+        private void DeselectedAssets()
+        {
+            Selection.UnSelectObject();
+            _selectedAssets.Clear();
+        }
 
         private void DeleteSelectedAssets()
         {
@@ -514,6 +540,21 @@ namespace Unify2D.Toolbox
                 Directory.CreateDirectory(fullPath);
 
             System.Diagnostics.Process.Start("explorer.exe", fullPath);
+        }
+
+        // After a Reset or loading scene, we need to link the instantiated game objects to their respective prefabs
+        private void LinkInstantiatedObjectsToPrefabs()
+        {
+            foreach (var go in SceneManager.Instance.CurrentScene.GameObjects)
+            {
+                if (go.Tag is PrefabAssetContent myPrefabContent)
+                {
+                    if(_assets.Contains(go.Tag))
+                    {
+                        myPrefabContent.AddGoInstantiated(go);
+                    }
+                }
+            }
         }
     }
 }
