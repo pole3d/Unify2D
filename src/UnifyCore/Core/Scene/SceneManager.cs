@@ -100,7 +100,7 @@ namespace UnifyCore
 
             File.WriteAllText(scene.Path, sceneContent);
         }
-        public void CreateNewScene(string path, string sceneFolder)
+        public void CreateNewScene(string path, string sceneFolder = "")
         {
             _currentProjectPath = path;
             _sceneFolder = sceneFolder;
@@ -155,7 +155,7 @@ namespace UnifyCore
         }
 
         private const string AssetsPath = "Assets";
-        const string JsonFolderSceneName = "SceneJson.json";
+        const string JsonFolderSceneName = "SceneJson.scene";
 
         public void SaveAllSceneToJson()
         {

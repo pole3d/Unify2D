@@ -20,7 +20,7 @@ namespace UnifyGame
     /// </summary>
     public class UnifyGame : Game
     {
-        const string JsonFolderSceneName = "\\SceneJson.json";
+        const string JsonFolderSceneName = "\\SceneJson.scene";
 
         private GraphicsDeviceManager _graphics;
         private Unify2D.ImGuiRenderer.Renderer _imGuiRenderer;
