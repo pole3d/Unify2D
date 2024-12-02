@@ -14,6 +14,7 @@ namespace Unify2D.Toolbox
         GameEditor _editor;
         string _newProjectPath = String.Empty;
         string _newProjectName = "NEW_PROJECT";
+
         protected override void DrawInternal(GameEditor editor)
         {
             _editor = editor;
@@ -57,7 +58,7 @@ namespace Unify2D.Toolbox
         {
             Directory.CreateDirectory(_newProjectPath);
             Directory.CreateDirectory(Path.Combine(_newProjectPath, GameEditor.AssetsFolder));
-            Directory.CreateDirectory(_newProjectPath + "\\" + GameEditor.ScenesFolder);
+
         }
 
         private void DrawExistingProject(GameEditor editor)
@@ -119,7 +120,6 @@ namespace Unify2D.Toolbox
             //_editor.SceneEditorManager.LoadScene();
 
             _editor.HidePopup();
-
         }
 
 

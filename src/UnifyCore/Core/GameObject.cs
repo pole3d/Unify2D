@@ -191,6 +191,14 @@ namespace Unify2D.Core
             {
                 scene.CanvasList.Add(canvas);
             }
+            else if (component is EventSystem eventSystem)
+            {
+                if (scene.EventSystem != null)
+                {
+                    return;
+                } 
+                scene.AddEventSystem(eventSystem);
+            }
             else if (component is UIComponent)
             {
                 bool hasCanvas = scene.HasCanvas(out Canvas gameCoreCanvas);

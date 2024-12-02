@@ -32,14 +32,14 @@ namespace Unify2D.Core
         public GraphicsDevice GraphicsDevice { get; private set; }
         public SpriteBatch SpriteBatch { get; private set; }
         public List<GameObject> GameObjects => SceneManager.Instance.CurrentScene.GameObjects;
-
+        
         public PhysicsSettings PhysicsSettings { get; private set; }
         public float DeltaTime { get; private set; }
 
         static GameCore s_current;
-
+        
         private Game _game;
-
+        
         public GameCore(Game game)
         {
             _game = game;
@@ -51,12 +51,12 @@ namespace Unify2D.Core
 
             PhysicsSettings.Init();
         }
-
+        
         public void BeginDraw()
         {
             BeginDraw(Matrix.Identity);
         }
-
+        
         public void BeginDraw(Matrix matrix)
         {
             SpriteBatch.Begin(SpriteSortMode.Deferred,
@@ -67,16 +67,13 @@ namespace Unify2D.Core
                         null,
                         matrix);
         }
-
+        
         public void DrawGizmo()
         {
             Gizmo.SetColor(Color.White);
-            if (SceneManager.Instance.CurrentScene != null)
+            foreach (var item in SceneManager.Instance.CurrentScene.GameObjects)
             {
-                foreach (var item in SceneManager.Instance.CurrentScene.GameObjects)
-                {
-                    item.DrawGizmo();
-                }
+                item.DrawGizmo();
             }
         }
         public void EndDraw()
@@ -87,7 +84,7 @@ namespace Unify2D.Core
         public void Initialize(GraphicsDevice graphicsDevice)
         {
             GraphicsDevice = graphicsDevice;
-
+            
             SpriteBatch = new SpriteBatch(graphicsDevice);
 
             InitPhysics();

@@ -24,7 +24,7 @@ namespace Unify2D.Toolbox
         private const string GameObjectNamePrefix = "GameObject_";
         private const string GameObjectListChildLabel = "gameObjectList";
 
-
+        
         public void SetCore(GameCoreViewer coreViewer)
         {
             _tag = coreViewer;
@@ -66,18 +66,15 @@ namespace Unify2D.Toolbox
             }
 
             // First way to Display GameObjects to the hierarchy -> Don't allow to D&D
-            if (SceneManager.Instance.CurrentScene != null)
+            foreach (GameObject gameObject in SceneManager.Instance.CurrentScene.GameObjects)
             {
-                foreach (GameObject gameObject in SceneManager.Instance.CurrentScene.GameObjects)
-                {
-                    if (gameObject.Parent != null)
-                        continue;
-
-                    DrawNode(gameObject);
-                }
+                if (gameObject.Parent != null)
+                    continue;
+            
+                DrawNode(gameObject);
             }
 
-            if (_isAnyWidgetHovered == false && ImGui.IsMouseReleased(ImGuiMouseButton.Left)
+            if (_isAnyWidgetHovered == false && ImGui.IsMouseReleased(ImGuiMouseButton.Left) 
                 && ImGui.IsWindowFocused())
             {
                 Selection.UnSelectObject();
@@ -88,7 +85,7 @@ namespace Unify2D.Toolbox
 
             ImGui.End();
 
-            if (_goToDestroy != null && SceneManager.Instance.CurrentScene != null)
+            if (_goToDestroy != null)
             {
                 SceneManager.Instance.CurrentScene.DestroyImmediate(_goToDestroy);
                 Selection.UnSelectObject();
@@ -159,7 +156,7 @@ namespace Unify2D.Toolbox
 
             ImGui.PopID();
         }
-
+        
         void ShowContextMenu(GameObject go)
         {
             if (ImGui.BeginPopupContextItem())

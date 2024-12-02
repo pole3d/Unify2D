@@ -1,5 +1,4 @@
-﻿using Genbox.VelcroPhysics.Tools.PathGenerator;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
@@ -29,10 +28,12 @@ namespace Unify2D
 
         private bool _isLoaded = false;
 
-        private bool _isDirty = false;
 
         public List<Canvas> CanvasList => _canvasList;
         private List<Canvas> _canvasList = new List<Canvas>();
+
+        public EventSystem EventSystem => _eventSystem;
+        private EventSystem _eventSystem;
 
         public IEnumerable<GameObject> GameObjectsWithChildren
         {
@@ -88,6 +89,7 @@ namespace Unify2D
         public void Init()
         {
             GameCore.Current.InitPhysics();
+
             foreach (GameObject gameObject in GameObjects)
             {
                 gameObject.Init(GameCore.Current.Game);
@@ -179,6 +181,11 @@ namespace Unify2D
         {
             _isLoaded = false;
             GameObjects.Clear();
+        }
+
+        public void AddEventSystem(EventSystem eventSystem)
+        {
+            _eventSystem = eventSystem;
         }
     }
 

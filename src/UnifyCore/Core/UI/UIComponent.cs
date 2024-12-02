@@ -11,8 +11,8 @@ namespace Unify2D.Core
     public abstract class UIComponent : Component
     {
         [JsonIgnore]
-        public Canvas ParentCanvas { get; set; }
-        
+        public GameObject ParentCanvas { get; set; }
+
         public Vector2 Origin { get; set; }
 
         public enum AnchorType

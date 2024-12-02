@@ -1,8 +1,11 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
-using Unify2D.Assets;
+using System.Text;
+using System.Threading.Tasks;
 using Unify2D.Core;
 using Unify2D.Core.Graphics;
 
@@ -28,10 +31,10 @@ namespace Unify2D.Toolbox
             }
 
             if (name != "none")
-            {
-                bool getAsset = GameEditor.Instance.AssetsToolBox.TryGetAssetFromPath(name, out Asset asset);
+            { 
+                var asset = GameEditor.Instance.AssetsToolBox.GetAssetFromPath(name);
 
-                if (getAsset && (value == null || asset != value.Asset))
+                if (asset != null && (value == null || asset != value.Asset))
                 {
                     if (instance is SpriteRenderer spriteRenderer)
                     {
