@@ -119,8 +119,9 @@ namespace Unify2D.Toolbox
             string relativeDirectory = directory.Replace(_path, string.Empty);
             
             string directoryName = GetDirectoryNameSafe(relativeDirectory);
+            string path = relativeDirectory.Replace(directoryName, "");
 
-            Asset newAsset = new Asset(directoryName, directoryName, true);
+            Asset newAsset = new Asset(directoryName, path, true);
 
             _assets.Add(newAsset);
 
@@ -534,7 +535,7 @@ namespace Unify2D.Toolbox
                             File.Delete(file);
                     }
 
-                    Directory.Delete(path);
+                    Directory.Delete(path,true);
                 }
                 else
                     File.Delete(path);

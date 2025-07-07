@@ -55,6 +55,9 @@ namespace UnifyCore
             try
             {
                 string pathJson = System.IO.Path.Combine(_currentProjectPath, JsonFolderSceneName);
+
+                bool sceneLoaded = false;
+
                 if (File.Exists(pathJson))
                 {
                     SceneInfo deserializedJsonScene = System.Text.Json.JsonSerializer.Deserialize<SceneInfo>(File.ReadAllText(pathJson));
@@ -62,24 +65,20 @@ namespace UnifyCore
                     SceneInfo sceneInfo = deserializedJsonScene;
 
                     if (sceneInfo != null && File.Exists(sceneInfo.Path))
-                        LoadSceneWithPath(sceneInfo.Path);
-                    else
                     {
-                        if (GameSettings.Instance.ScenesSave.Count > 0)
-                            LoadSceneWithPath(GameSettings.Instance.ScenesSave[0].Path);
-                        else
-                            CreateNewScene(path, sceneFolder);
+                        sceneLoaded = true;
+                        LoadSceneWithPath(sceneInfo.Path);
                     }
                 }
-                else
+
+                if ( sceneLoaded == false)
                 {
                     if (GameSettings.Instance.ScenesSave.Count > 0)
                         LoadSceneWithPath(GameSettings.Instance.ScenesSave[0].Path);
                     else
                         CreateNewScene(path, sceneFolder);
-
-                    Console.WriteLine("Problem with your folder json, here your path : " + pathJson);
                 }
+
             }
             catch (Exception ex)
             {
@@ -111,17 +110,21 @@ namespace UnifyCore
             _currentProjectPath = path;
             _sceneFolder = sceneFolder;
 
+            const string defaultName = "SampleScene";
+            const string sceneExtension = ".scene";
+
+
             string currentPath = path + sceneFolder;
             int count = 0;
-            if (File.Exists(System.IO.Path.Combine(currentPath, "SampleScene.scene")))
+            if (File.Exists(System.IO.Path.Combine(GameCore.Current.Game.AssetsPath,$"{defaultName}{sceneExtension}")))
             {
-                while (File.Exists(System.IO.Path.Combine(currentPath, "SampleScene_" + count + ".scene")))
+                while (File.Exists(System.IO.Path.Combine(GameCore.Current.Game.AssetsPath, $"{defaultName}_" + count + $"{sceneExtension}")))
                     count++;
 
-                _currentScene = new Scene(System.IO.Path.Combine(currentPath, "SampleScene_" + count + ".scene"));
+                _currentScene = new Scene(System.IO.Path.Combine(GameCore.Current.Game.AssetsPath, $"{defaultName}_" + count + $"{sceneExtension}"));
             }
             else
-                _currentScene = new Scene(System.IO.Path.Combine(currentPath, "SampleScene.scene"));
+                _currentScene = new Scene(System.IO.Path.Combine(GameCore.Current.Game.AssetsPath, $"{defaultName}{sceneExtension}"));
 
             _currentScene.Init();
         }
