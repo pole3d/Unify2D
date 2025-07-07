@@ -95,5 +95,10 @@ namespace Unify2D.Assets
 
             throw new Exception($"No Asset found at path \"{path}\"");
         }
+
+        internal bool IsAssetExtension(string extension)
+        {
+            return _extensionToAssetType.ContainsKey(extension);
+        }
     }
 }

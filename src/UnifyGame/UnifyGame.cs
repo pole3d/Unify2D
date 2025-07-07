@@ -73,7 +73,7 @@ namespace UnifyGame
                     for (int i = 0; i < deserializedJsonScene.Count; i++)
                     {
                         SceneInfo sceneInfo = deserializedJsonScene[i];
-                        sceneInfo.Path = Path.Combine(currentPath, sceneInfo.Path);
+                        sceneInfo.Path = CombinePath(currentPath, sceneInfo.Path);
                         sceneInfo.BuildIndex = i;
                         GameSettings.Instance.AddSceneToList(sceneInfo);
                     }
@@ -141,6 +141,30 @@ namespace UnifyGame
             //  ImGui.ShowDemoWindow();
         }
 
+
+        public static string CombinePath(string a, string b)
+        {
+            if (string.IsNullOrEmpty(a))
+            {
+                if (string.IsNullOrEmpty(b))
+                    return string.Empty;
+
+                return b;
+            }
+            else if (string.IsNullOrEmpty(b))
+            {
+                return a;
+            }
+
+            a = a.TrimEnd('/', '\\');
+            b = b.TrimStart('/', '\\');
+
+            if (b.StartsWith("./"))
+                b = b.Substring(2, b.Length - 2);
+
+            return a + "\\" + b;
+
+        }
 
     }
 

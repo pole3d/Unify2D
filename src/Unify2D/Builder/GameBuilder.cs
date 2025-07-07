@@ -77,9 +77,6 @@ namespace Unify2D.Builder
             }
 
 
-           
-
-
             SaveAllScene();
 
             CreateDll();
@@ -100,7 +97,8 @@ namespace Unify2D.Builder
                     foreach (string item in Directory.GetFiles(_editor.AssetsPath, "*.scene", SearchOption.AllDirectories))
                     {
                         string name = item.Substring(item.LastIndexOf('\\') + 1);
-                        string path = item.Substring(item.IndexOf('\\') + 1);
+                        string path = item.Replace(_editor.ProjectPath, "");
+
                         SceneInfo scene = new SceneInfo(name, path);
                         listSceneToJson.Add(scene);
                     }

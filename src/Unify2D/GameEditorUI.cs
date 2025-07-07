@@ -43,7 +43,9 @@ namespace Unify2D
                         Process.Start("explorer.exe", _editor.Settings.Data.CurrentProjectPath);
                     }
                     if (ImGui.MenuItem("Build"))
-                        _editor.Build();
+                    {
+                        Build();
+                    }
                     if (ImGui.MenuItem("Create scene"))
                     {
                         // _editor.SceneEditorManager.SaveCurrentScene();
@@ -69,7 +71,7 @@ namespace Unify2D
 
                 if (ImGui.MenuItem("Play"))
                 {
-                    _editor.Build();
+                    Build();
                 }
 
                 ImGui.EndMainMenuBar();
@@ -77,6 +79,13 @@ namespace Unify2D
                 ImGui.ShowDemoWindow();
 
             }
+        }
+
+        private void Build()
+        {
+            SaveCurrentScene();
+
+            _editor.Build();
         }
 
         private void LoadScene()
@@ -113,8 +122,6 @@ namespace Unify2D
         private void SaveCurrentScene()
         {
             Scene scene = SceneManager.Instance.CurrentScene;
-
-
 
             if (scene.SceneInfo == null)
             {
