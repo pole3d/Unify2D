@@ -344,10 +344,11 @@ namespace Unify2D.Toolbox
 
             if (_selectedAssets.Count == 1)
             {
+                var prefabContent = asset.AssetContent as PrefabAssetContent;
+
                 // TODO: Improve the system because not really open 
-                if (ImGui.Button(OpenPrefabButtonLabel))
+                if (prefabContent != null && ImGui.Button(OpenPrefabButtonLabel))
                 {
-                    var prefabContent = asset.AssetContent as PrefabAssetContent;
                     GameEditor.Instance.OpenPrefab(prefabContent);
 
                     if (prefabContent.IsLoaded == false)
