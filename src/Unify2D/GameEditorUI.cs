@@ -109,7 +109,7 @@ namespace Unify2D
                 if (result == NfdStatus.Ok)
                 {
                     Scene scene = new Scene(path);
-                    scene.SaveSceneNameAndPath(Path.GetFileName(path), path);
+                    scene.SetSceneInfo(Path.GetFileName(path), path);
                     SceneManager.Instance.LoadSceneWithPath(path);
                 }
             }
@@ -129,7 +129,7 @@ namespace Unify2D
                 NfdStatus result = Nfd.SaveDialog(out path, new Dictionary<string, string>() { { "New Scene", "scene" } }, "New Scene", Path.GetFullPath("./Assets").ToString());
                 if (result == NfdStatus.Ok)
                 {
-                    scene.SaveSceneNameAndPath(Path.GetFileName(path), path);
+                    scene.SetSceneInfo(Path.GetFileName(path), path);
                 }
             }
 

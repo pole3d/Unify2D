@@ -1,25 +1,18 @@
-﻿using Genbox.VelcroPhysics.Tools.PathGenerator;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using Unify2D.Core;
 using Unify2D.Physics;
 using UnifyCore;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace Unify2D
 {
     public class Scene
     {
-        private SceneInfo _sceneInfo;
         public SceneInfo SceneInfo => _sceneInfo;
+
 
         public string Name => _sceneInfo.Name;
         public string Path => _sceneInfo.Path;
@@ -27,6 +20,8 @@ namespace Unify2D
         public int BuildIndex { get; private set; }
         public List<GameObject> GameObjects { get; private set; } = new List<GameObject>();
 
+
+        private SceneInfo _sceneInfo;
         private bool _isLoaded = false;
 
         private bool _isDirty = false;
@@ -55,11 +50,11 @@ namespace Unify2D
 
         private List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
 
-        public Scene(string path, bool save = true)
+        public Scene(string path)
         {
-            SaveSceneNameAndPath(System.IO.Path.GetFileName(path), path);
-            if (save == true)
-                SceneManager.Instance.Save(this);
+            SetSceneInfo(System.IO.Path.GetFileName(path), path);
+            //if (save == true)
+            //    SceneManager.Instance.Save(this);
 
             try
             {
@@ -75,7 +70,7 @@ namespace Unify2D
             }
         }
 
-        public void SaveSceneNameAndPath(string name, string path)
+        public void SetSceneInfo(string name, string path)
         {
             if (_sceneInfo == null)
                 _sceneInfo = new SceneInfo(name, path);

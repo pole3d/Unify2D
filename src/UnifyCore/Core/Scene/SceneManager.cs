@@ -144,7 +144,7 @@ namespace UnifyCore
         {
             ClearScene();
 
-            _currentScene = new Scene(scenePath,false);
+            _currentScene = new Scene(scenePath);
             _currentScene.Init();
         }
         public void LoadScene(int sceneBuildIndex)
@@ -215,7 +215,7 @@ namespace UnifyCore
         /// <summary>
         public Scene GetSceneAt(int index)
         {
-            return new Scene(GameSettings.Instance.ScenesSave[index].Path,false);
+            return new Scene(GameSettings.Instance.ScenesSave[index].Path);
         }
 
         /// </summary>
@@ -224,7 +224,7 @@ namespace UnifyCore
         /// </summary>
         public Scene GetSceneByBuildIndex(int buildIndex)
         {
-            return new Scene(GameSettings.Instance.ScenesSave[buildIndex].Path, false);
+            return new Scene(GameSettings.Instance.ScenesSave[buildIndex].Path);
         }
 
         /// <summary>
@@ -236,7 +236,7 @@ namespace UnifyCore
             {
                 if (scene.Name != name)
                     continue;
-                return new Scene(scene.Path, false);
+                return new Scene(scene.Path);
             }
             Debug.Log("No scene with the name : " + name);
             return null;
@@ -245,7 +245,7 @@ namespace UnifyCore
 
         public Scene GetSceneByPath(string scenePath)
         {
-            return new Scene(scenePath,false);
+            return new Scene(scenePath);
         }
 
 

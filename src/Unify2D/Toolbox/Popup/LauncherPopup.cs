@@ -116,10 +116,7 @@ namespace Unify2D.Toolbox
 
         void LoadProject()
         {
-            //_editor.SceneEditorManager.LoadScene();
-
-            _editor.HidePopup();
-
+            _editor.ProjectLoaded();
         }
 
 
