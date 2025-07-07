@@ -40,7 +40,7 @@ namespace Unify2D
         public string ProjectPath => _settings.Data.CurrentProjectPath;
 
         public override string AssetsPath => !string.IsNullOrEmpty(ProjectPath)
-            ? ToolsEditor.CombinePath(ProjectPath, AssetsFolder)
+            ? CoreTools.CombinePath(ProjectPath, AssetsFolder)
             : string.Empty;
 
         public GameEditorSettings Settings => _settings;

@@ -172,7 +172,6 @@ namespace UnifyCore
 
                     string json = System.Text.Json.JsonSerializer.Serialize(currentSceneToJson);
                     string pathJson = System.IO.Path.Combine(_currentProjectPath, JsonFolderSceneName);
-                    Console.WriteLine("path json : " + pathJson);
 
                     // TODO WTF
                     if (File.Exists(pathJson))

@@ -13,7 +13,7 @@ namespace Unify2D.Assets
     internal class ScriptAssetContent : AssetContent
     {
         public string Content = String.Empty;
-        public string Path => Tools.ToolsEditor.CombinePath(GameEditor.Instance.AssetsPath, _asset.FullPath);
+        public string Path => CoreTools.CombinePath(GameEditor.Instance.AssetsPath, _asset.FullPath);
         public ScriptAssetContent(Asset asset) : base(asset) { }
 
         public override void Load()
@@ -47,7 +47,7 @@ namespace Unify2D.Assets
         }
         internal void Save()
         {
-            string path = ToolsEditor.CombinePath(GameEditor.Instance.AssetsPath, _asset.FullPath);
+            string path = CoreTools.CombinePath(GameEditor.Instance.AssetsPath, _asset.FullPath);
             File.WriteAllText(path, Content);
         }
     }

@@ -4,14 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Unify2D.Tools
+namespace Unify2D
 {
+
     /// <summary>
-    /// The <see cref="ToolsEditor"/> class is a base class that represents
-    /// an In-Editor Tool. This class serves as a foundation
-    /// for creating specialized <see cref="Tools"/> with shared functionality.
+    /// Tools used in both editor and game
     /// </summary>
-    internal class ToolsEditor
+    public class CoreTools
     {
         public static string CombinePath(string a, string b)
         {

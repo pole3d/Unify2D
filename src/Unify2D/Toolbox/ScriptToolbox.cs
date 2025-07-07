@@ -22,7 +22,7 @@ namespace Unify2D.Toolbox
         const string ProjectFile = "GameAssembly.csproj";
         const string TemplateProjectDirectory = "GameAssemblyProject";
 
-        string TemplateProjectPathFull => ToolsEditor.CombinePath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), TemplateProjectDirectory);
+        string TemplateProjectPathFull => CoreTools.CombinePath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), TemplateProjectDirectory);
 
         Asset _asset;
         FileSystemWatcher _watcher;
@@ -81,12 +81,12 @@ namespace Unify2D.Toolbox
                 foreach (var file in Directory.GetFiles(TemplateProjectPathFull))
                 {
                     string fileName = Path.GetFileName(file);
-                    string newPath = ToolsEditor.CombinePath(_editor.AssetsPath, fileName);
+                    string newPath = CoreTools.CombinePath(_editor.AssetsPath, fileName);
                     File.Copy(file, newPath, true);
                 }
 
 
-                ProcessStartInfo process = new ProcessStartInfo(Tools.ToolsEditor.CombinePath(_editor.AssetsPath, ProjectFile));
+                ProcessStartInfo process = new ProcessStartInfo(CoreTools.CombinePath(_editor.AssetsPath, ProjectFile));
                 process.WorkingDirectory = _editor.AssetsPath;
                 process.UseShellExecute = true;
                 // process.Arguments = $"/edit {_asset.FullPath}"; // Doesn't work

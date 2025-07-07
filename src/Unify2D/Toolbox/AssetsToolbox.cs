@@ -440,9 +440,9 @@ namespace Unify2D.Toolbox
                 {
                     int sourceIndex = *(int*)payload.Data;
                     Asset movingAsset = _assets[sourceIndex];
-                    string oldPath = ToolsEditor.CombinePath(_path, movingAsset.FullPath);
-                    string combinePath = ToolsEditor.CombinePath(_path, asset.FullPath);
-                    string newPath = ToolsEditor.CombinePath(combinePath, movingAsset.Name) + movingAsset.Extension;
+                    string oldPath = CoreTools.CombinePath(_path, movingAsset.FullPath);
+                    string combinePath = CoreTools.CombinePath(_path, asset.FullPath);
+                    string newPath = CoreTools.CombinePath(combinePath, movingAsset.Name) + movingAsset.Extension;
 
                     if (Path.Exists(newPath))
                         return;
@@ -520,7 +520,7 @@ namespace Unify2D.Toolbox
 
         private void DeleteAsset(string fullPath)
         {
-            string path = ToolsEditor.CombinePath(_path, fullPath);
+            string path = CoreTools.CombinePath(_path, fullPath);
 
             if (TryGetAssetFromPath(fullPath, out Asset asset))
             {

@@ -40,7 +40,7 @@ namespace Unify2D.Assets
             // Create the asset content depending on the extension. Example .jpg and .png will create a TextureAssetContent, .cs will create a ScriptAssetContent...
             AssetContent = (AssetContent)Activator.CreateInstance(GameEditor.Instance.AssetManager.ExtensionToAssetType[extension], this);
 
-            _fullPath = ToolsEditor.CombinePath(path, name + extension);
+            _fullPath = CoreTools.CombinePath(path, name + extension);
         }
 
         public Asset(string name, string path, bool isDirectory = false)
@@ -49,7 +49,7 @@ namespace Unify2D.Assets
             _path = path;
             _isDirectory = isDirectory;
             
-            _fullPath = ToolsEditor.CombinePath(path, name);
+            _fullPath = CoreTools.CombinePath(path, name);
         }
         
         public void AddChild(Asset child)
@@ -70,7 +70,7 @@ namespace Unify2D.Assets
         public void SetPath(string path)
         {
             _path = path;
-            _fullPath = ToolsEditor.CombinePath(path, _name + _extension);
+            _fullPath = CoreTools.CombinePath(path, _name + _extension);
         }
 
         public void SetMegaPath(string megaPath)
