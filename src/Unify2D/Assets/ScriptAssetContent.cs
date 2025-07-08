@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Unify2D.Core;
-using Unify2D.Tools;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Unify2D.Assets
 {

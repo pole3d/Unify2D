@@ -1,18 +1,11 @@
 ﻿using ImGuiNET;
 using NativeFileDialogs.Net;
-using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Runtime;
-using System.Text;
-using System.Threading.Tasks;
 using Unify2D.Toolbox;
 using Unify2D.Toolbox.Popup;
 using UnifyCore;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace Unify2D
 {

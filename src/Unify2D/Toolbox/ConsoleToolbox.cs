@@ -1,17 +1,5 @@
 ﻿using ImGuiNET;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Unify2D.Assets;
-using Unify2D.Core.Graphics;
-using Unify2D.Core;
-using Unify2D.Tools;
-using Microsoft.Xna.Framework;
 
 using Num = System.Numerics;
 

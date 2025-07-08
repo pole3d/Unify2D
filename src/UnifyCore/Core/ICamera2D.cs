@@ -1,11 +1,4 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Num = System.Numerics;
+﻿using Microsoft.Xna.Framework;
 
 namespace Unify2D.Core
 {

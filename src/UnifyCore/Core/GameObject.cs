@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 using Unify2D.Core.Graphics;
 using UnifyCore;
 

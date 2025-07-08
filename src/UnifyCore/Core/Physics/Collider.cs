@@ -1,9 +1,7 @@
 ﻿using Genbox.VelcroPhysics.Dynamics;
-using Genbox.VelcroPhysics.Factories;
 using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 using Unify2D.Core;
-using Unify2D.Physics;
 
 namespace UnifyCore.Core.Physics
 {

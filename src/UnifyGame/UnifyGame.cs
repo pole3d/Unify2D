@@ -1,8 +1,6 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,7 +9,6 @@ using Unify2D.Builder;
 using Unify2D.Core;
 using Unify2D.Core.Graphics;
 using UnifyCore;
-using Num = System.Numerics;
 
 namespace UnifyGame
 {

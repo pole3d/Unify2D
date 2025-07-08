@@ -8,12 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unify2D.Core;
-using Unify2D.Tools;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Unify2D.Assets;
 using UnifyCore;
 
 namespace Unify2D.Builder

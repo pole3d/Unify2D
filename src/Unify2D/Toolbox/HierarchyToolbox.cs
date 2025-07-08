@@ -1,10 +1,7 @@
 ﻿using ImGuiNET;
-using System;
 using System.Numerics;
-using System.Diagnostics;
 using Unify2D.Assets;
 using Unify2D.Core;
-using Unify2D.Tools;
 using UnifyCore;
 
 

@@ -1,16 +1,7 @@
 ﻿using ImGuiNET;
-using Microsoft.CodeAnalysis;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using Unify2D.Core;
-using Unify2D.Core.Graphics;
-using Unify2D.ImGuiRenderer;
 using Num = System.Numerics;
 
 namespace Unify2D

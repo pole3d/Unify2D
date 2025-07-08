@@ -1,15 +1,8 @@
 ﻿using ImGuiNET;
-using Microsoft.CodeAnalysis;
-using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using Unify2D.Assets;
-using Unify2D.Core;
-using Unify2D.Tools;
 
 namespace Unify2D.Toolbox
 {

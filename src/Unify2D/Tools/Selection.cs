@@ -1,22 +1,9 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using Unify2D.Assets;
-using Unify2D.Builder;
 using Unify2D.Core;
-using Unify2D.Core.Graphics;
-using Unify2D.ImGuiRenderer;
-using Unify2D.Toolbox;
-using Unify2D.Toolbox.Popup;
-using Unify2D.Tools;
 using UnifyCore;
-using Num = System.Numerics;
 
 namespace Unify2D
 {

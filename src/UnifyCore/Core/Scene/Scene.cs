@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using Unify2D.Core;
 using Unify2D.Physics;
-using UnifyCore;
 
 namespace Unify2D
 {

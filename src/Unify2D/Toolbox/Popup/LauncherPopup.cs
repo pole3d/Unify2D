@@ -2,7 +2,6 @@
 using System;
 using System.IO;
 using Unify2D.Toolbox.Popup;
-using Unify2D.Tools;
 using UnifyCore;
 
 namespace Unify2D.Toolbox
