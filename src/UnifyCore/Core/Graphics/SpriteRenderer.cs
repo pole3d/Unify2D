@@ -28,16 +28,15 @@ namespace Unify2D.Core.Graphics
             _gameObject = go;
             try
             {
-                _texture = game.Content.Load<Texture2D>($"./Assets/{path}");
+                _texture = GameCore.Current.ResourcesManager.GetTexture(path);
+
                 _asset = new GameAsset(_texture, path);
                 _gameObject.BoundingSize = new Vector2(_texture.Width, _texture.Height);
             }
             catch (Exception e)
             {
-
-                Console.WriteLine(e.ToString());
+                Debug.Log(e.ToString());
             }
-
         }
 
         internal override void Destroy()

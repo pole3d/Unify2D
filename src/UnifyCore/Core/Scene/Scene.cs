@@ -183,8 +183,6 @@ namespace Unify2D
 
         public void UpdateCanvasList()
         {
-            Debug.Log("update canvas list");
-        
             CanvasList.Clear();
 
             foreach (GameObject go in GameObjects)

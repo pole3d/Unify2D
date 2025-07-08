@@ -32,6 +32,7 @@ namespace Unify2D.Core
 
         public GraphicsDevice GraphicsDevice { get; private set; }
         public SpriteBatch SpriteBatch { get; private set; }
+        public ResourcesManager ResourcesManager { get; private set; }
         public List<GameObject> GameObjects => SceneManager.Instance.CurrentScene.GameObjects;
 
         public PhysicsSettings PhysicsSettings { get; private set; }
@@ -44,6 +45,16 @@ namespace Unify2D.Core
         public GameCore(Game game)
         {
             _game = game;
+        }
+
+        public void Initialize(GraphicsDevice graphicsDevice)
+        {
+            GraphicsDevice = graphicsDevice;
+
+            SpriteBatch = new SpriteBatch(graphicsDevice);
+            ResourcesManager = new ResourcesManager();
+
+            InitPhysics();
         }
 
         public void InitPhysics()
@@ -87,13 +98,6 @@ namespace Unify2D.Core
             TweenManager.Instance.Update(DeltaTime);
         }
 
-        public void Initialize(GraphicsDevice graphicsDevice)
-        {
-            GraphicsDevice = graphicsDevice;
 
-            SpriteBatch = new SpriteBatch(graphicsDevice);
-
-            InitPhysics();
-        }
     }
 }

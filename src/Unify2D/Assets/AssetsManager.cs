@@ -1,15 +1,18 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Unify2D.Core;
 
 namespace Unify2D.Assets
 {
     public class AssetManager
     {
         internal Dictionary<string, Type> ExtensionToAssetType => _extensionToAssetType;
-        internal List<Asset> Assets => _assets;
         internal int NbOfFiles => _nbOfFiles;
+
+
         
         private GameEditor _editor;
         
@@ -25,10 +28,9 @@ namespace Unify2D.Assets
             { typeof(TextureAssetContent), new List<string> { ".png", ".jpg" } }
         };
         
-        private List<Asset> _assets = new List<Asset>();
+      //  private Dictionary<string,Asset> _assets = new Dictionary<string, Asset>();
         private int _nbOfFiles;
 
-        
         internal AssetManager(GameEditor editor)
         {
             _editor = editor;
@@ -81,22 +83,33 @@ namespace Unify2D.Assets
             return asset;
         }
 
-        internal Asset Find(string path, bool isFullPath = false)
-        {
-            if (isFullPath == false)
-                path = Path.Combine(_editor.AssetsPath, path);
-            foreach (Asset asset in Assets)
-            {
-                if (asset.FullPath == path)
-                    return asset;
-            }
+        //internal Asset Find(string path, bool isFullPath = false)
+        //{
+        //    if (isFullPath == false)
+        //        path = Path.Combine(_editor.AssetsPath, path);
+        //    foreach (Asset asset in _assets)
+        //    {
+        //        if (asset.FullPath == path)
+        //            return asset;
+        //    }
 
-            throw new Exception($"No Asset found at path \"{path}\"");
-        }
+        //    throw new Exception($"No Asset found at path \"{path}\"");
+        //}
 
         internal bool IsAssetExtension(string extension)
         {
             return _extensionToAssetType.ContainsKey(extension);
         }
+
+        //internal Asset GetTextureAsset( string path , out Texture2D texture)
+        //{
+        //    texture = null;
+
+        //    if ( _assets.TryGetValue(path,out Asset asset) == false)
+        //    {
+
+        //    }
+
+        //}
     }
 }

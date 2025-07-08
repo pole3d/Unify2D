@@ -25,9 +25,11 @@ public class UIImage : UIComponent, IPointerEventReceiver
         }
         
         SpritePath = path;
-        using FileStream filestream = new FileStream(path, FileMode.Open);
-        Texture2D texture = Texture2D.FromStream(GameCore.Current.GraphicsDevice, filestream);
-        Sprite = texture;
+
+        //using FileStream filestream = new FileStream(path, FileMode.Open);
+        //Texture2D texture = Texture2D.FromStream(GameCore.Current.GraphicsDevice, filestream);
+
+        Sprite = GameCore.Current.ResourcesManager.GetTexture(path);
     }
     
     public override void Load(Game game, GameObject go)

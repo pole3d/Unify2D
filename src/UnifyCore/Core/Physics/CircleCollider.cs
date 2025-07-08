@@ -10,14 +10,12 @@ namespace UnifyCore.Core.Physics
 
     internal class CircleCollider: Component
     {
-        public float Radius{ get { return m_radius; } set { m_radius = value; } }
-        public Vector2 Offset { get { return m_offset; } set { m_offset = value; } }
+        public float Radius{ get { return _radius; } set { _radius = value; } }
+        public Vector2 Offset { get { return _offset; } set { _offset = value; } }
 
-        private Vector2 m_size, m_offset;
-
-        private Body staticBody;
-
-        private float m_radius = 1f;
+        private Vector2 _size, _offset;
+        private Body _body;
+        private float _radius = 1f;
 
         public override void Load(Game game, GameObject go)
         {
@@ -30,27 +28,18 @@ namespace UnifyCore.Core.Physics
                 if (_gameObject.Scale.X > size)
                     size = _gameObject.Scale.X;
 
-                staticBody = BodyFactory.CreateCircle(PhysicsSettings.World, m_radius * size, 1, _gameObject.Position + Offset, 0, BodyType.Static);
+                _body = BodyFactory.CreateCircle(PhysicsSettings.World, _radius * size, 1, _gameObject.Position + Offset, 0, BodyType.Static);
             }
         }
 
         public override void PhysicsUpdate(GameCore game)
         {
-            if (staticBody != null)
+            if (_body != null)
             {
-                staticBody.Position = _gameObject.Position / PhysicsSettings.UnitToPixelRatio;
-                staticBody.Rotation = _gameObject.Rotation;
+                _body.Position = _gameObject.Position / PhysicsSettings.UnitToPixelRatio;
+                _body.Rotation = _gameObject.Rotation;
             }
         }
-        /*
 
-        public override void DrawGizmoOnSelected(ImDrawListPtr drawList)
-        {
-            drawList.AddRect(new System.Numerics.Vector2(m_width, m_height), new System.Numerics.Vector2(m_width, m_height), ToColor32(Color.Green.R, Color.Green.G, Color.Green.B, Color.Green.A));
-        }
-
-        //REMOVE THIS SHIT
-        static uint ToColor32(byte r, byte g, byte b, byte a) { uint ret = a; ret <<= 8; ret += b; ret <<= 8; ret += g; ret <<= 8; ret += r; return ret; }
-        */
     }
 }

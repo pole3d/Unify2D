@@ -50,6 +50,7 @@ namespace Unify2D.Toolbox
             {
                 _watcher.Renamed -= OnRenamed;
                 _watcher.Deleted -= OnDeleted;
+                _watcher.Created -= OnCreated;
             }
 
             string path = Path.GetFullPath(_editor.AssetsPath);
@@ -66,7 +67,7 @@ namespace Unify2D.Toolbox
 
             _watcher.Renamed += OnRenamed;
             _watcher.Deleted += OnDeleted;
-            _watcher.Created += OnDeleted;
+            _watcher.Created += OnCreated;
 
             _watcher.IncludeSubdirectories = true;
             _watcher.EnableRaisingEvents = true;
@@ -178,6 +179,14 @@ namespace Unify2D.Toolbox
         private void OnDeleted(object sender, FileSystemEventArgs e)
         {
             if (e.ChangeType != WatcherChangeTypes.Deleted)
+                return;
+
+            Reset();
+        }
+
+        private void OnCreated(object sender, FileSystemEventArgs e)
+        {
+            if (e.ChangeType != WatcherChangeTypes.Created)
                 return;
 
             Reset();
