@@ -1,17 +1,13 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using Unify2D.Assets;
 using Unify2D.Builder;
 using Unify2D.Core;
 using Unify2D.Toolbox;
 using Unify2D.Toolbox.Popup;
-using Unify2D.Tools;
 using UnifyCore;
 
 namespace Unify2D
@@ -40,7 +36,7 @@ namespace Unify2D
         public string ProjectPath => _settings.Data.CurrentProjectPath;
 
         public override string AssetsPath => !string.IsNullOrEmpty(ProjectPath)
-            ? ToolsEditor.CombinePath(ProjectPath, AssetsFolder)
+            ? CoreTools.CombinePath(ProjectPath, AssetsFolder)
             : string.Empty;
 
         public GameEditorSettings Settings => _settings;
@@ -55,7 +51,7 @@ namespace Unify2D
         internal ScriptToolbox ScriptToolbox { get; private set; }
         internal GameToolbox GameToolbox { get; private set; }
         internal HierarchyToolbox HierarchyToolbox { get; private set; }
-        internal AssetsToolbox AssetsToolBox{ get; private set; }
+        internal AssetsToolbox AssetsToolBox { get; private set; }
         internal SpriteEditorToolbox SpriteEditorToolbox { get; private set; }
         internal AssetManager AssetManager { get; private set; }
 
@@ -99,7 +95,6 @@ namespace Unify2D
             _gameEditorUI = new GameEditorUI(this);
             _sceneEditorManager = SceneManager.Instance;
 
-
             Exiting += (object _, EventArgs _) => { _sceneEditorManager.SaveCurrentSceneToJson(); };
         }
 
@@ -109,16 +104,14 @@ namespace Unify2D
             _settings.Load(this);
 
             AssetManager = new AssetManager(this);
-            
+
             // Create game core and load scene content / Not useful for now
             _coreViewerScene = new GameCoreViewer(new GameCoreEditor(this), ".scene");
             _coreViewers.Add(_coreViewerScene);
-            
+
             // Set the current game core
             GameCore.SetCurrent(_coreViewerScene.GameCore);
-         //   _sceneEditorManager.Initialize();
 
-            
             Content.RootDirectory = ProjectPath;
 
             _scripting = new Scripting.Scripting();
@@ -134,7 +127,6 @@ namespace Unify2D
             _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 60;
             _graphics.ApplyChanges();
 
-            InitializeToolBoxes();
 
             ShowPopup(new LauncherPopup());
 
@@ -151,7 +143,7 @@ namespace Unify2D
             HierarchyToolbox.SetCore(_coreViewerScene);
             AssetsToolBox = new AssetsToolbox();
             SpriteEditorToolbox = new SpriteEditorToolbox();
-            
+
             _toolboxes.Add(AssetsToolBox);
             _toolboxes.Add(HierarchyToolbox);
             _toolboxes.Add(SpriteEditorToolbox);
@@ -260,8 +252,8 @@ namespace Unify2D
         {
             GameBuilder builder = new GameBuilder();
 
-            
-            if ( builder.Build(_coreViewerScene.GameCore, this))
+
+            if (builder.Build(_coreViewerScene.GameCore, this))
                 builder.StartBuild();
 
         }
@@ -277,7 +269,7 @@ namespace Unify2D
         {
             _unbindTargets.Add((sceneRenderTarget, renderTargetId));
         }
-        
+
 
         // Waiting to resolve operation
         internal void OpenPrefab(PrefabAssetContent content)
@@ -291,10 +283,10 @@ namespace Unify2D
             HierarchyToolbox.SetCore(prefabCoreViewer);
 
             GameCore.SetCurrent(prefabCoreViewer.GameCore);
-            
-            if(content.IsLoaded == false)
+
+            if (content.IsLoaded == false)
                 content.Load();
-            
+
             // GameObject.Instantiate(content.Asset.FullPath);
         }
 
@@ -309,6 +301,13 @@ namespace Unify2D
             if (HierarchyToolbox.Tag == gameCoreViewer)
                 HierarchyToolbox.SetCore(replaceCore);
             GameCore.SetCurrent(replaceCore.GameCore);
+        }
+
+        internal void ProjectLoaded()
+        {
+            InitializeToolBoxes();
+            HidePopup();
+
         }
     }
 }

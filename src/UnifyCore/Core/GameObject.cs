@@ -20,8 +20,6 @@ namespace Unify2D.Core
         public static ulong s_maxID = 0;
         public ulong UID { get; set; }
 
-
-
         public string Name { get; set; }
 
         public Vector2 Position
@@ -41,6 +39,9 @@ namespace Unify2D.Core
         public Vector2 BoundingSize { get; set; } = new Vector2(30, 30);
         public bool PositionUpdated { get { return m_positionUpdated; } }
         public bool RotationUpdated { get { return m_rotationUpdated; } }
+
+        [JsonIgnore]
+        public object Tag { get; set; }
         public List<GameObject> Children { get; set; }
         [JsonIgnore]
         public GameObject Parent { get; set; }
@@ -52,7 +53,6 @@ namespace Unify2D.Core
         private Vector2 m_position;
         private float m_rotation;
         private bool m_positionUpdated, m_rotationUpdated;
-
 
 
         [JsonIgnore]
@@ -167,6 +167,17 @@ namespace Unify2D.Core
             foreach (var item in _components)
             {
                 item.DrawGizmo();
+            }
+        }
+
+        public void ResetComponents()
+        {
+            var components = _components;
+            _components = new List<Component>();
+            
+            foreach (var item in components)
+            {
+                AddComponent(item);
             }
         }
 
@@ -369,5 +380,47 @@ namespace Unify2D.Core
                 Name = prefabInstance.Name; //Temporary, overridden name should be saved in the override list, instead of using PrefabInstance.Name.
             // apply overrides here
         }
+        
+        public void UpdateFromPrefab(GameObject updatedGameObject)
+        {
+            if (Tag != null)
+            {
+                // Apply overrides here
+                foreach (var property in typeof(GameObject).GetProperties())
+                {
+                    if (property.CanWrite)
+                    {
+                        property.SetValue(this, property.GetValue(updatedGameObject));
+                    }
+                }
+
+                foreach (var field in typeof(GameObject).GetFields(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance))
+                {
+                    field.SetValue(this, field.GetValue(updatedGameObject));
+                }
+            }
+        }
+    }
+    public static class GameObjectExtensions
+    {
+        public static GameObject DeepCopy(this GameObject original)
+        {
+            // Serialize the original object to JSON
+            string json = JsonConvert.SerializeObject(original, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
+
+            // Deserialize the JSON to a new object
+            GameObject copy = JsonConvert.DeserializeObject<GameObject>(json, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
+
+            return copy;
+        }
     }
 }
+

@@ -61,7 +61,7 @@ namespace Unify2D.Toolbox
                 {
                     GameEditor.Instance.CloseGameCore(coreViewer);
                 }
-            
+
                 ImGui.Separator();
             }
 
@@ -78,10 +78,11 @@ namespace Unify2D.Toolbox
             }
 
             if (_isAnyWidgetHovered == false && ImGui.IsMouseReleased(ImGuiMouseButton.Left)
-                && ImGui.IsWindowFocused())
+                                             && ImGui.IsWindowFocused())
             {
                 Selection.UnSelectObject();
             }
+
             ImGui.BeginChild(GameObjectListChildLabel);
 
             Selection.TryGameObject(out GameObject selectedGameObject);
@@ -94,10 +95,9 @@ namespace Unify2D.Toolbox
                 Selection.UnSelectObject();
                 _goToDestroy = null;
             }
-
         }
 
-        void DrawNode(GameObject go)
+        private void DrawNode(GameObject go)
         {
             ImGui.PushID((int)go.UID);
 
@@ -107,14 +107,25 @@ namespace Unify2D.Toolbox
             if (go.Children == null || go.Children.Count == 0)
             {
                 base_flags = ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.Leaf |
-                             ImGuiTreeNodeFlags.NoTreePushOnOpen; // ImGuiTreeNodeFlags_Bullet
+                             ImGuiTreeNodeFlags.NoTreePushOnOpen;
 
                 if (Selection.Selected == go)
                 {
                     base_flags |= ImGuiTreeNodeFlags.Selected;
                 }
 
-                ImGui.TreeNodeEx($"{go.Name}##{go.GetHashCode()}", base_flags);
+                // Add cyan color if prefab
+                if (go.Tag is PrefabAssetContent)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.0f, 1.0f, 1.0f, 1.0f)); // Cyan color for prefabs
+                    ImGui.TreeNodeEx($"{go.Name}##{go.GetHashCode()}", base_flags);
+                    ImGui.PopStyleColor();
+                }
+                else
+                {
+                    ImGui.TreeNodeEx($"{go.Name}##{go.GetHashCode()}", base_flags);
+                }
+
                 if (ImGui.IsItemClicked())
                 {
                     Selection.SelectObject(go);
@@ -132,7 +143,18 @@ namespace Unify2D.Toolbox
                     base_flags |= ImGuiTreeNodeFlags.Selected;
                 }
 
-                bool open = (ImGui.TreeNodeEx($"{go.Name}##{go.GetHashCode()}", base_flags));
+                bool open;
+                if (go.Tag is PrefabAssetContent)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.0f, 1.0f, 1.0f, 1.0f)); // Cyan color for prefabs
+                    open = ImGui.TreeNodeEx($"{go.Name}##{go.GetHashCode()}", base_flags);
+                    ImGui.PopStyleColor();
+                }
+                else
+                {
+                    open = ImGui.TreeNodeEx($"{go.Name}##{go.GetHashCode()}", base_flags);
+                }
+
                 if (ImGui.IsItemClicked())
                 {
                     Selection.SelectObject(go);
@@ -160,7 +182,7 @@ namespace Unify2D.Toolbox
             ImGui.PopID();
         }
 
-        void ShowContextMenu(GameObject go)
+        private void ShowContextMenu(GameObject go)
         {
             if (ImGui.BeginPopupContextItem())
             {
@@ -182,5 +204,7 @@ namespace Unify2D.Toolbox
                 ImGui.EndPopup();
             }
         }
+
+
     }
 }

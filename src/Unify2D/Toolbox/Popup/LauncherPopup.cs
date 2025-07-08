@@ -43,7 +43,7 @@ namespace Unify2D.Toolbox
 
             if (ImGui.Button("Create"))
             {
-                _newProjectPath = ToolsEditor.CombinePath(_newProjectPath, _newProjectName);
+                _newProjectPath = CoreTools.CombinePath(_newProjectPath, _newProjectName);
 
                 CreateProject();
 
@@ -116,10 +116,7 @@ namespace Unify2D.Toolbox
 
         void LoadProject()
         {
-            //_editor.SceneEditorManager.LoadScene();
-
-            _editor.HidePopup();
-
+            _editor.ProjectLoaded();
         }
 
 

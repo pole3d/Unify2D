@@ -12,6 +12,7 @@ namespace Unify2D.Core
         [JsonProperty] private string _prefabAssetPath;
         // todo here: list of overrides
         [JsonIgnore] GameObject _gameObject;
+        
 
         public PrefabInstance(string assetPath)
         {

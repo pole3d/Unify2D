@@ -2,11 +2,14 @@
 using System;
 using Unify2D.Core;
 using System.IO;
-
+using UnifyCore;
+using System.Text.Json;
 using Unify2D.Builder;
 using Unify2D;
-
-
+using System.Runtime.CompilerServices;
+using Genbox.VelcroPhysics.Tools.PathGenerator;
+using static System.Formats.Asn1.AsnWriter;
+using System.Collections.Generic;
 namespace UnifyCore
 {
 
@@ -36,15 +39,7 @@ namespace UnifyCore
         private string _sceneFolder;
         public SceneManager()
         {
-
-          
         }
-        
-        // public void Initialize()
-        // {
-        //    _currentScene = new Scene();
-        //    _currentScene.Init();
-        // }
 
         public void CreateOrOpenSceneAtStart(string path, string sceneFolder)
         {
@@ -60,6 +55,9 @@ namespace UnifyCore
             try
             {
                 string pathJson = System.IO.Path.Combine(_currentProjectPath, JsonFolderSceneName);
+
+                bool sceneLoaded = false;
+
                 if (File.Exists(pathJson))
                 {
                     SceneInfo deserializedJsonScene = System.Text.Json.JsonSerializer.Deserialize<SceneInfo>(File.ReadAllText(pathJson));
@@ -67,33 +65,26 @@ namespace UnifyCore
                     SceneInfo sceneInfo = deserializedJsonScene;
 
                     if (sceneInfo != null && File.Exists(sceneInfo.Path))
-                        LoadSceneWithPath(sceneInfo.Path);
-                    else
                     {
-                        if (GameSettings.Instance.ScenesSave.Count > 0)
-                            LoadSceneWithPath(GameSettings.Instance.ScenesSave[0].Path);
-                        else
-                            CreateNewScene(path, sceneFolder);
+                        sceneLoaded = true;
+                        LoadSceneWithPath(sceneInfo.Path);
                     }
                 }
-                else
+
+                if ( sceneLoaded == false)
                 {
                     if (GameSettings.Instance.ScenesSave.Count > 0)
                         LoadSceneWithPath(GameSettings.Instance.ScenesSave[0].Path);
                     else
                         CreateNewScene(path, sceneFolder);
-
-                    Console.WriteLine("Problem with your folder json, here your path : " + pathJson);
                 }
+
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Can't load scene" + ex.ToString());
             }
             #endregion
-
-
-            
         }
 
         #region Save/Load
@@ -107,12 +98,10 @@ namespace UnifyCore
             settings.Formatting = Formatting.Indented;
             string sceneContent = JsonConvert.SerializeObject(scene.GameObjects, settings);
 
-
             string directory = System.IO.Path.GetDirectoryName(scene.Path);
 
             if (Directory.Exists(directory) == false)
                 Directory.CreateDirectory(directory);
-
 
             File.WriteAllText(scene.Path, sceneContent);
         }
@@ -121,17 +110,21 @@ namespace UnifyCore
             _currentProjectPath = path;
             _sceneFolder = sceneFolder;
 
+            const string defaultName = "SampleScene";
+            const string sceneExtension = ".scene";
+
+
             string currentPath = path + sceneFolder;
             int count = 0;
-            if (File.Exists(System.IO.Path.Combine(currentPath, "SampleScene.scene")))
+            if (File.Exists(System.IO.Path.Combine(GameCore.Current.Game.AssetsPath,$"{defaultName}{sceneExtension}")))
             {
-                while (File.Exists(System.IO.Path.Combine(currentPath, "SampleScene_" + count + ".scene")))
+                while (File.Exists(System.IO.Path.Combine(GameCore.Current.Game.AssetsPath, $"{defaultName}_" + count + $"{sceneExtension}")))
                     count++;
 
-                _currentScene = new Scene(System.IO.Path.Combine(currentPath, "SampleScene_" + count + ".scene"), true);
+                _currentScene = new Scene(System.IO.Path.Combine(GameCore.Current.Game.AssetsPath, $"{defaultName}_" + count + $"{sceneExtension}"));
             }
             else
-                _currentScene = new Scene(System.IO.Path.Combine(currentPath, "SampleScene.scene"), true);
+                _currentScene = new Scene(System.IO.Path.Combine(GameCore.Current.Game.AssetsPath, $"{defaultName}{sceneExtension}"));
 
             _currentScene.Init();
         }
@@ -182,7 +175,6 @@ namespace UnifyCore
 
                     string json = System.Text.Json.JsonSerializer.Serialize(currentSceneToJson);
                     string pathJson = System.IO.Path.Combine(_currentProjectPath, JsonFolderSceneName);
-                    Console.WriteLine("path json : " + pathJson);
 
                     // TODO WTF
                     if (File.Exists(pathJson))
@@ -276,7 +268,5 @@ namespace UnifyCore
             e.ErrorContext.Handled = true;
         }
         #endregion
-
-
     }
 }

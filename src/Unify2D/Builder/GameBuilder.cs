@@ -24,9 +24,9 @@ namespace Unify2D.Builder
         const string TemplatePath = "./GameTemplate";
         const string RuntimesFolderPath = "./runtimes";
         const string JsonFolderSceneName = "SceneJson.json";
-        string AssetsPathFull => ToolsEditor.CombinePath(_editor.ProjectPath, AssetsPath);
-        string BuildPathFull => ToolsEditor.CombinePath(_editor.ProjectPath, "./Build");
-        string RuntimesFolderPathFull => ToolsEditor.CombinePath(TemplatePath, RuntimesFolderPath);
+        string AssetsPathFull => CoreTools.CombinePath(_editor.ProjectPath, AssetsPath);
+        string BuildPathFull => CoreTools.CombinePath(_editor.ProjectPath, "./Build");
+        string RuntimesFolderPathFull => CoreTools.CombinePath(TemplatePath, RuntimesFolderPath);
 
         const string AssemblyName = "GameAssembly";
         const string ExeName = "UnifyGame.exe";
@@ -42,8 +42,8 @@ namespace Unify2D.Builder
             if (Directory.Exists(BuildPathFull) == false)
                 Directory.CreateDirectory(BuildPathFull);
 
-            if (Directory.Exists(ToolsEditor.CombinePath(BuildPathFull, AssetsPath)) == false)
-                Directory.CreateDirectory(ToolsEditor.CombinePath(BuildPathFull, AssetsPath));
+            if (Directory.Exists(CoreTools.CombinePath(BuildPathFull, AssetsPath)) == false)
+                Directory.CreateDirectory(CoreTools.CombinePath(BuildPathFull, AssetsPath));
 
             if (Directory.Exists(TemplatePath) == false)
             {
@@ -55,7 +55,7 @@ namespace Unify2D.Builder
             foreach (string file in Directory.GetFiles(TemplatePath))
             {
                 string fileName = Path.GetFileName(file);
-                string newPath = ToolsEditor.CombinePath(BuildPathFull, fileName);
+                string newPath = CoreTools.CombinePath(BuildPathFull, fileName);
                 File.Copy(file, newPath, true);
             }
 
@@ -64,7 +64,7 @@ namespace Unify2D.Builder
             Directory.CreateDirectory(BuildPathFull + RuntimesFolderPath);
             if (Directory.Exists(RuntimesFolderPathFull))
             {
-                string newPath = ToolsEditor.CombinePath(BuildPathFull, RuntimesFolderPath);
+                string newPath = CoreTools.CombinePath(BuildPathFull, RuntimesFolderPath);
                 CopyFilesRecursively(RuntimesFolderPathFull, newPath);
             }
 
@@ -72,12 +72,9 @@ namespace Unify2D.Builder
             Directory.CreateDirectory(BuildPathFull + AssetsPath);
             if (Directory.Exists(AssetsPathFull))
             {
-                string newPath = ToolsEditor.CombinePath(BuildPathFull, AssetsPath);
+                string newPath = CoreTools.CombinePath(BuildPathFull, AssetsPath);
                 CopyFilesRecursively(AssetsPathFull, newPath);
             }
-
-
-           
 
 
             SaveAllScene();
@@ -100,13 +97,14 @@ namespace Unify2D.Builder
                     foreach (string item in Directory.GetFiles(_editor.AssetsPath, "*.scene", SearchOption.AllDirectories))
                     {
                         string name = item.Substring(item.LastIndexOf('\\') + 1);
-                        string path = item.Substring(item.IndexOf('\\') + 1);
+                        string path = item.Replace(_editor.ProjectPath, "");
+
                         SceneInfo scene = new SceneInfo(name, path);
                         listSceneToJson.Add(scene);
                     }
 
                     string json = JsonSerializer.Serialize(listSceneToJson);
-                    string pathJson = ToolsEditor.CombinePath(BuildPathFull, JsonFolderSceneName);
+                    string pathJson = CoreTools.CombinePath(BuildPathFull, JsonFolderSceneName);
                     File.WriteAllText(pathJson, json);
                 }
                 catch (Exception ex)
@@ -161,7 +159,7 @@ namespace Unify2D.Builder
             references: references,
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-            string dllPath = ToolsEditor.CombinePath(BuildPathFull, $"{AssemblyName}.dll");
+            string dllPath = CoreTools.CombinePath(BuildPathFull, $"{AssemblyName}.dll");
 
             EmitResult result = compilation.Emit(dllPath);
 
@@ -185,7 +183,7 @@ namespace Unify2D.Builder
         public void StartBuild()
         {
             var startInfo = new ProcessStartInfo();
-            startInfo.FileName = ToolsEditor.CombinePath(BuildPathFull, ExeName);
+            startInfo.FileName = CoreTools.CombinePath(BuildPathFull, ExeName);
             startInfo.WorkingDirectory = BuildPathFull;
 
             Process.Start(startInfo);

@@ -67,7 +67,7 @@ namespace Unify2D
         string GetFilePath()
         {
             string exePath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            return ToolsEditor.CombinePath(exePath, SettingsFilename);
+            return CoreTools.CombinePath(exePath, SettingsFilename);
         }
     }
 }

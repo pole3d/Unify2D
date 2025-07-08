@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unify2D.Physics;
 using Unify2D.Core.Tools;
 using UnifyCore;
+using UnifyCore.Core.Tweens;
 
 namespace Unify2D.Core
 {
@@ -82,6 +83,8 @@ namespace Unify2D.Core
         public void EndDraw()
         {
             SpriteBatch.End();
+
+            TweenManager.Instance.Update(DeltaTime);
         }
 
         public void Initialize(GraphicsDevice graphicsDevice)

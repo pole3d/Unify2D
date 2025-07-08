@@ -73,7 +73,7 @@ namespace UnifyGame
                     for (int i = 0; i < deserializedJsonScene.Count; i++)
                     {
                         SceneInfo sceneInfo = deserializedJsonScene[i];
-                        sceneInfo.Path = Path.Combine(currentPath, sceneInfo.Path);
+                        sceneInfo.Path = CoreTools.CombinePath(currentPath, sceneInfo.Path);
                         sceneInfo.BuildIndex = i;
                         GameSettings.Instance.AddSceneToList(sceneInfo);
                     }
@@ -140,6 +140,8 @@ namespace UnifyGame
         {
             //  ImGui.ShowDemoWindow();
         }
+
+
 
 
     }

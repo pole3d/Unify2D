@@ -29,6 +29,7 @@ namespace Unify2D.Core
             _name = name;
         }
 
+
         public void Release()
         {
 
