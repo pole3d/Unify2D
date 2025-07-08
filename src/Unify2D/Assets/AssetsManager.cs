@@ -74,7 +74,7 @@ namespace Unify2D.Assets
             File.Create(filePath).Close();
 
             // Create the asset and initialize its content
-            Asset asset = new Asset(nameSb.ToString(), extension, _editor.AssetsPath);
+            Asset asset = new Asset(nameSb.ToString(), extension, "\\");
             asset.AssetContent = (T)Activator.CreateInstance(typeof(T), asset); // Ensure AssetContent is correctly instantiated with the Asset
 
             // Refresh the AssetsToolbox

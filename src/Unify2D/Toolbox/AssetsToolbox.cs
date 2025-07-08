@@ -177,6 +177,9 @@ namespace Unify2D.Toolbox
 
         private void OnDeleted(object sender, FileSystemEventArgs e)
         {
+            if (e.ChangeType != WatcherChangeTypes.Deleted)
+                return;
+
             Reset();
         }
 
@@ -331,6 +334,9 @@ namespace Unify2D.Toolbox
                         // SceneManager.Instance.CurrentScene.AddRootGameObject(prefabContent.InstantiatedGameObject);
 
                         var newGameObject = prefabContent.InstantiatedGameObject.DeepCopy();
+
+                        newGameObject.ResetComponents();
+
                         newGameObject.Tag = prefabContent;
                         prefabContent.AddGoInstantiated(newGameObject);
 

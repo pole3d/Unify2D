@@ -16,16 +16,24 @@ namespace Unify2D.Toolbox
         {
             GameAsset value = property.GetValue(instance) as GameAsset;
             string name = "none";
+            string newName = "none";
+
+            bool changed = false;
 
             if (value == null)
             {
-                ImGui.InputText("path", ref name, 50);
+                ImGui.InputText("path", ref newName, 50);
             }
-            else 
+            else
             {
-                name = value.Name;
-                ImGui.InputText("path", ref name, 50);
+                newName = value.Name;
+                ImGui.InputText("path", ref newName, 50);
             }
+
+            if (newName == name)
+                return;
+
+            name = newName;
 
             if (name != "none")
             {
@@ -35,7 +43,12 @@ namespace Unify2D.Toolbox
                 {
                     if (instance is SpriteRenderer spriteRenderer)
                     {
-                        spriteRenderer.Initialize(GameCore.Current.Game, spriteRenderer.GameObject, name);
+                        if (spriteRenderer.GameObject == null) // is prefab TODO : better system to detect
+                        {
+                            property.SetValue(instance,new GameAsset(null, name));
+                        }
+                        else
+                            spriteRenderer.Initialize(GameCore.Current.Game, spriteRenderer.GameObject, name);
                     }
                 }
             }

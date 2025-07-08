@@ -39,7 +39,8 @@ namespace Unify2D.Core
         public Vector2 BoundingSize { get; set; } = new Vector2(30, 30);
         public bool PositionUpdated { get { return m_positionUpdated; } }
         public bool RotationUpdated { get { return m_rotationUpdated; } }
-        
+
+        [JsonIgnore]
         public object Tag { get; set; }
         public List<GameObject> Children { get; set; }
         [JsonIgnore]
@@ -166,6 +167,17 @@ namespace Unify2D.Core
             foreach (var item in _components)
             {
                 item.DrawGizmo();
+            }
+        }
+
+        public void ResetComponents()
+        {
+            var components = _components;
+            _components = new List<Component>();
+            
+            foreach (var item in components)
+            {
+                AddComponent(item);
             }
         }
 
