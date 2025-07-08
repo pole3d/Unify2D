@@ -7,22 +7,23 @@ using UnifyCore.Core.Physics;
 
 namespace Unify2D.Physics
 {
-    internal class Rigidbody : Component 
+    internal class Rigidbody : Component
     {
         [JsonIgnore]
-        public BodyType Type { get{ return _type; } set { _type = value; } }
+        public BodyType Type { get { return _type; } set { _type = value; } }
         public float Mass { get { return _mass; } set { _mass = value; } }
         public float LinearDamper { get { return _linearDamper; } set { _linearDamper = value; } }
-        public float GravityScale{ get { return _gravityScale; } set { _gravityScale = value; } }
-        public bool IsKinematic { 
-            get 
-            { 
+        public float GravityScale { get { return _gravityScale; } set { _gravityScale = value; } }
+        public bool IsKinematic
+        {
+            get
+            {
                 return (_type == BodyType.Kinematic);
-            }  
+            }
 
             set
             {
-                if (value) 
+                if (value)
                 {
                     _type = BodyType.Kinematic;
                 }
@@ -36,7 +37,7 @@ namespace Unify2D.Physics
         private float _mass = 1f;
         private float _linearDamper = 0.1f;
         private BodyType _type = BodyType.Dynamic;
-        private float  _gravityScale = 1f;
+        private float _gravityScale = 1f;
         private Body _body;
 
         public override void Load(Game game, GameObject go)
@@ -53,7 +54,8 @@ namespace Unify2D.Physics
             }
             else
             {
-               _body = BodyFactory.CreateBody(PhysicsSettings.World, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, _gameObject.Rotation, _type);
+                _body = BodyFactory.CreateBody(PhysicsSettings.World, _gameObject.Position / PhysicsSettings.UnitToPixelRatio, _gameObject.Rotation, _type);
+                _body.Mass = _mass;
             }
         }
 

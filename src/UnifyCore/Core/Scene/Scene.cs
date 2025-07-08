@@ -130,7 +130,7 @@ namespace Unify2D
             for (int i = 0; i < _gameObjectsToDestroy.Count; i++)
                 GameObjects.Remove(_gameObjectsToDestroy[i]);
 
-            PhysicsSettings.World.Step(GameCore.Current.DeltaTime);
+            PhysicsSettings.World.Step((float)gameTime.ElapsedGameTime.TotalSeconds);
 
             _gameObjectsToDestroy.Clear();
         }
