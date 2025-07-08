@@ -36,7 +36,7 @@ public class UIImage : UIComponent, IPointerEventReceiver
         
         try
         {
-            _asset = new GameAsset(Sprite, _asset.Name);
+            _asset = new GameAsset(Sprite, SpritePath);
         }
         catch (Exception e)
         {

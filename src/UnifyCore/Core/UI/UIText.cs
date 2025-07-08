@@ -43,7 +43,7 @@ namespace Unify2D.Core
             
             try
             {
-                _asset = new GameAsset(Font, _asset.Name);
+                _asset = new GameAsset(Font, FontPath);
             }
             catch (Exception e)
             {
