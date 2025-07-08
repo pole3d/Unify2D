@@ -17,7 +17,6 @@ namespace Unify2D.Toolbox
             string name = "none";
             string newName = "none";
 
-            bool changed = false;
 
             if (value == null)
             {
@@ -25,6 +24,7 @@ namespace Unify2D.Toolbox
             }
             else
             {
+                name = value.Name;
                 newName = value.Name;
                 ImGui.InputText("path", ref newName, 50);
             }
