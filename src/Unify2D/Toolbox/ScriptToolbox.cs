@@ -74,13 +74,12 @@ namespace Unify2D.Toolbox
                 foreach (var file in Directory.GetFiles(TemplateProjectPathFull))
                 {
                     string fileName = Path.GetFileName(file);
-                    string newPath = CoreTools.CombinePath(_editor.AssetsPath, fileName);
+                    string newPath = CoreTools.CombinePath(_editor.ProjectPath, fileName);
                     File.Copy(file, newPath, true);
                 }
 
-
-                ProcessStartInfo process = new ProcessStartInfo(CoreTools.CombinePath(_editor.AssetsPath, ProjectFile));
-                process.WorkingDirectory = _editor.AssetsPath;
+                ProcessStartInfo process = new ProcessStartInfo(CoreTools.CombinePath(_editor.ProjectPath, ProjectFile));
+                process.WorkingDirectory = _editor.ProjectPath;
                 process.UseShellExecute = true;
                 // process.Arguments = $"/edit {_asset.FullPath}"; // Doesn't work
 

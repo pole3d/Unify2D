@@ -119,6 +119,8 @@ namespace Unify2D.Builder
             //Copy all the files & Replaces any files with the same name
             foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
             {
+                if (Path.GetExtension(newPath) == ".cs") continue;
+
                 File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
             }
         }
