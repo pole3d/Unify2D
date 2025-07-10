@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,6 +33,7 @@ namespace UnifyGame
             _graphics.PreferMultiSampling = true;
             _graphics.PreferredBackBufferWidth = 1920;
             _graphics.PreferredBackBufferHeight = 1080;
+            _graphics.IsFullScreen = true;
             _graphics.PreferMultiSampling = true;
             _graphics.SynchronizeWithVerticalRetrace = false;
 
@@ -92,8 +94,40 @@ namespace UnifyGame
 
         protected override void Update(GameTime gameTime)
         {
+            CheckAltEnter();
+
             if (SceneManager.Instance.CurrentScene != null)
                 SceneManager.Instance.CurrentScene.Update(gameTime);
+        }
+
+        bool _wasAltEnterPressed;
+        private void CheckAltEnter()
+        {
+            KeyboardState currentKeyState = Keyboard.GetState();
+
+            // On vérifie l'état de Alt+Entrée uniquement si les deux sont enfoncés
+            bool isAltEnterPressed =
+                (currentKeyState.IsKeyDown(Keys.LeftAlt) || currentKeyState.IsKeyDown(Keys.RightAlt)) &&
+                currentKeyState.IsKeyDown(Keys.Enter);
+
+            if (isAltEnterPressed && !_wasAltEnterPressed)
+            {
+                _graphics.IsFullScreen = !_graphics.IsFullScreen;
+                if (_graphics.IsFullScreen)
+                {
+                    _graphics.PreferredBackBufferWidth = 1920;
+                    _graphics.PreferredBackBufferHeight = 1080;
+                }
+                else
+                {
+                    _graphics.PreferredBackBufferWidth = 1280;
+                    _graphics.PreferredBackBufferHeight = 720;
+                }
+                _graphics.ApplyChanges();
+            }
+
+            // On stocke l'état pour ne pas répéter l’action
+            _wasAltEnterPressed = isAltEnterPressed;
         }
 
         protected override void Draw(GameTime gameTime)
