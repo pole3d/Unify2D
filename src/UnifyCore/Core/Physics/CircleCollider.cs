@@ -13,7 +13,7 @@ namespace UnifyCore.Core.Physics
         public float Radius{ get { return _radius; } set { _radius = value; } }
         public Vector2 Offset { get { return _offset; } set { _offset = value; } }
 
-        private Vector2 _size, _offset;
+        private Vector2  _offset;
         private Body _body;
         private float _radius = 1f;
 

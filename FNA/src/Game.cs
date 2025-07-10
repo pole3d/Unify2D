@@ -24,7 +24,7 @@ namespace Microsoft.Xna.Framework
 	public class Game : IDisposable
 	{
 		#region Unify Properties
-		protected const string AssetsFolder = "./Assets";
+		public const string AssetsFolder = "./Assets";
 		public virtual string AssetsPath => AssetsFolder;
 		#endregion
 

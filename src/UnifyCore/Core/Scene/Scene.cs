@@ -23,7 +23,7 @@ namespace Unify2D
         private SceneInfo _sceneInfo;
         private bool _isLoaded = false;
 
-        private bool _isDirty = false;
+        //private bool _isDirty = false;
 
         [JsonIgnore] public List<Canvas> CanvasList => _canvasList;
         [JsonIgnore] private List<Canvas> _canvasList = new List<Canvas>();

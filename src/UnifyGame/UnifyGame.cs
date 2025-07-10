@@ -19,9 +19,14 @@ namespace UnifyGame
     public class UnifyGame : Game
     {
         const string JsonFolderSceneName = "\\SceneJson.json";
+        const int _resolutionFullWidth = 1920;
+        const int _resolutionFullHeight = 1080;
+        const int _resolutionWindowedWidth = 1280;
+        const int _resolutionWindowedHeight = 720;
 
         private GraphicsDeviceManager _graphics;
         private Unify2D.ImGuiRenderer.Renderer _imGuiRenderer;
+
 
         GameCore _core;
 
@@ -31,8 +36,8 @@ namespace UnifyGame
             _graphics = new GraphicsDeviceManager(this);
 
             _graphics.PreferMultiSampling = true;
-            _graphics.PreferredBackBufferWidth = 1920;
-            _graphics.PreferredBackBufferHeight = 1080;
+            _graphics.PreferredBackBufferWidth = _resolutionFullWidth;
+            _graphics.PreferredBackBufferHeight = _resolutionFullHeight;
             _graphics.IsFullScreen = true;
             _graphics.PreferMultiSampling = true;
             _graphics.SynchronizeWithVerticalRetrace = false;
@@ -115,13 +120,13 @@ namespace UnifyGame
                 _graphics.IsFullScreen = !_graphics.IsFullScreen;
                 if (_graphics.IsFullScreen)
                 {
-                    _graphics.PreferredBackBufferWidth = 1920;
-                    _graphics.PreferredBackBufferHeight = 1080;
+                    _graphics.PreferredBackBufferWidth = _resolutionFullWidth;
+                    _graphics.PreferredBackBufferHeight = _resolutionFullHeight;
                 }
                 else
                 {
-                    _graphics.PreferredBackBufferWidth = 1280;
-                    _graphics.PreferredBackBufferHeight = 720;
+                    _graphics.PreferredBackBufferWidth = _resolutionWindowedWidth;
+                    _graphics.PreferredBackBufferHeight = _resolutionWindowedHeight;
                 }
                 _graphics.ApplyChanges();
             }
@@ -164,17 +169,10 @@ namespace UnifyGame
             _imGuiRenderer.AfterLayout();
         }
 
-
-
-
         protected virtual void ImGuiLayout()
         {
             //  ImGui.ShowDemoWindow();
         }
-
-
-
-
     }
 
 

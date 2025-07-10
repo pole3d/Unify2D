@@ -17,7 +17,7 @@ public class UIButton : UIComponent
     
     public Action OnButtonPressed { get; set; }
     
-    private bool _isPressed;
+   // private bool _isPressed;
 
     public override void Initialize(GameObject go)
     {

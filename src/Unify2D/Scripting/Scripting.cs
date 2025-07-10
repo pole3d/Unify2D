@@ -62,7 +62,7 @@ namespace Unify2D.Scripting
             references: references,
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-            bool success = true;
+          //  bool success = true;
 
             using (var ms = new MemoryStream())
             {
@@ -70,7 +70,7 @@ namespace Unify2D.Scripting
 
                 if (!result.Success)
                 {
-                    success = false;
+                    //success = false;
                     IEnumerable<Diagnostic> failures = result.Diagnostics.Where(diagnostic =>
                         diagnostic.IsWarningAsError ||
                         diagnostic.Severity == DiagnosticSeverity.Error);

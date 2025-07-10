@@ -26,7 +26,6 @@ namespace Unify2D.Assets
         private bool _isDirectory;
         private List<Asset> _children = new();
         string _fullPath;
-        AssetContent _content;
         private Asset _parent;
 
         public Asset(string guid,string name, string extension, string path, bool isDirectory = false)

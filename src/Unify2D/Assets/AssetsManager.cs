@@ -10,7 +10,6 @@ namespace Unify2D.Assets
     public class AssetManager
     {
         internal Dictionary<string, Type> ExtensionToAssetType => _extensionToAssetType;
-        internal int NbOfFiles => _nbOfFiles;
         
         private GameEditor _editor;
         
@@ -26,8 +25,6 @@ namespace Unify2D.Assets
             { typeof(TextureAssetContent), new List<string> { ".png", ".jpg" } }
         };
         
-      //  private Dictionary<string,Asset> _assets = new Dictionary<string, Asset>();
-        private int _nbOfFiles;
 
         internal AssetManager(GameEditor editor)
         {

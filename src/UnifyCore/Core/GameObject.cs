@@ -48,7 +48,6 @@ namespace Unify2D.Core
 
         private static string _originalAssetPath;
         
-        private Vector2 m_position;
         private float m_rotation;
         private bool m_positionUpdated, m_rotationUpdated;
 

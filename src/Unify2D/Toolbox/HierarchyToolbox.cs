@@ -10,7 +10,7 @@ namespace Unify2D.Toolbox
     internal class HierarchyToolbox : Toolbox
     {
         private int _countGO = 0;
-        private int _currentIndex = 0;
+      //  private int _currentIndex = 0;
         private GameObject _goToDestroy = null;
         private bool _isAnyWidgetHovered = false;
 

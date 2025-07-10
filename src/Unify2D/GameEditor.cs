@@ -28,7 +28,7 @@ namespace Unify2D
 
         #endregion
 
-        public const string AssetsFolder = "\\Assets";
+        //public const string AssetsFolder = "\\Assets";
         public const string ScenesFolder = "\\Assets\\Scenes";
 
         #region Properties
@@ -43,7 +43,7 @@ namespace Unify2D
         public Scripting.Scripting Scripting => _scripting;
         public ImGuiRenderer.Renderer GuiRenderer => _imGuiRenderer;
 
-        public GameObject Selected => _selected;
+       // public GameObject Selected => _selected;
 
         public SceneManager SceneEditorManager => _sceneEditorManager;
 
@@ -74,8 +74,8 @@ namespace Unify2D
 
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
 
-        GameObject _selected;
-        bool _projectLoaded = false;
+        //GameObject _selected;
+       // bool _projectLoaded = false;
 
         List<(RenderTarget2D, IntPtr)> _unbindTargets = new List<(RenderTarget2D, IntPtr)>();
 

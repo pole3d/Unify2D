@@ -13,7 +13,6 @@ namespace UnifyCore.Core.Physics
         public float Height { get{ return m_height; } set { m_height = value; } }
         public float Radius { get { return m_radius; } set { m_radius = value; } }
 
-        private Vector2 m_size;
         private Body staticBody;
 
         private float m_radius = 0.5f, m_height = 1f;
