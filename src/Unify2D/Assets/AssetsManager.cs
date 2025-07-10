@@ -11,8 +11,6 @@ namespace Unify2D.Assets
     {
         internal Dictionary<string, Type> ExtensionToAssetType => _extensionToAssetType;
         internal int NbOfFiles => _nbOfFiles;
-
-
         
         private GameEditor _editor;
         
@@ -70,11 +68,12 @@ namespace Unify2D.Assets
                     nameSb.Append('1');
             }
 
+            string guid = new Guid().ToString();
             string filePath = Path.Combine(_editor.AssetsPath, $"{nameSb}{extension}");
             File.Create(filePath).Close();
 
             // Create the asset and initialize its content
-            Asset asset = new Asset(nameSb.ToString(), extension, "\\");
+            Asset asset = new Asset(guid, nameSb.ToString(), extension, "\\");
             asset.AssetContent = (T)Activator.CreateInstance(typeof(T), asset); // Ensure AssetContent is correctly instantiated with the Asset
 
             // Refresh the AssetsToolbox

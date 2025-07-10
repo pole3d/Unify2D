@@ -22,7 +22,7 @@ namespace Unify2D.Toolbox
         private string _path;
         private List<Asset> _selectedAssets = new List<Asset>();
         private List<Asset> _assets = new List<Asset>();
-        private HashSet<string> _extensionsToIgnore = new HashSet<string> { ".csproj", ".dll", ".sln" };
+        private HashSet<string> _extensionsToIgnore = new HashSet<string> { ".csproj", ".dll", ".sln" , ".meta" };
 
         private const string OpenPrefabButtonLabel = "Open Prefab";
         private const string InstantiateAsGameObjectButtonLabel = "Instantiate as GameObject";
@@ -40,6 +40,7 @@ namespace Unify2D.Toolbox
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
+
             SetWatcher();
             Reset();
         }
@@ -122,7 +123,7 @@ namespace Unify2D.Toolbox
             string directoryName = GetDirectoryNameSafe(relativeDirectory);
             string path = relativeDirectory.Replace(directoryName, "");
 
-            Asset newAsset = new Asset(directoryName, path, true);
+            Asset newAsset = new Asset(" " , directoryName, "", path, true);
 
             _assets.Add(newAsset);
 
@@ -157,10 +158,22 @@ namespace Unify2D.Toolbox
             if (_extensionsToIgnore.Contains(extension))
                 return null;
 
+            string pathMeta = file + ".meta";
+            string uid = string.Empty;
 
+            if ( File.Exists(pathMeta) == false )
+            {
+                uid = Guid.NewGuid().ToString();
+                File.WriteAllText(pathMeta, uid);
+            }
+            else
+            {
+                uid = File.ReadAllText(pathMeta);
+            }
 
-            Asset newAsset = new Asset(Path.GetFileNameWithoutExtension(relativeFile),
+            Asset newAsset = new Asset (uid,Path.GetFileNameWithoutExtension(relativeFile),
                 Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile));
+
 
             _assets.Add(newAsset);
 

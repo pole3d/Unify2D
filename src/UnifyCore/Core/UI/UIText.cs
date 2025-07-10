@@ -22,8 +22,8 @@ namespace Unify2D.Core
         
         public float FontSize { get; set; } = 12;
 
-        [JsonProperty]
-        private GameAsset _asset;
+        //[JsonProperty]
+        //private GameAsset _asset;
 
         public void SetFont(string path)
         {
@@ -41,14 +41,14 @@ namespace Unify2D.Core
         {
             base.Load(game, go);
             
-            try
-            {
-                _asset = new GameAsset(Font, FontPath);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
+            //try
+            //{
+            //    _asset = new GameAsset(Font, FontPath);
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine(e.ToString());
+            //}
             SetFont(FontPath);
         }
         
@@ -79,7 +79,7 @@ namespace Unify2D.Core
         
         internal override void Destroy()
         {
-            _asset?.Release();
+       //     _asset?.Release();
         }
     }
 }

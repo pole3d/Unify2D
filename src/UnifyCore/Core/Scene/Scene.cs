@@ -85,10 +85,20 @@ namespace Unify2D
         public void Init()
         {
             GameCore.Current.InitPhysics();
-            foreach (GameObject gameObject in GameObjects)
+
+            try
             {
-                gameObject.Init(GameCore.Current.Game);
+                foreach (GameObject gameObject in GameObjects)
+                {
+                    gameObject.Init(GameCore.Current.Game);
+                }
             }
+            catch (Exception e)
+            {
+
+                Debug.LogError(e.Message + e.StackTrace);
+            }
+
 
             _isLoaded = true;
 

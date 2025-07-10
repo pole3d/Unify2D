@@ -69,8 +69,7 @@ namespace Unify2D
 
                 ImGui.EndMainMenuBar();
 
-                ImGui.ShowDemoWindow();
-
+            //    ImGui.ShowDemoWindow();
             }
         }
 

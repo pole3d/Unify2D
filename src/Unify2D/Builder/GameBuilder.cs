@@ -54,8 +54,6 @@ namespace Unify2D.Builder
                 File.Copy(file, newPath, true);
             }
 
-
-
             Directory.CreateDirectory(BuildPathFull + RuntimesFolderPath);
             if (Directory.Exists(RuntimesFolderPathFull))
             {
@@ -70,7 +68,6 @@ namespace Unify2D.Builder
                 string newPath = CoreTools.CombinePath(BuildPathFull, AssetsPath);
                 CopyFilesRecursively(AssetsPathFull, newPath);
             }
-
 
             SaveAllScene();
 
@@ -119,7 +116,7 @@ namespace Unify2D.Builder
             //Copy all the files & Replaces any files with the same name
             foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
             {
-                if (Path.GetExtension(newPath) == ".cs") continue;
+                if (Path.GetExtension(newPath) == ".cs" || Path.GetExtension(newPath) == ".cs.meta") continue;
 
                 File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
             }

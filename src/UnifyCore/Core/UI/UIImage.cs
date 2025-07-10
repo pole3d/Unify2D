@@ -13,8 +13,8 @@ public class UIImage : UIComponent, IPointerEventReceiver
 
     public Color Color { get; set; } = Color.White;
     
-    [JsonProperty]
-    private GameAsset _asset;
+    //[JsonProperty]
+    //private GameAsset _asset;
 
 
     public void SetSprite(string path)
@@ -26,9 +26,6 @@ public class UIImage : UIComponent, IPointerEventReceiver
         
         SpritePath = path;
 
-        //using FileStream filestream = new FileStream(path, FileMode.Open);
-        //Texture2D texture = Texture2D.FromStream(GameCore.Current.GraphicsDevice, filestream);
-
         Sprite = GameCore.Current.ResourcesManager.GetTexture(path);
     }
     
@@ -36,14 +33,14 @@ public class UIImage : UIComponent, IPointerEventReceiver
     {
         base.Load(game,go);
         
-        try
-        {
-            _asset = new GameAsset(Sprite, SpritePath);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.ToString());
-        }
+        //try
+        //{
+        //    _asset = new GameAsset(Sprite, SpritePath);
+        //}
+        //catch (Exception e)
+        //{
+        //    Console.WriteLine(e.ToString());
+        //}
         SetSprite(SpritePath);
     }
     

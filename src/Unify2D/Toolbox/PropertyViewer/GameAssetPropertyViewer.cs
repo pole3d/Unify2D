@@ -44,10 +44,10 @@ namespace Unify2D.Toolbox
                     {
                         if (spriteRenderer.GameObject == null) // is prefab TODO : better system to detect
                         {
-                            property.SetValue(instance,new GameAsset(null, name));
+                            property.SetValue(instance,asset.ToGameAsset());
                         }
                         else
-                            spriteRenderer.Initialize(GameCore.Current.Game, spriteRenderer.GameObject, name);
+                            spriteRenderer.Initialize(GameCore.Current.Game, spriteRenderer.GameObject, asset.ToGameAsset());
                     }
                 }
             }

@@ -104,7 +104,7 @@ namespace UnifyCore
             _currentProjectPath = path;
             _sceneFolder = sceneFolder;
 
-            const string defaultName = "SampleScene";
+            const string defaultName = "Scenes\\SampleScene";
             const string sceneExtension = ".scene";
 
 

@@ -10,7 +10,7 @@ namespace Unify2D.Core
     /// may have references to multiple <see cref="Component"/>s. This class serves as a foundation
     /// for creating specialized <see cref="Component"/>s with shared functionality.
     /// </summary>
-    public class Component
+    public abstract class Component
     {
         [JsonIgnore]
         public GameObject GameObject => _gameObject;

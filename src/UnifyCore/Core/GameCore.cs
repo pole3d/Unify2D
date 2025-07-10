@@ -33,6 +33,8 @@ namespace Unify2D.Core
         public GraphicsDevice GraphicsDevice { get; private set; }
         public SpriteBatch SpriteBatch { get; private set; }
         public ResourcesManager ResourcesManager { get; private set; }
+        public AssetsManager AssetsManager { get; private set; }
+
         public List<GameObject> GameObjects => SceneManager.Instance.CurrentScene.GameObjects;
 
         public PhysicsSettings PhysicsSettings { get; private set; }
@@ -53,6 +55,7 @@ namespace Unify2D.Core
 
             SpriteBatch = new SpriteBatch(graphicsDevice);
             ResourcesManager = new ResourcesManager();
+            AssetsManager = new AssetsManager();
 
             InitPhysics();
         }
@@ -72,8 +75,7 @@ namespace Unify2D.Core
         public void BeginDraw(Matrix matrix)
         {
             SpriteBatch.Begin(SpriteSortMode.Deferred,
-                        BlendState.NonPremultiplied,
-                        null,
+                        BlendState.NonPremultiplied, SamplerState.PointClamp,
                         null,
                         null,
                         null,

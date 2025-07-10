@@ -156,7 +156,7 @@ namespace Unify2D.Toolbox
                         Selection.SelectObject(go);
 
                         SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
-                        renderer.Initialize(_editor, go, asset.FullPath);
+                        renderer.Initialize(_editor, go, asset.ToGameAsset());
 
                     }
                 }

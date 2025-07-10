@@ -303,11 +303,18 @@ namespace Unify2D
             GameCore.SetCurrent(replaceCore.GameCore);
         }
 
+        internal void PreloadProject()
+        {
+            GameCore.Current.AssetsManager.Initialize(AssetsPath);
+        }
+
         internal void ProjectLoaded()
         {
             InitializeToolBoxes();
             HidePopup();
 
         }
+
+
     }
 }

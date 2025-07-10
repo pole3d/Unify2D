@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json;
 
 
 namespace Unify2D.Core
@@ -12,21 +13,32 @@ namespace Unify2D.Core
     public class GameAsset
     {
         [JsonIgnore]
+        public string GUID => _guid;
+
+        [JsonIgnore]
         public string Name => _name;
 
         [JsonIgnore]
         public object Asset => _asset;
 
-        [JsonIgnore]
-        object _asset;
-
         [JsonProperty]
         private string _name;
 
-        public GameAsset(object asset , string name)
+        [JsonProperty]
+        private string _guid;
+
+        [JsonIgnore]
+        object _asset;
+
+        string _path;
+
+
+        public GameAsset(string guid, object asset, string name, string path)
         {
+            _guid = guid;
             _asset = asset;
             _name = name;
+            _path = path;
         }
 
 
@@ -35,10 +47,19 @@ namespace Unify2D.Core
 
         }
 
-        public void Acquire()
+        public void Load()
         {
 
         }
+
+        public Texture2D LoadTexture()
+        {
+            return GameCore.Current.ResourcesManager.GetTexture(_path);
+        }
+
+
+
+
 
     }
 }

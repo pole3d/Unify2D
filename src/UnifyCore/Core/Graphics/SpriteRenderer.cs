@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using System;
+using UnifyCore;
 
 
 namespace Unify2D.Core.Graphics
@@ -16,22 +17,25 @@ namespace Unify2D.Core.Graphics
     {
         public Color Color { get; set; } = Color.White;
         public float LayerDepth { get; set; } = 0f;
-        [JsonIgnore]
-        public GameAsset Asset => _asset;
 
         [JsonProperty]
-        GameAsset _asset;
-        Texture2D _texture;
+        string _spriteGuid;
 
-        public void Initialize(Game game, GameObject go, string path)
+        Texture2D _texture;
+        GameAsset _asset;
+
+        public void Initialize(Game game, GameObject go, GameAsset asset)
         {
             _gameObject = go;
+            _asset = asset;
+            _spriteGuid = asset.GUID;
             try
             {
-                _texture = GameCore.Current.ResourcesManager.GetTexture(path);
 
-                _asset = new GameAsset(_texture, path);
-                _gameObject.BoundingSize = new Vector2(_texture.Width, _texture.Height);
+                _texture = asset.LoadTexture();
+
+                if (_texture != null)
+                    _gameObject.BoundingSize = new Vector2(_texture.Width, _texture.Height);
             }
             catch (Exception e)
             {
@@ -48,8 +52,7 @@ namespace Unify2D.Core.Graphics
 
         public override void Load(Game game, GameObject go)
         {
-            if (_asset != null)
-                Initialize(game, go, _asset.Name);
+            Initialize(game, go, GameCore.Current.AssetsManager.GetAsset(_spriteGuid));
         }
 
         public override void Draw()

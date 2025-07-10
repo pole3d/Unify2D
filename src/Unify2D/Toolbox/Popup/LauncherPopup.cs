@@ -72,6 +72,9 @@ namespace Unify2D.Toolbox
                 if (ImGui.Button(Path.GetFileName(editor.Settings.Data.CurrentProjectPath)))
                 {
                     string pathProject = Path.Combine(Directory.GetCurrentDirectory(), editor.Settings.Data.CurrentProjectPath);
+                    
+                    PreloadProject();
+
                     SceneManager.Instance.CreateOrOpenSceneAtStart(pathProject, GameEditor.ScenesFolder);
                     LoadProject();
                 }
@@ -97,6 +100,11 @@ namespace Unify2D.Toolbox
 
         }
 
+        private void PreloadProject()
+        {
+            _editor.PreloadProject();
+
+        }
 
         private void OnOpenProjectPathSelected(string path)
         {
