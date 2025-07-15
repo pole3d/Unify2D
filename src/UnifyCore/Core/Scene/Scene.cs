@@ -6,12 +6,12 @@ using System.IO;
 using Unify2D.Core;
 using Unify2D.Physics;
 
+
 namespace Unify2D
 {
     public class Scene
     {
         public SceneInfo SceneInfo => _sceneInfo;
-
 
         public string Name => _sceneInfo.Name;
         public string Path => _sceneInfo.Path;
@@ -52,18 +52,20 @@ namespace Unify2D
 
         private List<GameObject> _gameObjectsToDestroy = new List<GameObject>();
 
-        public Scene(string path)
+        public Scene(string name, string path)
         {
-            SetSceneInfo(System.IO.Path.GetFileName(path), path);
-            //if (save == true)
-            //    SceneManager.Instance.Save(this);
+            SetSceneInfo(name, path);
+        }
 
+        public void LoadFromFile()
+        {
             try
             {
-                string text = File.ReadAllText(path);
+                string text = File.ReadAllText(_sceneInfo.Path);
                 JsonSerializerSettings settings = new JsonSerializerSettings();
                 settings.TypeNameHandling = TypeNameHandling.Auto;
                 settings.Error += SilentErrors;
+                settings.SerializationBinder = GuidTypeBinder.Instance;
                 GameObjects = JsonConvert.DeserializeObject<List<GameObject>>(text, settings);
             }
             catch (Exception ex)
@@ -71,6 +73,8 @@ namespace Unify2D
                 Console.WriteLine(ex.Message);
             }
         }
+
+
 
         public void SetSceneInfo(string name, string path)
         {
@@ -82,7 +86,7 @@ namespace Unify2D
                 _sceneInfo.Path = path;
             }
         }
-        public void Init()
+        public void Initialize()
         {
             GameCore.Current.InitPhysics();
 
@@ -90,12 +94,11 @@ namespace Unify2D
             {
                 foreach (GameObject gameObject in GameObjects)
                 {
-                    gameObject.Init(GameCore.Current.Game);
+                    gameObject.Initialize(GameCore.Current.Game);
                 }
             }
             catch (Exception e)
             {
-
                 Debug.LogError(e.Message + e.StackTrace);
             }
 
@@ -204,24 +207,10 @@ namespace Unify2D
                 }
             }
         }
-        
+
         public void AddEventSystem(EventSystem eventSystem)
         {
             _eventSystem = eventSystem;
         }
-    }
-
-    public class SceneInfo
-    {
-        public SceneInfo(string name, string path)
-        {
-            Name = name;
-            Path = path;
-        }
-
-        public string Name { get; set; }
-        public string Path { get; set; }
-        public int BuildIndex { get; set; }
-
     }
 }

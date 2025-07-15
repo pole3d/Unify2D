@@ -106,14 +106,14 @@ namespace Unify2D.Core
             parent.Children.Add(child);
         }
 
-        public void Init(Game game)
+        public void Initialize(Game game)
         {
             if (Children != null)
             {
                 foreach (GameObject child in Children)
                 {
                     child.Parent = this;
-                    child.Init(game);
+                    child.Initialize(game);
                 }
             }
 
@@ -354,7 +354,7 @@ namespace Unify2D.Core
              
              // Create gameObject
              GameObject go = JsonConvert.DeserializeObject<GameObject>(serializedText, s_serializerSettings);
-             go.Init(GameCore.Current.Game);
+             go.Initialize(GameCore.Current.Game);
 
              
              return go;
