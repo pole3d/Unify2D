@@ -75,14 +75,14 @@ namespace Unify2D
             }
         }
 
-        private void Build()
+        public void Build()
         {
             SaveCurrentScene();
 
             _editor.Build();
         }
 
-        private void LoadScene()
+        public void LoadScene()
         {
             string path = string.Empty;
 

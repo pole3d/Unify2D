@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Unify2D.Assets;
 using Unify2D.Builder;
 using Unify2D.Core;
+using Unify2D.Inputs;
 using Unify2D.Toolbox;
 using Unify2D.Toolbox.Popup;
 using UnifyCore;
@@ -113,6 +114,7 @@ namespace Unify2D
             _coreViewers.Add(_coreViewerScene);
 
             _inputsManager = new InputsManager();
+            _inputsManager.Initialize(this);
 
             // Set the current game core
             GameCore.SetCurrent(_coreViewerScene.GameCore);
@@ -183,7 +185,7 @@ namespace Unify2D
             {
                 item.Update(gameTime);
             }
-            _inputsManager.Update(this, gameTime);
+            _inputsManager.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
