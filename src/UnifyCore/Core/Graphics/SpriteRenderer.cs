@@ -52,7 +52,14 @@ namespace Unify2D.Core.Graphics
 
         public override void Load(Game game, GameObject go)
         {
-            Initialize(game, go, GameCore.Current.AssetsManager.GetAsset(_spriteGuid));
+            var asset = GameCore.Current.AssetsManager.GetAsset(_spriteGuid);
+            if ( asset == null)
+            {
+                Debug.LogError($"Can't load sprite {_spriteGuid} {_gameObject.Name}");
+                return;
+            }
+
+            Initialize(game, go, asset);
         }
 
         public override void Draw()

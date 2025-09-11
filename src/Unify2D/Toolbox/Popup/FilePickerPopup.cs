@@ -13,14 +13,15 @@ namespace Unify2D.Toolbox
             var picker = FilePicker.GetFolderPicker(this, editor.ProjectPath);
             picker.RootFolder = "C:\\";
             picker.OnlyAllowFolders = true;
-            if (picker.Draw())
+            if (picker.Draw(editor))
             {
-                OnPathSelected?.Invoke(picker.SelectedFile);
+                if (picker.SelectedFile != null)
+                    OnPathSelected?.Invoke(picker.SelectedFile);
 
                 FilePicker.RemoveFilePicker(this);
                 editor.HidePopup();
-
             }
+
         }
 
 
