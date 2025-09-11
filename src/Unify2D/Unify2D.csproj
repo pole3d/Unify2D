@@ -38,6 +38,12 @@
       <Folder Include="src\unify2d\builder\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Update="Toolbox\AssetsToolbox.cs">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Compile>
+    </ItemGroup>
+
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
       <Exec Command="xcopy &quot;$(SolutionDir)..\GameAssemblyProject\&quot; &quot;$(OutDir)GameAssemblyProject\&quot; /s /y;&#xA;xcopy &quot;$(SolutionDir)..\DefaultConfigs&quot; &quot;$(OutDir)&quot; /Y /D" />
     </Target>
