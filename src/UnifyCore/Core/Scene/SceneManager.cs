@@ -134,6 +134,8 @@ namespace Unify2D
             ClearScene();
 
             _currentScene = GetSceneByName(sceneName);
+            _currentScene.LoadFromFile();
+
             _currentScene.Initialize();
         }
 
@@ -195,6 +197,9 @@ namespace Unify2D
         #region Tools
         private void GetAllSceneInProject()
         {
+            if (Directory.Exists(GameCore.Current.Game.AssetsPath) == false)
+                return;
+
             //Récupérer tous les fichiers .scene dans le répertoire et ses sous - répertoires
             foreach (string path in Directory.GetFiles(GameCore.Current.Game.AssetsPath, "*.scene", SearchOption.AllDirectories))
             {
