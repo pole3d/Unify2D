@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using System;
-using UnifyCore;
 
 
 namespace Unify2D.Core.Graphics

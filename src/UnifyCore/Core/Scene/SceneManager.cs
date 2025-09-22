@@ -132,39 +132,34 @@ namespace Unify2D
         public void LoadScene(string sceneName)
         {
             ClearScene();
-
             _currentScene = GetSceneByName(sceneName);
-            _currentScene.LoadFromFile();
-
-            _currentScene.Initialize();
+            LoadSceneFromFile();
         }
 
         public void LoadSceneWithPath(string scenePath)
         {
             ClearScene();
-
             _currentScene = new Scene(Path.GetFileName(scenePath), scenePath);
-            _currentScene.LoadFromFile();
-            _currentScene.Initialize();
+            LoadSceneFromFile();
         }
         public void LoadScene(int sceneBuildIndex)
         {
             ClearScene();
-
             _currentScene = GetSceneByBuildIndex(sceneBuildIndex);
-            _currentScene.LoadFromFile();
-
-            _currentScene.Initialize();
+            LoadSceneFromFile();
         }
         public void LoadNextSceneInBuild()
         {
             ClearScene();
-
             _currentScene = GetSceneByBuildIndex(_currentScene.BuildIndex + 1);
+            LoadSceneFromFile();
+        }
+
+        private void LoadSceneFromFile()
+        {
             _currentScene.LoadFromFile();
             _currentScene.Initialize();
         }
-
 
         public void SaveCurrentSceneToJson()
         {

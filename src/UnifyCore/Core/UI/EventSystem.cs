@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using UnifyCore;
 
 namespace Unify2D.Core;
 
@@ -19,7 +18,7 @@ public class EventSystem : Component
         {
             _receivers.Clear();
 
-            List<GameObject> objectsInScene = SceneManager.Instance.CurrentScene.GameObjects;
+            IEnumerable<GameObject> objectsInScene = SceneManager.Instance.CurrentScene.GameObjectsWithChildren;
             foreach (GameObject obj in objectsInScene)
             {
                 //check if mouse in bounds

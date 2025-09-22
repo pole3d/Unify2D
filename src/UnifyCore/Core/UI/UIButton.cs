@@ -19,9 +19,9 @@ public class UIButton : UIComponent
     
    // private bool _isPressed;
 
-    public override void Initialize(GameObject go)
+    public override void Reset(GameObject go)
     {
-        base.Initialize(go);
+        base.Reset(go);
 
         _gameObject.Name += "Button";
         

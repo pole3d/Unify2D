@@ -241,6 +241,7 @@ namespace Unify2D.Core
             }
 
             component.Initialize(this);
+            component.Reset(this);
 
             _components.Add(component);
             

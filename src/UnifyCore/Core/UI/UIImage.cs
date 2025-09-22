@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
@@ -81,6 +80,7 @@ public class UIImage : UIComponent, IPointerEventReceiver
         }
 
         //TEST
+        Console.WriteLine("CLICK");
         _gameObject.Scale *= 2;
         //---
     }
