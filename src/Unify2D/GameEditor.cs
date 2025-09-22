@@ -1,11 +1,13 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using Unify2D.Assets;
 using Unify2D.Builder;
 using Unify2D.Core;
+using Unify2D.Inputs;
 using Unify2D.Toolbox;
 using Unify2D.Toolbox.Popup;
 using UnifyCore;
@@ -46,6 +48,7 @@ namespace Unify2D
        // public GameObject Selected => _selected;
 
         public SceneManager SceneEditorManager => _sceneEditorManager;
+        internal GameEditorUI GameEditorUI => _gameEditorUI;
 
         internal InspectorToolbox InspectorToolbox { get; private set; }
         internal ScriptToolbox ScriptToolbox { get; private set; }
@@ -69,6 +72,7 @@ namespace Unify2D
         GameEditorSettings _settings;
         SceneManager _sceneEditorManager;
         GameCoreViewer _coreViewerScene;
+        InputsManager _inputsManager;
         List<GameCoreViewer> _coreViewers = new List<GameCoreViewer>();
 
 
@@ -108,6 +112,9 @@ namespace Unify2D
             // Create game core and load scene content / Not useful for now
             _coreViewerScene = new GameCoreViewer(new GameCoreEditor(this), ".scene");
             _coreViewers.Add(_coreViewerScene);
+
+            _inputsManager = new InputsManager();
+            _inputsManager.Initialize(this);
 
             // Set the current game core
             GameCore.SetCurrent(_coreViewerScene.GameCore);
@@ -178,6 +185,7 @@ namespace Unify2D
             {
                 item.Update(gameTime);
             }
+            _inputsManager.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
