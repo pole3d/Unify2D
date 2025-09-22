@@ -34,6 +34,24 @@ namespace Unify2D.Assets
             InstantiateGameObjectOnLoad();
         }
 
+        public GameObject Instantiate(Scene scene)
+        {
+            Load();
+
+            var newGameObject = InstantiatedGameObject.DeepCopy();
+
+            newGameObject.ResetComponents();
+
+            newGameObject.Tag = this;
+            AddGoInstantiated(newGameObject);
+
+            scene.AddRootGameObject(newGameObject);
+
+            newGameObject.Initialize(GameCore.Current.Game);
+
+            return newGameObject;
+        }
+
         private void InstantiateGameObjectOnLoad()
         {
             PrefabInstance prefabInstance = new PrefabInstance($"{Asset.FullPath}");

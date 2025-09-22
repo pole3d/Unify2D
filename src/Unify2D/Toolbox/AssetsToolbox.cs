@@ -350,19 +350,8 @@ namespace Unify2D.Toolbox
                     foreach (var selectedAsset in _selectedAssets)
                     {
                         PrefabAssetContent prefabContent = selectedAsset.AssetContent as PrefabAssetContent;
-                        prefabContent.Load();
-
-                        // Old way of instantiating prefabs
-                        // SceneManager.Instance.CurrentScene.AddRootGameObject(prefabContent.InstantiatedGameObject);
-
-                        var newGameObject = prefabContent.InstantiatedGameObject.DeepCopy();
-
-                        newGameObject.ResetComponents();
-
-                        newGameObject.Tag = prefabContent;
-                        prefabContent.AddGoInstantiated(newGameObject);
-
-                        SceneManager.Instance.CurrentScene.AddRootGameObject(newGameObject);
+                        prefabContent.Instantiate(SceneManager.Instance.CurrentScene);
+      
                     }
                     ImGui.CloseCurrentPopup();
 

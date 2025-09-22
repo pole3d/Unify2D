@@ -140,28 +140,11 @@ namespace Unify2D.Toolbox
             Selection.CircleSelected();
 
             #region Drag & Drop Asset
-            if (ImGui.BeginDragDropTarget())
+            var go = TryDragAndDrop(_editor);
+            if (go != null)
             {
-                unsafe
-                {
-                    var ptr = ImGui.AcceptDragDropPayload("ASSET");
-                    if (ptr.NativePtr != null)
-                    {
-                        Asset asset = Clipboard.Content as Asset;
-                        GameObject go = GameObject.Create();
-                        go.Name = asset.Name;
-
-                        go.Position = GetMousePosition();
-
-                        Selection.SelectObject(go);
-
-                        SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
-                        renderer.Initialize(_editor, go, asset.ToGameAsset());
-
-                    }
-                }
+                go.Position = GetMousePosition();
             }
-            ImGui.EndDragDropTarget();
             #endregion
 
             //updates camera movement ect...
@@ -190,6 +173,7 @@ namespace Unify2D.Toolbox
             ImGui.End();
 
         }
+
         private void DrawGrid()
         {
             Vector2 viewPort = _gameCamera.Viewport / _gameCamera.Zoom;
@@ -383,5 +367,48 @@ namespace Unify2D.Toolbox
         {
             _gameCamera.Position = position;
         }
+
+
+        public static GameObject TryDragAndDrop(Game game)
+        {
+            GameObject go = null;
+
+            if (ImGui.BeginDragDropTarget())
+            {
+                unsafe
+                {
+                    var ptr = ImGui.AcceptDragDropPayload("ASSET");
+                    if (ptr.NativePtr != null)
+                    {
+                        Asset asset = Clipboard.Content as Asset;
+                        if (asset.Extension == ".prefab")
+                        {
+                            var content = asset.AssetContent as PrefabAssetContent;
+                            go = content.Instantiate(SceneManager.Instance.CurrentScene);
+
+                        }
+                        else
+                        {
+
+                            go = GameObject.Create();
+                            go.Name = asset.Name;
+
+
+                            Selection.SelectObject(go);
+
+                            SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
+                            renderer.Initialize(game, go, asset.ToGameAsset());
+                        }
+
+                    }
+                }
+            }
+            ImGui.EndDragDropTarget();
+
+            return go;
+        }
+
     }
+
+
 }
