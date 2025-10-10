@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Xna.Framework.Input;
+using System;
+using System.Collections.Generic;
 
 namespace Unify2D.Core;
 
@@ -10,6 +12,7 @@ using Input = Microsoft.Xna.Framework.Input;
 public class EventSystem : Component
 {
     private List<IPointerEventReceiver> _receivers = new();
+    private MouseState _lastMouseState;
 
     public override void Update(GameCore game)
     {
@@ -22,7 +25,7 @@ public class EventSystem : Component
             foreach (GameObject obj in objectsInScene)
             {
                 //check if mouse in bounds
-                
+
                 foreach (Component component in obj.Components)
                 {
                     if (component is IPointerEventReceiver receiver == false) continue;
@@ -30,15 +33,18 @@ public class EventSystem : Component
                 }
             }
 
-            _receivers.ForEach(r => r.OnPointerClick());
+
+            if (_lastMouseState.LeftButton != mouseState.LeftButton) _receivers.ForEach(r => r.OnPointerDown());
+            _receivers.ForEach(r => r.OnPointerPressed());
         }
 
-        _receivers.ForEach(r => r.OnPointerPressed());
 
         if (mouseState.LeftButton == Input.ButtonState.Released)
         {
-            _receivers.ForEach(r => r.OnPointerRelease());
+            _receivers.ForEach(r => r.OnPointerUp());
             _receivers.Clear();
         }
+
+        _lastMouseState = mouseState;
     }
 }

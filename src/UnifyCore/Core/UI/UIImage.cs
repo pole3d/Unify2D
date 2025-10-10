@@ -67,7 +67,7 @@ public class UIImage : UIComponent, IPointerEventReceiver
     public Action OnPressed { get; set; }
     public Action OnRelease { get; set; }
     
-    public void OnPointerClick()
+    public void OnPointerDown()
     {
         OnClick?.Invoke();
 
@@ -76,12 +76,11 @@ public class UIImage : UIComponent, IPointerEventReceiver
             if (component is UIButton button)
             {
                 button.OnButtonPressed?.Invoke();
+                //TEST
+                //Console.WriteLine("CLICK");
+                _gameObject.Scale *= 1.01f;
+                //---
             }
         }
-
-        //TEST
-        Console.WriteLine("CLICK");
-        _gameObject.Scale *= 2;
-        //---
     }
 }
