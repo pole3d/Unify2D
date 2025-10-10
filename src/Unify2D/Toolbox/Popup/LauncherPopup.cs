@@ -109,10 +109,12 @@ namespace Unify2D.Toolbox
         private void OnOpenProjectPathSelected(string path)
         {
             _editor.Settings.Data.CurrentProjectPath = path;
+            
+            PreloadProject();
 
             SceneManager.Instance.CreateOrOpenSceneAtStart(path, GameEditor.ScenesFolder);
-
             LoadProject();
+
         }
 
         private void OnNewProjectPathSelected(string path)
