@@ -32,8 +32,19 @@ namespace Unify2D.Core
 
         public Vector2 LocalPosition { get; set; }
 
-        public float Rotation { get { return m_rotation; } set { m_rotation = value; m_rotationUpdated = true; } }
-        public Vector2 Scale { get; set; } = new Vector2(1, 1);
+        public float Rotation {
+            get { return GetParentRotation() + LocalRotation; }
+            set
+            {
+                LocalRotation = value - GetParentRotation();
+                m_rotationUpdated = true;
+            }
+        }
+        public float LocalRotation { get { return m_rotation; } set {
+                m_rotation = value;
+                    m_rotationUpdated = true; 
+            } }
+        public Vector2 Scale = new Vector2(1, 1);
         public Vector2 BoundingSize { get; set; } = new Vector2(30, 30);
         public bool PositionUpdated { get { return m_positionUpdated; } }
         public bool RotationUpdated { get { return m_rotationUpdated; } }
@@ -303,17 +314,30 @@ namespace Unify2D.Core
         Vector2 GetParentPosition()
         {
             Vector2 position = Vector2.Zero;
-            GameObject parent = Parent;
+            GameObject current = Parent;
 
-            while (parent != null)
+            while (current != null)
             {
-                position += Parent.LocalPosition;
-                parent = parent.Parent;
+                position += current.LocalPosition;
+                current = current.Parent;
             }
 
             return position;
         }
 
+        float GetParentRotation()
+        {
+            float rotation = 0;
+            GameObject current = Parent;
+
+            while (current != null)
+            {
+                rotation += current.LocalRotation;
+                current = current.Parent;
+            }
+
+            return rotation;
+        }
         public bool HasCanvasInParents(out Canvas canvas)
         {
             canvas = null;

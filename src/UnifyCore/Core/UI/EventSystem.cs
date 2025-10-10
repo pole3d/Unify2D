@@ -24,7 +24,7 @@ public class EventSystem : Component
             IEnumerable<GameObject> objectsInScene = SceneManager.Instance.CurrentScene.GameObjectsWithChildren;
             foreach (GameObject obj in objectsInScene)
             {
-                //check if mouse in bounds
+                if (IsMouseInBounds(mouseState, obj) == false) continue;
 
                 foreach (Component component in obj.Components)
                 {
@@ -46,5 +46,20 @@ public class EventSystem : Component
         }
 
         _lastMouseState = mouseState;
+    }
+
+    /// <summary>
+    /// Check if the mouse is hovering a gameObject
+    /// </summary>
+    /// <param name="mouseState"></param>
+    /// <param name="obj"></param>
+    /// <returns></returns>
+    private bool IsMouseInBounds(MouseState mouseState, GameObject obj)
+    {
+        Console.WriteLine(mouseState + " / " + obj.Name + " at position: " + obj.Position);
+        return mouseState.X > obj.Position.X - obj.BoundingSize.X / 2f
+            && mouseState.X < obj.Position.X + obj.BoundingSize.X / 2f
+            && mouseState.Y > obj.Position.Y - obj.BoundingSize.Y/ 2f
+            && mouseState.Y < obj.Position.Y + obj.BoundingSize.Y / 2f;
     }
 }

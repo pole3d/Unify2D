@@ -1176,6 +1176,10 @@ namespace Microsoft.Xna.Framework
 			return value1;
 		}
 
-		#endregion
-	}
+        public static implicit operator Vector3(Vector2 v)
+        {
+			return new Vector3(v.X, v.Y, 0);
+        }
+        #endregion
+    }
 }
