@@ -36,6 +36,13 @@
     <ItemGroup>
       <Folder Include="src\unify2d\assets\" />
       <Folder Include="src\unify2d\builder\" />
+      <Folder Include="src\unify2d\inputs\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Toolbox\AssetsToolbox.cs">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Compile>
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">

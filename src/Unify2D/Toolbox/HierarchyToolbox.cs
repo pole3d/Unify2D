@@ -2,6 +2,8 @@
 using System.Numerics;
 using Unify2D.Assets;
 using Unify2D.Core;
+using Unify2D.Core.Graphics;
+using Unify2D.Tools;
 using UnifyCore;
 
 
@@ -29,7 +31,12 @@ namespace Unify2D.Toolbox
 
         public override void Draw()
         {
+            Vector2 size = ImGui.GetContentRegionAvail();
+
+
+
             ImGui.Begin(HierarchyWindowLabel);
+
 
             _isAnyWidgetHovered = false;
 
@@ -51,6 +58,7 @@ namespace Unify2D.Toolbox
                 }
             }
 
+
             // Commented because waiting resolve operation 
             if (_tag is GameCoreViewer coreViewer && coreViewer.AssetType == GameCoreViewer.Type.Prefab)
             {
@@ -62,6 +70,9 @@ namespace Unify2D.Toolbox
                 ImGui.Separator();
             }
 
+
+
+            ImGui.BeginGroup();
             // First way to Display GameObjects to the hierarchy -> Don't allow to D&D
             if (SceneManager.Instance.CurrentScene != null)
             {
@@ -73,6 +84,16 @@ namespace Unify2D.Toolbox
                     DrawNode(gameObject);
                 }
             }
+            ImGui.EndGroup();
+
+            Vector2 bb_min = ImGui.GetItemRectMin();
+            Vector2 bb_max = ImGui.GetItemRectMax();
+            Vector2 saved = ImGui.GetCursorScreenPos();
+
+            ImGui.SetCursorScreenPos(bb_min);
+            ImGui.InvisibleButton("##drop_zone_node", bb_max - bb_min);
+            GameToolbox.TryDragAndDrop(_editor);
+            ImGui.SetCursorScreenPos(saved);
 
             if (_isAnyWidgetHovered == false && ImGui.IsMouseReleased(ImGuiMouseButton.Left)
                                              && ImGui.IsWindowFocused())
@@ -93,6 +114,7 @@ namespace Unify2D.Toolbox
                 _goToDestroy = null;
             }
         }
+
 
         private void DrawNode(GameObject go)
         {
@@ -121,6 +143,7 @@ namespace Unify2D.Toolbox
                 else
                 {
                     ImGui.TreeNodeEx($"{go.Name}##{go.GetHashCode()}", base_flags);
+
                 }
 
                 if (ImGui.IsItemClicked())

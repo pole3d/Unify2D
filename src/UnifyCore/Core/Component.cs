@@ -17,6 +17,16 @@ namespace Unify2D.Core
 
         protected GameObject _gameObject;
 
+        /// <summary>
+        /// Play only when the Component is created (via AddComponent)
+        /// </summary>
+        /// <param name="go"></param>
+        public virtual void Reset(GameObject go) { }
+
+        /// <summary>
+        /// Play when the associated GameObject is created
+        /// </summary>
+        /// <param name="go"></param>
         public virtual void Initialize(GameObject go)
         {
             _gameObject = go;

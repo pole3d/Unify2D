@@ -1,4 +1,6 @@
 ﻿using ImGuiNET;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using NativeFileDialogs.Net;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -73,14 +75,14 @@ namespace Unify2D
             }
         }
 
-        private void Build()
+        public void Build()
         {
             SaveCurrentScene();
 
             _editor.Build();
         }
 
-        private void LoadScene()
+        public void LoadScene()
         {
             string path = string.Empty;
 
@@ -110,7 +112,7 @@ namespace Unify2D
                 SceneManager.Instance.CreateNewScene(pathProject, GameEditor.ScenesFolder);
             }
         }
-        private void SaveCurrentScene()
+        public void SaveCurrentScene()
         {
             Scene scene = SceneManager.Instance.CurrentScene;
 
@@ -147,6 +149,5 @@ namespace Unify2D
         {
             _popups.Pop();
         }
-
     }
 }
