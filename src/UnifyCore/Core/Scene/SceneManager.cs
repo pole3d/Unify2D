@@ -31,6 +31,8 @@ namespace Unify2D
         public Scene CurrentScene => _currentScene;
         public int SceneCountInGameSettings => GameSettings.Instance.ScenesInGame.Count;
 
+        public Action OnSceneLoaded;
+
         private Scene _currentScene;
         private string _currentProjectPath;
         private string _sceneFolder;
@@ -159,6 +161,8 @@ namespace Unify2D
         {
             _currentScene.LoadFromFile();
             _currentScene.Initialize();
+
+            OnSceneLoaded?.Invoke();
         }
 
         public void SaveCurrentSceneToJson()

@@ -43,6 +43,7 @@ namespace Unify2D.Assets
             newGameObject.ResetComponents();
 
             newGameObject.Tag = this;
+            newGameObject.PrefabGUID = Asset.GUID;
             AddGoInstantiated(newGameObject);
 
             scene.AddRootGameObject(newGameObject);
@@ -61,7 +62,7 @@ namespace Unify2D.Assets
             InstantiatedGameObject.Name = Asset.Name;
             InstantiatedGameObject.Tag = this;
 
-            Asset.SetMegaPath(InstantiatedGameObject.GetOriginalAssetPath());
+           // Asset.SetMegaPath(InstantiatedGameObject.GetOriginalAssetPath());
         }
 
         internal void Save(GameObject gameObject)

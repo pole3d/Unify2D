@@ -209,7 +209,7 @@ namespace Unify2D.Toolbox
                 if (ImGui.Button(CreatePrefabButtonLabel))
                 {
                     // Prefab creation Logic
-                    Asset prefabAsset = GameEditor.Instance.AssetManager.CreateAsset<PrefabAssetContent>(go.Name);
+                    Asset prefabAsset = GameEditor.Instance.EditorAssetManager.CreateAsset<PrefabAssetContent>(go.Name);
                     ((PrefabAssetContent)prefabAsset.AssetContent).Save(go);
 
                     ImGui.CloseCurrentPopup();

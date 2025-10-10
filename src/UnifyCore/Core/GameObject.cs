@@ -40,13 +40,14 @@ namespace Unify2D.Core
 
         [JsonIgnore]
         public object Tag { get; set; }
+        public string PrefabGUID { get; set; }
         public List<GameObject> Children { get; set; }
         [JsonIgnore]
         public GameObject Parent { get; set; }
         [JsonIgnore]
         public IEnumerable<Component> Components => _components;
 
-        private static string _originalAssetPath;
+        private string _originalAssetPath;
         
         private float m_rotation;
         private bool m_positionUpdated, m_rotationUpdated;
@@ -132,6 +133,8 @@ namespace Unify2D.Core
             {
                 component.LateLoad(game, this);
             }
+
+
         }
 
         public T GetComponent<T>() where T : Component
@@ -193,7 +196,7 @@ namespace Unify2D.Core
                 _renderers.Add(renderer);
             }
 
-            //ui
+            //ui TODO : refactor this
             Scene scene = SceneManager.Instance.CurrentScene;
             if (component is Canvas canvas)
             {
@@ -347,8 +350,8 @@ namespace Unify2D.Core
              // if (sb.ToString().EndsWith(".prefab") == false)
              //     sb.Append(".prefab");
              
-             // Set original asset path for prefab instance 
-             _originalAssetPath = sb.ToString();
+             //// Set original asset path for prefab instance 
+             //_originalAssetPath = sb.ToString();
              
              // Get serialized text
              string serializedText = File.ReadAllText(Path.GetFullPath(sb.ToString()));
@@ -361,10 +364,10 @@ namespace Unify2D.Core
              return go;
          }
 
-        public string GetOriginalAssetPath()
-        {
-            return _originalAssetPath;
-        }
+        //public string GetOriginalAssetPath()
+        //{
+        //    return _originalAssetPath;
+        //}
 
         internal void LinkToPrefabInstance(PrefabInstance prefabInstance)
         {

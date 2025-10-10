@@ -7,14 +7,19 @@ using Unify2D.Core;
 
 namespace Unify2D.Assets
 {
-    public class AssetManager
+    public class EditorAssetManager
     {
         internal Dictionary<string, Type> ExtensionToAssetType => _extensionToAssetType;
-        
+
+        internal List<Asset> Assets => _assets;
+
+        List<Asset> _assets = new List<Asset>();
+        Dictionary<string,Asset> _dictAssets = new Dictionary<string,Asset>();
+
         private GameEditor _editor;
-        
+
         private readonly Dictionary<string, Type> _extensionToAssetType = new Dictionary<string, Type>();
-        
+
         // Add the supported extensions for each asset type here
         private readonly Dictionary<Type, List<string>> _assetTypeToExtension = new Dictionary<Type, List<string>>()
         {
@@ -24,9 +29,9 @@ namespace Unify2D.Assets
             { typeof(PrefabAssetContent), new List<string> { ".prefab" } },
             { typeof(TextureAssetContent), new List<string> { ".png", ".jpg" } }
         };
-        
 
-        internal AssetManager(GameEditor editor)
+
+        internal EditorAssetManager(GameEditor editor)
         {
             _editor = editor;
 
@@ -38,7 +43,13 @@ namespace Unify2D.Assets
                 }
             }
         }
-        
+
+        internal void AddAsset(string guid, Asset asset)
+        {
+            _assets.Add(asset);
+            _dictAssets.Add(guid, asset);
+        }
+
         internal Asset CreateAsset<T>(string name) where T : AssetContent, new()
         {
             List<string> extensions = _assetTypeToExtension[typeof(T)];
@@ -95,6 +106,19 @@ namespace Unify2D.Assets
         internal bool IsAssetExtension(string extension)
         {
             return _extensionToAssetType.ContainsKey(extension);
+        }
+
+        internal void ClearAssets()
+        {
+            _assets.Clear();
+            _dictAssets.Clear();
+        }
+
+        internal Asset GetAsset(string guid)
+        {
+
+
+            return _dictAssets[guid];
         }
 
         //internal Asset GetTextureAsset( string path , out Texture2D texture)
