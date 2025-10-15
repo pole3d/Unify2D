@@ -112,6 +112,7 @@ namespace Unify2D
 
         private void SilentErrors(object sender, Newtonsoft.Json.Serialization.ErrorEventArgs e)
         {
+            Console.WriteLine(e.ErrorContext.Error);
             e.ErrorContext.Handled = true;
         }
 
