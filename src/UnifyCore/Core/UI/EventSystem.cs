@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using Unify2D.Core.Graphics;
+using Microsoft.Xna.Framework;
 
 namespace Unify2D.Core;
 
@@ -56,10 +58,11 @@ public class EventSystem : Component
     /// <returns></returns>
     private bool IsMouseInBounds(MouseState mouseState, GameObject obj)
     {
-        Console.WriteLine(mouseState + " / " + obj.Name + " at position: " + obj.Position);
-        return mouseState.X > obj.Position.X - obj.BoundingSize.X / 2f
-            && mouseState.X < obj.Position.X + obj.BoundingSize.X / 2f
-            && mouseState.Y > obj.Position.Y - obj.BoundingSize.Y/ 2f
-            && mouseState.Y < obj.Position.Y + obj.BoundingSize.Y / 2f;
+        Vector2 mousePosition = Camera.Main.LocalToWorld(new Vector2 (mouseState.X, mouseState.Y));
+
+        return mousePosition.X > obj.Position.X - obj.BoundingSize.X / 2f * obj.Scale.X
+            && mousePosition.X < obj.Position.X + obj.BoundingSize.X / 2f * obj.Scale.X
+            && mousePosition.Y > obj.Position.Y - obj.BoundingSize.Y / 2f * obj.Scale.Y
+            && mousePosition.Y < obj.Position.Y + obj.BoundingSize.Y / 2f * obj.Scale.Y;
     }
 }

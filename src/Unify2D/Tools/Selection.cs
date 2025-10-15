@@ -104,8 +104,8 @@ namespace Unify2D
 
                     foreach (var item in SceneManager.Instance.CurrentScene.GameObjectsWithChildren)
                     {
-                        if (worldPosition.X >= item.Position.X - item.BoundingSize.X / 2 && worldPosition.X <= item.Position.X + item.BoundingSize.X / 2
-                            && worldPosition.Y >= item.Position.Y - item.BoundingSize.Y / 2 && worldPosition.Y <= item.Position.Y + item.BoundingSize.Y / 2)
+                        if (worldPosition.X >= item.Position.X - item.BoundingSize.X *item.Scale.X / 2 && worldPosition.X <= item.Position.X + item.BoundingSize.X * item.Scale.X / 2
+                            && worldPosition.Y >= item.Position.Y - item.BoundingSize.Y * item.Scale.Y / 2 && worldPosition.Y <= item.Position.Y + item.BoundingSize.Y * item.Scale.Y / 2)
                         {
                             if (item == _gameObject && gameTime.TotalGameTime.Seconds - _timeAtLastClick < 0.5f)
                             {// Double click, focus
@@ -131,7 +131,7 @@ namespace Unify2D
             {
                 if (mouseState.LeftButton == ButtonState.Pressed && _gameObject != null)
                 {
-                    _gameObject.Position = GameEditor.Instance.GetWorldMousePosition() - _dragOffset;
+                    _gameObject.Position = (GameEditor.Instance.GetWorldMousePosition() - _dragOffset).Rotate(_gameObject.Rotation);
                 }
                 if (mouseState.LeftButton == ButtonState.Released)
                 {

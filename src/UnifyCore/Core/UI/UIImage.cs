@@ -26,6 +26,9 @@ public class UIImage : UIComponent, IPointerEventReceiver
         SpritePath = path;
 
         Sprite = GameCore.Current.ResourcesManager.GetTexture(path);
+
+        if (Sprite != null)
+            _gameObject.BoundingSize = new Vector2(Sprite.Width, Sprite.Height);
     }
     
     public override void Load(Game game, GameObject go)
