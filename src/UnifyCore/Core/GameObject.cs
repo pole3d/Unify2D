@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Xna.Framework;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
-using Microsoft.Xna.Framework;
-using Newtonsoft.Json;
 using Unify2D.Core.Graphics;
 using UnifyCore;
 
@@ -46,15 +47,10 @@ namespace Unify2D.Core
         public GameObject Parent { get; set; }
         [JsonIgnore]
         public IEnumerable<Component> Components => _components;
+        public int ComponentCount => _components.Count;
 
-        private string _originalAssetPath;
-        
         private float m_rotation;
         private bool m_positionUpdated, m_rotationUpdated;
-
-
-        [JsonIgnore]
-        public PrefabInstance PrefabInstance => _prefabInstance;
 
         private static JsonSerializerSettings s_serializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto }; //type name should be read
         
@@ -62,16 +58,12 @@ namespace Unify2D.Core
 
         [JsonProperty]
         List<Component> _components;
-        
-        [JsonIgnore]
-        private PrefabInstance _prefabInstance;
 
         public GameObject()
         {
             _components = new List<Component>();
             _renderers = new List<Renderer>();
             Name = "GameObject";
-
         }
 
         public static GameObject Create()
@@ -133,8 +125,11 @@ namespace Unify2D.Core
             {
                 component.LateLoad(game, this);
             }
+        }
 
-
+        public Component GetComponent(int i) 
+        {
+            return _components[i];
         }
 
         public T GetComponent<T>() where T : Component
@@ -371,7 +366,6 @@ namespace Unify2D.Core
 
         internal void LinkToPrefabInstance(PrefabInstance prefabInstance)
         {
-            _prefabInstance = prefabInstance;
             ApplyOverridesFromPrefabInstance(prefabInstance);
         }
 
@@ -386,18 +380,20 @@ namespace Unify2D.Core
         {
             if (Tag != null)
             {
-                // Apply overrides here
-                foreach (var property in typeof(GameObject).GetProperties())
-                {
-                    if (property.CanWrite)
-                    {
-                        property.SetValue(this, property.GetValue(updatedGameObject));
-                    }
-                }
 
-                foreach (var field in typeof(GameObject).GetFields(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance))
+                for (int i = 0; i < updatedGameObject.ComponentCount;i++)
                 {
-                    field.SetValue(this, field.GetValue(updatedGameObject));
+                    var component = updatedGameObject.GetComponent(i);
+                    foreach (var property in component.GetType().GetProperties())
+                    {
+                        if (property.Name == "GameObject")
+                            continue;
+
+                        if (property.CanWrite)
+                        {
+                            property.SetValue(_components[i], property.GetValue(component));
+                        }
+                    }
                 }
             }
         }

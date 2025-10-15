@@ -106,10 +106,9 @@ namespace Unify2D
         {
             foreach (var go in _sceneEditorManager.CurrentScene.GameObjects)
             {
-
                 if (string.IsNullOrEmpty(go.PrefabGUID) == false)
                 {
-                    go.Tag = EditorAssetManager.GetAsset(go.PrefabGUID).AssetContent;
+                    PrefabAssetContent.LinkPrefabToInstance(go,EditorAssetManager);
                 }
             }
         }

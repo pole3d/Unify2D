@@ -62,7 +62,7 @@ namespace Unify2D.Assets
             InstantiatedGameObject.Name = Asset.Name;
             InstantiatedGameObject.Tag = this;
 
-           // Asset.SetMegaPath(InstantiatedGameObject.GetOriginalAssetPath());
+            // Asset.SetMegaPath(InstantiatedGameObject.GetOriginalAssetPath());
         }
 
         internal void Save(GameObject gameObject)
@@ -97,6 +97,22 @@ namespace Unify2D.Assets
         public void AddGoInstantiated(GameObject go)
         {
             _gameObjectsInstantiated.Add(go);
+        }
+
+
+        public static void LinkPrefabToInstance(GameObject go, EditorAssetManager assetManager)
+        {
+            if (String.IsNullOrEmpty(go.PrefabGUID))
+            {
+                Console.WriteLine("no prefab !");
+                return;
+            }
+
+            PrefabAssetContent assetContent = (PrefabAssetContent)assetManager.GetAsset(go.PrefabGUID).AssetContent;
+            go.Tag = assetContent;
+
+            assetContent.AddGoInstantiated(go);
+
         }
     }
 }
