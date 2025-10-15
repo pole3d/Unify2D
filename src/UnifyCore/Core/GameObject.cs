@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Xna.Framework;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Microsoft.Xna.Framework;
-using Newtonsoft.Json;
 using Unify2D.Core.Graphics;
 
 namespace Unify2D.Core
@@ -25,7 +25,7 @@ namespace Unify2D.Core
             get { return GetParentPosition() + LocalPosition.Rotate(Rotation); }
             set
             {
-                LocalPosition = value - GetParentPosition();
+                LocalPosition = value.Rotate(-Rotation) - GetParentPosition();
                 m_positionUpdated = true;
             }
         }
@@ -64,6 +64,7 @@ namespace Unify2D.Core
         public GameObject Parent { get; set; }
         [JsonIgnore]
         public IEnumerable<Component> Components => _components;
+        public IEnumerable<UIComponent> UIComponents => _uiComponents;
 
         private static string _originalAssetPath;
 
@@ -77,6 +78,7 @@ namespace Unify2D.Core
         private static JsonSerializerSettings s_serializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto }; //type name should be read
 
         List<Renderer> _renderers;
+        List<UIComponent> _uiComponents;
 
         [JsonProperty]
         List<Component> _components;
@@ -87,6 +89,7 @@ namespace Unify2D.Core
         public GameObject()
         {
             _components = new List<Component>();
+            _uiComponents = new List<UIComponent>();
             _renderers = new List<Renderer>();
             Name = "GameObject";
 
@@ -136,6 +139,7 @@ namespace Unify2D.Core
                 }
             }
 
+            _uiComponents.Clear();
             foreach (Component component in _components)
             {
                 component.Initialize(this);
@@ -144,6 +148,10 @@ namespace Unify2D.Core
                 if (component is Renderer renderer)
                 {
                     _renderers.Add(renderer);
+                }
+                if (component is UIComponent uiComponent)
+                {
+                    _uiComponents.Add(uiComponent);
                 }
             }
 
@@ -169,6 +177,11 @@ namespace Unify2D.Core
         public bool HasRenderer()
         {
             return _renderers.Count > 0;
+        }
+
+        public bool HasUIComponents()
+        {
+            return _uiComponents.Count > 0;
         }
 
         internal void Draw()
@@ -214,6 +227,8 @@ namespace Unify2D.Core
 
             //ui
             Scene scene = SceneManager.Instance.CurrentScene;
+            var uicomponent = component as UIComponent;
+
             if (component is Canvas canvas)
             {
                 scene.CanvasList.Add(canvas);
@@ -226,8 +241,9 @@ namespace Unify2D.Core
                 }
                 scene.AddEventSystem(eventSystem);
             }
-            else if (component is UIComponent)
+            else if (uicomponent != null)
             {
+                _uiComponents.Add(uicomponent);
                 bool hasCanvas = scene.HasCanvas(out Canvas gameCoreCanvas);
                 if (hasCanvas && gameCoreCanvas.GameObject == this)
                 {
@@ -312,6 +328,11 @@ namespace Unify2D.Core
             if (component is Canvas canvas)
             {
                 SceneManager.Instance.CurrentScene.CanvasList.Remove(canvas);
+            }
+
+            if (component is UIComponent uiComponent)
+            {
+                _uiComponents.Remove(uiComponent);
             }
 
             component.Destroy();

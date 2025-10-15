@@ -1,8 +1,8 @@
 ﻿using Microsoft.Xna.Framework.Input;
-using System;
 using System.Collections.Generic;
 using Unify2D.Core.Graphics;
 using Microsoft.Xna.Framework;
+using System.Linq;
 
 namespace Unify2D.Core;
 
@@ -58,11 +58,23 @@ public class EventSystem : Component
     /// <returns></returns>
     private bool IsMouseInBounds(MouseState mouseState, GameObject obj)
     {
-        Vector2 mousePosition = Camera.Main.LocalToWorld(new Vector2 (mouseState.X, mouseState.Y));
+        if (obj.HasUIComponents() == false) return false;
 
-        return mousePosition.X > obj.Position.X - obj.BoundingSize.X / 2f * obj.Scale.X
-            && mousePosition.X < obj.Position.X + obj.BoundingSize.X / 2f * obj.Scale.X
-            && mousePosition.Y > obj.Position.Y - obj.BoundingSize.Y / 2f * obj.Scale.Y
-            && mousePosition.Y < obj.Position.Y + obj.BoundingSize.Y / 2f * obj.Scale.Y;
+        var uiComponent = obj.UIComponents.First();
+        var anchor = uiComponent.GetAnchorVector(uiComponent.Anchor) - new Vector2(0.5f);
+        var origin = uiComponent.Origin;
+        //Vector2 origin = Origin + (new Vector2(Sprite.Width, Sprite.Height)) * GetAnchorVector(Anchor);
+        //Vector2 origin = uiComponent.Origin + obj.BoundingSize * GetAnchorVector(Anchor);
+
+
+
+        Vector2 mousePosition = Camera.Main.LocalToWorld(new Vector2(mouseState.X, mouseState.Y));
+        var sizeX = obj.BoundingSize.X * 0.5f * obj.Scale.X;
+        var sizeY = obj.BoundingSize.Y * 0.5f * obj.Scale.Y;
+
+        return mousePosition.X > obj.Position.X - origin.X - sizeX - (sizeX * 2f * anchor.X)
+            && mousePosition.X < obj.Position.X - origin.X + sizeX - (sizeX * 2f * anchor.X)
+            && mousePosition.Y > obj.Position.Y - origin.Y - sizeY - (sizeY * 2f * anchor.Y)
+            && mousePosition.Y < obj.Position.Y - origin.Y + sizeY - (sizeY * 2f * anchor.Y);
     }
 }

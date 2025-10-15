@@ -98,17 +98,18 @@ namespace Unify2D
             }
             else if (_selectState == SelectedState.None && mouseState.LeftButton == ButtonState.Pressed && GameEditor.Instance.IsMouseInGameWindow())
             {
-                Vector2 worldPosition = GameEditor.Instance.GetWorldMousePosition();
+                Vector2 mouseWorldPosition = GameEditor.Instance.GetWorldMousePosition();
                 if (SceneManager.Instance.CurrentScene != null)
                 {
 
                     foreach (var item in SceneManager.Instance.CurrentScene.GameObjectsWithChildren)
                     {
-                        if (worldPosition.X >= item.Position.X - item.BoundingSize.X *item.Scale.X / 2 && worldPosition.X <= item.Position.X + item.BoundingSize.X * item.Scale.X / 2
-                            && worldPosition.Y >= item.Position.Y - item.BoundingSize.Y * item.Scale.Y / 2 && worldPosition.Y <= item.Position.Y + item.BoundingSize.Y * item.Scale.Y / 2)
+                        if (mouseWorldPosition.X >= item.Position.X - item.BoundingSize.X *item.Scale.X / 2 && mouseWorldPosition.X <= item.Position.X + item.BoundingSize.X * item.Scale.X / 2
+                            && mouseWorldPosition.Y >= item.Position.Y - item.BoundingSize.Y * item.Scale.Y / 2 && mouseWorldPosition.Y <= item.Position.Y + item.BoundingSize.Y * item.Scale.Y / 2)
                         {
                             if (item == _gameObject && gameTime.TotalGameTime.Seconds - _timeAtLastClick < 0.5f)
-                            {// Double click, focus
+                            {
+                                // Double click, focus
                                 GameEditor.Instance.GameToolbox.GoTo(item.Position);
                             }
 
@@ -131,7 +132,7 @@ namespace Unify2D
             {
                 if (mouseState.LeftButton == ButtonState.Pressed && _gameObject != null)
                 {
-                    _gameObject.Position = (GameEditor.Instance.GetWorldMousePosition() - _dragOffset).Rotate(_gameObject.Rotation);
+                    _gameObject.Position = GameEditor.Instance.GetWorldMousePosition() - _dragOffset;
                 }
                 if (mouseState.LeftButton == ButtonState.Released)
                 {
