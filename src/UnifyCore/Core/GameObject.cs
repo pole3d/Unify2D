@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Text;
 using Unify2D.Core.Graphics;
-using UnifyCore;
 
 namespace Unify2D.Core
 {
@@ -21,9 +20,10 @@ namespace Unify2D.Core
 
         public string Name { get; set; }
 
+
         public Vector2 Position
         {
-            get { return GetParentPosition() + LocalPosition; }
+            get { return GetParentPosition() + LocalPosition.Rotate(Rotation); }
             set
             {
                 LocalPosition = value - GetParentPosition();
@@ -33,8 +33,27 @@ namespace Unify2D.Core
 
         public Vector2 LocalPosition { get; set; }
 
-        public float Rotation { get { return m_rotation; } set { m_rotation = value; m_rotationUpdated = true; } }
-        public Vector2 Scale { get; set; } = new Vector2(1, 1);
+        public float Rotation
+        {
+            get { return GetParentRotation() + LocalRotation; }
+            set
+            {
+                LocalRotation = value - GetParentRotation();
+                m_rotationUpdated = true;
+            }
+        }
+        public float LocalRotation
+        {
+            get { return m_rotation; }
+            set
+            {
+                m_rotation = value;
+                m_rotationUpdated = true;
+            }
+        }
+
+        public Vector2 Scale = new Vector2(1, 1);
+
         public Vector2 BoundingSize { get; set; } = new Vector2(30, 30);
         public bool PositionUpdated { get { return m_positionUpdated; } }
         public bool RotationUpdated { get { return m_rotationUpdated; } }
@@ -53,7 +72,7 @@ namespace Unify2D.Core
         private bool m_positionUpdated, m_rotationUpdated;
 
         private static JsonSerializerSettings s_serializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto }; //type name should be read
-        
+
         List<Renderer> _renderers;
 
         [JsonProperty]
@@ -84,9 +103,9 @@ namespace Unify2D.Core
 
             child.Parent = parent;
             parent.Children.Add(child);
-            
+
             SceneManager.Instance.CurrentScene.AddRootGameObject(child);
-            
+
             return child;
         }
 
@@ -94,7 +113,7 @@ namespace Unify2D.Core
         {
             if (parent.Children == null)
                 parent.Children = new List<GameObject>();
-            
+
             child.Parent = parent;
             parent.Children.Add(child);
         }
@@ -113,7 +132,7 @@ namespace Unify2D.Core
             foreach (Component component in _components)
             {
                 component.Initialize(this);
-                component.Load(game,this);
+                component.Load(game, this);
 
                 if (component is Renderer renderer)
                 {
@@ -169,7 +188,7 @@ namespace Unify2D.Core
         {
             var components = _components;
             _components = new List<Component>();
-            
+
             foreach (var item in components)
             {
                 AddComponent(item);
@@ -202,7 +221,7 @@ namespace Unify2D.Core
                 if (scene.EventSystem != null)
                 {
                     return;
-                } 
+                }
                 scene.AddEventSystem(eventSystem);
             }
             else if (component is UIComponent)
@@ -214,7 +233,7 @@ namespace Unify2D.Core
                     component.Destroy();
                     return;
                 }
-                
+
                 if (HasCanvasInParents(out Canvas _) == false)
                 {
                     if (Parent != null)
@@ -222,13 +241,13 @@ namespace Unify2D.Core
                         Parent.Children.Remove(this);
                         Parent = null;
                     }
-                    
+
                     if (hasCanvas == false)
                     {
                         GameObject canvasGameObject = Create();
                         canvasGameObject.Name = "Canvas";
                         canvasGameObject.AddComponent<Canvas>();
-                        
+
                         SetChild(canvasGameObject, this);
                     }
                     else
@@ -242,7 +261,7 @@ namespace Unify2D.Core
             component.Reset(this);
 
             _components.Add(component);
-            
+
             SceneManager.Instance.CurrentScene.UpdateCanvas();
         }
 
@@ -252,7 +271,7 @@ namespace Unify2D.Core
             {
                 item.Update(core);
             }
-            
+
             ///To be refactored as FixedUpdate later
             foreach (var item in _components)
             {
@@ -280,36 +299,50 @@ namespace Unify2D.Core
 
             _components.Clear();
         }
-        
+
         private void DestroyComponent(Component component)
         {
             if (component is Renderer renderer)
             {
                 _renderers.Remove(renderer);
             }
-            
+
             if (component is Canvas canvas)
             {
                 SceneManager.Instance.CurrentScene.CanvasList.Remove(canvas);
             }
 
             component.Destroy();
-            
+
             SceneManager.Instance.CurrentScene.UpdateCanvas();
         }
 
         Vector2 GetParentPosition()
         {
             Vector2 position = Vector2.Zero;
-            GameObject parent = Parent;
+            GameObject current = Parent;
 
-            while (parent != null)
+            while (current != null)
             {
-                position += Parent.LocalPosition;
-                parent = parent.Parent;
+                position += current.LocalPosition.Rotate(current.Rotation);
+                current = current.Parent;
             }
 
             return position;
+        }
+
+        float GetParentRotation()
+        {
+            float rotation = 0;
+            GameObject current = Parent;
+
+            while (current != null)
+            {
+                rotation += current.LocalRotation;
+                current = current.Parent;
+            }
+
+            return rotation;
         }
 
         public bool HasCanvasInParents(out Canvas canvas)
@@ -332,22 +365,16 @@ namespace Unify2D.Core
 
             return false;
         }
-        
+
         /// <summary>
         ///  Deserialize a prefab asset into a gameObject, load it and add it to the current core.
         /// </summary>
          public static GameObject InstantiateFromPrefab(string originalAssetName)
          {
               StringBuilder sb = new StringBuilder(originalAssetName);
-             // if (sb.ToString().StartsWith("/") == false)
-             //     sb.Insert(0, "/");
+
              sb.Insert(0, GameCore.Current.Game.AssetsPath);
-             // if (sb.ToString().EndsWith(".prefab") == false)
-             //     sb.Append(".prefab");
-             
-             //// Set original asset path for prefab instance 
-             //_originalAssetPath = sb.ToString();
-             
+ 
              // Get serialized text
              string serializedText = File.ReadAllText(Path.GetFullPath(sb.ToString()));
              
@@ -355,9 +382,9 @@ namespace Unify2D.Core
              GameObject go = JsonConvert.DeserializeObject<GameObject>(serializedText, s_serializerSettings);
              go.Initialize(GameCore.Current.Game);
 
-             
-             return go;
-         }
+
+            return go;
+        }
 
         //public string GetOriginalAssetPath()
         //{
@@ -375,7 +402,7 @@ namespace Unify2D.Core
                 Name = prefabInstance.Name; //Temporary, overridden name should be saved in the override list, instead of using PrefabInstance.Name.
             // apply overrides here
         }
-        
+
         public void UpdateFromPrefab(GameObject updatedGameObject)
         {
             if (Tag != null)
