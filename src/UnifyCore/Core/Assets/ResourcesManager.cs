@@ -19,9 +19,5 @@ namespace UnifyCore
 
             return texture;
         }
-
-
-
-
     }
 }

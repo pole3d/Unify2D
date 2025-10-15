@@ -11,16 +11,16 @@ public class Canvas : Component
 {
     public int SortOrder { get; set; }
     public bool IsVisible { get; set; } = true;
-    
+
     [JsonIgnore] public List<UIComponent> Elements { get; set; } = new();
 
     public void UpdateList()
     {
         Debug.Log("update list");
-        
+
         Elements.Clear();
 
-        if (_gameObject.Children == null) return;
+        if (_gameObject == null || _gameObject.Children == null) return;
         foreach (GameObject child in _gameObject.Children)
         {
             SetCanvasParentForChildren(child, this);
@@ -42,7 +42,7 @@ public class Canvas : Component
             SetCanvasParentForChildren(child, canvas);
         }
     }
-    
+
     public void Draw()
     {
         foreach (UIComponent component in Elements)

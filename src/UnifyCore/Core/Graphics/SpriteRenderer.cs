@@ -28,9 +28,9 @@ namespace Unify2D.Core.Graphics
             _gameObject = go;
             _asset = asset;
             _spriteGuid = asset.GUID;
+
             try
             {
-
                 _texture = asset.LoadTexture();
 
                 if (_texture != null)
@@ -52,7 +52,7 @@ namespace Unify2D.Core.Graphics
         public override void Load(Game game, GameObject go)
         {
             var asset = GameCore.Current.AssetsManager.GetAsset(_spriteGuid);
-            if ( asset == null)
+            if (asset == null)
             {
                 Debug.LogError($"Can't load sprite {_spriteGuid} {_gameObject.Name}");
                 return;

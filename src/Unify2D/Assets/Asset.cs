@@ -4,7 +4,7 @@ using Unify2D.Core;
 
 namespace Unify2D.Assets
 {
-    internal class Asset
+    public class Asset
     {
         public string GUID => _guid;
 

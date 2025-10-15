@@ -239,7 +239,8 @@ namespace Microsoft.Xna.Framework.Content
 			try
 			{
 				stream = TitleContainer.OpenStream(
-					Path.Combine(RootDirectory, assetName) + ".xnb"
+					assetName + ".xnb"
+					//Path.Combine(RootDirectory, assetName) + ".xnb"
 				);
 			}
 			catch (FileNotFoundException fileNotFound)
