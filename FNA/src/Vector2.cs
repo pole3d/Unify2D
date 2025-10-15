@@ -216,6 +216,18 @@ namespace Microsoft.Xna.Framework
 			);
 		}
 
+		/// <summary>
+		/// Rotate the vector by a given angle
+		/// </summary>
+		/// <param name="angle"></param>
+		/// <returns></returns>
+		public Vector2 Rotate(float angle)
+		{
+			float cos = (float)Math.Cos(angle);
+			float sin = (float)Math.Sin(angle);
+			return new Vector2(cos * X - sin * Y, sin * X + cos * Y);
+		}
+
 		#endregion
 
 		#region Internal Methods
@@ -1176,10 +1188,14 @@ namespace Microsoft.Xna.Framework
 			return value1;
 		}
 
-        public static implicit operator Vector3(Vector2 v)
-        {
+		/// <summary>
+		/// Implicitly converts a Vector2 to a Vector3
+		/// </summary>
+		/// <param name="v"></param>
+		public static implicit operator Vector3(Vector2 v)
+		{
 			return new Vector3(v.X, v.Y, 0);
-        }
-        #endregion
-    }
+		}
+		#endregion
+	}
 }
