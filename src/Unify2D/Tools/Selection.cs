@@ -98,17 +98,17 @@ namespace Unify2D
             }
             else if (_selectState == SelectedState.None && mouseState.LeftButton == ButtonState.Pressed && GameEditor.Instance.IsMouseInGameWindow())
             {
-                Vector2 worldPosition = GameEditor.Instance.GetWorldMousePosition();
+                Vector2 mouseWorldPosition = GameEditor.Instance.GetWorldMousePosition();
                 if (SceneManager.Instance.CurrentScene != null)
                 {
 
                     foreach (var item in SceneManager.Instance.CurrentScene.GameObjectsWithChildren)
                     {
-                        if (worldPosition.X >= item.Position.X - item.BoundingSize.X / 2 && worldPosition.X <= item.Position.X + item.BoundingSize.X / 2
-                            && worldPosition.Y >= item.Position.Y - item.BoundingSize.Y / 2 && worldPosition.Y <= item.Position.Y + item.BoundingSize.Y / 2)
+                        if (item.IsPointInBounds(mouseWorldPosition))
                         {
                             if (item == _gameObject && gameTime.TotalGameTime.Seconds - _timeAtLastClick < 0.5f)
-                            {// Double click, focus
+                            {
+                                // Double click, focus
                                 GameEditor.Instance.GameToolbox.GoTo(item.Position);
                             }
 
