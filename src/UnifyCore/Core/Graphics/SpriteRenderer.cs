@@ -34,7 +34,10 @@ namespace Unify2D.Core.Graphics
                 _texture = asset.LoadTexture();
 
                 if (_texture != null)
-                    _gameObject.BoundingSize = new Vector2(_texture.Width, _texture.Height);
+                {
+                    _gameObject.Bounds.BoundingSize = new Vector2(_texture.Width, _texture.Height);
+                    _gameObject.Bounds.Pivot = 0.5f;
+                }
             }
             catch (Exception e)
             {
@@ -60,7 +63,7 @@ namespace Unify2D.Core.Graphics
                 return;
 
             GameCore.Current.SpriteBatch.Draw(_texture, _gameObject.Position,
-     null, Color, _gameObject.Rotation, _gameObject.BoundingSize / 2, _gameObject.Scale,
+     null, Color, _gameObject.Rotation, _gameObject.Bounds.BoundingSize / 2, _gameObject.Scale,
      SpriteEffects.None, LayerDepth);
         }
     }

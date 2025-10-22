@@ -29,7 +29,7 @@ namespace Unify2D.Core
         }
         public AnchorType Anchor { get; set; }
         
-        public static Vector2 GetAnchorVector(AnchorType anchor)
+        public Vector2 GetAnchorVector(AnchorType anchor)
         {
             switch (anchor)
             {

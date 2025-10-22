@@ -1,11 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Text;
 using Unify2D.Core.Graphics;
-using UnifyCore;
+using UnifyCore.Core;
 
 namespace Unify2D.Core
 {
@@ -27,7 +26,7 @@ namespace Unify2D.Core
             get { return GetParentPosition() + LocalPosition.Rotate(Rotation); }
             set
             {
-                LocalPosition = value - GetParentPosition();
+                LocalPosition = value.Rotate(-Rotation) - GetParentPosition();
                 m_positionUpdated = true;
             }
         }
@@ -55,7 +54,7 @@ namespace Unify2D.Core
 
         public Vector2 Scale = new Vector2(1, 1);
 
-        public Vector2 BoundingSize { get; set; } = new Vector2(30, 30);
+        public Bounds Bounds { get; set; } = new Bounds(30);
         public bool PositionUpdated { get { return m_positionUpdated; } }
         public bool RotationUpdated { get { return m_rotationUpdated; } }
 
@@ -67,7 +66,10 @@ namespace Unify2D.Core
         public GameObject Parent { get; set; }
         [JsonIgnore]
         public IEnumerable<Component> Components => _components;
+        public IEnumerable<UIComponent> UIComponents => _uiComponents;
         public int ComponentCount => _components.Count;
+
+        private static string _originalAssetPath;
 
         private float m_rotation;
         private bool m_positionUpdated, m_rotationUpdated;
@@ -75,6 +77,7 @@ namespace Unify2D.Core
         private static JsonSerializerSettings s_serializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto }; //type name should be read
 
         List<Renderer> _renderers;
+        List<UIComponent> _uiComponents;
 
         [JsonProperty]
         List<Component> _components;
@@ -82,6 +85,7 @@ namespace Unify2D.Core
         public GameObject()
         {
             _components = new List<Component>();
+            _uiComponents = new List<UIComponent>();
             _renderers = new List<Renderer>();
             Name = "GameObject";
         }
@@ -130,6 +134,21 @@ namespace Unify2D.Core
             parent.Children.Add(child);
         }
 
+        public IEnumerable<GameObject> GetAllChildren()
+        {
+            if (Children != null)
+            {
+                foreach (var child in Children)
+                {
+                    yield return child;
+                    foreach (var grandChild in child.GetAllChildren())
+                    {
+                        yield return grandChild;
+                    }
+                }
+            }
+        }
+
         public void Initialize(Game game)
         {
             if (Children != null)
@@ -141,6 +160,7 @@ namespace Unify2D.Core
                 }
             }
 
+            _uiComponents.Clear();
             foreach (Component component in _components)
             {
                 component.Initialize(this);
@@ -149,6 +169,10 @@ namespace Unify2D.Core
                 if (component is Renderer renderer)
                 {
                     _renderers.Add(renderer);
+                }
+                if (component is UIComponent uiComponent)
+                {
+                    _uiComponents.Add(uiComponent);
                 }
             }
 
@@ -179,6 +203,11 @@ namespace Unify2D.Core
         public bool HasRenderer()
         {
             return _renderers.Count > 0;
+        }
+
+        public bool HasUIComponents()
+        {
+            return _uiComponents.Count > 0;
         }
 
         internal void Draw()
@@ -224,6 +253,8 @@ namespace Unify2D.Core
 
             //ui TODO : refactor this
             Scene scene = SceneManager.Instance.CurrentScene;
+            var uicomponent = component as UIComponent;
+
             if (component is Canvas canvas)
             {
                 scene.CanvasList.Add(canvas);
@@ -236,8 +267,9 @@ namespace Unify2D.Core
                 }
                 scene.AddEventSystem(eventSystem);
             }
-            else if (component is UIComponent)
+            else if (uicomponent != null)
             {
+                _uiComponents.Add(uicomponent);
                 bool hasCanvas = scene.HasCanvas(out Canvas gameCoreCanvas);
                 if (hasCanvas && gameCoreCanvas.GameObject == this)
                 {
@@ -292,6 +324,14 @@ namespace Unify2D.Core
 
             m_positionUpdated = false;
             m_rotationUpdated = false;
+
+            if (Children != null)
+            {
+                foreach (var child in Children)
+                {
+                    child.Update(core);
+                }
+            }
         }
 
         public void RemoveComponent(Component item)
@@ -322,6 +362,11 @@ namespace Unify2D.Core
             if (component is Canvas canvas)
             {
                 SceneManager.Instance.CurrentScene.CanvasList.Remove(canvas);
+            }
+
+            if (component is UIComponent uiComponent)
+            {
+                _uiComponents.Remove(uiComponent);
             }
 
             component.Destroy();
@@ -436,6 +481,26 @@ namespace Unify2D.Core
                 }
             }
         }
+
+        /// <summary>
+        /// Check if a point is inside a gameObject's bounds
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public bool IsPointInBounds(Vector2 point)
+        {
+            var anchor = Bounds.Pivot - new Vector2(0.5f);
+            var origin = Bounds.PositionOffset;
+
+            var sizeX = Bounds.BoundingSize.X * 0.5f * Scale.X;
+            var sizeY = Bounds.BoundingSize.Y * 0.5f * Scale.Y;
+
+            return point.X > Position.X - origin.X - sizeX - (sizeX * 2f * anchor.X)
+                && point.X < Position.X - origin.X + sizeX - (sizeX * 2f * anchor.X)
+                && point.Y > Position.Y - origin.Y - sizeY - (sizeY * 2f * anchor.Y)
+                && point.Y < Position.Y - origin.Y + sizeY - (sizeY * 2f * anchor.Y);
+        }
     }
     public static class GameObjectExtensions
     {
@@ -457,6 +522,8 @@ namespace Unify2D.Core
 
             return copy;
         }
+
+
     }
 }
 

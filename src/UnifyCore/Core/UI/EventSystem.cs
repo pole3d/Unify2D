@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework.Input;
-using System;
 using System.Collections.Generic;
+using Unify2D.Core.Graphics;
+using Microsoft.Xna.Framework;
+using System.Linq;
 
 namespace Unify2D.Core;
 
@@ -17,10 +19,34 @@ public class EventSystem : Component
     public override void Update(GameCore game)
     {
         var mouseState = Input.Mouse.GetState();
+        UpdatePointerHover(mouseState);
+        UpdatePointerClick(mouseState);
+    }
+
+    private void UpdatePointerHover(MouseState mouseState)
+    {
+        IEnumerable<GameObject> objectsInScene = SceneManager.Instance.CurrentScene.GameObjectsWithChildren;
+        foreach (GameObject obj in objectsInScene)
+        {
+            foreach (Component component in obj.Components)
+            {
+                if (component is IPointerHoverHandler receiver == false) continue;
+                var isHovering = IsMouseInBounds(mouseState, obj);
+                if (isHovering)
+                    receiver.OnHover();
+                else
+                    receiver.OnNotHover();
+            }
+        }
+    }
+
+    private void UpdatePointerClick(MouseState mouseState)
+    {
         if (mouseState.LeftButton == Input.ButtonState.Pressed)
         {
             _receivers.Clear();
 
+            // TODO : Iterate over only UI GameObjects (by keeping track of them)
             IEnumerable<GameObject> objectsInScene = SceneManager.Instance.CurrentScene.GameObjectsWithChildren;
             foreach (GameObject obj in objectsInScene)
             {
@@ -32,7 +58,6 @@ public class EventSystem : Component
                     _receivers.Add(receiver);
                 }
             }
-
 
             if (_lastMouseState.LeftButton != mouseState.LeftButton) _receivers.ForEach(r => r.OnPointerDown());
             _receivers.ForEach(r => r.OnPointerPressed());
@@ -56,10 +81,9 @@ public class EventSystem : Component
     /// <returns></returns>
     private bool IsMouseInBounds(MouseState mouseState, GameObject obj)
     {
-        Console.WriteLine(mouseState + " / " + obj.Name + " at position: " + obj.Position);
-        return mouseState.X > obj.Position.X - obj.BoundingSize.X / 2f
-            && mouseState.X < obj.Position.X + obj.BoundingSize.X / 2f
-            && mouseState.Y > obj.Position.Y - obj.BoundingSize.Y/ 2f
-            && mouseState.Y < obj.Position.Y + obj.BoundingSize.Y / 2f;
+        if (obj.HasUIComponents() == false) return false;
+
+        var mousePosition = Camera.Main.LocalToWorld(new Vector2(mouseState.X, mouseState.Y));
+        return obj.IsPointInBounds(mousePosition);
     }
 }
