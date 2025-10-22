@@ -5,6 +5,7 @@ using Unify2D.Physics;
 using Unify2D.Core.Tools;
 using UnifyCore;
 using UnifyCore.Core.Tweens;
+using System;
 
 namespace Unify2D.Core
 {
@@ -43,6 +44,8 @@ namespace Unify2D.Core
         static GameCore s_current;
 
         private Game _game;
+
+
 
         public GameCore(Game game)
         {
@@ -100,6 +103,9 @@ namespace Unify2D.Core
             TweenManager.Instance.Update(DeltaTime);
         }
 
-
+        public void SetDeltaTime(float totalMilliseconds)
+        {
+            DeltaTime = totalMilliseconds;
+        }
     }
 }

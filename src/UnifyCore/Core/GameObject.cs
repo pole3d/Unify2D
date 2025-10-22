@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Text;
 using Unify2D.Core.Graphics;
+using UnifyCore;
 
 namespace Unify2D.Core
 {
@@ -84,6 +85,17 @@ namespace Unify2D.Core
             _renderers = new List<Renderer>();
             Name = "GameObject";
         }
+
+        public static GameObject CreatePrefab(string guid)
+        {
+            var asset = GameCore.Current.AssetsManager.GetAsset(guid);
+            var go = InstantiateFromPrefab(asset.Path);
+            go.UID = s_maxID++;
+            SceneManager.Instance.CurrentScene.AddRootGameObject(go);
+
+            return go;
+        }
+
 
         public static GameObject Create()
         {

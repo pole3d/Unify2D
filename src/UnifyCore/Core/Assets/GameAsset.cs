@@ -21,6 +21,9 @@ namespace Unify2D.Core
         [JsonIgnore]
         public object Asset => _asset;
 
+        [JsonIgnore]
+        public string Path => _path;
+
         [JsonProperty]
         private string _name;
 

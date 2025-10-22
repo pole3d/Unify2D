@@ -101,6 +101,8 @@ namespace UnifyGame
         {
             CheckAltEnter();
 
+            _core.SetDeltaTime((float)gameTime.ElapsedGameTime.TotalSeconds);
+
             if (SceneManager.Instance.CurrentScene != null)
                 SceneManager.Instance.CurrentScene.Update(gameTime);
         }
