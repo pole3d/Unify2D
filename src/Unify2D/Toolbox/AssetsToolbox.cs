@@ -25,6 +25,9 @@ namespace Unify2D.Toolbox
         //   private List<Asset> _assets = new List<Asset>();
         private HashSet<string> _extensionsToIgnore = new HashSet<string> { ".csproj", ".dll", ".sln", ".meta" };
 
+        private Dictionary<string, string> _extensionsToIcon = new Dictionary<string, string>{ { ".jpg", "T" }, { ".png", "T" },
+                                                                                                 { ".cs", "S" } , { ".scene","C"} };
+
         private const string OpenPrefabButtonLabel = "Open Prefab";
         private const string InstantiateAsGameObjectButtonLabel = "Instantiate as GameObject";
         private const string DeleteButtonLabel = "Delete";
@@ -264,12 +267,17 @@ namespace Unify2D.Toolbox
                 if (node.AssetContent is PrefabAssetContent)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(0.0f, 1.0f, 1.0f, 1.0f)); // Blue color for prefabs
-                    ImGui.TreeNodeEx($"{node.Name}##{node.GetHashCode()}", base_flags);
+                    ImGui.TreeNodeEx($"P|{node.Name}##{node.GetHashCode()}", base_flags);
                     ImGui.PopStyleColor();
                 }
                 else
                 {
-                    ImGui.TreeNodeEx($"{node.Name}##{node.GetHashCode()}", base_flags);
+                    string icon = "";
+
+                    if (_extensionsToIcon.ContainsKey(node.Extension))
+                        icon = _extensionsToIcon[node.Extension];
+
+                    ImGui.TreeNodeEx($"{icon + "|" + node.Name}##{node.GetHashCode()}", base_flags);
                 }
 
                 SetNode(node);
