@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using System;
+using System.ComponentModel;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Xml.Linq;
@@ -36,20 +37,6 @@ public class UIImage : UIComponent, IPointerEventReceiver
         {
             Debug.Log(e.ToString());
         }
-    }
-
-    public void SetSprite(Texture2D asset, PropertyInfo propertyInfo, string path)
-    {
-        //try
-        //{
-        //    _asset = new GameAsset(, asset, propertyInfo.Name, path);
-        //}
-        //catch (Exception e)
-        //{
-        //    Console.WriteLine(e.ToString());
-        //}
-
-        //_imageGuid = _asset.GUID;
     }
 
     public override void Load(Game game, GameObject go)

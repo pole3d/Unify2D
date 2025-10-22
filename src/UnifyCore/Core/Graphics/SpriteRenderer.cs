@@ -14,13 +14,14 @@ namespace Unify2D.Core.Graphics
     /// </summary>
     public class SpriteRenderer : Renderer
     {
+        [JsonIgnore]
+        public Texture2D Texture { get; set; }
         public Color Color { get; set; } = Color.White;
         public float LayerDepth { get; set; } = 0f;
 
         [JsonProperty]
         string _spriteGuid;
 
-        Texture2D _texture;
         GameAsset _asset;
 
         public void Initialize(Game game, GameObject go, GameAsset asset)
@@ -31,10 +32,10 @@ namespace Unify2D.Core.Graphics
 
             try
             {
-                _texture = asset.LoadTexture();
+                Texture = asset.LoadTexture();
 
-                if (_texture != null)
-                    _gameObject.BoundingSize = new Vector2(_texture.Width, _texture.Height);
+                if (Texture != null)
+                    _gameObject.BoundingSize = new Vector2(Texture.Width, Texture.Height);
             }
             catch (Exception e)
             {
@@ -44,7 +45,7 @@ namespace Unify2D.Core.Graphics
 
         internal override void Destroy()
         {
-            _texture = null;
+            Texture = null;
             if (_asset != null)
                 _asset.Release();
         }
@@ -63,10 +64,10 @@ namespace Unify2D.Core.Graphics
 
         public override void Draw()
         {
-            if (_texture == null)
+            if (Texture == null)
                 return;
 
-            GameCore.Current.SpriteBatch.Draw(_texture, _gameObject.Position,
+            GameCore.Current.SpriteBatch.Draw(Texture, _gameObject.Position,
      null, Color, _gameObject.Rotation, _gameObject.BoundingSize / 2, _gameObject.Scale,
      SpriteEffects.None, LayerDepth);
         }

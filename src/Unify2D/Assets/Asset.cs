@@ -89,5 +89,11 @@ namespace Unify2D.Assets
         {
             return Name;
         }
+
+        internal virtual void LoadContent()
+        {
+           
+        }
+
     }
 }

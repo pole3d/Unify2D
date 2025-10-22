@@ -6,6 +6,8 @@
         public Asset Asset => _asset;
         protected Asset _asset;
 
+        public object RawAsset;
+
         public AssetContent(Asset asset)
         {
             _asset = asset;

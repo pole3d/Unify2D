@@ -49,19 +49,21 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
     protected virtual Dictionary<string, Asset> GetAssetLists()
     {
         Dictionary<string, Asset> dictionary = new();
-        (string name, string path) baseAsset = GetBaseAsset();
+        //(string name, string path) baseAsset = GetBaseAsset();
+        Asset baseAsset = new Asset("", "Rectangle", ".png", "null");
+        dictionary.Add(baseAsset.Name, baseAsset);
+        string extension = GetAssetExtension();
 
-        if (baseAsset.path.Length > 0 && File.Exists(baseAsset.path + ".meta"))
+        if (baseAsset.Path.Length > 0 && File.Exists(baseAsset.Path + ".meta"))
         {
-            Asset assetDictionary = new Asset(File.ReadAllText(baseAsset.path + ".meta"), baseAsset.name, "", baseAsset.path);
-            dictionary.Add(baseAsset.name, assetDictionary);
+            Asset assetDictionary = new Asset(File.ReadAllText(baseAsset.Path + ".meta"), baseAsset.Name, extension, baseAsset.Path);
+            dictionary.Add(baseAsset.Name, assetDictionary);
         }
 
         //Asset assetDictionary = new Asset(File.ReadAllText(baseAsset.path + ".meta"), baseAsset.name, "", baseAsset.path);
         //dictionary.Add(baseAsset.name, assetDictionary);
 
         List<Asset> assets = GameEditor.Instance.AssetsToolBox.Assets;
-        string extension = GetAssetExtension();
         foreach (Asset asset in assets)
         {
             string name = asset.Name;
@@ -71,7 +73,7 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
                 path = path.Remove(0, 1);
                 path = $"{GameCore.Current.Game.Content.RootDirectory}/Assets/{path}";
 
-                Asset assetAdd = new Asset(File.ReadAllText(path + ".meta"), name, "", path);
+                Asset assetAdd = new Asset(File.ReadAllText(path + ".meta"), name, extension, path);
                 dictionary.Add(name, assetAdd);
             }
         }
@@ -121,10 +123,16 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
 
         if (foldoutIndex == _currentFoldoutIndex) return;
         _currentFoldoutIndex = foldoutIndex;
-        Debug.Log("SET ASSET");
 
-        asset = _currentFoldoutIndex == 0 ? GetInitializeAsset() : (T)Convert.ChangeType(dictionaryList[_currentFoldoutIndex].Value, typeof(T));
-        SetAsset(asset, property, instance as Component, dictionaryList[_currentFoldoutIndex].Value.Path);
+        var selected = dictionaryList[_currentFoldoutIndex].Value;
+
+        T assetContent = selected.AssetContent.RawAsset as T;
+        if (assetContent == null)
+        {
+            selected.AssetContent.Load();
+        }
+
+        SetAsset(selected.AssetContent.RawAsset as T, property, instance as Component, dictionaryList[_currentFoldoutIndex].Value.Path);
 
         // property.SetValue(instance, asset);
     }
