@@ -1196,6 +1196,15 @@ namespace Microsoft.Xna.Framework
 		{
 			return new Vector3(v.X, v.Y, 0);
 		}
+
+		/// <summary>
+		/// Implicitly converts a float to a Vector2, where the X and Y are both assigned to the given float value.
+		/// </summary>
+		/// <param name="value"></param>
+		public static implicit operator Vector2(float value)
+		{
+			return new Vector2(value);
+		}
 		#endregion
 	}
 }

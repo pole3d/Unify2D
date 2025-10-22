@@ -2,6 +2,9 @@
 
 namespace Unify2D.Core;
 
+/// <summary>
+/// Handles the click interactions with the mouse
+/// </summary>
 public interface IPointerEventReceiver
 {
     public Action OnClick { get; set; }

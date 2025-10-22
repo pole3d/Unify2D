@@ -19,6 +19,29 @@ public class EventSystem : Component
     public override void Update(GameCore game)
     {
         var mouseState = Input.Mouse.GetState();
+        UpdatePointerHover(mouseState);
+        UpdatePointerClick(mouseState);
+    }
+
+    private void UpdatePointerHover(MouseState mouseState)
+    {
+        IEnumerable<GameObject> objectsInScene = SceneManager.Instance.CurrentScene.GameObjectsWithChildren;
+        foreach (GameObject obj in objectsInScene)
+        {
+            foreach (Component component in obj.Components)
+            {
+                if (component is IPointerHoverHandler receiver == false) continue;
+                var isHovering = IsMouseInBounds(mouseState, obj);
+                if (isHovering)
+                    receiver.OnHover();
+                else
+                    receiver.OnNotHover();
+            }
+        }
+    }
+
+    private void UpdatePointerClick(MouseState mouseState)
+    {
         if (mouseState.LeftButton == Input.ButtonState.Pressed)
         {
             _receivers.Clear();
@@ -34,7 +57,6 @@ public class EventSystem : Component
                     _receivers.Add(receiver);
                 }
             }
-
 
             if (_lastMouseState.LeftButton != mouseState.LeftButton) _receivers.ForEach(r => r.OnPointerDown());
             _receivers.ForEach(r => r.OnPointerPressed());

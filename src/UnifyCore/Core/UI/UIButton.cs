@@ -6,7 +6,7 @@ namespace Unify2D.Core;
 /// <summary>
 /// This class inherit from <see cref="UIComponent"/> class and is used to create a button;
 /// </summary>
-public class UIButton : UIComponent, IPointerEventReceiver
+public class UIButton : UIComponent, IPointerEventReceiver, IPointerHoverHandler
 {
     public Color NormalColor { get; set; } = Color.White;
     public Color HoverColor { get; set; } = Color.White;
@@ -17,6 +17,8 @@ public class UIButton : UIComponent, IPointerEventReceiver
     public Action OnClick { get; set; }
     public Action OnPressed { get; set; }
     public Action OnRelease { get; set; }
+    public Action OnHoverEvent { get; set; }
+    public Action OnNotHoverEvent { get; set; }
 
     private UIImage _image;
 
@@ -58,8 +60,6 @@ public class UIButton : UIComponent, IPointerEventReceiver
     public void OnPointerDown()
     {
         OnClick?.Invoke();
-
-        //_gameObject.Scale *= 1.01f;
     }
 
     public void OnPointerPressed()
@@ -71,6 +71,18 @@ public class UIButton : UIComponent, IPointerEventReceiver
     public void OnPointerUp()
     {
         OnRelease?.Invoke();
+        _image.Color = NormalColor;
+    }
+
+    public void OnHover()
+    {
+        OnHoverEvent?.Invoke();
+        _image.Color = HoverColor;
+    }
+
+    public void OnNotHover()
+    {
+        OnNotHoverEvent?.Invoke();
         _image.Color = NormalColor;
     }
 }
