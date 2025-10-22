@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Unify2D.Core;
 
-public class UIImage : UIComponent, IPointerEventReceiver
+public class UIImage : UIComponent
 {
     [JsonIgnore] public Texture2D Sprite { get; private set; }
     public string SpritePath { get; set; }
@@ -64,26 +64,5 @@ public class UIImage : UIComponent, IPointerEventReceiver
         GameCore.Current.SpriteBatch.Draw(Sprite, _gameObject.Position,
             null, Color, _gameObject.Rotation, origin, _gameObject.Scale,
             SpriteEffects.None, 0);
-    }
-
-    public Action OnClick { get; set; }
-    public Action OnPressed { get; set; }
-    public Action OnRelease { get; set; }
-    
-    public void OnPointerDown()
-    {
-        OnClick?.Invoke();
-
-        foreach (var component in GameObject.Components)
-        {
-            if (component is UIButton button)
-            {
-                button.OnButtonPressed?.Invoke();
-                //TEST
-                //Console.WriteLine("CLICK");
-                _gameObject.Scale *= 1.01f;
-                //---
-            }
-        }
     }
 }

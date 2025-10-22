@@ -128,6 +128,21 @@ namespace Unify2D.Core
             parent.Children.Add(child);
         }
 
+        public IEnumerable<GameObject> GetAllChildren()
+        {
+            if (Children != null)
+            {
+                foreach (var child in Children)
+                {
+                    yield return child;
+                    foreach (var grandChild in child.GetAllChildren())
+                    {
+                        yield return grandChild;
+                    }
+                }
+            }
+        }
+
         public void Initialize(Game game)
         {
             if (Children != null)

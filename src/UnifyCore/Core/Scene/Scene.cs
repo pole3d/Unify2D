@@ -38,14 +38,11 @@ namespace Unify2D
                 foreach (var gameObject in GameObjects)
                 {
                     yield return gameObject;
-
-                    if (gameObject.Children != null)
+                    foreach (var child in gameObject.GetAllChildren())
                     {
-                        foreach (var child in gameObject.Children)
-                        {
-                            yield return child;
-                        }
+                        yield return child;
                     }
+                    
                 }
             }
         }
