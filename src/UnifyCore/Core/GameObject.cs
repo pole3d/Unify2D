@@ -496,6 +496,8 @@ namespace Unify2D.Core
             var sizeX = Bounds.BoundingSize.X * 0.5f * Scale.X;
             var sizeY = Bounds.BoundingSize.Y * 0.5f * Scale.Y;
 
+            point = point.RotateAroundPoint(-Rotation, Position);
+
             return point.X > Position.X - origin.X - sizeX - (sizeX * 2f * anchor.X)
                 && point.X < Position.X - origin.X + sizeX - (sizeX * 2f * anchor.X)
                 && point.Y > Position.Y - origin.Y - sizeY - (sizeY * 2f * anchor.Y)
