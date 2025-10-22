@@ -104,8 +104,7 @@ namespace Unify2D
 
                     foreach (var item in SceneManager.Instance.CurrentScene.GameObjectsWithChildren)
                     {
-                        if (mouseWorldPosition.X >= item.Position.X - item.BoundingSize.X *item.Scale.X / 2 && mouseWorldPosition.X <= item.Position.X + item.BoundingSize.X * item.Scale.X / 2
-                            && mouseWorldPosition.Y >= item.Position.Y - item.BoundingSize.Y * item.Scale.Y / 2 && mouseWorldPosition.Y <= item.Position.Y + item.BoundingSize.Y * item.Scale.Y / 2)
+                        if (item.IsPointInBounds(mouseWorldPosition))
                         {
                             if (item == _gameObject && gameTime.TotalGameTime.Seconds - _timeAtLastClick < 0.5f)
                             {

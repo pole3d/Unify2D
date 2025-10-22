@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 
@@ -28,7 +27,11 @@ public class UIImage : UIComponent
         Sprite = GameCore.Current.ResourcesManager.GetTexture(path);
 
         if (Sprite != null)
-            _gameObject.BoundingSize = new Vector2(Sprite.Width, Sprite.Height);
+        {
+            _gameObject.Bounds.BoundingSize = new Vector2(Sprite.Width, Sprite.Height);
+            _gameObject.Bounds.PositionOffset = Origin;
+            _gameObject.Bounds.Pivot = GetAnchorVector(Anchor);
+        }
     }
     
     public override void Load(Game game, GameObject go)

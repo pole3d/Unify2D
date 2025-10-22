@@ -46,6 +46,7 @@ public class EventSystem : Component
         {
             _receivers.Clear();
 
+            // TODO : Iterate over only UI GameObjects (by keeping track of them)
             IEnumerable<GameObject> objectsInScene = SceneManager.Instance.CurrentScene.GameObjectsWithChildren;
             foreach (GameObject obj in objectsInScene)
             {
@@ -82,21 +83,7 @@ public class EventSystem : Component
     {
         if (obj.HasUIComponents() == false) return false;
 
-        var uiComponent = obj.UIComponents.First();
-        var anchor = uiComponent.GetAnchorVector(uiComponent.Anchor) - new Vector2(0.5f);
-        var origin = uiComponent.Origin;
-        //Vector2 origin = Origin + (new Vector2(Sprite.Width, Sprite.Height)) * GetAnchorVector(Anchor);
-        //Vector2 origin = uiComponent.Origin + obj.BoundingSize * GetAnchorVector(Anchor);
-
-
-
-        Vector2 mousePosition = Camera.Main.LocalToWorld(new Vector2(mouseState.X, mouseState.Y));
-        var sizeX = obj.BoundingSize.X * 0.5f * obj.Scale.X;
-        var sizeY = obj.BoundingSize.Y * 0.5f * obj.Scale.Y;
-
-        return mousePosition.X > obj.Position.X - origin.X - sizeX - (sizeX * 2f * anchor.X)
-            && mousePosition.X < obj.Position.X - origin.X + sizeX - (sizeX * 2f * anchor.X)
-            && mousePosition.Y > obj.Position.Y - origin.Y - sizeY - (sizeY * 2f * anchor.Y)
-            && mousePosition.Y < obj.Position.Y - origin.Y + sizeY - (sizeY * 2f * anchor.Y);
+        var mousePosition = Camera.Main.LocalToWorld(new Vector2(mouseState.X, mouseState.Y));
+        return obj.IsPointInBounds(mousePosition);
     }
 }

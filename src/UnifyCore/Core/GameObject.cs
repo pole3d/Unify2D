@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Unify2D.Core.Graphics;
+using UnifyCore.Core;
 
 namespace Unify2D.Core
 {
@@ -53,7 +54,7 @@ namespace Unify2D.Core
 
         public Vector2 Scale = new Vector2(1, 1);
 
-        public Vector2 BoundingSize { get; set; } = new Vector2(30, 30);
+        public Bounds Bounds { get; set; } = new Bounds(30);
         public bool PositionUpdated { get { return m_positionUpdated; } }
         public bool RotationUpdated { get { return m_rotationUpdated; } }
 
@@ -313,6 +314,14 @@ namespace Unify2D.Core
 
             m_positionUpdated = false;
             m_rotationUpdated = false;
+
+            if (Children != null)
+            {
+                foreach (var child in Children)
+                {
+                    child.Update(core);
+                }
+            }
         }
 
         public void RemoveComponent(Component item)
@@ -467,6 +476,26 @@ namespace Unify2D.Core
                 }
             }
         }
+
+        /// <summary>
+        /// Check if a point is inside a gameObject's bounds
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public bool IsPointInBounds(Vector2 point)
+        {
+            var anchor = Bounds.Pivot - new Vector2(0.5f);
+            var origin = Bounds.PositionOffset;
+
+            var sizeX = Bounds.BoundingSize.X * 0.5f * Scale.X;
+            var sizeY = Bounds.BoundingSize.Y * 0.5f * Scale.Y;
+
+            return point.X > Position.X - origin.X - sizeX - (sizeX * 2f * anchor.X)
+                && point.X < Position.X - origin.X + sizeX - (sizeX * 2f * anchor.X)
+                && point.Y > Position.Y - origin.Y - sizeY - (sizeY * 2f * anchor.Y)
+                && point.Y < Position.Y - origin.Y + sizeY - (sizeY * 2f * anchor.Y);
+        }
     }
     public static class GameObjectExtensions
     {
@@ -488,6 +517,8 @@ namespace Unify2D.Core
 
             return copy;
         }
+
+
     }
 }
 
