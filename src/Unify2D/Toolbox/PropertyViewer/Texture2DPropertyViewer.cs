@@ -41,10 +41,10 @@ public class Texture2DPropertyViewer : AssetTypePropertyViewer<Texture2D>
         return baseRectangle;
     }
 
-    public override (string name, string path) GetBaseAsset()
-    {
-        return ("Rectangle", "null");
-    }
+    //public override (string name, string path) GetBaseAsset()
+    //{
+    //    return ("Rectangle", "null");
+    //}
 
     public override void SetAsset(Texture2D asset, PropertyInfo propertyInfo, Component component)
     {

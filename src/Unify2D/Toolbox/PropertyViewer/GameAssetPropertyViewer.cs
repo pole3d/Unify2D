@@ -49,7 +49,7 @@ namespace Unify2D.Toolbox
                             property.SetValue(instance,asset.ToGameAsset());
                         }
                         else
-                            spriteRenderer.Initialize(GameCore.Current.Game, spriteRenderer.GameObject, asset.ToGameAsset());
+                            spriteRenderer.SetAsset(asset.ToGameAsset());
                     }
                     if (instance is UIImage imageRenderer)
                     {
@@ -58,7 +58,16 @@ namespace Unify2D.Toolbox
                             property.SetValue(instance, asset.ToGameAsset());
                         }
                         else
-                            imageRenderer.Initialize(GameCore.Current.Game, imageRenderer.GameObject, asset.ToGameAsset());
+                            imageRenderer.SetAsset(asset.ToGameAsset());
+                    }
+                    if (instance is UIText textRenderer)
+                    {
+                        if (textRenderer.GameObject == null) // is prefab TODO : better system to detect
+                        {
+                            property.SetValue(instance, asset.ToGameAsset());
+                        }
+                        else
+                            textRenderer.SetAsset(asset.ToGameAsset());
                     }
                 }
             }

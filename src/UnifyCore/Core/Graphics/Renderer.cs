@@ -13,7 +13,7 @@ namespace Unify2D.Core.Graphics
     public abstract class Renderer : Component
     {
 
-        public override void Load(Game game, GameObject go)
+        public override void Load(Game game)
         {
 
         }

@@ -164,7 +164,7 @@ namespace Unify2D.Core
             foreach (Component component in _components)
             {
                 component.Initialize(this);
-                component.Load(game, this);
+                component.Load(game);
 
                 if (component is Renderer renderer)
                 {
@@ -178,7 +178,7 @@ namespace Unify2D.Core
 
             foreach (var component in _components)
             {
-                component.LateLoad(game, this);
+                component.LateLoad(game);
             }
         }
 

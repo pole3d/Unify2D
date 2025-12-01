@@ -17,7 +17,7 @@ namespace UnifyCore.Core.Physics
         private Body _body;
         private float _radius = 1f;
 
-        public override void Load(Game game, GameObject go)
+        public override void Load(Game game)
         {
             Rigidbody rb = _gameObject.GetComponent<Rigidbody>();
 
