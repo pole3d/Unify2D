@@ -103,9 +103,9 @@ namespace Unify2D.Core
             TweenManager.Instance.Update(DeltaTime);
         }
 
-        public void SetDeltaTime(float totalMilliseconds)
+        public void SetDeltaTime(float timeSeconds)
         {
-            DeltaTime = totalMilliseconds;
+            DeltaTime = timeSeconds;
         }
     }
 }

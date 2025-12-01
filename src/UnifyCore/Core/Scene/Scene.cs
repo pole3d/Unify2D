@@ -132,7 +132,7 @@ namespace Unify2D
                 if (canvas != null) canvas.Draw();
             }
         }
-        public void Update(GameTime gameTime)
+        public void Update(float elapsedTime)
         {
             if (_isLoaded == false)
                 return;
@@ -146,7 +146,7 @@ namespace Unify2D
             for (int i = 0; i < _gameObjectsToDestroy.Count; i++)
                 GameObjects.Remove(_gameObjectsToDestroy[i]);
 
-            PhysicsSettings.World.Step((float)gameTime.ElapsedGameTime.TotalSeconds);
+            PhysicsSettings.World.Step(elapsedTime);
 
             _gameObjectsToDestroy.Clear();
         }

@@ -120,7 +120,7 @@ namespace Unify2D.Core
             child.Parent = parent;
             parent.Children.Add(child);
 
-            SceneManager.Instance.CurrentScene.AddRootGameObject(child);
+            //SceneManager.Instance.CurrentScene.AddRootGameObject(child);
 
             return child;
         }
@@ -202,6 +202,15 @@ namespace Unify2D.Core
 
         public bool HasRenderer()
         {
+            if (Children != null)
+            {
+                foreach (GameObject child in Children)
+                {
+                    if (child.HasRenderer())
+                        return true;
+                }
+            }
+
             return _renderers.Count > 0;
         }
 
@@ -215,6 +224,14 @@ namespace Unify2D.Core
             foreach (Renderer renderer in _renderers)
             {
                 renderer.Draw();
+            }
+
+            if (Children != null)
+            {
+                foreach (GameObject child in Children)
+                {
+                    child.Draw();
+                }
             }
         }
         internal void DrawGizmo()
