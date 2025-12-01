@@ -21,7 +21,7 @@ namespace UnifyCore
                 return texture;
 
             if (startAsset)
-                texture = GameCore.Current.Game.Content.Load<Texture2D>($"./Assets/{path}");
+                texture = GameCore.Current.Game.Content.Load<Texture2D>($"./Assets{path}");
             else
                 texture = GameCore.Current.Game.Content.Load<Texture2D>($"{path}");
 

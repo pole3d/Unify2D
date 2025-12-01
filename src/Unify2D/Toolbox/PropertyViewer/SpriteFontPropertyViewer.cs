@@ -30,7 +30,7 @@ namespace Unify2D.Toolbox
         }
 
         protected override string GetPropertyName() => "Font";
-        protected override string GetAssetExtension() => ".ttf";
+        protected override string[] GetAssetExtension() => new string[] { ".ttf" };
         public override (string name, string path) GetBaseAsset() => ("Arial", ArialFontPath);
         
         public override void SetAsset(SpriteFont asset, PropertyInfo propertyInfo, Component component, string path)

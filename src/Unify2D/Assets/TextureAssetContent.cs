@@ -15,24 +15,23 @@ namespace Unify2D.Assets
         {
         }
 
-
         public override void Load()
         {
-            if (_asset.Path != "null")
+            if (!string.IsNullOrEmpty(_asset.Path))
                 RawAsset = GameCore.Current.ResourcesManager.GetTexture(_asset.Path, false);
             else
             {
-                Texture2D baseRectangle = new Texture2D(GameCore.Current.GraphicsDevice, 100, 100);
+                //Texture2D baseRectangle = new Texture2D(GameCore.Current.GraphicsDevice, 100, 100);
 
-                Color[] colors = new Color[100 * 100];
+                //Color[] colors = new Color[100 * 100];
 
-                for (int i = 0; i < colors.Length; i++)
-                {
-                    colors[i] = Color.White;
-                }
+                //for (int i = 0; i < colors.Length; i++)
+                //{
+                //    colors[i] = Color.White;
+                //}
 
-                baseRectangle.SetData(colors);
-                RawAsset = (Texture2D)baseRectangle;
+                //baseRectangle.SetData(colors);
+                //RawAsset = (Texture2D)baseRectangle;
             }
         }
     }

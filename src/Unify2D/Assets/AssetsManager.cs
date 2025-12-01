@@ -22,7 +22,7 @@ namespace Unify2D.Assets
             { typeof(FontAssetContent), new List<string> { ".ttf" } },
             { typeof(SceneAssetContent), new List<string> { ".scene" } },
             { typeof(PrefabAssetContent), new List<string> { ".prefab" } },
-            { typeof(TextureAssetContent), new List<string> { ".png", ".jpg" } }
+            { typeof(TextureAssetContent), new List<string> { ".png", ".bmp", ".gif", ".jpg", ".jpeg", ".tga", ".tif", ".tiff", ".dds" } }
         };
         
 

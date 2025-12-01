@@ -18,7 +18,7 @@ public class Texture2DPropertyViewer : AssetTypePropertyViewer<Texture2D>
     }
 
     protected override string GetPropertyName() => "Sprite";
-    protected override string GetAssetExtension() => ".png";
+    protected override string[] GetAssetExtension() => new string[] { ".png", ".bmp", ".gif", ".jpg", ".jpeg", ".tga", ".tif", ".tiff", ".dds" };
 
 
     /// <summary>

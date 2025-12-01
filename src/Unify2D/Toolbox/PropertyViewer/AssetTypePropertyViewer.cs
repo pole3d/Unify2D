@@ -18,7 +18,7 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
 {
     protected abstract T GetAssetFromPath(string path);
     protected abstract string GetPropertyName();
-    protected abstract string GetAssetExtension(); //TODO add the possibility to have multiple extension, maybe create a subclass "extension to asset" ? 
+    protected abstract string[] GetAssetExtension(); //TODO add the possibility to have multiple extension, maybe create a subclass "extension to asset" ? 
     public abstract T GetInitializeAsset();
     public abstract (string name, string path) GetBaseAsset();
     public abstract void SetAsset(T asset, PropertyInfo propertyInfo, Component component, string path);
@@ -50,31 +50,32 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
     {
         Dictionary<string, Asset> dictionary = new();
         //(string name, string path) baseAsset = GetBaseAsset();
-        Asset baseAsset = new Asset("", "Rectangle", ".png", "null");
+        Asset baseAsset = new Asset("", "Rectangle", ".png", string.Empty);
         dictionary.Add(baseAsset.Name, baseAsset);
-        string extension = GetAssetExtension();
+        string[] extension = GetAssetExtension();
 
         if (baseAsset.Path.Length > 0 && File.Exists(baseAsset.Path + ".meta"))
         {
-            Asset assetDictionary = new Asset(File.ReadAllText(baseAsset.Path + ".meta"), baseAsset.Name, extension, baseAsset.Path);
+            Asset assetDictionary = new Asset(File.ReadAllText(baseAsset.Path + ".meta"), baseAsset.Name, extension[0], baseAsset.Path);
             dictionary.Add(baseAsset.Name, assetDictionary);
         }
-
-        //Asset assetDictionary = new Asset(File.ReadAllText(baseAsset.path + ".meta"), baseAsset.name, "", baseAsset.path);
-        //dictionary.Add(baseAsset.name, assetDictionary);
 
         List<Asset> assets = GameEditor.Instance.AssetsToolBox.Assets;
         foreach (Asset asset in assets)
         {
             string name = asset.Name;
             string path = asset.FullPath;
-            if (path.EndsWith(extension))
-            {
-                path = path.Remove(0, 1);
-                path = $"{GameCore.Current.Game.Content.RootDirectory}/Assets/{path}";
 
-                Asset assetAdd = new Asset(File.ReadAllText(path + ".meta"), name, extension, path);
-                dictionary.Add(name, assetAdd);
+            for (int i = 0; i < extension.Length; i++)
+            {
+                if (path.EndsWith(extension[i]))
+                {
+                    path = path.Remove(0, 1);
+                    path = $"{GameCore.Current.Game.Content.RootDirectory}/Assets/{path}";
+
+                    Asset assetAdd = new Asset(File.ReadAllText(path + ".meta"), name, extension[i], path);
+                    dictionary.Add(name, assetAdd);
+                }
             }
         }
 
