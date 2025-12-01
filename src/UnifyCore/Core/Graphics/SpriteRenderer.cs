@@ -14,28 +14,40 @@ namespace Unify2D.Core.Graphics
     /// </summary>
     public class SpriteRenderer : Renderer
     {
+        public GameAsset AssetTexture{ get; set; }
+
         [JsonIgnore]
         public Texture2D Texture { get; set; }
+
         public Color Color { get; set; } = Color.White;
         public float LayerDepth { get; set; } = 0f;
 
-        [JsonProperty]
-        string _spriteGuid;
 
-        GameAsset _asset;
+        public override void Initialize(GameObject go)
+        {
+            base.Initialize(go);
+
+            Texture = GameCore.Current.ResourcesManager.GetTexture(null);
+            _gameObject.Bounds.BoundingSize = new Vector2(Texture.Width, Texture.Height);
+            _gameObject.Bounds.Pivot = 0.5f;
+        }
 
         public void Initialize(Game game, GameObject go, GameAsset asset)
         {
+            
             _gameObject = go;
-            _asset = asset;
-            _spriteGuid = asset.GUID;
+            AssetTexture = asset;
 
             try
             {
-                Texture = asset.LoadTexture();
+                if (AssetTexture != null)
+                {
+                    Texture = GameCore.Current.ResourcesManager.GetTexture(asset.Path);
+       
+                    _gameObject.Bounds.BoundingSize = new Vector2(Texture.Width, Texture.Height);
+                    _gameObject.Bounds.Pivot = 0.5f;
+                }
 
-                if (Texture != null)
-                    _gameObject.BoundingSize = new Vector2(Texture.Width, Texture.Height);
             }
             catch (Exception e)
             {
@@ -46,16 +58,17 @@ namespace Unify2D.Core.Graphics
         internal override void Destroy()
         {
             Texture = null;
-            if (_asset != null)
-                _asset.Release();
+            if (AssetTexture != null)
+                AssetTexture.Release();
         }
+
 
         public override void Load(Game game, GameObject go)
         {
-            var asset = GameCore.Current.AssetsManager.GetAsset(_spriteGuid);
+            var asset = GameCore.Current.AssetsManager.GetAsset(AssetTexture.GUID);
             if (asset == null)
             {
-                Debug.LogError($"Can't load sprite {_spriteGuid} {_gameObject.Name}");
+                Debug.LogError($"Can't load sprite {AssetTexture.GUID} {_gameObject.Name}");
                 return;
             }
 
@@ -68,7 +81,7 @@ namespace Unify2D.Core.Graphics
                 return;
 
             GameCore.Current.SpriteBatch.Draw(Texture, _gameObject.Position,
-     null, Color, _gameObject.Rotation, _gameObject.BoundingSize / 2, _gameObject.Scale,
+     null, Color, _gameObject.Rotation, _gameObject.Bounds.BoundingSize / 2, _gameObject.Scale,
      SpriteEffects.None, LayerDepth);
         }
     }

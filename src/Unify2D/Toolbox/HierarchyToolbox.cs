@@ -12,7 +12,7 @@ namespace Unify2D.Toolbox
     internal class HierarchyToolbox : Toolbox
     {
         private int _countGO = 0;
-      //  private int _currentIndex = 0;
+        //  private int _currentIndex = 0;
         private GameObject _goToDestroy = null;
         private bool _isAnyWidgetHovered = false;
 
@@ -33,10 +33,7 @@ namespace Unify2D.Toolbox
         {
             Vector2 size = ImGui.GetContentRegionAvail();
 
-
-
             ImGui.Begin(HierarchyWindowLabel);
-
 
             _isAnyWidgetHovered = false;
 
@@ -84,6 +81,12 @@ namespace Unify2D.Toolbox
                     DrawNode(gameObject);
                 }
             }
+
+            // Empty node to deselect when you click on it
+            var base_flags = ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.Leaf |
+                             ImGuiTreeNodeFlags.NoTreePushOnOpen; 
+            ImGui.TreeNodeEx($"     ", base_flags);
+
             ImGui.EndGroup();
 
             Vector2 bb_min = ImGui.GetItemRectMin();
@@ -209,7 +212,7 @@ namespace Unify2D.Toolbox
                 if (ImGui.Button(CreatePrefabButtonLabel))
                 {
                     // Prefab creation Logic
-                    Asset prefabAsset = GameEditor.Instance.AssetManager.CreateAsset<PrefabAssetContent>(go.Name);
+                    Asset prefabAsset = GameEditor.Instance.EditorAssetManager.CreateAsset<PrefabAssetContent>(go.Name);
                     ((PrefabAssetContent)prefabAsset.AssetContent).Save(go);
 
                     ImGui.CloseCurrentPopup();

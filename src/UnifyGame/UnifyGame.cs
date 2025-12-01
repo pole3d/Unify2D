@@ -23,11 +23,13 @@ namespace UnifyGame
         const int _resolutionFullHeight = 1080;
         const int _resolutionWindowedWidth = 1280;
         const int _resolutionWindowedHeight = 720;
+        const float _timeStep60fps = 0.016f;
 
         private GraphicsDeviceManager _graphics;
         private Unify2D.ImGuiRenderer.Renderer _imGuiRenderer;
 
-
+        bool _fixFramerate;
+        float _timerFps;
         GameCore _core;
 
 
@@ -40,7 +42,9 @@ namespace UnifyGame
             _graphics.PreferredBackBufferHeight = _resolutionFullHeight;
             _graphics.IsFullScreen = true;
             _graphics.PreferMultiSampling = true;
-            _graphics.SynchronizeWithVerticalRetrace = false;
+            _graphics.SynchronizeWithVerticalRetrace = true;
+
+            _fixFramerate = true;
 
             IsMouseVisible = true;
         }
@@ -101,8 +105,27 @@ namespace UnifyGame
         {
             CheckAltEnter();
 
+            float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             if (SceneManager.Instance.CurrentScene != null)
-                SceneManager.Instance.CurrentScene.Update(gameTime);
+            {
+                if (_fixFramerate)
+                {
+                    _core.SetDeltaTime(_timeStep60fps);
+
+                    _timerFps += elapsed;
+                    if (_timerFps >= _timeStep60fps)
+                    {
+                        _timerFps -= _timeStep60fps;
+                        SceneManager.Instance.CurrentScene.Update(_timeStep60fps);
+                    }
+                }
+                else
+                {
+                    _core.SetDeltaTime(elapsed);
+                    SceneManager.Instance.CurrentScene.Update(elapsed);
+                }
+            }
         }
 
         bool _wasAltEnterPressed;

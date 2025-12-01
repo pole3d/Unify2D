@@ -14,15 +14,19 @@ namespace Unify2D.Toolbox
     /// <summary>
     /// The <see cref="AssetsToolbox"/> class,
     /// is a specialized toolbox designed to provide a user interface to visualise and select <see cref="Asset">s.
+    /// TODO refactor this to divise visualization and data
     /// </summary>
     internal class AssetsToolbox : Toolbox
     {
-        public List<Asset> Assets => _assets;
+        public List<Asset> Assets => _editor.EditorAssetManager.Assets;
 
         private string _path;
         private List<Asset> _selectedAssets = new List<Asset>();
-        private List<Asset> _assets = new List<Asset>();
-        private HashSet<string> _extensionsToIgnore = new HashSet<string> { ".csproj", ".dll", ".sln" , ".meta" };
+        //   private List<Asset> _assets = new List<Asset>();
+        private HashSet<string> _extensionsToIgnore = new HashSet<string> { ".csproj", ".dll", ".sln", ".meta" };
+
+        private Dictionary<string, string> _extensionsToIcon = new Dictionary<string, string>{ { ".jpg", "T" }, { ".png", "T" },
+                                                                                                 { ".cs", "S" } , { ".scene","C"} };
 
         private const string OpenPrefabButtonLabel = "Open Prefab";
         private const string InstantiateAsGameObjectButtonLabel = "Instantiate as GameObject";
@@ -78,7 +82,7 @@ namespace Unify2D.Toolbox
         {
             assetFromPath = null;
 
-            foreach (Asset asset in _assets)
+            foreach (Asset asset in _editor.EditorAssetManager.Assets)
             {
                 if (path == asset.FullPath)
                 {
@@ -95,7 +99,8 @@ namespace Unify2D.Toolbox
         /// </summary>
         internal override void Reset()
         {
-            _assets.Clear();
+            _editor.EditorAssetManager.ClearAssets();
+
             DeselectedAssets();
             _path = _editor.AssetsPath;
 
@@ -119,13 +124,13 @@ namespace Unify2D.Toolbox
         private Asset CreateAssetFromDirectory(string directory)
         {
             string relativeDirectory = directory.Replace(_path, string.Empty);
-            
+
             string directoryName = GetDirectoryNameSafe(relativeDirectory);
             string path = relativeDirectory.Replace(directoryName, "");
 
-            Asset newAsset = new Asset(" " , directoryName, "", path, true);
+            Asset newAsset = new Asset(directoryName, directoryName, "", path, true);
 
-            _assets.Add(newAsset);
+            _editor.EditorAssetManager.AddAsset(directoryName, newAsset);
 
             string[] filesInDirectory = Directory.GetFiles($"{directory}");
             string[] directoriesInDirectory = Directory.GetDirectories($"{directory}");
@@ -152,7 +157,7 @@ namespace Unify2D.Toolbox
             string relativeFile = file.Replace(_path, string.Empty);
             string extension = Path.GetExtension(relativeFile);
 
-            if (GameEditor.Instance.AssetManager.IsAssetExtension(extension) == false)
+            if (GameEditor.Instance.EditorAssetManager.IsAssetExtension(extension) == false)
                 return null;
 
             if (_extensionsToIgnore.Contains(extension))
@@ -161,7 +166,7 @@ namespace Unify2D.Toolbox
             string pathMeta = file + ".meta";
             string uid = string.Empty;
 
-            if ( File.Exists(pathMeta) == false )
+            if (File.Exists(pathMeta) == false)
             {
                 uid = Guid.NewGuid().ToString();
                 File.WriteAllText(pathMeta, uid);
@@ -171,11 +176,11 @@ namespace Unify2D.Toolbox
                 uid = File.ReadAllText(pathMeta);
             }
 
-            Asset newAsset = new Asset (uid,Path.GetFileNameWithoutExtension(relativeFile),
+            Asset newAsset = new Asset(uid, Path.GetFileNameWithoutExtension(relativeFile),
                 Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile));
 
 
-            _assets.Add(newAsset);
+            _editor.EditorAssetManager.AddAsset(uid, newAsset);
 
             return newAsset;
         }
@@ -240,7 +245,7 @@ namespace Unify2D.Toolbox
 
         private void DrawAssetTree()
         {
-            IEnumerable<Asset> rootAssets = _assets.Where(asset => asset.Parent == null).ToList();
+            IEnumerable<Asset> rootAssets = _editor.EditorAssetManager.Assets.Where(asset => asset.Parent == null).ToList();
 
             foreach (Asset rootAsset in rootAssets)
                 DrawNode(rootAsset);
@@ -262,12 +267,17 @@ namespace Unify2D.Toolbox
                 if (node.AssetContent is PrefabAssetContent)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(0.0f, 1.0f, 1.0f, 1.0f)); // Blue color for prefabs
-                    ImGui.TreeNodeEx($"{node.Name}##{node.GetHashCode()}", base_flags);
+                    ImGui.TreeNodeEx($"P|{node.Name}##{node.GetHashCode()}", base_flags);
                     ImGui.PopStyleColor();
                 }
                 else
                 {
-                    ImGui.TreeNodeEx($"{node.Name}##{node.GetHashCode()}", base_flags);
+                    string icon = "";
+
+                    if (_extensionsToIcon.ContainsKey(node.Extension))
+                        icon = _extensionsToIcon[node.Extension];
+
+                    ImGui.TreeNodeEx($"{icon + "|" + node.Name}##{node.GetHashCode()}", base_flags);
                 }
 
                 SetNode(node);
@@ -351,7 +361,7 @@ namespace Unify2D.Toolbox
                     {
                         PrefabAssetContent prefabContent = selectedAsset.AssetContent as PrefabAssetContent;
                         prefabContent.Instantiate(SceneManager.Instance.CurrentScene);
-      
+
                     }
                     ImGui.CloseCurrentPopup();
 
@@ -432,7 +442,7 @@ namespace Unify2D.Toolbox
             if (!ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
                 return;
 
-            int index = _assets.FindIndex(a => a == asset);
+            int index = _editor.EditorAssetManager.Assets.FindIndex(a => a == asset);
             ImGui.SetDragDropPayload(AssetDragDropPayloadType, (IntPtr)(&index), sizeof(int));
 
             Clipboard.Content = asset;
@@ -458,7 +468,7 @@ namespace Unify2D.Toolbox
                 if (payload.Delivery)
                 {
                     int sourceIndex = *(int*)payload.Data;
-                    Asset movingAsset = _assets[sourceIndex];
+                    Asset movingAsset = _editor.EditorAssetManager.Assets[sourceIndex];
                     string oldPath = CoreTools.CombinePath(_path, movingAsset.FullPath);
                     string combinePath = CoreTools.CombinePath(_path, asset.FullPath);
                     string newPath = CoreTools.CombinePath(combinePath, movingAsset.Name) + movingAsset.Extension;
@@ -553,7 +563,7 @@ namespace Unify2D.Toolbox
                             File.Delete(file);
                     }
 
-                    Directory.Delete(path,true);
+                    Directory.Delete(path, true);
                 }
                 else
                     File.Delete(path);
@@ -570,20 +580,20 @@ namespace Unify2D.Toolbox
             System.Diagnostics.Process.Start("explorer.exe", fullPath);
         }
 
-        // After a Reset or loading scene, we need to link the instantiated game objects to their respective prefabs
-        private void LinkInstantiatedObjectsToPrefabs()
-        {
-            foreach (var go in SceneManager.Instance.CurrentScene.GameObjects)
-            {
-                if (go.Tag is PrefabAssetContent myPrefabContent)
-                {
-                    if (_assets.Contains(go.Tag))
-                    {
-                        myPrefabContent.AddGoInstantiated(go);
-                    }
-                }
-            }
-        }
+        //// After a Reset or loading scene, we need to link the instantiated game objects to their respective prefabs
+        //private void LinkInstantiatedObjectsToPrefabs()
+        //{
+        //    foreach (var go in SceneManager.Instance.CurrentScene.GameObjects)
+        //    {
+        //        if (go.Tag is PrefabAssetContent myPrefabContent)
+        //        {
+        //            if (_assets.Contains(go.Tag))
+        //            {
+        //                myPrefabContent.AddGoInstantiated(go);
+        //            }
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Returns the name of the last directory

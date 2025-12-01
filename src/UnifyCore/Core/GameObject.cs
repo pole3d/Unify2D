@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Xna.Framework;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Microsoft.Xna.Framework;
-using Newtonsoft.Json;
 using Unify2D.Core.Graphics;
-using UnifyCore;
+using UnifyCore.Core;
 
 namespace Unify2D.Core
 {
@@ -20,58 +20,86 @@ namespace Unify2D.Core
 
         public string Name { get; set; }
 
+
         public Vector2 Position
         {
-            get { return GetParentPosition() + LocalPosition; }
+            get { return GetParentPosition() + LocalPosition.Rotate(Rotation); }
             set
             {
-                LocalPosition = value - GetParentPosition();
+                LocalPosition = value.Rotate(-Rotation) - GetParentPosition();
                 m_positionUpdated = true;
             }
         }
 
         public Vector2 LocalPosition { get; set; }
 
-        public float Rotation { get { return m_rotation; } set { m_rotation = value; m_rotationUpdated = true; } }
-        public Vector2 Scale { get; set; } = new Vector2(1, 1);
-        public Vector2 BoundingSize { get; set; } = new Vector2(30, 30);
+        public float Rotation
+        {
+            get { return GetParentRotation() + LocalRotation; }
+            set
+            {
+                LocalRotation = value - GetParentRotation();
+                m_rotationUpdated = true;
+            }
+        }
+        public float LocalRotation
+        {
+            get { return m_rotation; }
+            set
+            {
+                m_rotation = value;
+                m_rotationUpdated = true;
+            }
+        }
+
+        public Vector2 Scale = new Vector2(1, 1);
+
+        public Bounds Bounds { get; set; } = new Bounds(30);
         public bool PositionUpdated { get { return m_positionUpdated; } }
         public bool RotationUpdated { get { return m_rotationUpdated; } }
 
         [JsonIgnore]
         public object Tag { get; set; }
+        public string PrefabGUID { get; set; }
         public List<GameObject> Children { get; set; }
         [JsonIgnore]
         public GameObject Parent { get; set; }
         [JsonIgnore]
         public IEnumerable<Component> Components => _components;
+        public IEnumerable<UIComponent> UIComponents => _uiComponents;
+        public int ComponentCount => _components.Count;
 
         private static string _originalAssetPath;
-        
+
         private float m_rotation;
         private bool m_positionUpdated, m_rotationUpdated;
 
-
-        [JsonIgnore]
-        public PrefabInstance PrefabInstance => _prefabInstance;
-
         private static JsonSerializerSettings s_serializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.Auto }; //type name should be read
-        
+
         List<Renderer> _renderers;
+        List<UIComponent> _uiComponents;
 
         [JsonProperty]
         List<Component> _components;
-        
-        [JsonIgnore]
-        private PrefabInstance _prefabInstance;
 
         public GameObject()
         {
             _components = new List<Component>();
+            _uiComponents = new List<UIComponent>();
             _renderers = new List<Renderer>();
             Name = "GameObject";
-
         }
+
+        public static GameObject CreatePrefab(string guid)
+        {
+            var asset = GameCore.Current.AssetsManager.GetAsset(guid);
+            var go = InstantiateFromPrefab(asset.Path);
+            go.UID = s_maxID++;
+            SceneManager.Instance.CurrentScene.AddRootGameObject(go);
+
+            return go;
+        }
+
 
         public static GameObject Create()
         {
@@ -91,9 +119,9 @@ namespace Unify2D.Core
 
             child.Parent = parent;
             parent.Children.Add(child);
-            
-            SceneManager.Instance.CurrentScene.AddRootGameObject(child);
-            
+
+            //SceneManager.Instance.CurrentScene.AddRootGameObject(child);
+
             return child;
         }
 
@@ -101,9 +129,24 @@ namespace Unify2D.Core
         {
             if (parent.Children == null)
                 parent.Children = new List<GameObject>();
-            
+
             child.Parent = parent;
             parent.Children.Add(child);
+        }
+
+        public IEnumerable<GameObject> GetAllChildren()
+        {
+            if (Children != null)
+            {
+                foreach (var child in Children)
+                {
+                    yield return child;
+                    foreach (var grandChild in child.GetAllChildren())
+                    {
+                        yield return grandChild;
+                    }
+                }
+            }
         }
 
         public void Initialize(Game game)
@@ -117,14 +160,19 @@ namespace Unify2D.Core
                 }
             }
 
+            _uiComponents.Clear();
             foreach (Component component in _components)
             {
                 component.Initialize(this);
-                component.Load(game,this);
+                component.Load(game, this);
 
                 if (component is Renderer renderer)
                 {
                     _renderers.Add(renderer);
+                }
+                if (component is UIComponent uiComponent)
+                {
+                    _uiComponents.Add(uiComponent);
                 }
             }
 
@@ -132,6 +180,11 @@ namespace Unify2D.Core
             {
                 component.LateLoad(game, this);
             }
+        }
+
+        public Component GetComponent(int i) 
+        {
+            return _components[i];
         }
 
         public T GetComponent<T>() where T : Component
@@ -149,7 +202,21 @@ namespace Unify2D.Core
 
         public bool HasRenderer()
         {
+            if (Children != null)
+            {
+                foreach (GameObject child in Children)
+                {
+                    if (child.HasRenderer())
+                        return true;
+                }
+            }
+
             return _renderers.Count > 0;
+        }
+
+        public bool HasUIComponents()
+        {
+            return _uiComponents.Count > 0;
         }
 
         internal void Draw()
@@ -157,6 +224,14 @@ namespace Unify2D.Core
             foreach (Renderer renderer in _renderers)
             {
                 renderer.Draw();
+            }
+
+            if (Children != null)
+            {
+                foreach (GameObject child in Children)
+                {
+                    child.Draw();
+                }
             }
         }
         internal void DrawGizmo()
@@ -171,7 +246,7 @@ namespace Unify2D.Core
         {
             var components = _components;
             _components = new List<Component>();
-            
+
             foreach (var item in components)
             {
                 AddComponent(item);
@@ -193,8 +268,10 @@ namespace Unify2D.Core
                 _renderers.Add(renderer);
             }
 
-            //ui
+            //ui TODO : refactor this
             Scene scene = SceneManager.Instance.CurrentScene;
+            var uicomponent = component as UIComponent;
+
             if (component is Canvas canvas)
             {
                 scene.CanvasList.Add(canvas);
@@ -204,11 +281,12 @@ namespace Unify2D.Core
                 if (scene.EventSystem != null)
                 {
                     return;
-                } 
+                }
                 scene.AddEventSystem(eventSystem);
             }
-            else if (component is UIComponent)
+            else if (uicomponent != null)
             {
+                _uiComponents.Add(uicomponent);
                 bool hasCanvas = scene.HasCanvas(out Canvas gameCoreCanvas);
                 if (hasCanvas && gameCoreCanvas.GameObject == this)
                 {
@@ -216,7 +294,7 @@ namespace Unify2D.Core
                     component.Destroy();
                     return;
                 }
-                
+
                 if (HasCanvasInParents(out Canvas _) == false)
                 {
                     if (Parent != null)
@@ -224,13 +302,13 @@ namespace Unify2D.Core
                         Parent.Children.Remove(this);
                         Parent = null;
                     }
-                    
+
                     if (hasCanvas == false)
                     {
                         GameObject canvasGameObject = Create();
                         canvasGameObject.Name = "Canvas";
                         canvasGameObject.AddComponent<Canvas>();
-                        
+
                         SetChild(canvasGameObject, this);
                     }
                     else
@@ -244,7 +322,7 @@ namespace Unify2D.Core
             component.Reset(this);
 
             _components.Add(component);
-            
+
             SceneManager.Instance.CurrentScene.UpdateCanvas();
         }
 
@@ -254,7 +332,7 @@ namespace Unify2D.Core
             {
                 item.Update(core);
             }
-            
+
             ///To be refactored as FixedUpdate later
             foreach (var item in _components)
             {
@@ -263,6 +341,14 @@ namespace Unify2D.Core
 
             m_positionUpdated = false;
             m_rotationUpdated = false;
+
+            if (Children != null)
+            {
+                foreach (var child in Children)
+                {
+                    child.Update(core);
+                }
+            }
         }
 
         public void RemoveComponent(Component item)
@@ -282,36 +368,55 @@ namespace Unify2D.Core
 
             _components.Clear();
         }
-        
+
         private void DestroyComponent(Component component)
         {
             if (component is Renderer renderer)
             {
                 _renderers.Remove(renderer);
             }
-            
+
             if (component is Canvas canvas)
             {
                 SceneManager.Instance.CurrentScene.CanvasList.Remove(canvas);
             }
 
+            if (component is UIComponent uiComponent)
+            {
+                _uiComponents.Remove(uiComponent);
+            }
+
             component.Destroy();
-            
+
             SceneManager.Instance.CurrentScene.UpdateCanvas();
         }
 
         Vector2 GetParentPosition()
         {
             Vector2 position = Vector2.Zero;
-            GameObject parent = Parent;
+            GameObject current = Parent;
 
-            while (parent != null)
+            while (current != null)
             {
-                position += Parent.LocalPosition;
-                parent = parent.Parent;
+                position += current.LocalPosition.Rotate(current.Rotation);
+                current = current.Parent;
             }
 
             return position;
+        }
+
+        float GetParentRotation()
+        {
+            float rotation = 0;
+            GameObject current = Parent;
+
+            while (current != null)
+            {
+                rotation += current.LocalRotation;
+                current = current.Parent;
+            }
+
+            return rotation;
         }
 
         public bool HasCanvasInParents(out Canvas canvas)
@@ -334,22 +439,16 @@ namespace Unify2D.Core
 
             return false;
         }
-        
+
         /// <summary>
         ///  Deserialize a prefab asset into a gameObject, load it and add it to the current core.
         /// </summary>
          public static GameObject InstantiateFromPrefab(string originalAssetName)
          {
               StringBuilder sb = new StringBuilder(originalAssetName);
-             // if (sb.ToString().StartsWith("/") == false)
-             //     sb.Insert(0, "/");
+
              sb.Insert(0, GameCore.Current.Game.AssetsPath);
-             // if (sb.ToString().EndsWith(".prefab") == false)
-             //     sb.Append(".prefab");
-             
-             // Set original asset path for prefab instance 
-             _originalAssetPath = sb.ToString();
-             
+ 
              // Get serialized text
              string serializedText = File.ReadAllText(Path.GetFullPath(sb.ToString()));
              
@@ -357,18 +456,17 @@ namespace Unify2D.Core
              GameObject go = JsonConvert.DeserializeObject<GameObject>(serializedText, s_serializerSettings);
              go.Initialize(GameCore.Current.Game);
 
-             
-             return go;
-         }
 
-        public string GetOriginalAssetPath()
-        {
-            return _originalAssetPath;
+            return go;
         }
+
+        //public string GetOriginalAssetPath()
+        //{
+        //    return _originalAssetPath;
+        //}
 
         internal void LinkToPrefabInstance(PrefabInstance prefabInstance)
         {
-            _prefabInstance = prefabInstance;
             ApplyOverridesFromPrefabInstance(prefabInstance);
         }
 
@@ -378,25 +476,49 @@ namespace Unify2D.Core
                 Name = prefabInstance.Name; //Temporary, overridden name should be saved in the override list, instead of using PrefabInstance.Name.
             // apply overrides here
         }
-        
+
         public void UpdateFromPrefab(GameObject updatedGameObject)
         {
             if (Tag != null)
             {
-                // Apply overrides here
-                foreach (var property in typeof(GameObject).GetProperties())
+
+                for (int i = 0; i < updatedGameObject.ComponentCount;i++)
                 {
-                    if (property.CanWrite)
+                    var component = updatedGameObject.GetComponent(i);
+                    foreach (var property in component.GetType().GetProperties())
                     {
-                        property.SetValue(this, property.GetValue(updatedGameObject));
+                        if (property.Name == "GameObject")
+                            continue;
+
+                        if (property.CanWrite)
+                        {
+                            property.SetValue(_components[i], property.GetValue(component));
+                        }
                     }
                 }
-
-                foreach (var field in typeof(GameObject).GetFields(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance))
-                {
-                    field.SetValue(this, field.GetValue(updatedGameObject));
-                }
             }
+        }
+
+        /// <summary>
+        /// Check if a point is inside a gameObject's bounds
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public bool IsPointInBounds(Vector2 point)
+        {
+            var anchor = Bounds.Pivot - new Vector2(0.5f);
+            var origin = Bounds.PositionOffset;
+
+            var sizeX = Bounds.BoundingSize.X * 0.5f * Scale.X;
+            var sizeY = Bounds.BoundingSize.Y * 0.5f * Scale.Y;
+
+            point = point.RotateAroundPoint(-Rotation, Position);
+
+            return point.X > Position.X - origin.X - sizeX - (sizeX * 2f * anchor.X)
+                && point.X < Position.X - origin.X + sizeX - (sizeX * 2f * anchor.X)
+                && point.Y > Position.Y - origin.Y - sizeY - (sizeY * 2f * anchor.Y)
+                && point.Y < Position.Y - origin.Y + sizeY - (sizeY * 2f * anchor.Y);
         }
     }
     public static class GameObjectExtensions
@@ -419,6 +541,8 @@ namespace Unify2D.Core
 
             return copy;
         }
+
+
     }
 }
 

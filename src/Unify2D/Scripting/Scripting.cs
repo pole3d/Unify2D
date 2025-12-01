@@ -116,7 +116,10 @@ namespace Unify2D.Scripting
                 List<Component> newComponents = new List<Component>();
                 foreach (var oldComponent in go.Components)
                 {
-                    var newComp = Activator.CreateInstance(GetNewType(oldComponent.GetType())) as Component;
+                    var oldType = oldComponent.GetType();
+                    var newType = GetNewType(oldType);
+
+                    var newComp = Activator.CreateInstance(newType) as Component;
                     newComponents.Add(newComp);
 
                     var oldFields = oldComponent.GetType().GetFields(

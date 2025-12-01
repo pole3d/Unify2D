@@ -13,7 +13,7 @@ namespace Unify2D.Toolbox
     internal class ScriptToolbox : Toolbox
     {
         const string ProjectFile = "GameAssembly.csproj";
-        const string TemplateProjectDirectory = "GameAssemblyProject";
+        const string TemplateProjectDirectory = @"..\..\..\GameAssemblyProject";
 
         string TemplateProjectPathFull => CoreTools.CombinePath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), TemplateProjectDirectory);
 

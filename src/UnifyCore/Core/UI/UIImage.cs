@@ -2,22 +2,22 @@
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using System;
-using System.ComponentModel;
-using System.Reflection;
-using System.Reflection.Metadata;
-using System.Xml.Linq;
 
 namespace Unify2D.Core;
 
-public class UIImage : UIComponent, IPointerEventReceiver
+public class UIImage : UIComponent
 {
     [JsonIgnore]
     public Texture2D Texture { get; set; }
     public Color Color { get; set; } = Color.White;
 
     [JsonProperty]
-    string _imageGuid;
+    string _imageGuid
+    { get => guidField; 
+      set => guidField = value;
+    }
 
+    string guidField;
     GameAsset _asset;
 
     public void Initialize(Game game, GameObject go, GameAsset asset)
@@ -26,12 +26,17 @@ public class UIImage : UIComponent, IPointerEventReceiver
         _asset = asset;
         _imageGuid = asset.GUID;
 
+
         try
         {
-            Texture = asset.LoadTexture();
+            Texture = GameCore.Current.ResourcesManager.GetTexture(asset.Path);
 
             if (Texture != null)
-                _gameObject.BoundingSize = new Vector2(Texture.Width, Texture.Height);
+            {
+                _gameObject.Bounds.BoundingSize = new Vector2(Texture.Width, Texture.Height);
+                _gameObject.Bounds.PositionOffset = Origin;
+                _gameObject.Bounds.Pivot = GetAnchorVector(Anchor);
+            }
         }
         catch (Exception e)
         {
@@ -47,7 +52,7 @@ public class UIImage : UIComponent, IPointerEventReceiver
         if (asset == null)
         {
 
-            Debug.LogError($"Can't load sprite {_imageGuid} {_gameObject.Name}");
+            Debug.LogError($"Can't load image {_imageGuid} {_gameObject.Name}");
             return;
         }
 
@@ -72,27 +77,5 @@ public class UIImage : UIComponent, IPointerEventReceiver
         GameCore.Current.SpriteBatch.Draw(Texture, _gameObject.Position,
             null, Color, _gameObject.Rotation, origin, _gameObject.Scale,
             SpriteEffects.None, 0);
-    }
-
-    public Action OnClick { get; set; }
-    public Action OnPressed { get; set; }
-    public Action OnRelease { get; set; }
-
-    public void OnPointerClick()
-    {
-        OnClick?.Invoke();
-
-        foreach (var component in GameObject.Components)
-        {
-            if (component is UIButton button)
-            {
-                button.OnButtonPressed?.Invoke();
-            }
-        }
-
-        //TEST
-        Console.WriteLine("CLICK");
-        _gameObject.Scale *= 2;
-        //---
     }
 }

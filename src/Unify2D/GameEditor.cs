@@ -45,7 +45,7 @@ namespace Unify2D
         public Scripting.Scripting Scripting => _scripting;
         public ImGuiRenderer.Renderer GuiRenderer => _imGuiRenderer;
 
-       // public GameObject Selected => _selected;
+        // public GameObject Selected => _selected;
 
         public SceneManager SceneEditorManager => _sceneEditorManager;
         internal GameEditorUI GameEditorUI => _gameEditorUI;
@@ -56,7 +56,7 @@ namespace Unify2D
         internal HierarchyToolbox HierarchyToolbox { get; private set; }
         internal AssetsToolbox AssetsToolBox { get; private set; }
         internal SpriteEditorToolbox SpriteEditorToolbox { get; private set; }
-        internal AssetManager AssetManager { get; private set; }
+        internal EditorAssetManager EditorAssetManager { get; private set; }
 
         public GameCoreViewer GameCoreViewerScene => _coreViewerScene;
         public List<GameCoreViewer> GameCoreViewers => _coreViewers;
@@ -75,11 +75,10 @@ namespace Unify2D
         InputsManager _inputsManager;
         List<GameCoreViewer> _coreViewers = new List<GameCoreViewer>();
 
-
         List<Toolbox.Toolbox> _toolboxes = new List<Toolbox.Toolbox>();
 
         //GameObject _selected;
-       // bool _projectLoaded = false;
+        // bool _projectLoaded = false;
 
         List<(RenderTarget2D, IntPtr)> _unbindTargets = new List<(RenderTarget2D, IntPtr)>();
 
@@ -98,8 +97,20 @@ namespace Unify2D
 
             _gameEditorUI = new GameEditorUI(this);
             _sceneEditorManager = SceneManager.Instance;
+            _sceneEditorManager.OnSceneLoaded += SceneLoaded;
 
             Exiting += (object _, EventArgs _) => { _sceneEditorManager.SaveCurrentSceneToJson(); };
+        }
+
+        private void SceneLoaded()
+        {
+            foreach (var go in _sceneEditorManager.CurrentScene.GameObjects)
+            {
+                if (string.IsNullOrEmpty(go.PrefabGUID) == false)
+                {
+                    PrefabAssetContent.LinkPrefabToInstance(go,EditorAssetManager);
+                }
+            }
         }
 
         protected override void Initialize()
@@ -107,7 +118,7 @@ namespace Unify2D
             _settings = new GameEditorSettings();
             _settings.Load(this);
 
-            AssetManager = new AssetManager(this);
+            EditorAssetManager = new EditorAssetManager(this);
 
             // Create game core and load scene content / Not useful for now
             _coreViewerScene = new GameCoreViewer(new GameCoreEditor(this), ".scene");

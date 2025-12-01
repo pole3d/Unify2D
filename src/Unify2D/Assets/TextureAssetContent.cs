@@ -17,8 +17,9 @@ namespace Unify2D.Assets
 
         public override void Load()
         {
-            if (!string.IsNullOrEmpty(_asset.Path))
-                RawAsset = GameCore.Current.ResourcesManager.GetTexture(_asset.Path, false);
+
+            if (string.IsNullOrEmpty(_asset.Path) == false)
+                RawAsset = GameCore.Current.ResourcesManager.GetTexture(_asset.Path);
             else
             {
                 //Texture2D baseRectangle = new Texture2D(GameCore.Current.GraphicsDevice, 100, 100);

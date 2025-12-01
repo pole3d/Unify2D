@@ -75,8 +75,8 @@ namespace Unify2D.Toolbox
                     
                     PreloadProject();
 
-                    SceneManager.Instance.CreateOrOpenSceneAtStart(pathProject, GameEditor.ScenesFolder);
                     LoadProject();
+                    SceneManager.Instance.CreateOrOpenSceneAtStart(pathProject, GameEditor.ScenesFolder);
                 }
                 ImGui.PopStyleColor();
                 ImGui.PopStyleColor();
@@ -113,6 +113,7 @@ namespace Unify2D.Toolbox
             PreloadProject();
 
             SceneManager.Instance.CreateOrOpenSceneAtStart(path, GameEditor.ScenesFolder);
+
             LoadProject();
 
         }

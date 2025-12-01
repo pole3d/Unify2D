@@ -38,14 +38,11 @@ namespace Unify2D
                 foreach (var gameObject in GameObjects)
                 {
                     yield return gameObject;
-
-                    if (gameObject.Children != null)
+                    foreach (var child in gameObject.GetAllChildren())
                     {
-                        foreach (var child in gameObject.Children)
-                        {
-                            yield return child;
-                        }
+                        yield return child;
                     }
+                    
                 }
             }
         }
@@ -112,6 +109,7 @@ namespace Unify2D
 
         private void SilentErrors(object sender, Newtonsoft.Json.Serialization.ErrorEventArgs e)
         {
+            Console.WriteLine(e.ErrorContext.Error);
             e.ErrorContext.Handled = true;
         }
 
@@ -134,7 +132,7 @@ namespace Unify2D
                 if (canvas != null) canvas.Draw();
             }
         }
-        public void Update(GameTime gameTime)
+        public void Update(float elapsedTime)
         {
             if (_isLoaded == false)
                 return;
@@ -148,7 +146,7 @@ namespace Unify2D
             for (int i = 0; i < _gameObjectsToDestroy.Count; i++)
                 GameObjects.Remove(_gameObjectsToDestroy[i]);
 
-            PhysicsSettings.World.Step((float)gameTime.ElapsedGameTime.TotalSeconds);
+            PhysicsSettings.World.Step(elapsedTime);
 
             _gameObjectsToDestroy.Clear();
         }

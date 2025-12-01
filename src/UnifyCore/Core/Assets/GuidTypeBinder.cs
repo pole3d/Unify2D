@@ -2,6 +2,8 @@
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using Unify2D;
 using Unify2D.Core.Graphics;
 
@@ -31,7 +33,18 @@ public class GuidTypeBinder : ISerializationBinder
             return type;
         }
 
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        var assemblies = new List<Assembly>(AppDomain.CurrentDomain.GetAssemblies());
+        try
+        {
+            var assembly = Assembly.LoadFrom(Path.Combine(AppContext.BaseDirectory, "GameAssembly.dll"));
+            assemblies.Add(assembly);
+
+        }
+        catch (Exception)
+        {
+        }
+
+
         foreach (var asm in assemblies)
         {
             foreach (var t in asm.GetTypes())

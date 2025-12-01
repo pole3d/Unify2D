@@ -9,12 +9,12 @@ namespace Unify2D.Assets
         public string GUID => _guid;
 
         public string Name => _name;
-        public string Extension => _extension;  
-        public string Path  => _path; 
-        public AssetContent AssetContent  { get; set; }
+        public string Extension => _extension;
+        public string Path => _path;
+        public AssetContent AssetContent { get; set; }
         public bool IsDirectory => _isDirectory;
         public string FullPath => _fullPath;
-        
+
         public string MegaPath { get; set; }
         public List<Asset> Children => new(_children);
         public Asset Parent => _parent;
@@ -28,7 +28,7 @@ namespace Unify2D.Assets
         string _fullPath;
         private Asset _parent;
 
-        public Asset(string guid,string name, string extension, string path, bool isDirectory = false)
+        public Asset(string guid, string name, string extension, string path, bool isDirectory = false)
         {
             _guid = guid;
             _name = name;
@@ -39,7 +39,7 @@ namespace Unify2D.Assets
             // Create the asset content depending on the extension. Example .jpg and .png will create a TextureAssetContent, .cs will create a ScriptAssetContent...
             if (String.IsNullOrEmpty(extension) == false)
             {
-                AssetContent = (AssetContent)Activator.CreateInstance(GameEditor.Instance.AssetManager.ExtensionToAssetType[extension], this);
+                AssetContent = (AssetContent)Activator.CreateInstance(GameEditor.Instance.EditorAssetManager.ExtensionToAssetType[extension], this);
             }
 
             _fullPath = CoreTools.CombinePath(path, name + extension);
@@ -50,13 +50,13 @@ namespace Unify2D.Assets
         //    _name = name;
         //    _path = path;
         //    _isDirectory = isDirectory;
-            
+
         //    _fullPath = CoreTools.CombinePath(path, name);
         //}
-        
+
         public GameAsset ToGameAsset()
         {
-            return new  GameAsset(GUID, AssetContent, _name , _fullPath);
+            return new GameAsset(GUID, AssetContent, _name, _fullPath);
         }
 
         public void AddChild(Asset child)
