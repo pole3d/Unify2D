@@ -22,8 +22,6 @@ namespace Unify2D.Core.Graphics
         public Color Color { get; set; } = Color.White;
         public float LayerDepth { get; set; } = 0f;
 
-        [JsonProperty]
-        string _spriteGuid;
 
         public override void Initialize(GameObject go)
         {
@@ -40,13 +38,10 @@ namespace Unify2D.Core.Graphics
             _gameObject = go;
             AssetTexture = asset;
 
-
             try
             {
                 if (AssetTexture != null)
                 {
-                    _spriteGuid = asset.GUID;
-
                     Texture = GameCore.Current.ResourcesManager.GetTexture(asset.Path);
        
                     _gameObject.Bounds.BoundingSize = new Vector2(Texture.Width, Texture.Height);
@@ -70,10 +65,10 @@ namespace Unify2D.Core.Graphics
 
         public override void Load(Game game, GameObject go)
         {
-            var asset = GameCore.Current.AssetsManager.GetAsset(_spriteGuid);
+            var asset = GameCore.Current.AssetsManager.GetAsset(AssetTexture.GUID);
             if (asset == null)
             {
-                Debug.LogError($"Can't load sprite {_spriteGuid} {_gameObject.Name}");
+                Debug.LogError($"Can't load sprite {AssetTexture.GUID} {_gameObject.Name}");
                 return;
             }
 
