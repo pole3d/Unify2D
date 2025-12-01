@@ -61,7 +61,7 @@ namespace Unify2D.Toolbox
 
 		public static void RemoveFilePicker(object o) => _filePickers.Remove(o);
 
-		public bool Draw()
+		public bool Draw(GameEditor editor)
 		{
 			ImGui.Text("Current Folder: " + Path.GetFileName(RootFolder) + CurrentFolder.Replace(RootFolder, ""));
 			bool result = false;
@@ -114,7 +114,8 @@ namespace Unify2D.Toolbox
 			{
 				result = false;
 				ImGui.CloseCurrentPopup();
-			}
+                editor.HidePopup();
+            }
 
 			if (OnlyAllowFolders)
 			{

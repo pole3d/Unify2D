@@ -1,10 +1,12 @@
 ﻿namespace Unify2D.Assets
 {
-    internal abstract class AssetContent
+    public abstract class AssetContent
     {
         public bool IsLoaded { get; set; }
         public Asset Asset => _asset;
         protected Asset _asset;
+
+        public object RawAsset;
 
         public AssetContent(Asset asset)
         {

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
+using System.IO;
 using Unify2D.Core;
 
 namespace UnifyCore
@@ -26,20 +27,17 @@ namespace UnifyCore
 
         public Texture2D GetTexture(string path)
         {
-            if ( string.IsNullOrEmpty( path ) )
+            if (string.IsNullOrEmpty(path))
                 return _whiteTexture;
 
             if (_textures.TryGetValue(path, out Texture2D texture))
                 return texture;
 
             texture = GameCore.Current.Game.Content.Load<Texture2D>($"./Assets/{path}");
+
             _textures.Add(path, texture);
 
             return texture;
         }
-
-
-
-
     }
 }

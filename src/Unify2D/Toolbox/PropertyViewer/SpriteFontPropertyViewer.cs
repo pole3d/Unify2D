@@ -33,15 +33,15 @@ namespace Unify2D.Toolbox
         protected override string GetAssetExtension() => ".ttf";
         public override (string name, string path) GetBaseAsset() => ("Arial", ArialFontPath);
         
-        public override void SetAsset(SpriteFont asset, PropertyInfo propertyInfo, Component component, string path)
+        public override void SetAsset(SpriteFont asset, PropertyInfo propertyInfo, Component component)
         {
             propertyInfo.SetValue(component, asset);
         
-            //find a way to make this dynamic
-            if (component is UIText uiImage)
-            {
-                uiImage.SetFont(path);
-            }
+            ////find a way to make this dynamic
+            //if (component is UIText uiImage)
+            //{
+            //    uiImage.SetFont(path);
+            //}
         }
 
         public override SpriteFont GetInitializeAsset()
