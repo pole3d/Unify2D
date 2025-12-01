@@ -1,0 +1,86 @@
+[
+  {
+    "_components": [
+      {
+        "$type": "Unify2D.Core.Canvas, UnifyCore",
+        "SortOrder": 0,
+        "IsVisible": true
+      }
+    ],
+    "UID": 0,
+    "Name": "GameObject_0",
+    "Position": "0, 0",
+    "LocalPosition": "0, 0",
+    "Rotation": 0.0,
+    "Scale": "1, 1",
+    "BoundingSize": "30, 30",
+    "PositionUpdated": true,
+    "RotationUpdated": true,
+    "Children": [
+      {
+        "_components": [
+          {
+            "$type": "Unify2D.Core.UIImage, UnifyCore",
+            "_imageGuid": null,
+            "Color": "255, 255, 255, 255",
+            "OnClick": null,
+            "OnPressed": null,
+            "OnRelease": null,
+            "Origin": "0, 0",
+            "Anchor": 0
+          }
+        ],
+        "UID": 1,
+        "Name": "GameObject_1",
+        "Position": "0, 0",
+        "LocalPosition": "0, 0",
+        "Rotation": 0.0,
+        "Scale": "1, 1",
+        "BoundingSize": "30, 30",
+        "PositionUpdated": true,
+        "RotationUpdated": true,
+        "Children": null
+      }
+    ]
+  },
+  {
+    "_components": [
+      {
+        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
+        "_spriteGuid": null,
+        "Color": "255, 255, 255, 255",
+        "LayerDepth": 0.0
+      }
+    ],
+    "UID": 0,
+    "Name": "GameObject_0",
+    "Position": "0, 0",
+    "LocalPosition": "0, 0",
+    "Rotation": 0.0,
+    "Scale": "1, 1",
+    "BoundingSize": "30, 30",
+    "PositionUpdated": true,
+    "RotationUpdated": true,
+    "Children": null
+  },
+  {
+    "_components": [
+      {
+        "$type": "Unify2D.Core.Graphics.SpriteRenderer, UnifyCore",
+        "_spriteGuid": "901a70d9-3efb-437e-862e-814b37c36bef",
+        "Color": "255, 255, 255, 255",
+        "LayerDepth": 0.0
+      }
+    ],
+    "UID": 1,
+    "Name": "Capture d'écran 2025-10-10 102856",
+    "Position": "92, 45",
+    "LocalPosition": "92, 45",
+    "Rotation": 0.0,
+    "Scale": "1, 1",
+    "BoundingSize": "1919, 1032",
+    "PositionUpdated": true,
+    "RotationUpdated": true,
+    "Children": null
+  }
+]

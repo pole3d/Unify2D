@@ -61,7 +61,11 @@ namespace Unify2D.Core
         }
 
 
-
+        public void SetTexture(string path)
+        {
+            _path = path;
+            LoadTexture();
+        }
 
 
     }
