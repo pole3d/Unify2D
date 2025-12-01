@@ -20,6 +20,11 @@ namespace UnifyCore
 
         public GameAsset GetAsset(string guid)
         {
+            if ( String.IsNullOrEmpty(guid))
+            {
+                return null;
+            }
+
             if (_assets.TryGetValue(guid, out GameAsset asset))
                 return asset;
 

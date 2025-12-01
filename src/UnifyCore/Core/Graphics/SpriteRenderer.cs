@@ -14,6 +14,7 @@ namespace Unify2D.Core.Graphics
     /// </summary>
     public class SpriteRenderer : Renderer
     {
+
         public Color Color { get; set; } = Color.White;
         public float LayerDepth { get; set; } = 0f;
 
@@ -23,18 +24,29 @@ namespace Unify2D.Core.Graphics
         Texture2D _texture;
         GameAsset _asset;
 
+        public override void Initialize(GameObject go)
+        {
+            base.Initialize(go);
+
+            _texture = GameCore.Current.ResourcesManager.GetTexture(null);
+            _gameObject.Bounds.BoundingSize = new Vector2(_texture.Width, _texture.Height);
+            _gameObject.Bounds.Pivot = 0.5f;
+        }
+
         public void Initialize(Game game, GameObject go, GameAsset asset)
         {
+            
             _gameObject = go;
             _asset = asset;
-            _spriteGuid = asset.GUID;
+
             try
             {
-
-                _texture = asset.LoadTexture();
-
-                if (_texture != null)
+                if (_asset != null)
                 {
+                    _spriteGuid = asset.GUID;
+
+                    _texture = GameCore.Current.ResourcesManager.GetTexture(asset.Path);
+       
                     _gameObject.Bounds.BoundingSize = new Vector2(_texture.Width, _texture.Height);
                     _gameObject.Bounds.Pivot = 0.5f;
                 }
@@ -51,6 +63,7 @@ namespace Unify2D.Core.Graphics
             if (_asset != null)
                 _asset.Release();
         }
+
 
         public override void Load(Game game, GameObject go)
         {

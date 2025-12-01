@@ -55,14 +55,6 @@ namespace Unify2D.Core
 
         }
 
-        public Texture2D LoadTexture()
-        {
-            return GameCore.Current.ResourcesManager.GetTexture(_path);
-        }
-
-
-
-
 
     }
 }

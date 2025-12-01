@@ -46,8 +46,16 @@ namespace Unify2D.Assets
 
         internal void AddAsset(string guid, Asset asset)
         {
-            _assets.Add(asset);
-            _dictAssets.Add(guid, asset);
+            try
+            {
+                _dictAssets.Add(guid, asset);
+                _assets.Add(asset);
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine(ex.Message);
+            }
+   
         }
 
         internal Asset CreateAsset<T>(string name) where T : AssetContent, new()
