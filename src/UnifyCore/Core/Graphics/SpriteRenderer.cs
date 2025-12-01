@@ -66,6 +66,11 @@ namespace Unify2D.Core.Graphics
 
         public override void Load(Game game, GameObject go)
         {
+            if ( AssetTexture == null )
+            {
+                return;
+            }
+
             var asset = GameCore.Current.AssetsManager.GetAsset(AssetTexture.GUID);
             if (asset == null)
             {

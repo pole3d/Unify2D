@@ -90,7 +90,10 @@ namespace Unify2D.Assets
 
             foreach (var go in _gameObjectsInstantiated)
             {
+                if (gameObject == go) continue;
+
                 go.UpdateFromPrefab(InstantiatedGameObject.DeepCopy());
+                go.Initialize(GameCore.Current.Game);
             }
         }
 

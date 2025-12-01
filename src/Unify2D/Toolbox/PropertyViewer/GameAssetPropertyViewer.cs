@@ -26,7 +26,8 @@ namespace Unify2D.Toolbox
             else
             {
                 name = value.Path;
-                newName = value.Path;
+                newName = value.Path == null ? String.Empty : value.Path;
+
                 ImGui.InputText("path", ref newName, 50);
             }
 
