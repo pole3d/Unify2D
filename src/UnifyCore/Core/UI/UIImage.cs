@@ -2,10 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using System;
-using System.ComponentModel;
-using System.Reflection;
-using System.Reflection.Metadata;
-using System.Xml.Linq;
 
 namespace Unify2D.Core;
 
@@ -16,8 +12,12 @@ public class UIImage : UIComponent
     public Color Color { get; set; } = Color.White;
 
     [JsonProperty]
-    string _imageGuid;
+    string _imageGuid
+    { get => guidField; 
+      set => guidField = value;
+    }
 
+    string guidField;
     GameAsset _asset;
 
     public void Initialize(Game game, GameObject go, GameAsset asset)
@@ -52,7 +52,7 @@ public class UIImage : UIComponent
         if (asset == null)
         {
 
-            Debug.LogError($"Can't load sprite {_imageGuid} {_gameObject.Name}");
+            Debug.LogError($"Can't load image {_imageGuid} {_gameObject.Name}");
             return;
         }
 

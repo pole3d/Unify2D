@@ -46,9 +46,10 @@ public class Texture2DPropertyViewer : AssetTypePropertyViewer<Texture2D>
         return ("Rectangle", "null");
     }
 
-    public override void SetAsset(Texture2D asset, PropertyInfo propertyInfo, Component component, string path)
+    public override void SetAsset(Texture2D asset, PropertyInfo propertyInfo, Component component)
     {
         propertyInfo.SetValue(component, asset);
+        component.Initialize(component.GameObject);
 
         //find a way to make this dynamic
         //if (component is UIImage uiImage)

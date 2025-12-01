@@ -14,6 +14,9 @@ namespace Unify2D.Core.Graphics
     /// </summary>
     public class SpriteRenderer : Renderer
     {
+        public GameAsset AssetTexture{ get; set; }
+
+
         [JsonIgnore]
         public Texture2D Texture { get; set; }
         public Color Color { get; set; } = Color.White;

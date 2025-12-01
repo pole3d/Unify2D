@@ -21,7 +21,7 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
     protected abstract string GetAssetExtension(); //TODO add the possibility to have multiple extension, maybe create a subclass "extension to asset" ? 
     public abstract T GetInitializeAsset();
     public abstract (string name, string path) GetBaseAsset();
-    public abstract void SetAsset(T asset, PropertyInfo propertyInfo, Component component, string path);
+    public abstract void SetAsset(T asset, PropertyInfo propertyInfo, Component component);
 
     /// <summary>
     /// This method is called from the inspector toolbox to draw the property.
@@ -32,12 +32,12 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
     {
         T asset = property.GetValue(instance) as T;
 
-        if (asset == null)
-        {
-            asset = GetInitializeAsset();
-            property.SetValue(instance, asset);
-            return;
-        }
+        //if (asset == null)
+        //{
+        //    asset = GetInitializeAsset();
+        //    property.SetValue(instance, asset);
+        //    return;
+        //}
 
         DrawFoldout(ref asset, property, instance);
     }
@@ -132,8 +132,10 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
             selected.AssetContent.Load();
         }
 
-        SetAsset(selected.AssetContent.RawAsset as T, property, instance as Component, dictionaryList[_currentFoldoutIndex].Value.Path);
+        SetAsset(selected.AssetContent.RawAsset as T, property, instance as Component);
 
         // property.SetValue(instance, asset);
     }
+
+
 }
