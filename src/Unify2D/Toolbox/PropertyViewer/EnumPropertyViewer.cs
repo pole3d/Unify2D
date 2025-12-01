@@ -16,7 +16,6 @@ public class EnumPropertyViewer : PropertyViewer
         DrawEnumFoldout(property.PropertyType, property, instance);
     }
 
-    private int _currentFoldoutIndex;
     private void DrawEnumFoldout(Type type, PropertyInfo property, object instance)
     {
         string[] enumNames = Enum.GetNames(type);
@@ -33,12 +32,12 @@ public class EnumPropertyViewer : PropertyViewer
             }
         }
         string label = typeName.Substring(index + 1);
-        
-        bool combo = ImGui.Combo(label, ref _currentFoldoutIndex,  enumNames, enumNames.Length);
-        if (combo)
-        {
-            object value = enumValues.GetValue(_currentFoldoutIndex);
-            property.SetValue(instance, value);
-        }
+
+        int currentFoldoutIndex = (int)Convert.ChangeType(property.GetValue(instance), type);
+
+        ImGui.Combo(label, ref currentFoldoutIndex, enumNames, enumNames.Length);
+
+        object value = enumValues.GetValue(currentFoldoutIndex);
+        property.SetValue(instance, value);
     }
 }

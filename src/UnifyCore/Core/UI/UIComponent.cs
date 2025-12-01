@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
+using System;
 
 namespace Unify2D.Core
 {
@@ -27,8 +28,20 @@ namespace Unify2D.Core
             LowerCenter = 7,
             LowerRight = 8,
         }
-        public AnchorType Anchor { get; set; }
-        
+
+        public AnchorType Anchor
+        {
+            get => _anchor;
+            set
+            {
+                _anchor = value;
+                OnAnchorUpdate?.Invoke();
+            }
+        }
+        [JsonIgnore] public Action OnAnchorUpdate { get; set; }
+
+        private AnchorType _anchor;
+
         public Vector2 GetAnchorVector(AnchorType anchor)
         {
             switch (anchor)

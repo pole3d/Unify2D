@@ -14,6 +14,7 @@ namespace Unify2D.Core.Graphics
     /// </summary>
     public class SpriteRenderer : Renderer
     {
+        // Used by the GameAssetPropertyViewer to set the Texture - To Change
         public GameAsset AssetTexture{ get; set; }
 
         [JsonIgnore]

@@ -7,17 +7,16 @@ namespace Unify2D.Core;
 
 public class UIImage : UIComponent
 {
+    // Used by the GameAssetPropertyViewer to set the Texture - To Change
+    public GameAsset AssetTexture { get; set; }
+
     [JsonIgnore]
     public Texture2D Texture { get; set; }
     public Color Color { get; set; } = Color.White;
 
     [JsonProperty]
-    string _imageGuid
-    { get => guidField; 
-      set => guidField = value;
-    }
+    string _imageGuid;
 
-    string guidField;
     GameAsset _asset;
 
     public void Initialize(Game game, GameObject go, GameAsset asset)
@@ -33,9 +32,8 @@ public class UIImage : UIComponent
 
             if (Texture != null)
             {
-                _gameObject.Bounds.BoundingSize = new Vector2(Texture.Width, Texture.Height);
-                _gameObject.Bounds.PositionOffset = Origin;
-                _gameObject.Bounds.Pivot = GetAnchorVector(Anchor);
+                UpdateBounds();
+                OnAnchorUpdate += UpdateBounds;
             }
         }
         catch (Exception e)
@@ -43,6 +41,7 @@ public class UIImage : UIComponent
             Debug.Log(e.ToString());
         }
     }
+
 
     public override void Load(Game game, GameObject go)
     {
@@ -77,5 +76,17 @@ public class UIImage : UIComponent
         GameCore.Current.SpriteBatch.Draw(Texture, _gameObject.Position,
             null, Color, _gameObject.Rotation, origin, _gameObject.Scale,
             SpriteEffects.None, 0);
+    }
+
+    private void UpdateBounds()
+    {
+        _gameObject.Bounds.BoundingSize = new Vector2(Texture.Width, Texture.Height);
+        _gameObject.Bounds.PositionOffset = Origin;
+        _gameObject.Bounds.Pivot = GetAnchorVector(Anchor);
+    }
+
+    internal override void Destroy()
+    {
+        OnAnchorUpdate -= UpdateBounds;
     }
 }
