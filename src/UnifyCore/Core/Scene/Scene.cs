@@ -87,16 +87,16 @@ namespace Unify2D
         {
             GameCore.Current.InitPhysics();
 
-            try
+            foreach (GameObject gameObject in GameObjects)
             {
-                foreach (GameObject gameObject in GameObjects)
+                try
                 {
                     gameObject.Initialize(GameCore.Current.Game);
                 }
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e.Message + e.StackTrace);
+                catch (Exception e)
+                {
+                    Debug.LogError(e.Message + e.StackTrace);
+                }
             }
 
 

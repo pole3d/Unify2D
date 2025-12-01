@@ -49,6 +49,15 @@ namespace Unify2D.Toolbox
                         else
                             spriteRenderer.Initialize(GameCore.Current.Game, spriteRenderer.GameObject, asset.ToGameAsset());
                     }
+                    if (instance is UIImage imageRenderer)
+                    {
+                        if (imageRenderer.GameObject == null) // is prefab TODO : better system to detect
+                        {
+                            property.SetValue(instance, asset.ToGameAsset());
+                        }
+                        else
+                            imageRenderer.Initialize(GameCore.Current.Game, imageRenderer.GameObject, asset.ToGameAsset());
+                    }
                 }
             }
 

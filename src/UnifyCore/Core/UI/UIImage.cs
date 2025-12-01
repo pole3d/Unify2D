@@ -1,70 +1,80 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
+using System;
 
 namespace Unify2D.Core;
 
 public class UIImage : UIComponent
 {
-    [JsonIgnore] public Texture2D Sprite { get; private set; }
-    public string SpritePath { get; set; }
-
+    [JsonIgnore]
+    public Texture2D Texture { get; set; }
     public Color Color { get; set; } = Color.White;
-    
-    //[JsonProperty]
-    //private GameAsset _asset;
 
+    [JsonProperty]
+    string _imageGuid
+    { get => guidField; 
+      set => guidField = value;
+    }
 
-    public void SetSprite(string path)
+    string guidField;
+    GameAsset _asset;
+
+    public void Initialize(Game game, GameObject go, GameAsset asset)
     {
-        if (string.IsNullOrEmpty(path))
+        _gameObject = go;
+        _asset = asset;
+        _imageGuid = asset.GUID;
+
+
+        try
         {
-            return;
+            Texture = asset.LoadTexture();
+
+            if (Texture != null)
+            {
+                _gameObject.Bounds.BoundingSize = new Vector2(Texture.Width, Texture.Height);
+                _gameObject.Bounds.PositionOffset = Origin;
+                _gameObject.Bounds.Pivot = GetAnchorVector(Anchor);
+            }
         }
-        
-        SpritePath = path;
-
-        Sprite = GameCore.Current.ResourcesManager.GetTexture(path);
-
-        if (Sprite != null)
+        catch (Exception e)
         {
-            _gameObject.Bounds.BoundingSize = new Vector2(Sprite.Width, Sprite.Height);
-            _gameObject.Bounds.PositionOffset = Origin;
-            _gameObject.Bounds.Pivot = GetAnchorVector(Anchor);
+            Debug.Log(e.ToString());
         }
     }
-    
+
     public override void Load(Game game, GameObject go)
     {
-        base.Load(game,go);
-        
-        //try
-        //{
-        //    _asset = new GameAsset(Sprite, SpritePath);
-        //}
-        //catch (Exception e)
-        //{
-        //    Console.WriteLine(e.ToString());
-        //}
-        SetSprite(SpritePath);
+        base.Load(game, go);
+
+        var asset = GameCore.Current.AssetsManager.GetAsset(_imageGuid);
+        if (asset == null)
+        {
+
+            Debug.LogError($"Can't load image {_imageGuid} {_gameObject.Name}");
+            return;
+        }
+
+        Initialize(game, go, asset);
     }
-    
+
     public override void Draw()
     {
         if (_gameObject == null)
         {
             return;
         }
-        
-        if (Sprite == null)
+
+        if (Texture == null)
         {
-            SetSprite(SpritePath);
+            //SetSprite(_game, _gameObject, _asset);
             return;
         }
-        
-        Vector2 origin = Origin + (new Vector2(Sprite.Width, Sprite.Height)) * GetAnchorVector(Anchor);
-        
-        GameCore.Current.SpriteBatch.Draw(Sprite, _gameObject.Position,
+
+        Vector2 origin = Origin + (new Vector2(Texture.Width, Texture.Height)) * GetAnchorVector(Anchor);
+
+        GameCore.Current.SpriteBatch.Draw(Texture, _gameObject.Position,
             null, Color, _gameObject.Rotation, origin, _gameObject.Scale,
             SpriteEffects.None, 0);
     }

@@ -228,6 +228,21 @@ namespace Microsoft.Xna.Framework
 			return new Vector2(cos * X - sin * Y, sin * X + cos * Y);
 		}
 
+		/// <summary>
+		/// Rotate the vector by a given angle around a point
+		/// </summary>
+		/// <param name="angle"></param>
+		/// <param name="point"></param>
+		/// <returns></returns>
+		public Vector2 RotateAroundPoint(float angle, Vector2 point)
+		{
+			var x = X - point.X;
+			var y = Y - point.Y;
+			float cos = (float)Math.Cos(angle);
+			float sin = (float)Math.Sin(angle);
+			return new Vector2(cos * x - sin * y, sin * x + cos * y) + point;
+		}
+
 		#endregion
 
 		#region Internal Methods

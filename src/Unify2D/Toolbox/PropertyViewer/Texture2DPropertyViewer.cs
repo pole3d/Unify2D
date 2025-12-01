@@ -20,6 +20,11 @@ public class Texture2DPropertyViewer : AssetTypePropertyViewer<Texture2D>
     protected override string GetPropertyName() => "Sprite";
     protected override string GetAssetExtension() => ".png";
 
+
+    /// <summary>
+    /// TODO reuse same texture
+    /// </summary>
+    /// <returns></returns>
     public override Texture2D GetInitializeAsset()
     {
         Texture2D baseRectangle = new Texture2D(GameCore.Current.GraphicsDevice, 100, 100);
@@ -30,9 +35,9 @@ public class Texture2DPropertyViewer : AssetTypePropertyViewer<Texture2D>
         {
             colors[i] = Color.White;
         }
-        
+
         baseRectangle.SetData(colors);
-        
+
         return baseRectangle;
     }
 
@@ -41,14 +46,15 @@ public class Texture2DPropertyViewer : AssetTypePropertyViewer<Texture2D>
         return ("Rectangle", "null");
     }
 
-    public override void SetAsset(Texture2D asset, PropertyInfo propertyInfo, Component component, string path)
+    public override void SetAsset(Texture2D asset, PropertyInfo propertyInfo, Component component)
     {
         propertyInfo.SetValue(component, asset);
-        
+        component.Initialize(component.GameObject);
+
         //find a way to make this dynamic
-        if (component is UIImage uiImage)
-        {
-            uiImage.SetSprite(path);
-        }
+        //if (component is UIImage uiImage)
+        //{
+        //    uiImage.SetSprite(asset, propertyInfo, path);
+        //}
     }
 }
