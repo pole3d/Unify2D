@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using System.Drawing;
+using System.IO;
 using Unify2D.Core;
 using Unify2D.Toolbox;
 
@@ -19,7 +20,7 @@ namespace Unify2D.Assets
         {
 
             if (string.IsNullOrEmpty(_asset.Path) == false)
-                RawAsset = GameCore.Current.ResourcesManager.GetTexture(_asset.Path);
+                RawAsset = GameCore.Current.ResourcesManager.GetTexture( Path.Combine(  _asset.Path , _asset.Name ) + _asset.Extension);
             else
             {
                 //Texture2D baseRectangle = new Texture2D(GameCore.Current.GraphicsDevice, 100, 100);

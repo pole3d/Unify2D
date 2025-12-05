@@ -7,6 +7,7 @@ using System.Reflection;
 using Unify2D.Assets;
 using Unify2D.Core;
 using Unify2D.Inputs;
+using UnifyCore;
 
 namespace Unify2D.Toolbox;
 
@@ -39,104 +40,120 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
         //    return;
         //}
 
-        DrawFoldout(ref asset, property, instance);
+        //DrawFoldout(ref asset, property, instance);
     }
 
-    /// <summary>
-    /// This method search in the assets of the project and get all assets with the right extension.
-    /// </summary>
-    /// <returns>A tuple with 2 list : names with asset names, paths with assets paths</returns>
-    protected virtual Dictionary<string, Asset> GetAssetLists()
-    {
-        Dictionary<string, Asset> dictionary = new();
-        //(string name, string path) baseAsset = GetBaseAsset();
-        Asset baseAsset = new Asset("", "Rectangle", ".png", string.Empty);
-        dictionary.Add(baseAsset.Name, baseAsset);
-        string[] extension = GetAssetExtension();
+    ///// <summary>
+    ///// This method search in the assets of the project and get all assets with the right extension.
+    ///// </summary>
+    ///// <returns>A tuple with 2 list : names with asset names, paths with assets paths</returns>
+    //protected virtual Dictionary<string, Asset> GetAssetLists()
+    //{
+    //    Dictionary<string, Asset> dictionary = new();
+    //    //(string name, string path) baseAsset = GetBaseAsset();
+    //    Asset baseAsset = new Asset("", "Rectangle", ".png", string.Empty);
+    //    dictionary.Add(baseAsset.Name, baseAsset);
+    //    string[] extension = GetAssetExtension();
 
-        if (baseAsset.Path.Length > 0 && File.Exists(baseAsset.Path + ".meta"))
-        {
-            Asset assetDictionary = new Asset(File.ReadAllText(baseAsset.Path + ".meta"), baseAsset.Name, extension[0], baseAsset.Path);
-            dictionary.Add(baseAsset.Name, assetDictionary);
-        }
+    //    if (baseAsset.Path.Length > 0 && File.Exists(baseAsset.Path + ".meta"))
+    //    {
+    //        Asset assetDictionary = new Asset(File.ReadAllText(baseAsset.Path + ".meta"), baseAsset.Name, extension[0], baseAsset.Path);
+    //        dictionary.Add(baseAsset.Name, assetDictionary);
+    //    }
 
-        List<Asset> assets = GameEditor.Instance.AssetsToolBox.Assets;
-        foreach (Asset asset in assets)
-        {
-            string name = asset.Name;
-            string path = asset.FullPath;
+    //    List<Asset> assets = GameEditor.Instance.AssetsToolBox.Assets;
+    //    foreach (Asset asset in assets)
+    //    {
+    //        string name = asset.Name;
+    //        string path = asset.FullPath;
 
-            for (int i = 0; i < extension.Length; i++)
-            {
-                if (path.EndsWith(extension[i]))
-                {
-                    path = path.Remove(0, 1);
-                    path = $"{GameCore.Current.Game.Content.RootDirectory}/Assets/{path}";
+    //        for (int i = 0; i < extension.Length; i++)
+    //        {
+    //            if (path.EndsWith(extension[i]))
+    //            {
+    //                path = path.Remove(0, 1);
+    //                path = $"{GameCore.Current.Game.Content.RootDirectory}/Assets/{path}";
 
-                    Asset assetAdd = new Asset(File.ReadAllText(path + ".meta"), name, extension[i], path);
-                    dictionary.Add(name, assetAdd);
-                }
-            }
-        }
+    //                Asset assetAdd = new Asset(File.ReadAllText(path + ".meta"), name, extension[i], path);
+    //                dictionary.Add(name, assetAdd);
+    //            }
+    //        }
+    //    }
 
-        return dictionary;
-    }
+    //    return dictionary;
+    //}
 
-    private int _currentFoldoutIndex;
-    private string _search = string.Empty;
-    /// <summary>
-    /// This method draw the foldout for the asset property with all the files in the project that can be chosen.
-    /// </summary>
-    /// <param name="asset">The property asset</param>
-    /// <param name="property">The property</param>
-    /// <param name="instance">The component owning the property</param>
-    protected void DrawFoldout(ref T asset, PropertyInfo property, object instance)
-    {
-        Dictionary<string, Asset> dictionary = GetAssetLists();
-        var dictionaryList = dictionary.ToList();
+    //private int _currentFoldoutIndex;
+    //private string _search = string.Empty;
+    ///// <summary>
+    ///// This method draw the foldout for the asset property with all the files in the project that can be chosen.
+    ///// </summary>
+    ///// <param name="asset">The property asset</param>
+    ///// <param name="property">The property</param>
+    ///// <param name="instance">The component owning the property</param>
+    //protected void DrawFoldout(ref T asset, PropertyInfo property, object instance)
+    //{
+    //    var assets = GameEditor.Instance.EditorAssetManager.Assets;
+    //    var dictionary = new Dictionary<string, Asset>();
 
-        int foldoutIndex = _currentFoldoutIndex;
-        if (ImGui.BeginCombo($"{GetPropertyName()}", dictionaryList[_currentFoldoutIndex].Key))
-        {
-            ImGui.InputText("search", ref _search, 100);
-            Dictionary<string, Asset> filteredFileDictionary = new();
-            foreach (KeyValuePair<string, Asset> pair in dictionary)
-            {
-                if (pair.Key.ToUpper().Contains(_search.ToUpper()) == false) continue;
-                filteredFileDictionary.Add(pair.Key, pair.Value);
-            }
+    //    //Burp burp ugly, rework please 🤒
+    //    var extension = new List<string> { ".png", ".bmp", ".gif", ".jpg", ".jpeg", ".tga", ".tif", ".tiff", ".dds" };
 
-            for (int i = 0; i < dictionary.Count; i++)
-            {
-                bool isSelected = (_currentFoldoutIndex == i);
-                bool isInFilter = string.IsNullOrEmpty(_search) || filteredFileDictionary.ContainsKey(dictionaryList[i].Key);
-                if (isInFilter && ImGui.Selectable(dictionaryList[i].Key, isSelected))
-                {
-                    foldoutIndex = i;
-                }
-                if (isSelected)
-                {
-                    ImGui.SetItemDefaultFocus();
-                }
-            }
-            ImGui.EndCombo();
-        }
+    //    foreach (var item in assets)
+    //    {
+    //        if (extension.Contains(item.Extension))
+    //            dictionary.Add(item.FullPath, item);
+    //    }
 
-        if (foldoutIndex == _currentFoldoutIndex) return;
-        _currentFoldoutIndex = foldoutIndex;
+    //    var dictionaryList = dictionary.ToList();
 
-        var selected = dictionaryList[_currentFoldoutIndex].Value;
+    //    int foldoutIndex = _currentFoldoutIndex;
+    //    if (ImGui.BeginCombo($"{GetPropertyName()}", dictionaryList[_currentFoldoutIndex].Key))
+    //    {
+    //        ImGui.InputText("search", ref _search, 100);
+    //        Dictionary<string, Asset> filteredFileDictionary = new();
+    //        foreach (KeyValuePair<string, Asset> pair in dictionaryList)
+    //        {
+    //            if (pair.Key.ToUpper().Contains(_search.ToUpper()) == false) continue;
+    //            filteredFileDictionary.Add(pair.Key, pair.Value);
+    //        }
 
-        T assetContent = selected.AssetContent.RawAsset as T;
-        if (assetContent == null)
-        {
-            selected.AssetContent.Load();
-        }
+    //        for (int i = 0; i < dictionary.Count; i++)
+    //        {
+    //            bool isSelected = (_currentFoldoutIndex == i);
+    //            bool isInFilter = string.IsNullOrEmpty(_search) || filteredFileDictionary.ContainsKey(dictionaryList[i].Key);
+    //            if (isInFilter && ImGui.Selectable(dictionaryList[i].Key, isSelected))
+    //            {
+    //                foldoutIndex = i;
+    //            }
+    //            if (isSelected)
+    //            {
+    //                ImGui.SetItemDefaultFocus();
+    //            }
+    //        }
+    //        ImGui.EndCombo();
+    //    }
 
-        SetAsset(selected.AssetContent.RawAsset as T, property, instance as Component);
+    //    if (foldoutIndex == _currentFoldoutIndex) return;
+    //    _currentFoldoutIndex = foldoutIndex;
 
-        // property.SetValue(instance, asset);
-    }
+    //    var selected = dictionaryList[_currentFoldoutIndex].Value;
 
+    //    T assetContent = selected.AssetContent.RawAsset as T;
+    //    if (assetContent == null)
+    //    {
+    //        selected.AssetContent.Load();
+    //    }
 
+    //    SetAsset(selected.AssetContent.RawAsset as T, property, instance as Component);
+
+    //    AssignAsset(selected, property, instance as Component);
+
+    //    // property.SetValue(instance, asset);
+    //}
+
+    //void AssignAsset(Asset selected, PropertyInfo property, Component component)
+    //{
+    //    property.SetValue(component, selected);
+    //}
 }

@@ -1,8 +1,9 @@
-﻿using System.IO;
-using System.Reflection;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.IO;
+using System.Reflection;
 using Unify2D.Core;
+using Unify2D.Core.Graphics;
 
 namespace Unify2D.Toolbox;
 
@@ -50,11 +51,7 @@ public class Texture2DPropertyViewer : AssetTypePropertyViewer<Texture2D>
     {
         propertyInfo.SetValue(component, asset);
         component.Initialize(component.GameObject);
+        
 
-        //find a way to make this dynamic
-        //if (component is UIImage uiImage)
-        //{
-        //    uiImage.SetSprite(asset, propertyInfo, path);
-        //}
     }
 }
