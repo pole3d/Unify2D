@@ -20,7 +20,7 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
     protected abstract string GetPropertyName();
     protected abstract string GetAssetExtension(); //TODO add the possibility to have multiple extension, maybe create a subclass "extension to asset" ? 
     public abstract T GetInitializeAsset();
-    public abstract (string name, string path) GetBaseAsset();
+    //public abstract (string name, string path) GetBaseAsset();
     public abstract void SetAsset(T asset, PropertyInfo propertyInfo, Component component);
 
     /// <summary>

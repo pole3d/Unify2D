@@ -8,7 +8,7 @@ namespace Unify2D.Toolbox
 {
     internal class SpriteFontPropertyViewer : AssetTypePropertyViewer<SpriteFont>
     {
-        private const string ArialFontPath = @"C:\\Windows\\Fonts\arial.ttf";
+        private const string ArialFontPath = @"C:\Windows\Fonts\arial.ttf";
         
         protected override SpriteFont GetAssetFromPath(string path)
         {
@@ -31,17 +31,17 @@ namespace Unify2D.Toolbox
 
         protected override string GetPropertyName() => "Font";
         protected override string GetAssetExtension() => ".ttf";
-        public override (string name, string path) GetBaseAsset() => ("Arial", ArialFontPath);
+       // public override (string name, string path) GetBaseAsset() => ("Arial", ArialFontPath);
         
         public override void SetAsset(SpriteFont asset, PropertyInfo propertyInfo, Component component)
         {
             propertyInfo.SetValue(component, asset);
         
-            ////find a way to make this dynamic
-            //if (component is UIText uiImage)
-            //{
-            //    uiImage.SetFont(path);
-            //}
+            //find a way to make this dynamic
+            if (component is UIText uiText)
+            {
+                uiText.SetFont(asset ?? GetInitializeAsset());
+            }
         }
 
         public override SpriteFont GetInitializeAsset()

@@ -397,7 +397,7 @@ namespace Unify2D.Toolbox
                             Selection.SelectObject(go);
 
                             SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
-                            renderer.Initialize(game, go, asset.ToGameAsset());
+                            renderer.SetAsset(asset.ToGameAsset());
                         }
 
                     }

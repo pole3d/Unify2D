@@ -40,7 +40,7 @@ namespace Unify2D.Physics
         private float _gravityScale = 1f;
         private Body _body;
 
-        public override void Load(Game game, GameObject go)
+        public override void Load(Game game)
         {
             Collider col = _gameObject.GetComponent<Collider>();
             if (col != null)
