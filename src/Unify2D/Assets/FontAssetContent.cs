@@ -1,5 +1,7 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using ImGuiNET;
+using Microsoft.Xna.Framework.Graphics;
 using Unify2D.Core;
+using Unify2D.Toolbox;
 
 namespace Unify2D.Assets
 {
@@ -21,6 +23,11 @@ namespace Unify2D.Assets
             {
                 RawAsset = null;
             }
+        }
+
+        public override void Show(InspectorToolbox inspectorToolbox)
+        {
+            ImGui.Text(_asset.Name);
         }
     }
 }

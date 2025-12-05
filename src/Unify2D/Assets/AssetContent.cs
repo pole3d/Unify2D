@@ -1,4 +1,7 @@
-﻿namespace Unify2D.Assets
+﻿using ImGuiNET;
+using Unify2D.Toolbox;
+
+namespace Unify2D.Assets
 {
     public abstract class AssetContent
     {
@@ -21,6 +24,11 @@
         public virtual void Unload()
         {
             IsLoaded = false;
+        }
+
+        public virtual void Show(InspectorToolbox inspectorToolbox)
+        {
+            inspectorToolbox.CurrentPrefabAsset = null;
         }
 
         public virtual void OnDragDroppedInGame(GameEditor editor) { }

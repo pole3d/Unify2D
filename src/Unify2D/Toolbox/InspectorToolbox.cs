@@ -18,7 +18,11 @@ namespace Unify2D.Toolbox
     /// </summary>
     public class InspectorToolbox : Toolbox
     {
-        private GameObject _gameObject;
+        internal PrefabAssetContent CurrentPrefabAsset { get; set; }
+        public GameEditor Editor => _editor;
+        public GameObject GameObject { get; internal set; }
+
+
         private Asset _asset;
 
         private List<TextureBound> _texturesBound = new List<TextureBound>();
@@ -26,16 +30,10 @@ namespace Unify2D.Toolbox
 
         private Dictionary<Type, PropertyViewer> _propertyViewers = new Dictionary<Type, PropertyViewer>();
 
-        /// <summary>
-        /// WORKAROUND : Add one frame delay to avoid modifying another gameobject when
-        /// switching between gameobjects
-        /// </summary>
-        private int _changeCount = 0;
 
-        private PrefabAssetContent _currentPrefabAsset;
-        
         private const string SavePrefabButtonLabel = "Save Prefab";
         private const string ApplyPrefabButtonLabel = "Apply to Prefab";
+
 
         public override void Initialize(GameEditor editor)
         {
@@ -49,7 +47,7 @@ namespace Unify2D.Toolbox
             _propertyViewers.Add(typeof(GameAsset), new GameAssetPropertyViewer());
             _propertyViewers.Add(typeof(Enum), new EnumPropertyViewer());
 
-            _propertyViewers.Add(typeof(SpriteFont), new SpriteFontPropertyViewer());
+            //_propertyViewers.Add(typeof(SpriteFont), new SpriteFontPropertyViewer());
             _propertyViewers.Add(typeof(Texture2D), new Texture2DPropertyViewer());
         }
 
@@ -58,19 +56,17 @@ namespace Unify2D.Toolbox
             UnSelect();
 
             _asset = null;
-            _gameObject = null;
-            _currentPrefabAsset = null;
+            GameObject = null;
+            CurrentPrefabAsset = null;
 
             if (obj is GameObject)
-                _gameObject = obj as GameObject;
+                GameObject = obj as GameObject;
             else if (obj is Asset)
                 _asset = obj as Asset;
         }
 
         private void UnSelect()
         {
-            _changeCount = 1;
-
             foreach (var item in _texturesBound)
             {
                 _texturesToUnbind.Add(item);
@@ -90,99 +86,72 @@ namespace Unify2D.Toolbox
 
             ImGui.Begin("Inspector");
 
-            if (_changeCount <= 0)
+            if (GameObject != null)
             {
-                if (_gameObject != null)
-                {
-                    ShowGameObject();
-                }
-                else if (_asset != null)
-                {
-                    ShowAsset();
-                }
+                ShowGameObject();
             }
-            else
-                _changeCount--;
+            else if (_asset != null)
+            {
+                ShowAsset();
+            }
 
             ImGui.End();
         }
 
         private void ShowAsset()
         {
-            if (_asset.AssetContent is ScriptAssetContent scriptAsset)
-            {
-                if (scriptAsset.IsLoaded == false)
-                    scriptAsset.Load();
+            if (_asset.AssetContent == null) return;
 
-                ImGui.InputTextMultiline("##source", ref scriptAsset.Content, ushort.MaxValue,
-                    new System.Numerics.Vector2(340, 550));
-                if (ImGui.Button("Save"))
-                {
-                    scriptAsset.Save();
-                    _editor.Scripting.Reload();
-                }
-            }
+            // Load the prefab asset content if not already loaded
+            if (_asset.AssetContent.IsLoaded == false)
+                _asset.AssetContent.Load();
 
-            if (_asset.AssetContent is PrefabAssetContent prefabAsset)
-            {
-                // Load the prefab asset content if not already loaded
-                if (!prefabAsset.IsLoaded)
-                    prefabAsset.Load();
+            _asset.AssetContent.Show(this);
 
-                // Set _gameObject to the instantiated prefab game object to show its properties
-                _gameObject = prefabAsset.InstantiatedGameObject;
-
-                ShowGameObject();
-
-                _currentPrefabAsset = prefabAsset;
-            }
-            else
-            {
-                _currentPrefabAsset = null;
-            }
+            _asset.AssetContent.Unload();
         }
 
-        private void ShowGameObject()
+        public void ShowGameObject()
         {
-            if (_currentPrefabAsset != null)
+            if (CurrentPrefabAsset != null)
             {
                 // Add a button to save the prefab
                 if (ImGui.Button(SavePrefabButtonLabel))
                 {
-                    _currentPrefabAsset.SavePrefab(_gameObject);
-                    
-                    Debug.Log($"Prefab {_gameObject.Name} saved!");
-                    Console.WriteLine($"Prefab {_gameObject.Name} saved!");
+                    CurrentPrefabAsset.SavePrefab(GameObject);
+
+                    Debug.Log($"Prefab {GameObject.Name} saved!");
+                    Console.WriteLine($"Prefab {GameObject.Name} saved!");
                 }
 
                 ImGui.Separator();
             }
-            else if (_gameObject.Tag is PrefabAssetContent)
+            else if (GameObject.Tag is PrefabAssetContent)
             {
                 if (ImGui.Button(ApplyPrefabButtonLabel))
                 {
-                    SavePrefabFromHierarchy(_gameObject);
+                    SavePrefabFromHierarchy(GameObject);
                 }
             }
 
-            string name = _gameObject.Name;
+            string name = GameObject.Name;
 
             ImGui.InputText("name", ref name, 40);
-            _gameObject.Name = name;
+            GameObject.Name = name;
             System.Numerics.Vector2 position =
-                new System.Numerics.Vector2(_gameObject.LocalPosition.X, _gameObject.LocalPosition.Y);
-            float rotation = MathHelper.ToDegrees(_gameObject.LocalRotation);
-            System.Numerics.Vector2 scale = new System.Numerics.Vector2(_gameObject.Scale.X, _gameObject.Scale.Y);
+                new System.Numerics.Vector2(GameObject.LocalPosition.X, GameObject.LocalPosition.Y);
+            float rotation = MathHelper.ToDegrees(GameObject.LocalRotation);
+            System.Numerics.Vector2 scale = new System.Numerics.Vector2(GameObject.Scale.X, GameObject.Scale.Y);
             ImGui.InputFloat2("position", ref position);
             ImGui.InputFloat("rotation", ref rotation);
             ImGui.InputFloat2("scale", ref scale);
 
-            _gameObject.LocalPosition = new Vector2(position.X, position.Y);
-            _gameObject.LocalRotation = MathHelper.ToRadians(rotation);
-            _gameObject.Scale = new Vector2(scale.X, scale.Y);
+            GameObject.LocalPosition = new Vector2(position.X, position.Y);
+            GameObject.LocalRotation = MathHelper.ToRadians(rotation);
+            GameObject.Scale = new Vector2(scale.X, scale.Y);
 
             List<Component> toRemove = new List<Component>();
-            foreach (var component in _gameObject.Components)
+            foreach (var component in GameObject.Components)
             {
                 ImGui.SetNextItemOpen(true, ImGuiCond.Once);
                 if (ImGui.TreeNode(component.GetType().Name))
@@ -233,10 +202,10 @@ namespace Unify2D.Toolbox
 
             foreach (var item in toRemove)
             {
-                _gameObject.RemoveComponent(item);
+                GameObject.RemoveComponent(item);
             }
 
-            if (_gameObject.Components.Count() == 0)
+            if (GameObject.Components.Count() == 0)
                 ImGui.Separator();
 
             if (ImGui.CollapsingHeader("Add Component"))
@@ -246,7 +215,7 @@ namespace Unify2D.Toolbox
                     if (ImGui.Button(item.Name))
                     {
                         var component = Activator.CreateInstance(item);
-                        _gameObject.AddComponent(component as Component);
+                        GameObject.AddComponent(component as Component);
                     }
                 }
             }
@@ -310,9 +279,9 @@ namespace Unify2D.Toolbox
                 if (prefabAssetContent != null)
                 {
                     prefabAssetContent.SavePrefab(gameObject);
-                }                
+                }
 
-                Debug.Log($"Prefab {_gameObject.Name} saved from hierarchy!");
+                Debug.Log($"Prefab {GameObject.Name} saved from hierarchy!");
                 Console.WriteLine($"Prefab {gameObject.Name} saved from hierarchy!");
             }
         }

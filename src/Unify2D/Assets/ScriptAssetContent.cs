@@ -1,7 +1,9 @@
-﻿using System;
+﻿using ImGuiNET;
+using System;
 using System.IO;
 using System.Text;
 using Unify2D.Core;
+using Unify2D.Toolbox;
 
 namespace Unify2D.Assets
 {
@@ -44,6 +46,17 @@ namespace Unify2D.Assets
         {
             string path = CoreTools.CombinePath(GameEditor.Instance.AssetsPath, _asset.FullPath);
             File.WriteAllText(path, Content);
+        }
+
+        public override void Show(InspectorToolbox inspectorToolbox)
+        {
+            ImGui.InputTextMultiline("##source", ref Content, ushort.MaxValue,
+                new System.Numerics.Vector2(340, 550));
+            if (ImGui.Button("Save"))
+            {
+                Save();
+                inspectorToolbox.Editor.Scripting.Reload();
+            }
         }
     }
 }

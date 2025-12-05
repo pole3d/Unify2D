@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
 using Unify2D.Core;
+using Unify2D.Toolbox;
 
 namespace Unify2D.Assets
 {
@@ -116,6 +117,16 @@ namespace Unify2D.Assets
 
             assetContent.AddGoInstantiated(go);
 
+        }
+
+        public override void Show(InspectorToolbox inspectorToolbox)
+        {
+            // Set _gameObject to the instantiated prefab game object to show its properties
+            inspectorToolbox.GameObject = InstantiatedGameObject;
+
+            inspectorToolbox.ShowGameObject();
+
+            inspectorToolbox.CurrentPrefabAsset = this;
         }
     }
 }
