@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using System;
 using System.Numerics;
 using Unify2D.Assets;
 using Unify2D.Core;
@@ -31,6 +32,8 @@ namespace Unify2D.Toolbox
 
         public override void Draw()
         {
+
+
             Vector2 size = ImGui.GetContentRegionAvail();
 
             ImGui.Begin(HierarchyWindowLabel);
@@ -70,6 +73,9 @@ namespace Unify2D.Toolbox
 
 
             ImGui.BeginGroup();
+
+
+
             // First way to Display GameObjects to the hierarchy -> Don't allow to D&D
             if (SceneManager.Instance.CurrentScene != null)
             {
@@ -84,7 +90,7 @@ namespace Unify2D.Toolbox
 
             // Empty node to deselect when you click on it
             var base_flags = ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.Leaf |
-                             ImGuiTreeNodeFlags.NoTreePushOnOpen; 
+                             ImGuiTreeNodeFlags.NoTreePushOnOpen;
             ImGui.TreeNodeEx($"     ", base_flags);
 
             ImGui.EndGroup();
@@ -149,6 +155,13 @@ namespace Unify2D.Toolbox
 
                 }
 
+                if (ImGui.IsItemFocused())
+                {
+                    if (ImGui.IsKeyPressed(ImGuiKey.Space))
+                    {
+                        Console.WriteLine("test");
+                    }
+                }
                 if (ImGui.IsItemClicked())
                 {
                     Selection.SelectObject(go);
@@ -181,6 +194,13 @@ namespace Unify2D.Toolbox
                 if (ImGui.IsItemClicked())
                 {
                     Selection.SelectObject(go);
+                }
+                if (ImGui.IsItemFocused())
+                {
+                    if (ImGui.IsKeyPressed(ImGuiKey.Space))
+                    {
+                        Console.WriteLine("test");
+                    }
                 }
 
                 if (ImGui.IsItemHovered())
