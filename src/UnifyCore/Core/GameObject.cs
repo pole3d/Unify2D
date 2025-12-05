@@ -23,10 +23,10 @@ namespace Unify2D.Core
 
         public Vector2 Position
         {
-            get { return GetParentPosition() + LocalPosition.Rotate(Rotation); }
+            get { return GetParentPosition() + LocalPosition.Rotate(GetParentRotation()); }
             set
             {
-                LocalPosition = value.Rotate(-Rotation) - GetParentPosition();
+                LocalPosition = value.Rotate(-GetParentRotation()) - GetParentPosition();
                 m_positionUpdated = true;
             }
         }
@@ -398,7 +398,7 @@ namespace Unify2D.Core
 
             while (current != null)
             {
-                position += current.LocalPosition.Rotate(current.Rotation);
+                position += current.LocalPosition;//.Rotate(current.Rotation);
                 current = current.Parent;
             }
 

@@ -73,7 +73,7 @@ public class UIImage : UIComponent
 
     private void UpdateBounds()
     {
-        _gameObject.Bounds.BoundingSize = new Vector2(Texture.Width, Texture.Height);
+        if (Texture != null) _gameObject.Bounds.BoundingSize = new Vector2(Texture.Width, Texture.Height);
         _gameObject.Bounds.PositionOffset = Origin;
         _gameObject.Bounds.Pivot = GetAnchorVector(Anchor);
     }
