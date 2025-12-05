@@ -198,7 +198,7 @@ namespace Microsoft.Xna.Framework.Content
 			 * stock XNA behavior. The Dictionary will ignore case
 			 * differences.
 			 */
-			string key = assetName.Replace('\\', '/');
+			string key = assetName.Replace("/\\", "/");
 
 			// Check for a previously loaded asset first
 			object asset = null;
@@ -210,7 +210,7 @@ namespace Microsoft.Xna.Framework.Content
 				}
 			}
 			// Load the asset.
-			result = ReadAsset<T>(assetName, null);
+			result = ReadAsset<T>(key, null);
 			loadedAssets[key] = result;
 			return result;
 		}
@@ -239,8 +239,8 @@ namespace Microsoft.Xna.Framework.Content
 			try
 			{
 				stream = TitleContainer.OpenStream(
-					assetName + ".xnb"
-					//Path.Combine(RootDirectory, assetName) + ".xnb"
+					assetName// + ".xnb"
+					//Path.Combine(RootDirectory, assetName)// + ".xnb"
 				);
 			}
 			catch (FileNotFoundException fileNotFound)
@@ -411,6 +411,10 @@ namespace Microsoft.Xna.Framework.Content
 						modifiedAssetName +
 						" does not have an XNB file! Hacking Duration property!"
 					);
+				}
+				else if (typeof(T) == typeof(SpriteFont))
+				{
+                    Console.WriteLine("This is a sprite font");
 				}
 				else
 				{
