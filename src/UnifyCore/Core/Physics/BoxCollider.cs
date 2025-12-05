@@ -21,7 +21,7 @@ namespace UnifyCore.Core.Physics
             return _body;
         }
 
-        public override void LateLoad(Game game, GameObject go)
+        public override void LateLoad(Game game)
         {
             if (_body == null)
             {

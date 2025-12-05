@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Unify2D.Core;
@@ -12,6 +13,9 @@ namespace UnifyCore
 
         Dictionary<string, Texture2D> _textures = new Dictionary<string, Texture2D>();
 
+        private static SpriteFont _defaultFont;
+
+        Dictionary<string, SpriteFont> _fonts = new Dictionary<string, SpriteFont>();
 
         public ResourcesManager()
         {
@@ -22,6 +26,8 @@ namespace UnifyCore
                 colors[i] = Color.White;
             }
             _whiteTexture.SetData(colors);
+
+            _defaultFont = null;
         }
 
 
@@ -38,6 +44,21 @@ namespace UnifyCore
             _textures.Add(path, texture);
 
             return texture;
+        }
+
+        public SpriteFont GetFont(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return _defaultFont;
+
+            if (_fonts.TryGetValue(path, out SpriteFont font))
+                return font;
+
+            font = GameCore.Current.Game.Content.Load<SpriteFont>($"./Assets/{path}");
+
+            _fonts.Add(path, font);
+
+            return font;
         }
     }
 }

@@ -15,7 +15,7 @@ namespace Unify2D.Core.Graphics
     public class SpriteRenderer : Renderer
     {
         // Used by the GameAssetPropertyViewer to set the Texture - To Change
-        public GameAsset AssetTexture{ get; set; }
+        public GameAsset AssetTexture { get; set; }
 
         [JsonIgnore]
         public Texture2D Texture { get; set; }
@@ -33,10 +33,8 @@ namespace Unify2D.Core.Graphics
             _gameObject.Bounds.Pivot = 0.5f;
         }
 
-        public void Initialize(Game game, GameObject go, GameAsset asset)
+        public void SetAsset(GameAsset asset)
         {
-            
-            _gameObject = go;
             AssetTexture = asset;
 
             try
@@ -44,7 +42,7 @@ namespace Unify2D.Core.Graphics
                 if (AssetTexture != null)
                 {
                     Texture = GameCore.Current.ResourcesManager.GetTexture(asset.Path);
-       
+
                     _gameObject.Bounds.BoundingSize = new Vector2(Texture.Width, Texture.Height);
                     _gameObject.Bounds.Pivot = 0.5f;
                 }
@@ -64,9 +62,9 @@ namespace Unify2D.Core.Graphics
         }
 
 
-        public override void Load(Game game, GameObject go)
+        public override void Load(Game game)
         {
-            if ( AssetTexture == null )
+            if (AssetTexture == null)
             {
                 return;
             }
@@ -78,7 +76,7 @@ namespace Unify2D.Core.Graphics
                 return;
             }
 
-            Initialize(game, go, asset);
+            SetAsset(asset);
         }
 
         public override void Draw()

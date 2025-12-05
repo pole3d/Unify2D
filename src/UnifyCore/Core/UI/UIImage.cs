@@ -14,18 +14,11 @@ public class UIImage : UIComponent
     public Texture2D Texture { get; set; }
     public Color Color { get; set; } = Color.White;
 
-    [JsonProperty]
-    string _imageGuid;
+    [JsonProperty] private string _imageGuid;
 
-    GameAsset _asset;
-
-    public void Initialize(Game game, GameObject go, GameAsset asset)
+    public void SetAsset(GameAsset asset)
     {
-        _gameObject = go;
-        _asset = asset;
         _imageGuid = asset.GUID;
-
-
         try
         {
             Texture = GameCore.Current.ResourcesManager.GetTexture(asset.Path);
@@ -43,9 +36,9 @@ public class UIImage : UIComponent
     }
 
 
-    public override void Load(Game game, GameObject go)
+    public override void Load(Game game)
     {
-        base.Load(game, go);
+        base.Load(game);
 
         var asset = GameCore.Current.AssetsManager.GetAsset(_imageGuid);
         if (asset == null)
@@ -55,7 +48,7 @@ public class UIImage : UIComponent
             return;
         }
 
-        Initialize(game, go, asset);
+        SetAsset(asset);
     }
 
     public override void Draw()
@@ -80,7 +73,7 @@ public class UIImage : UIComponent
 
     private void UpdateBounds()
     {
-        _gameObject.Bounds.BoundingSize = new Vector2(Texture.Width, Texture.Height);
+        if (Texture != null) _gameObject.Bounds.BoundingSize = new Vector2(Texture.Width, Texture.Height);
         _gameObject.Bounds.PositionOffset = Origin;
         _gameObject.Bounds.Pivot = GetAnchorVector(Anchor);
     }

@@ -32,11 +32,11 @@ namespace Unify2D.Core
             _gameObject = go;
         }
 
-        public virtual void Load(Game game, GameObject go)
+        public virtual void Load(Game game)
         {
         }
 
-        public virtual void LateLoad(Game game, GameObject go)
+        public virtual void LateLoad(Game game)
         {
 
         }
