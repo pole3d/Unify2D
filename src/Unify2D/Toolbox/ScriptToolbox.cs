@@ -71,19 +71,22 @@ namespace Unify2D.Toolbox
 
             if (ImGui.Button("Open in VS"))
             {
+                // Resolve before setting the shell's working directory to avoid repeating a relative project path.
+                string projectDirectory = Path.GetFullPath(_editor.ProjectPath);
+
                 foreach (var file in Directory.GetFiles(TemplateProjectPathFull))
                 {
                     string fileName = Path.GetFileName(file);
-                    string newPath = CoreTools.CombinePath(_editor.ProjectPath, fileName);
+                    string newPath = Path.Combine(projectDirectory, fileName);
                     File.Copy(file, newPath, true);
                 }
 
-                ProcessStartInfo process = new ProcessStartInfo(CoreTools.CombinePath(_editor.ProjectPath, ProjectFile));
-                process.WorkingDirectory = _editor.ProjectPath;
+                ProcessStartInfo process = new ProcessStartInfo(Path.Combine(projectDirectory, ProjectFile));
+                process.WorkingDirectory = projectDirectory;
                 process.UseShellExecute = true;
                 // process.Arguments = $"/edit {_asset.FullPath}"; // Doesn't work
 
-                Process.Start(process );
+                Process.Start(process);
             }
             ImGui.SameLine();
             if (ImGui.Button("Save"))
