@@ -66,7 +66,7 @@ namespace Microsoft.Xna.Framework.Content
 
 		#region Protected Internal Filename Normalizer Method
 
-		protected internal static string Normalize(string fileName, string[] extensions)
+		protected internal static string Normalize(string fileName, string[] extensions)//verifer pour faire en sorte une extensions en majuscule pas pour une minuscules 
 		{
 			if (File.Exists(fileName))
 			{

@@ -24,7 +24,7 @@ namespace Unify2D.Assets
         private readonly Dictionary<Type, List<string>> _assetTypeToExtension = new Dictionary<Type, List<string>>()
         {
             { typeof(ScriptAssetContent), new List<string> { ".cs" } },
-            { typeof(FontAssetContent), new List<string> { ".ttf" } },
+            { typeof(FontAssetContent), new List<string> { ".ttf", ".otf" } },
             { typeof(SceneAssetContent), new List<string> { ".scene" } },
             { typeof(PrefabAssetContent), new List<string> { ".prefab" } },
             { typeof(TextureAssetContent), new List<string> { ".png", ".jpg" } }
@@ -35,7 +35,7 @@ namespace Unify2D.Assets
         {
             _editor = editor;
 
-            foreach (KeyValuePair<Type, List<string>> pair in _assetTypeToExtension)
+            foreach (KeyValuePair<Type, List<string>> pair in _assetTypeToExtension)//regarder ici 
             {
                 foreach (string extension in pair.Value)
                 {
