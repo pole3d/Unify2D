@@ -18,6 +18,8 @@ namespace Microsoft.Xna.Framework.Input
 	/// </summary>
 	public static class Mouse
 	{
+		// Scoped by an embedded game host; null preserves normal platform input.
+		public static MouseState? StateOverrideEXT { get; set; }
 		#region Public Properties
 
 		public static IntPtr WindowHandle
@@ -66,6 +68,7 @@ namespace Microsoft.Xna.Framework.Input
 		/// <returns>Current state of the mouse.</returns>
 		public static MouseState GetState()
 		{
+			if (StateOverrideEXT.HasValue) return StateOverrideEXT.Value;
 			int x, y;
 			ButtonState left, middle, right, x1, x2;
 

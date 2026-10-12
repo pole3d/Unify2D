@@ -113,6 +113,7 @@ namespace Unify2D.Toolbox
 
         public void ShowGameObject()
         {
+            ImGui.BeginGroup();
             if (CurrentPrefabAsset != null)
             {
                 // Add a button to save the prefab
@@ -136,19 +137,17 @@ namespace Unify2D.Toolbox
 
             string name = GameObject.Name;
 
-            ImGui.InputText("name", ref name, 40);
-            GameObject.Name = name;
+            if (ImGui.InputText("name", ref name, 40)) GameObject.Name = name;
             System.Numerics.Vector2 position =
                 new System.Numerics.Vector2(GameObject.LocalPosition.X, GameObject.LocalPosition.Y);
             float rotation = MathHelper.ToDegrees(GameObject.LocalRotation);
             System.Numerics.Vector2 scale = new System.Numerics.Vector2(GameObject.Scale.X, GameObject.Scale.Y);
-            ImGui.InputFloat2("position", ref position);
-            ImGui.InputFloat("rotation", ref rotation);
-            ImGui.InputFloat2("scale", ref scale);
-
-            GameObject.LocalPosition = new Vector2(position.X, position.Y);
-            GameObject.LocalRotation = MathHelper.ToRadians(rotation);
-            GameObject.Scale = new Vector2(scale.X, scale.Y);
+            if (ImGui.InputFloat2("position", ref position))
+                GameObject.LocalPosition = new Vector2(position.X, position.Y);
+            if (ImGui.InputFloat("rotation", ref rotation))
+                GameObject.LocalRotation = MathHelper.ToRadians(rotation);
+            if (ImGui.InputFloat2("scale", ref scale))
+                GameObject.Scale = new Vector2(scale.X, scale.Y);
 
             List<Component> toRemove = new List<Component>();
             foreach (var component in GameObject.Components)
@@ -210,15 +209,21 @@ namespace Unify2D.Toolbox
 
             if (ImGui.CollapsingHeader("Add Component"))
             {
-                foreach (var item in _editor.Scripting.GetTypes())
+                if (ImGui.Button("Refresh Scripts"))
+                    _editor.Scripting.Reload();
+                foreach (var item in _editor.Scripting.GetTypes().OrderBy(type => type.Name))
                 {
-                    if (ImGui.Button(item.Name))
+                    if (ImGui.Button($"{item.Name}##{item.FullName}"))
                     {
-                        var component = Activator.CreateInstance(item);
-                        GameObject.AddComponent(component as Component);
+                        _editor.Scripting.TryAddComponent(GameObject, item);
                     }
                 }
             }
+            // Extend the group over the empty space so the whole inspector content accepts scripts.
+            var remainingSpace = ImGui.GetContentRegionAvail();
+            ImGui.Dummy(new System.Numerics.Vector2(Math.Max(0, remainingSpace.X), Math.Max(0, remainingSpace.Y)));
+            ImGui.EndGroup();
+            GameToolbox.TryDropScript(_editor, GameObject);
         }
 
         private void ShowComponent(Component component)

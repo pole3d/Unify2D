@@ -62,7 +62,7 @@ namespace Unify2D
                 JsonSerializerSettings settings = new JsonSerializerSettings();
                 settings.TypeNameHandling = TypeNameHandling.Auto;
                 settings.Error += SilentErrors;
-                settings.SerializationBinder = GuidTypeBinder.Instance;
+                settings.SerializationBinder = GameCore.Current.SerializationBinder ?? GuidTypeBinder.Instance;
                 GameObjects = JsonConvert.DeserializeObject<List<GameObject>>(text, settings);
             }
             catch (Exception ex)
@@ -95,6 +95,7 @@ namespace Unify2D
                 }
                 catch (Exception e)
                 {
+                    if (GameCore.Current.IsPlaySession) throw;
                     Debug.LogError(e.Message + e.StackTrace);
                 }
             }
@@ -147,6 +148,9 @@ namespace Unify2D
                 GameObjects.Remove(_gameObjectsToDestroy[i]);
 
             PhysicsSettings.World.Step(elapsedTime);
+
+            if (GameCore.Current.IsPlaySession)
+                GameCore.Current.Tweens.Update(elapsedTime);
 
             _gameObjectsToDestroy.Clear();
         }

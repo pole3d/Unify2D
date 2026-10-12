@@ -18,6 +18,8 @@ namespace Unify2D
         {
             get
             {
+                if (GameCore.Current != null)
+                    return GameCore.Current.SceneManager;
                 if (_instance == null)
                 {
                     _instance = new SceneManager();
@@ -29,6 +31,7 @@ namespace Unify2D
         }
 
         public Scene CurrentScene => _currentScene;
+        public void SetActiveScene(Scene scene) => _currentScene = scene;
         public int SceneCountInGameSettings => GameSettings.Instance.ScenesInGame.Count;
 
         public Action OnSceneLoaded;
@@ -248,6 +251,11 @@ namespace Unify2D
         {
             if (CurrentScene != null)
                 CurrentScene.ClearScene();
+            if (GameCore.Current?.IsPlaySession == true)
+            {
+                GameCore.Current.MainCamera = null;
+                GameCore.Current.Tweens.Clear();
+            }
         }
 
         public void AddGameObject(GameObject go)

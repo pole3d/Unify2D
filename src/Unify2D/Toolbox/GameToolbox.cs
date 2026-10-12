@@ -44,6 +44,7 @@ namespace Unify2D.Toolbox
 
         private bool _movingCamera;
         private bool _dragInput;
+        private bool _isViewHovered;
         private Vector2 _lastMousePosition;
 
         private int _lastMouseSroll;
@@ -97,12 +98,12 @@ namespace Unify2D.Toolbox
 
         public override void Draw()
         {
-            // Render target
-            _editor.GraphicsDevice.SetRenderTarget(_sceneRenderTarget);
-            _editor.GraphicsDevice.Clear(_gameCamera.Background);
-
-            // clear la texture de render de la scéne
-            ImGui.Begin("GAME", ImGuiWindowFlags.None);
+            _isViewHovered = false;
+            if (!ImGui.Begin("GAME", ImGuiWindowFlags.None))
+            {
+                ImGui.End();
+                return;
+            }
 
             if (ImGui.MenuItem($"Resolution {_resolution}"))
             {
@@ -111,7 +112,12 @@ namespace Unify2D.Toolbox
             }
 
             // begin child because stupid ImGui doesn't calculate Menu height....
-            ImGui.BeginChild("Camera", new Num.Vector2(), false, ImGuiWindowFlags.NoScrollbar);
+            if (!ImGui.BeginChild("Camera", new Num.Vector2(), false, ImGuiWindowFlags.NoScrollbar))
+            {
+                ImGui.EndChild();
+                ImGui.End();
+                return;
+            }
 
             UIPosition = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMin();
 
@@ -135,6 +141,7 @@ namespace Unify2D.Toolbox
 
             // Bind and give pointer to Scene render texture
             ImGui.Image(_renderTargetId, space);
+            _isViewHovered = ImGui.IsItemHovered();
 
             // Circle Gizmo around selected Game Object
             Selection.CircleSelected();
@@ -152,16 +159,7 @@ namespace Unify2D.Toolbox
 
             #region Drawing
 
-            ((GameCoreViewer)_tag).GameCore.BeginDraw(_gameCamera.Matrix);
-            //Draw the editor only grid
-            DrawGrid();
-
-            // Draw all game assets
-            if (SceneManager.Instance.CurrentScene != null)
-                SceneManager.Instance.CurrentScene.Draw();
-            // Draw all debutg gizmo
-            ((GameCoreViewer)_tag).GameCore.DrawGizmo();
-            ((GameCoreViewer)_tag).GameCore.EndDraw();
+            RenderScene();
             #endregion
 
             // Write camera data
@@ -172,6 +170,39 @@ namespace Unify2D.Toolbox
 
             ImGui.End();
 
+        }
+
+        private void RenderScene()
+        {
+            var device = _editor.GraphicsDevice;
+            var previousTargets = device.GetRenderTargets();
+            var previousViewport = device.Viewport;
+            var previousCore = GameCore.Current;
+            var core = ((GameCoreViewer)_tag).GameCore;
+            try
+            {
+                GameCore.SetCurrent(core);
+                device.SetRenderTarget(_sceneRenderTarget);
+                device.Clear(_gameCamera.Background);
+                core.BeginDraw(_gameCamera.Matrix);
+                try
+                {
+                    DrawGrid();
+                    SceneManager.Instance.CurrentScene?.Draw();
+                    core.DrawGizmo();
+                }
+                finally
+                {
+                    core.EndDraw();
+                }
+            }
+            finally
+            {
+                // Do not leave the scene target bound for Play to restore and discard.
+                device.SetRenderTargets(previousTargets);
+                device.Viewport = previousViewport;
+                GameCore.SetCurrent(previousCore);
+            }
         }
 
         private void DrawGrid()
@@ -326,6 +357,7 @@ namespace Unify2D.Toolbox
         }
         public bool IsMouseInWindow()
         {
+            if (!_isViewHovered) return false;
             var mouseState = Mouse.GetState();
             Vector2 position = new Vector2(mouseState.X, mouseState.Y);
 
@@ -369,8 +401,26 @@ namespace Unify2D.Toolbox
         }
 
 
+        internal static unsafe void TryDropScript(GameEditor editor, GameObject target)
+        {
+            if (target == null || Clipboard.Content is not Asset asset ||
+                asset.AssetContent is not ScriptAssetContent script || !ImGui.BeginDragDropTarget()) return;
+            var payload = ImGui.AcceptDragDropPayload("ASSET");
+            if (payload.NativePtr != null && payload.Delivery)
+            {
+                if (editor.Scripting.TryAddScript(target, script.Path))
+                    Selection.SelectObject(target);
+            }
+            ImGui.EndDragDropTarget();
+        }
+
         public static GameObject TryDragAndDrop(Game game)
         {
+            if (Clipboard.Content is not Asset droppedAsset ||
+                (droppedAsset.AssetContent is not PrefabAssetContent &&
+                 droppedAsset.AssetContent is not TextureAssetContent))
+                return null;
+
             GameObject go = null;
 
             if (ImGui.BeginDragDropTarget())
@@ -378,16 +428,15 @@ namespace Unify2D.Toolbox
                 unsafe
                 {
                     var ptr = ImGui.AcceptDragDropPayload("ASSET");
-                    if (ptr.NativePtr != null)
+                    if (ptr.NativePtr != null && ptr.Delivery && Clipboard.Content is Asset asset)
                     {
-                        Asset asset = Clipboard.Content as Asset;
-                        if (asset.Extension == ".prefab")
+                        if (asset.AssetContent is PrefabAssetContent)
                         {
                             var content = asset.AssetContent as PrefabAssetContent;
                             go = content.Instantiate(SceneManager.Instance.CurrentScene);
 
                         }
-                        else
+                        else if (asset.AssetContent is TextureAssetContent)
                         {
 
                             go = GameObject.Create();
@@ -402,8 +451,8 @@ namespace Unify2D.Toolbox
 
                     }
                 }
+                ImGui.EndDragDropTarget();
             }
-            ImGui.EndDragDropTarget();
 
             return go;
         }

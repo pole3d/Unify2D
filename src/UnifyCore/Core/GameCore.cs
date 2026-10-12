@@ -39,6 +39,12 @@ namespace Unify2D.Core
         public List<GameObject> GameObjects => SceneManager.Instance.CurrentScene.GameObjects;
 
         public PhysicsSettings PhysicsSettings { get; private set; }
+        public SceneManager SceneManager { get; }
+        public TweenManager Tweens { get; } = new TweenManager();
+        public Unify2D.Core.Graphics.Camera MainCamera { get; set; }
+        public Unify2D.Builder.GameSettings Settings { get; }
+        public Newtonsoft.Json.Serialization.ISerializationBinder SerializationBinder { get; set; }
+        public bool IsPlaySession { get; set; }
         public float DeltaTime { get; private set; }
 
         static GameCore s_current;
@@ -47,9 +53,12 @@ namespace Unify2D.Core
 
 
 
-        public GameCore(Game game)
+        public GameCore(Game game, SceneManager sceneManager = null, Unify2D.Builder.GameSettings settings = null)
         {
             _game = game;
+            SceneManager = sceneManager ?? Unify2D.SceneManager.Instance;
+            Settings = settings ?? Unify2D.Builder.GameSettings.Instance;
+            PhysicsSettings = new PhysicsSettings();
         }
 
         public void Initialize(GraphicsDevice graphicsDevice)
@@ -100,7 +109,8 @@ namespace Unify2D.Core
         {
             SpriteBatch.End();
 
-            TweenManager.Instance.Update(DeltaTime);
+            if (!IsPlaySession)
+                TweenManager.Instance.Update(DeltaTime);
         }
 
         public void SetDeltaTime(float timeSeconds)

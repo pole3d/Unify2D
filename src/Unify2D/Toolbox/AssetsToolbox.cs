@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -8,6 +9,7 @@ using Unify2D.Assets;
 using Unify2D.Core;
 using Unify2D.Tools;
 using UnifyCore;
+using Microsoft.Xna.Framework;
 
 namespace Unify2D.Toolbox
 {
@@ -22,6 +24,7 @@ namespace Unify2D.Toolbox
 
         private string _path;
         private List<Asset> _selectedAssets = new List<Asset>();
+        private Asset _pendingClickAsset;
         //   private List<Asset> _assets = new List<Asset>();
         private HashSet<string> _extensionsToIgnore = new HashSet<string> { ".csproj", ".dll", ".sln", ".meta" };
 
@@ -42,6 +45,9 @@ namespace Unify2D.Toolbox
         private FileSystemWatcher _watcher;
         bool _disableDeleteWatcher;
 
+        private readonly ConcurrentQueue<FileSystemEventArgs> _assetChanges = new();
+
+
         public override void Initialize(GameEditor editor)
         {
             base.Initialize(editor);
@@ -57,6 +63,7 @@ namespace Unify2D.Toolbox
                 _watcher.Renamed -= OnRenamed;
                 _watcher.Deleted -= OnDeleted;
                 _watcher.Created -= OnCreated;
+                _watcher.Dispose();
             }
 
             string path = Path.GetFullPath(_editor.AssetsPath);
@@ -188,11 +195,7 @@ namespace Unify2D.Toolbox
 
         private void OnRenamed(object sender, RenamedEventArgs e)
         {
-            if (TryGetAssetFromPath($"\\{e.OldName}", out Asset asset))
-            {
-                string lastFragment = Path.GetFileNameWithoutExtension(e.FullPath);
-                asset.SetName(lastFragment);
-            }
+            _assetChanges.Enqueue(e);
         }
 
         private void OnDeleted(object sender, FileSystemEventArgs e)
@@ -204,6 +207,7 @@ namespace Unify2D.Toolbox
                 return;
 
             Reset();
+            _assetChanges.Enqueue(e);
         }
 
         private void OnCreated(object sender, FileSystemEventArgs e)
@@ -211,7 +215,32 @@ namespace Unify2D.Toolbox
             if (e.ChangeType != WatcherChangeTypes.Created)
                 return;
 
-            Reset();
+            _assetChanges.Enqueue(e);
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            bool refresh = false;
+            while (_assetChanges.TryDequeue(out var change))
+            {
+                if (change is RenamedEventArgs renamed &&
+                    TryGetAssetFromPath($"\\{renamed.OldName}", out var asset) && !asset.IsDirectory &&
+                    string.Equals(Path.GetDirectoryName(renamed.OldFullPath), Path.GetDirectoryName(renamed.FullPath), StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(Path.GetExtension(renamed.OldFullPath), Path.GetExtension(renamed.FullPath), StringComparison.OrdinalIgnoreCase))
+                {
+                    asset.SetName(Path.GetFileNameWithoutExtension(renamed.FullPath));
+                }
+                else if (!string.Equals(Path.GetExtension(change.FullPath), ".meta", StringComparison.OrdinalIgnoreCase))
+                    refresh = true;
+            }
+            if (refresh)
+            {
+                // Watcher callbacks must not mutate assets or selection on a background thread.
+                Selection.TryGameObject(out var selectedObject);
+                Reset();
+                if (selectedObject != null)
+                    Selection.SelectObject(selectedObject);
+            }
         }
 
         public override void Draw()
@@ -250,6 +279,9 @@ namespace Unify2D.Toolbox
 
 
             DrawAssetTree();
+
+            if (!ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                _pendingClickAsset = null;
 
             ImGui.End();
         }
@@ -329,7 +361,13 @@ namespace Unify2D.Toolbox
         private void SetNode(Asset node)
         {
             if (ImGui.IsItemClicked())
+                _pendingClickAsset = node;
+
+            // Select on release so starting a drag preserves the inspector's target.
+            if (_pendingClickAsset == node && ImGui.IsMouseReleased(ImGuiMouseButton.Left) &&
+                ImGui.IsItemHovered())
             {
+                _pendingClickAsset = null;
                 // Clear selection when CTRL is not held
                 if (!ImGui.GetIO().KeyCtrl)
                 {
@@ -455,6 +493,8 @@ namespace Unify2D.Toolbox
             if (!ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
                 return;
 
+            _pendingClickAsset = null;
+
             int index = _editor.EditorAssetManager.Assets.FindIndex(a => a == asset);
             ImGui.SetDragDropPayload(AssetDragDropPayloadType, (IntPtr)(&index), sizeof(int));
 
@@ -522,7 +562,7 @@ namespace Unify2D.Toolbox
                 sw.WriteLine(defaultScript);
             }
 
-            // CreateAssetFromFile(newFile);
+            _editor.Scripting.RequestReload();
         }
 
         private void CreateFolder()

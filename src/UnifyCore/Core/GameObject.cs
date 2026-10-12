@@ -323,6 +323,12 @@ namespace Unify2D.Core
 
             _components.Add(component);
 
+            if (GameCore.Current.IsPlaySession)
+            {
+                component.Load(GameCore.Current.Game);
+                component.LateLoad(GameCore.Current.Game);
+            }
+
             SceneManager.Instance.CurrentScene.UpdateCanvas();
         }
 
@@ -453,7 +459,12 @@ namespace Unify2D.Core
              string serializedText = File.ReadAllText(Path.GetFullPath(sb.ToString()));
              
              // Create gameObject
-             GameObject go = JsonConvert.DeserializeObject<GameObject>(serializedText, s_serializerSettings);
+             var settings = new JsonSerializerSettings
+             {
+                 TypeNameHandling = TypeNameHandling.Auto,
+                 SerializationBinder = GameCore.Current.SerializationBinder
+             };
+             GameObject go = JsonConvert.DeserializeObject<GameObject>(serializedText, settings);
              go.Initialize(GameCore.Current.Game);
 
 

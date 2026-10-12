@@ -109,7 +109,16 @@ namespace Unify2D.Core.Graphics
             set { _matrix = value; }
         }
 
-        public static Camera Main;
+        private static Camera _fallbackMain;
+        public static Camera Main
+        {
+            get => GameCore.Current != null ? GameCore.Current.MainCamera : _fallbackMain;
+            set
+            {
+                if (GameCore.Current != null) GameCore.Current.MainCamera = value;
+                else _fallbackMain = value;
+            }
+        }
 
         internal Vector2 LocalToWorld(Vector2 mousePosition)
         {

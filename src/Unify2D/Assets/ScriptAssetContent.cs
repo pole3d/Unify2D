@@ -35,13 +35,6 @@ namespace Unify2D.Assets
 
         }
         
-        public override void OnDragDroppedInGame(GameEditor editor)
-        {
-            GameObject go = new GameObject() { Name = _asset.Name };
-            // GameCore.Current.AddGameObjectImmediate(go);
-            //TODO : Add component to the gameObject
-            Selection.SelectObject(go);
-        }
         internal void Save()
         {
             string path = CoreTools.CombinePath(GameEditor.Instance.AssetsPath, _asset.FullPath);
@@ -55,7 +48,7 @@ namespace Unify2D.Assets
             if (ImGui.Button("Save"))
             {
                 Save();
-                inspectorToolbox.Editor.Scripting.Reload();
+                inspectorToolbox.Editor.Scripting.RequestReload();
             }
         }
     }

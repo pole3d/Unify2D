@@ -12,6 +12,8 @@ namespace UnifyCore.Core
         public Vector2 Pivot { get; set; }
         public Vector2 PositionOffset { get; set; }
 
+        public Bounds() : this(Vector2.Zero) { }
+
         public Bounds(Vector2 boundingSize, Vector2 pivot, Vector2 positionOffset)
         {
             BoundingSize = boundingSize;

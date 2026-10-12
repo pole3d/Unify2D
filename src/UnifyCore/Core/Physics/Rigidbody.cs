@@ -1,4 +1,4 @@
-﻿using Genbox.VelcroPhysics.Dynamics;
+using Genbox.VelcroPhysics.Dynamics;
 using Genbox.VelcroPhysics.Factories;
 using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
@@ -39,9 +39,13 @@ namespace Unify2D.Physics
         private BodyType _type = BodyType.Dynamic;
         private float _gravityScale = 1f;
         private Body _body;
+        private Vector2 _lastPosition;
+        private float _lastRotation;
 
         public override void Load(Game game)
         {
+            _lastPosition = _gameObject.Position;
+            _lastRotation = _gameObject.Rotation;
             Collider col = _gameObject.GetComponent<Collider>();
             if (col != null)
             {
@@ -61,25 +65,18 @@ namespace Unify2D.Physics
 
         public override void PhysicsUpdate(GameCore game)
         {
+            if (_body == null) return;
+            _body.BodyType = _type;
+            _body.Mass = _mass;
+            _body.LinearDamping = _linearDamper;
+            _body.GravityScale = _gravityScale;
             if (_body.BodyType == BodyType.Dynamic)
             {
-                /*
-                if (_gameObject.PositionUpdated)
-                {
+                // A transform edited by the inspector, gizmos or a script teleports the body.
+                if (_gameObject.Position != _lastPosition)
                     _body.Position = _gameObject.Position / PhysicsSettings.UnitToPixelRatio;
-                    _body.GravityScale = 0;
-                }
-                else
-                {
-                    _gameObject.Position = _body.Position * PhysicsSettings.UnitToPixelRatio;
-                    _body.GravityScale = _gravityScale;
-                }
-
-                if (_gameObject.RotationUpdated)
+                if (_gameObject.Rotation != _lastRotation)
                     _body.Rotation = _gameObject.Rotation;
-                else
-                    _gameObject.Rotation = _body.Rotation;
-                */
                 _gameObject.Position = _body.Position * PhysicsSettings.UnitToPixelRatio;
                 _gameObject.Rotation = _body.Rotation;
             }
@@ -88,6 +85,8 @@ namespace Unify2D.Physics
                 _body.Position = _gameObject.Position / PhysicsSettings.UnitToPixelRatio;
                 _body.Rotation = _gameObject.Rotation;
             }
+            _lastPosition = _gameObject.Position;
+            _lastRotation = _gameObject.Rotation;
         }
 
         public void AddForce(Vector2 force)

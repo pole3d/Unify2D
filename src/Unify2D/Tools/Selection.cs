@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using System.Linq;
 using Unify2D.Assets;
 using Unify2D.Core;
 using UnifyCore;
@@ -25,7 +26,7 @@ namespace Unify2D
         {
             get
             {
-                return _gameObject;
+                return (object)_gameObject ?? _asset;
             }
             private set
             {
@@ -81,6 +82,7 @@ namespace Unify2D
         }
         public static void UnSelectObject()
         {
+            _selectState = SelectedState.None;
             Selected = null;
 
             if (GameEditor.Instance.InspectorToolbox != null)
@@ -102,7 +104,8 @@ namespace Unify2D
                 if (SceneManager.Instance.CurrentScene != null)
                 {
 
-                    foreach (var item in SceneManager.Instance.CurrentScene.GameObjectsWithChildren)
+                    // Test children before their parents, in reverse scene drawing order.
+                    foreach (var item in SceneManager.Instance.CurrentScene.GameObjectsWithChildren.Reverse())
                     {
                         if (item.IsPointInBounds(mouseWorldPosition))
                         {
