@@ -48,7 +48,7 @@ namespace Unify2D.Assets
             if (ImGui.Button("Save"))
             {
                 Save();
-                inspectorToolbox.Editor.Scripting.Reload();
+                inspectorToolbox.Editor.Scripting.RequestReload();
             }
         }
     }

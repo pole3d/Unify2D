@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -8,6 +9,7 @@ using Unify2D.Assets;
 using Unify2D.Core;
 using Unify2D.Tools;
 using UnifyCore;
+using Microsoft.Xna.Framework;
 
 namespace Unify2D.Toolbox
 {
@@ -41,6 +43,7 @@ namespace Unify2D.Toolbox
         private const string AssetDragDropPayloadType = "ASSET";
 
         private FileSystemWatcher _watcher;
+        private readonly ConcurrentQueue<FileSystemEventArgs> _assetChanges = new();
 
         public override void Initialize(GameEditor editor)
         {
@@ -57,6 +60,7 @@ namespace Unify2D.Toolbox
                 _watcher.Renamed -= OnRenamed;
                 _watcher.Deleted -= OnDeleted;
                 _watcher.Created -= OnCreated;
+                _watcher.Dispose();
             }
 
             string path = Path.GetFullPath(_editor.AssetsPath);
@@ -188,11 +192,7 @@ namespace Unify2D.Toolbox
 
         private void OnRenamed(object sender, RenamedEventArgs e)
         {
-            if (TryGetAssetFromPath($"\\{e.OldName}", out Asset asset))
-            {
-                string lastFragment = Path.GetFileNameWithoutExtension(e.FullPath);
-                asset.SetName(lastFragment);
-            }
+            _assetChanges.Enqueue(e);
         }
 
         private void OnDeleted(object sender, FileSystemEventArgs e)
@@ -200,7 +200,7 @@ namespace Unify2D.Toolbox
             if (e.ChangeType != WatcherChangeTypes.Deleted)
                 return;
 
-            Reset();
+            _assetChanges.Enqueue(e);
         }
 
         private void OnCreated(object sender, FileSystemEventArgs e)
@@ -208,7 +208,32 @@ namespace Unify2D.Toolbox
             if (e.ChangeType != WatcherChangeTypes.Created)
                 return;
 
-            Reset();
+            _assetChanges.Enqueue(e);
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            bool refresh = false;
+            while (_assetChanges.TryDequeue(out var change))
+            {
+                if (change is RenamedEventArgs renamed &&
+                    TryGetAssetFromPath($"\\{renamed.OldName}", out var asset) && !asset.IsDirectory &&
+                    string.Equals(Path.GetDirectoryName(renamed.OldFullPath), Path.GetDirectoryName(renamed.FullPath), StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(Path.GetExtension(renamed.OldFullPath), Path.GetExtension(renamed.FullPath), StringComparison.OrdinalIgnoreCase))
+                {
+                    asset.SetName(Path.GetFileNameWithoutExtension(renamed.FullPath));
+                }
+                else if (!string.Equals(Path.GetExtension(change.FullPath), ".meta", StringComparison.OrdinalIgnoreCase))
+                    refresh = true;
+            }
+            if (refresh)
+            {
+                // Watcher callbacks must not mutate assets or selection on a background thread.
+                Selection.TryGameObject(out var selectedObject);
+                Reset();
+                if (selectedObject != null)
+                    Selection.SelectObject(selectedObject);
+            }
         }
 
         public override void Draw()
@@ -521,7 +546,7 @@ namespace Unify2D.Toolbox
                 sw.WriteLine(defaultScript);
             }
 
-            _editor.Scripting.Reload();
+            _editor.Scripting.RequestReload();
         }
 
         private void CreateFolder()

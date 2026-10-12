@@ -197,6 +197,7 @@ namespace Unify2D
                 item.Update(gameTime);
             }
             _inputsManager.Update(gameTime);
+            _scripting?.Update();
         }
 
         protected override void Draw(GameTime gameTime)
@@ -281,6 +282,7 @@ namespace Unify2D
 
         protected override void UnloadContent()
         {
+            _scripting?.Unload();
             _settings.Save();
         }
 
@@ -329,6 +331,7 @@ namespace Unify2D
 
         internal void ProjectLoaded()
         {
+            _scripting.Load(this);
             InitializeToolBoxes();
             HidePopup();
 

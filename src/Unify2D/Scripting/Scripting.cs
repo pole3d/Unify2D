@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Threading;
 using Unify2D.Core;
 using UnifyCore;
 
@@ -19,12 +20,74 @@ namespace Unify2D.Scripting
         List<Type> _types = new();
         Dictionary<string, List<Type>> _scriptTypes = new(StringComparer.OrdinalIgnoreCase);
         GameEditor _editor;
+        FileSystemWatcher _watcher;
+        string _watchedPath;
+        long _reloadAt;
+        Dictionary<string, string> _sources;
+        const int ReloadDelayMilliseconds = 350;
+        public event Action SourcesChanged;
+
+        public void RequestReload()
+        {
+            Interlocked.Exchange(ref _reloadAt, Environment.TickCount64 + ReloadDelayMilliseconds);
+        }
+
+        // File-system callbacks only schedule work. Compilation and scene changes run here.
+        public void Update()
+        {
+            EnsureWatcher();
+            long due = Interlocked.Read(ref _reloadAt);
+            if (due != 0 && Environment.TickCount64 >= due &&
+                Interlocked.CompareExchange(ref _reloadAt, 0, due) == due)
+                Reload();
+        }
+
+        private void EnsureWatcher()
+        {
+            string path = _editor.AssetsPath;
+            path = string.IsNullOrEmpty(path) ? null : Path.GetFullPath(path);
+            if (string.Equals(path, _watchedPath, StringComparison.OrdinalIgnoreCase) &&
+                (_watcher != null || path == null || !Directory.Exists(path))) return;
+
+            _watcher?.Dispose();
+            _watcher = null;
+            _watchedPath = path;
+            _sources = null;
+            if (path == null || !Directory.Exists(path)) return;
+
+            _watcher = new FileSystemWatcher(path)
+            {
+                IncludeSubdirectories = true,
+                NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName |
+                    NotifyFilters.LastWrite | NotifyFilters.Size
+            };
+            _watcher.Changed += (_, e) =>
+            {
+                if (string.Equals(Path.GetExtension(e.FullPath), ".cs", StringComparison.OrdinalIgnoreCase))
+                    RequestReload();
+            };
+            // Include directory moves and atomic saves through temporary files.
+            _watcher.Created += (_, _) => RequestReload();
+            _watcher.Deleted += (_, _) => RequestReload();
+            _watcher.Renamed += (_, _) => RequestReload();
+            _watcher.Error += (_, _) => RequestReload();
+            _watcher.EnableRaisingEvents = true;
+            RequestReload();
+        }
 
         public void Reload()
         {
             if (_types.Count == 0)
                 _types.AddRange(typeof(Component).Assembly.GetTypes().Where(IsComponentType));
-            LoadScripts();
+            try
+            {
+                LoadScripts();
+            }
+            catch (IOException)
+            {
+                // External editors may still hold a file or be replacing it atomically.
+                RequestReload();
+            }
         }
 
         private static bool IsComponentType(Type type) =>
@@ -34,6 +97,7 @@ namespace Unify2D.Scripting
         private void LoadScripts()
         {
             List<SyntaxTree> syntaxes = new List<SyntaxTree>();
+            var sources = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             if (Directory.Exists(_editor.AssetsPath) == false)
                 return;
@@ -41,9 +105,14 @@ namespace Unify2D.Scripting
             foreach (var item in Directory.GetFiles(_editor.AssetsPath, "*.cs", SearchOption.AllDirectories))
             {
                 string content = File.ReadAllText(item);
+                sources[Path.GetFullPath(item)] = content;
                 SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(content, path: Path.GetFullPath(item));
                 syntaxes.Add(syntaxTree);
             }
+
+            if (_sources != null && sources.Count == _sources.Count &&
+                sources.All(pair => _sources.TryGetValue(pair.Key, out var text) && text == pair.Value))
+                return;
 
             string assemblyName = "GameAssembly";
             List<MetadataReference> references = new();
@@ -64,6 +133,8 @@ namespace Unify2D.Scripting
             using (var ms = new MemoryStream())
             {
                 EmitResult result = compilation.Emit(ms);
+                _sources = sources;
+                SourcesChanged?.Invoke();
 
                 if (!result.Success)
                 {
@@ -89,7 +160,8 @@ namespace Unify2D.Scripting
                     _types.AddRange(typeof(Component).Assembly.GetTypes().Where(IsComponentType));
                     var scriptTypes = assembly.GetTypes().Where(IsComponentType).ToList();
                     _types.AddRange(scriptTypes);
-                    _scriptTypes.Clear();
+                    var previousScriptTypes = _scriptTypes;
+                    _scriptTypes = new Dictionary<string, List<Type>>(StringComparer.OrdinalIgnoreCase);
                     foreach (var syntax in syntaxes)
                     {
                         var model = compilation.GetSemanticModel(syntax);
@@ -101,14 +173,36 @@ namespace Unify2D.Scripting
                     }
                     if (previousContext != null)
                     {
-                        ReplaceComponents();
+                        ReplaceComponents(GetRenamedTypes(previousScriptTypes));
                         previousContext.Unload();
                     }
                 }
             }
         }
 
-        private void ReplaceComponents()
+        private Dictionary<Type, Type> GetRenamedTypes(Dictionary<string, List<Type>> previousScriptTypes)
+        {
+            var renamedTypes = new Dictionary<Type, Type>();
+            var previousNames = previousScriptTypes.Values.SelectMany(types => types)
+                .Select(type => type.FullName).ToHashSet();
+            var currentNames = _types.Select(type => type.FullName).ToHashSet();
+
+            foreach (var source in previousScriptTypes)
+            {
+                if (!_scriptTypes.TryGetValue(source.Key, out var currentTypes)) continue;
+
+                var removed = source.Value.Where(type => !currentNames.Contains(type.FullName)).ToList();
+                var added = currentTypes.Where(type => !previousNames.Contains(type.FullName)).ToList();
+                // A unique replacement in the same source file identifies a renamed class.
+                // Never guess between several removed or added component classes.
+                if (removed.Count == 1 && added.Count == 1)
+                    renamedTypes[removed[0]] = added[0];
+            }
+
+            return renamedTypes;
+        }
+
+        private void ReplaceComponents(Dictionary<Type, Type> renamedTypes)
         {
             if (SceneManager.Instance.CurrentScene == null) return;
             foreach (var go in SceneManager.Instance.CurrentScene.GameObjectsWithChildren.ToList())
@@ -117,6 +211,8 @@ namespace Unify2D.Scripting
                 {
                     var oldType = oldComponent.GetType();
                     var newType = GetNewType(oldType);
+                    if (newType == null)
+                        renamedTypes.TryGetValue(oldType, out newType);
                     if (newType == null || newType == oldType)
                     {
                         continue;
@@ -158,6 +254,7 @@ namespace Unify2D.Scripting
         public void Load(GameEditor editor)
         {
             _editor = editor;
+            EnsureWatcher();
             Reload();
 
         }
@@ -169,7 +266,15 @@ namespace Unify2D.Scripting
 
         public void Unload()
         {
+            _watcher?.Dispose();
+            _watcher = null;
+            _watchedPath = null;
+            Interlocked.Exchange(ref _reloadAt, 0);
+            _sources = null;
+            _scriptTypes.Clear();
+            _types.Clear();
             _context?.Unload();
+            _context = null;
         }
 
         public List<Type> GetTypes()

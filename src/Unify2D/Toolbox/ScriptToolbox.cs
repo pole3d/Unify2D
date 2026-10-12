@@ -18,46 +18,26 @@ namespace Unify2D.Toolbox
         string TemplateProjectPathFull => CoreTools.CombinePath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), TemplateProjectDirectory);
 
         Asset _asset;
-        FileSystemWatcher _watcher;
+        bool _hasUnsavedChanges;
+
+        public override void Initialize(GameEditor editor)
+        {
+            base.Initialize(editor);
+            editor.Scripting.SourcesChanged += RefreshSource;
+        }
 
         public void SetObject(Asset asset)
         {
+            if (_asset == asset) return;
             _asset = asset;
-            var scriptAsset = _asset.AssetContent as ScriptAssetContent;
-
-            string path = Path.GetDirectoryName(scriptAsset.Path);
-
-            if (_watcher != null)
-            {
-                _watcher.Changed -= OnChanged;
-                _watcher.Created -= OnCreated;
-                _watcher.Renamed -= OnRenamed;
-            }
-
-            _watcher = new FileSystemWatcher(path);
-            _watcher.Path = path;
-            _watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName;
-            _watcher.Filter = "*.cs";
-            _watcher.Changed += new FileSystemEventHandler(OnChanged);
-            _watcher.Created += new FileSystemEventHandler(OnCreated);
-            _watcher.Renamed += new RenamedEventHandler(OnRenamed);
-            _watcher.EnableRaisingEvents = true;
+            _hasUnsavedChanges = false;
+            RefreshSource();
         }
 
-        private void OnRenamed(object sender, FileSystemEventArgs e)
+        private void RefreshSource()
         {
-            var scriptAsset = _asset.AssetContent as ScriptAssetContent;
-            scriptAsset.Load();
-
-        }
-
-        private void OnCreated(object sender, FileSystemEventArgs e)
-        {
-
-        }
-
-        private void OnChanged(object sender, FileSystemEventArgs e)
-        {
+            if (!_hasUnsavedChanges && _asset?.AssetContent is ScriptAssetContent script && File.Exists(script.Path))
+                script.Load();
         }
 
         public override void Draw()
@@ -67,7 +47,7 @@ namespace Unify2D.Toolbox
 
             var scriptAsset = _asset.AssetContent as ScriptAssetContent;
 
-            ImGui.Begin($"Script : {_asset.Name}##script");
+            ImGui.Begin($"Script : {_asset.Name}###script", ImGuiWindowFlags.NoFocusOnAppearing);
 
             if (ImGui.Button("Open in VS"))
             {
@@ -92,7 +72,8 @@ namespace Unify2D.Toolbox
             if (ImGui.Button("Save"))
             {
                 scriptAsset.Save();
-                _editor.Scripting.Reload();
+                _hasUnsavedChanges = false;
+                _editor.Scripting.RequestReload();
             }
 
             if (scriptAsset != null)
@@ -103,7 +84,8 @@ namespace Unify2D.Toolbox
                  System.Numerics.Vector2 size =  ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin();
                 size.Y -= 40;
 
-                ImGui.InputTextMultiline("##source", ref scriptAsset.Content, ushort.MaxValue, size, ImGuiInputTextFlags.AllowTabInput);
+                if (ImGui.InputTextMultiline("##source", ref scriptAsset.Content, ushort.MaxValue, size, ImGuiInputTextFlags.AllowTabInput))
+                    _hasUnsavedChanges = true;
          
             }
 
