@@ -64,9 +64,9 @@ namespace Unify2D
                     ImGui.EndMenu();
                 }
 
-                if (ImGui.MenuItem("Play"))
+                if (ImGui.MenuItem(_editor.PlayToolbox?.IsPlaying == true ? "Stop" : "Play"))
                 {
-                    Build();
+                    _editor.PlayToolbox?.TogglePlay();
                 }
 
                 ImGui.EndMainMenuBar();
@@ -77,6 +77,7 @@ namespace Unify2D
 
         public void Build()
         {
+            _editor.PlayToolbox?.Stop();
             SaveCurrentScene();
 
             _editor.Build();
@@ -90,6 +91,8 @@ namespace Unify2D
 
             if (result == NfdStatus.Ok)
             {
+                _editor.PlayToolbox?.Stop();
+                Selection.UnSelectObject();
                 SceneManager.Instance.LoadSceneWithPath(path);
             }
         }
@@ -102,18 +105,23 @@ namespace Unify2D
                 NfdStatus result = Nfd.SaveDialog(out path, new Dictionary<string, string>() { { "New Scene", "scene" } }, "New Scene", Path.GetFullPath("./Assets").ToString());
                 if (result == NfdStatus.Ok)
                 {
+                    _editor.PlayToolbox?.Stop();
+                    Selection.UnSelectObject();
                     Scene scene = new Scene(Path.GetFileName(path),path);
                     SceneManager.Instance.LoadSceneWithPath(path);
                 }
             }
             else
             {
+                _editor.PlayToolbox?.Stop();
                 string pathProject = Path.Combine(Directory.GetCurrentDirectory(), _editor.Settings.Data.CurrentProjectPath);
                 SceneManager.Instance.CreateNewScene(pathProject, GameEditor.ScenesFolder);
             }
         }
         public void SaveCurrentScene()
         {
+            // Play modifications are temporary; never serialize the running scene over the original.
+            if (_editor.PlayToolbox?.IsPlaying == true) return;
             Scene scene = SceneManager.Instance.CurrentScene;
 
             if (scene.SceneInfo == null)

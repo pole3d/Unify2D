@@ -13,6 +13,8 @@ namespace Unify2D.Builder
         {
             get
             {
+                if (Unify2D.Core.GameCore.Current != null)
+                    return Unify2D.Core.GameCore.Current.Settings;
                 if (_instance == null)
                 {
                     _instance = new GameSettings();

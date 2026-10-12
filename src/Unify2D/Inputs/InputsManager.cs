@@ -21,7 +21,7 @@ namespace Unify2D.Inputs
             _gameEditor = gameEditor;
             _inputs.Add(new Input(Keys.S, true), SaveCurrentScene);
             _inputs.Add(new Input(Keys.O, true), LoadScene);
-            _inputs.Add(new Input(Keys.F5), Build);
+            _inputs.Add(new Input(Keys.F5), () => _gameEditor.PlayToolbox?.TogglePlay());
         }
 
         public void Update(GameTime gameTime)
@@ -42,6 +42,8 @@ namespace Unify2D.Inputs
             {
                 var input = inputMethodPair.Key;
                 var key = input.Key;
+                if (_gameEditor.PlayToolbox?.HasInputFocus == true && key != Keys.F5)
+                    continue;
                 if (state.IsKeyDown(key) && _previousKeyboardState.IsKeyUp(key) && (input.PressControl == false || state.IsKeyDown(Keys.LeftControl)))
                 {
                     inputMethodPair.Value?.Invoke();
@@ -52,6 +54,7 @@ namespace Unify2D.Inputs
         #region Methods
         private void SaveCurrentScene()
         {
+            if (_gameEditor.PlayToolbox?.IsPlaying == true) return;
             Debug.Log("Scene saved!");
             _gameEditor.GameEditorUI.SaveCurrentScene();
         }

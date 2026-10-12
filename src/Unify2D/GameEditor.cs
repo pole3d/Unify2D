@@ -53,6 +53,7 @@ namespace Unify2D
         internal InspectorToolbox InspectorToolbox { get; private set; }
         internal ScriptToolbox ScriptToolbox { get; private set; }
         internal GameToolbox GameToolbox { get; private set; }
+        internal PlayToolbox PlayToolbox { get; private set; }
         internal HierarchyToolbox HierarchyToolbox { get; private set; }
         internal AssetsToolbox AssetsToolBox { get; private set; }
         internal SpriteEditorToolbox SpriteEditorToolbox { get; private set; }
@@ -99,7 +100,7 @@ namespace Unify2D
             _sceneEditorManager = SceneManager.Instance;
             _sceneEditorManager.OnSceneLoaded += SceneLoaded;
 
-            Exiting += (object _, EventArgs _) => { _sceneEditorManager.SaveCurrentSceneToJson(); };
+            Exiting += (object _, EventArgs _) => { PlayToolbox?.Stop(); _sceneEditorManager.SaveCurrentSceneToJson(); };
         }
 
         private void SceneLoaded()
@@ -161,6 +162,7 @@ namespace Unify2D
             HierarchyToolbox.SetCore(_coreViewerScene);
             AssetsToolBox = new AssetsToolbox();
             SpriteEditorToolbox = new SpriteEditorToolbox();
+            PlayToolbox = new PlayToolbox();
 
             _toolboxes.Add(AssetsToolBox);
             _toolboxes.Add(HierarchyToolbox);
@@ -170,6 +172,7 @@ namespace Unify2D
             _toolboxes.Add(ScriptToolbox);
             _toolboxes.Add(InspectorToolbox);
             _toolboxes.Add(GameToolbox);
+            _toolboxes.Add(PlayToolbox);
 
             foreach (var item in _toolboxes)
             {
@@ -260,7 +263,7 @@ namespace Unify2D
 
         public bool IsMouseInGameWindow()
         {
-            return GameToolbox.IsMouseInWindow();
+            return PlayToolbox?.HasInputFocus != true && GameToolbox.IsMouseInWindow();
         }
 
         public Vector2 GetWorldMousePosition()
@@ -282,6 +285,7 @@ namespace Unify2D
 
         protected override void UnloadContent()
         {
+            PlayToolbox?.Stop();
             _scripting?.Unload();
             _settings.Save();
         }
@@ -295,6 +299,7 @@ namespace Unify2D
         // Waiting to resolve operation
         internal void OpenPrefab(PrefabAssetContent content)
         {
+            PlayToolbox?.Stop();
             GameCoreViewer prefabCoreViewer = new GameCoreViewer(new GameCore(this),
                 content.Asset.FullPath);
             _coreViewers.Add(prefabCoreViewer);
@@ -326,6 +331,7 @@ namespace Unify2D
 
         internal void PreloadProject()
         {
+            PlayToolbox?.Stop();
             GameCore.Current.AssetsManager.Initialize(AssetsPath);
         }
 

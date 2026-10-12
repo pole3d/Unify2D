@@ -137,19 +137,17 @@ namespace Unify2D.Toolbox
 
             string name = GameObject.Name;
 
-            ImGui.InputText("name", ref name, 40);
-            GameObject.Name = name;
+            if (ImGui.InputText("name", ref name, 40)) GameObject.Name = name;
             System.Numerics.Vector2 position =
                 new System.Numerics.Vector2(GameObject.LocalPosition.X, GameObject.LocalPosition.Y);
             float rotation = MathHelper.ToDegrees(GameObject.LocalRotation);
             System.Numerics.Vector2 scale = new System.Numerics.Vector2(GameObject.Scale.X, GameObject.Scale.Y);
-            ImGui.InputFloat2("position", ref position);
-            ImGui.InputFloat("rotation", ref rotation);
-            ImGui.InputFloat2("scale", ref scale);
-
-            GameObject.LocalPosition = new Vector2(position.X, position.Y);
-            GameObject.LocalRotation = MathHelper.ToRadians(rotation);
-            GameObject.Scale = new Vector2(scale.X, scale.Y);
+            if (ImGui.InputFloat2("position", ref position))
+                GameObject.LocalPosition = new Vector2(position.X, position.Y);
+            if (ImGui.InputFloat("rotation", ref rotation))
+                GameObject.LocalRotation = MathHelper.ToRadians(rotation);
+            if (ImGui.InputFloat2("scale", ref scale))
+                GameObject.Scale = new Vector2(scale.X, scale.Y);
 
             List<Component> toRemove = new List<Component>();
             foreach (var component in GameObject.Components)

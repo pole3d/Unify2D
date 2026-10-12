@@ -7,7 +7,9 @@ namespace UnifyCore.Core.Tweens;
 public class TweenManager
 {
     private static TweenManager s_Instance;
-    public static TweenManager Instance => s_Instance ??= new TweenManager();
+    public static TweenManager Instance => GameCore.Current?.Tweens ?? (s_Instance ??= new TweenManager());
+
+    public void Clear() => m_Tweens.Clear();
 
     private List<Tween> m_Tweens = new();
     
@@ -21,7 +23,7 @@ public class TweenManager
                 continue;
             }
             
-            tween.onComplete();
+            tween.onComplete?.Invoke();
             killTweens = true;
         }
 

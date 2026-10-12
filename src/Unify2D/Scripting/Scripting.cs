@@ -24,6 +24,8 @@ namespace Unify2D.Scripting
         string _watchedPath;
         long _reloadAt;
         Dictionary<string, string> _sources;
+        byte[] _assemblyImage;
+        public bool HasCompilationErrors { get; private set; }
         const int ReloadDelayMilliseconds = 350;
         public event Action SourcesChanged;
 
@@ -77,17 +79,24 @@ namespace Unify2D.Scripting
 
         public void Reload()
         {
-            if (_types.Count == 0)
-                _types.AddRange(typeof(Component).Assembly.GetTypes().Where(IsComponentType));
+            var previousCore = GameCore.Current;
+            var editingCore = _editor?.PlayToolbox?.EditingCore;
+            if (editingCore != null) GameCore.SetCurrent(editingCore);
             try
             {
-                LoadScripts();
+                if (_types.Count == 0)
+                    _types.AddRange(typeof(Component).Assembly.GetTypes().Where(IsComponentType));
+                try
+                {
+                    LoadScripts();
+                }
+                catch (IOException)
+                {
+                    // External editors may still hold a file or be replacing it atomically.
+                    RequestReload();
+                }
             }
-            catch (IOException)
-            {
-                // External editors may still hold a file or be replacing it atomically.
-                RequestReload();
-            }
+            finally { GameCore.SetCurrent(previousCore); }
         }
 
         private static bool IsComponentType(Type type) =>
@@ -133,6 +142,7 @@ namespace Unify2D.Scripting
             using (var ms = new MemoryStream())
             {
                 EmitResult result = compilation.Emit(ms);
+                HasCompilationErrors = !result.Success;
                 _sources = sources;
                 SourcesChanged?.Invoke();
 
@@ -150,6 +160,7 @@ namespace Unify2D.Scripting
                 }
                 else
                 {
+                    _assemblyImage = ms.ToArray();
                     ms.Seek(0, SeekOrigin.Begin);
 
                     var previousContext = _context;
@@ -271,6 +282,7 @@ namespace Unify2D.Scripting
             _watchedPath = null;
             Interlocked.Exchange(ref _reloadAt, 0);
             _sources = null;
+            _assemblyImage = null;
             _scriptTypes.Clear();
             _types.Clear();
             _context?.Unload();
@@ -279,7 +291,17 @@ namespace Unify2D.Scripting
 
         public List<Type> GetTypes()
         {
+            if (GameCore.Current?.SerializationBinder is Runtime.PlayScriptAssembly playScripts)
+                return typeof(Component).Assembly.GetTypes().Concat(playScripts.Types).Where(IsComponentType).ToList();
             return _types;
+        }
+
+        internal Runtime.PlayScriptAssembly CreatePlayAssembly()
+        {
+            Reload();
+            if (HasCompilationErrors || _assemblyImage == null)
+                throw new InvalidOperationException("Fix script compilation errors before starting Play.");
+            return new Runtime.PlayScriptAssembly(_assemblyImage);
         }
 
         public bool TryAddComponent(GameObject target, Type type)
@@ -287,6 +309,8 @@ namespace Unify2D.Scripting
             if (target == null || type == null || !IsComponentType(type)) return false;
             try
             {
+                if (GameCore.Current?.IsPlaySession == true)
+                    type = GameCore.Current.SerializationBinder.BindToType(type.Assembly.GetName().Name, type.FullName);
                 target.AddComponent((Component)Activator.CreateInstance(type));
                 return true;
             }

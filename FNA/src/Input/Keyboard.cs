@@ -19,6 +19,8 @@ namespace Microsoft.Xna.Framework.Input
 	/// </summary>
 	public static class Keyboard
 	{
+		// Scoped by an embedded game host; null preserves normal platform input.
+		public static KeyboardState? StateOverrideEXT { get; set; }
 		#region Public Static Methods
 
 		/// <summary>
@@ -27,7 +29,7 @@ namespace Microsoft.Xna.Framework.Input
 		/// <returns>Current keyboard state.</returns>
 		public static KeyboardState GetState()
 		{
-			return new KeyboardState(keys);
+			return StateOverrideEXT ?? new KeyboardState(keys);
 		}
 
 		/// <summary>
@@ -37,7 +39,7 @@ namespace Microsoft.Xna.Framework.Input
 		/// <returns>Current keyboard state.</returns>
 		public static KeyboardState GetState(PlayerIndex playerIndex)
 		{
-			return new KeyboardState(keys);
+			return StateOverrideEXT ?? new KeyboardState(keys);
 		}
 
 		#endregion

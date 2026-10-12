@@ -37,9 +37,8 @@ namespace Unify2D.Toolbox
 
             if (ImGui.Button(AddGameObjectButtonLabel, new System.Numerics.Vector2(-1, 0)))
             {
-                if (Selection.Selected != null)
+                if (Selection.TryGameObject(out var parent))
                 {
-                    GameObject parent = Selection.Selected as GameObject;
                     GameObject go = GameObject.CreateChild(parent);
                     go.Name = $"{GameObjectNamePrefix}{_countGO++}";
                 }

@@ -7,18 +7,22 @@ using Unify2D.Core;
 
 namespace UnifyCore
 {
-    public class ResourcesManager
+    public class ResourcesManager : IDisposable
     {
-        private static Texture2D _whiteTexture;
+        private Texture2D _whiteTexture;
 
         Dictionary<string, Texture2D> _textures = new Dictionary<string, Texture2D>();
 
-        private static SpriteFont _defaultFont;
+        private SpriteFont _defaultFont;
+
+        private Microsoft.Xna.Framework.Content.ContentManager _content;
 
         Dictionary<string, SpriteFont> _fonts = new Dictionary<string, SpriteFont>();
 
         public ResourcesManager()
         {
+            _content = new Microsoft.Xna.Framework.Content.ContentManager(
+                GameCore.Current.Game.Services, GameCore.Current.Game.Content.RootDirectory);
             _whiteTexture = new Texture2D(GameCore.Current.Game.GraphicsDevice, 128, 128);
             Color[] colors = new Color[128 * 128];
             for (int i = 0; i < colors.Length; i++)
@@ -39,7 +43,7 @@ namespace UnifyCore
             if (_textures.TryGetValue(path, out Texture2D texture))
                 return texture;
 
-            texture = GameCore.Current.Game.Content.Load<Texture2D>($"./Assets/{path}");
+            texture = _content.Load<Texture2D>($"./Assets/{path}");
 
             _textures.Add(path, texture);
 
@@ -54,11 +58,19 @@ namespace UnifyCore
             if (_fonts.TryGetValue(path, out SpriteFont font))
                 return font;
 
-            font = GameCore.Current.Game.Content.Load<SpriteFont>($"./Assets/{path}");
+            font = _content.Load<SpriteFont>($"./Assets/{path}");
 
             _fonts.Add(path, font);
 
             return font;
+        }
+
+        public void Dispose()
+        {
+            _content.Dispose();
+            _whiteTexture.Dispose();
+            _textures.Clear();
+            _fonts.Clear();
         }
     }
 }

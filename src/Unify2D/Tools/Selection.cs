@@ -26,7 +26,7 @@ namespace Unify2D
         {
             get
             {
-                return _gameObject;
+                return (object)_gameObject ?? _asset;
             }
             private set
             {
@@ -82,6 +82,7 @@ namespace Unify2D
         }
         public static void UnSelectObject()
         {
+            _selectState = SelectedState.None;
             Selected = null;
 
             if (GameEditor.Instance.InspectorToolbox != null)

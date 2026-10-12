@@ -63,6 +63,16 @@ namespace Unify2D.Toolbox
             _isOpen = true;
         }
 
+        internal void Close()
+        {
+            _isOpen = false;
+            _component = null;
+            _gameAsset = null;
+            foreach (var bound in _texturesBound)
+                _editor.GuiRenderer.UnbindTexture(bound.IntPtr);
+            _texturesBound.Clear();
+        }
+
         public override void Draw()
         {
             if (!_isOpen)
