@@ -170,6 +170,7 @@ namespace Unify2D.Toolbox
                 if (ImGui.IsItemHovered())
                     _isAnyWidgetHovered = true;
 
+                GameToolbox.TryDropScript(_editor, go);
                 ShowContextMenu(go);
             }
             else
@@ -206,6 +207,7 @@ namespace Unify2D.Toolbox
                 if (ImGui.IsItemHovered())
                     _isAnyWidgetHovered = true;
 
+                GameToolbox.TryDropScript(_editor, go);
                 ShowContextMenu(go);
 
                 if (open)

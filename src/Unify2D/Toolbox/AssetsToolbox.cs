@@ -22,6 +22,7 @@ namespace Unify2D.Toolbox
 
         private string _path;
         private List<Asset> _selectedAssets = new List<Asset>();
+        private Asset _pendingClickAsset;
         //   private List<Asset> _assets = new List<Asset>();
         private HashSet<string> _extensionsToIgnore = new HashSet<string> { ".csproj", ".dll", ".sln", ".meta" };
 
@@ -240,6 +241,9 @@ namespace Unify2D.Toolbox
 
             DrawAssetTree();
 
+            if (!ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                _pendingClickAsset = null;
+
             ImGui.End();
         }
 
@@ -318,7 +322,13 @@ namespace Unify2D.Toolbox
         private void SetNode(Asset node)
         {
             if (ImGui.IsItemClicked())
+                _pendingClickAsset = node;
+
+            // Select on release so starting a drag preserves the inspector's target.
+            if (_pendingClickAsset == node && ImGui.IsMouseReleased(ImGuiMouseButton.Left) &&
+                ImGui.IsItemHovered())
             {
+                _pendingClickAsset = null;
                 // Clear selection when CTRL is not held
                 if (!ImGui.GetIO().KeyCtrl)
                 {
@@ -442,6 +452,8 @@ namespace Unify2D.Toolbox
             if (!ImGui.BeginDragDropSource(ImGuiDragDropFlags.None))
                 return;
 
+            _pendingClickAsset = null;
+
             int index = _editor.EditorAssetManager.Assets.FindIndex(a => a == asset);
             ImGui.SetDragDropPayload(AssetDragDropPayloadType, (IntPtr)(&index), sizeof(int));
 
@@ -509,7 +521,7 @@ namespace Unify2D.Toolbox
                 sw.WriteLine(defaultScript);
             }
 
-            // CreateAssetFromFile(newFile);
+            _editor.Scripting.Reload();
         }
 
         private void CreateFolder()

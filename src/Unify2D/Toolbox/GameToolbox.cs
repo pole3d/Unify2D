@@ -369,8 +369,26 @@ namespace Unify2D.Toolbox
         }
 
 
+        internal static unsafe void TryDropScript(GameEditor editor, GameObject target)
+        {
+            if (target == null || Clipboard.Content is not Asset asset ||
+                asset.AssetContent is not ScriptAssetContent script || !ImGui.BeginDragDropTarget()) return;
+            var payload = ImGui.AcceptDragDropPayload("ASSET");
+            if (payload.NativePtr != null && payload.Delivery)
+            {
+                if (editor.Scripting.TryAddScript(target, script.Path))
+                    Selection.SelectObject(target);
+            }
+            ImGui.EndDragDropTarget();
+        }
+
         public static GameObject TryDragAndDrop(Game game)
         {
+            if (Clipboard.Content is not Asset droppedAsset ||
+                (droppedAsset.AssetContent is not PrefabAssetContent &&
+                 droppedAsset.AssetContent is not TextureAssetContent))
+                return null;
+
             GameObject go = null;
 
             if (ImGui.BeginDragDropTarget())
@@ -378,16 +396,15 @@ namespace Unify2D.Toolbox
                 unsafe
                 {
                     var ptr = ImGui.AcceptDragDropPayload("ASSET");
-                    if (ptr.NativePtr != null)
+                    if (ptr.NativePtr != null && ptr.Delivery && Clipboard.Content is Asset asset)
                     {
-                        Asset asset = Clipboard.Content as Asset;
-                        if (asset.Extension == ".prefab")
+                        if (asset.AssetContent is PrefabAssetContent)
                         {
                             var content = asset.AssetContent as PrefabAssetContent;
                             go = content.Instantiate(SceneManager.Instance.CurrentScene);
 
                         }
-                        else
+                        else if (asset.AssetContent is TextureAssetContent)
                         {
 
                             go = GameObject.Create();
@@ -402,8 +419,8 @@ namespace Unify2D.Toolbox
 
                     }
                 }
+                ImGui.EndDragDropTarget();
             }
-            ImGui.EndDragDropTarget();
 
             return go;
         }

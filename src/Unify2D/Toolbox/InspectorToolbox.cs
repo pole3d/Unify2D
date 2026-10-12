@@ -113,6 +113,7 @@ namespace Unify2D.Toolbox
 
         public void ShowGameObject()
         {
+            ImGui.BeginGroup();
             if (CurrentPrefabAsset != null)
             {
                 // Add a button to save the prefab
@@ -210,15 +211,21 @@ namespace Unify2D.Toolbox
 
             if (ImGui.CollapsingHeader("Add Component"))
             {
-                foreach (var item in _editor.Scripting.GetTypes())
+                if (ImGui.Button("Refresh Scripts"))
+                    _editor.Scripting.Reload();
+                foreach (var item in _editor.Scripting.GetTypes().OrderBy(type => type.Name))
                 {
-                    if (ImGui.Button(item.Name))
+                    if (ImGui.Button($"{item.Name}##{item.FullName}"))
                     {
-                        var component = Activator.CreateInstance(item);
-                        GameObject.AddComponent(component as Component);
+                        _editor.Scripting.TryAddComponent(GameObject, item);
                     }
                 }
             }
+            // Extend the group over the empty space so the whole inspector content accepts scripts.
+            var remainingSpace = ImGui.GetContentRegionAvail();
+            ImGui.Dummy(new System.Numerics.Vector2(Math.Max(0, remainingSpace.X), Math.Max(0, remainingSpace.Y)));
+            ImGui.EndGroup();
+            GameToolbox.TryDropScript(_editor, GameObject);
         }
 
         private void ShowComponent(Component component)
