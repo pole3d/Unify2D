@@ -15,7 +15,6 @@ namespace Unify2D.Toolbox
         private int _countGO = 0;
         //  private int _currentIndex = 0;
         private GameObject _goToDestroy = null;
-        private bool _isAnyWidgetHovered = false;
 
         private const string CreatePrefabButtonLabel = "Create Prefab";
         private const string DestroyButtonLabel = "Destroy";
@@ -34,17 +33,10 @@ namespace Unify2D.Toolbox
         {
 
 
-            Vector2 size = ImGui.GetContentRegionAvail();
-
             ImGui.Begin(HierarchyWindowLabel);
-
-            _isAnyWidgetHovered = false;
 
             if (ImGui.Button(AddGameObjectButtonLabel, new System.Numerics.Vector2(-1, 0)))
             {
-                if (ImGui.IsItemHovered())
-                    _isAnyWidgetHovered = true;
-
                 if (Selection.Selected != null)
                 {
                     GameObject parent = Selection.Selected as GameObject;
@@ -72,11 +64,11 @@ namespace Unify2D.Toolbox
 
 
 
+            ImGui.BeginChild(GameObjectListChildLabel);
             ImGui.BeginGroup();
 
 
 
-            // First way to Display GameObjects to the hierarchy -> Don't allow to D&D
             if (SceneManager.Instance.CurrentScene != null)
             {
                 foreach (GameObject gameObject in SceneManager.Instance.CurrentScene.GameObjects)
@@ -88,31 +80,18 @@ namespace Unify2D.Toolbox
                 }
             }
 
-            // Empty node to deselect when you click on it
-            var base_flags = ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.Leaf |
-                             ImGuiTreeNodeFlags.NoTreePushOnOpen;
-            ImGui.TreeNodeEx($"     ", base_flags);
-
-            ImGui.EndGroup();
-
-            Vector2 bb_min = ImGui.GetItemRectMin();
-            Vector2 bb_max = ImGui.GetItemRectMax();
-            Vector2 saved = ImGui.GetCursorScreenPos();
-
-            ImGui.SetCursorScreenPos(bb_min);
-            ImGui.InvisibleButton("##drop_zone_node", bb_max - bb_min);
-            GameToolbox.TryDragAndDrop(_editor);
-            ImGui.SetCursorScreenPos(saved);
-
-            if (_isAnyWidgetHovered == false && ImGui.IsMouseReleased(ImGuiMouseButton.Left)
-                                             && ImGui.IsWindowFocused())
+            // Only a click starting in empty space clears selection, not a drop release.
+            Vector2 remainingSpace = ImGui.GetContentRegionAvail();
+            if (remainingSpace.X > 0 && remainingSpace.Y > 0)
             {
-                Selection.UnSelectObject();
+                ImGui.InvisibleButton("##hierarchy_empty_space", remainingSpace);
+                if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+                    Selection.UnSelectObject();
             }
 
-            ImGui.BeginChild(GameObjectListChildLabel);
-
-            Selection.TryGameObject(out GameObject selectedGameObject);
+            ImGui.EndGroup();
+            GameToolbox.TryDragAndDrop(_editor);
+            ImGui.EndChild();
 
             ImGui.End();
 
@@ -167,9 +146,6 @@ namespace Unify2D.Toolbox
                     Selection.SelectObject(go);
                 }
 
-                if (ImGui.IsItemHovered())
-                    _isAnyWidgetHovered = true;
-
                 GameToolbox.TryDropScript(_editor, go);
                 ShowContextMenu(go);
             }
@@ -203,9 +179,6 @@ namespace Unify2D.Toolbox
                         Console.WriteLine("test");
                     }
                 }
-
-                if (ImGui.IsItemHovered())
-                    _isAnyWidgetHovered = true;
 
                 GameToolbox.TryDropScript(_editor, go);
                 ShowContextMenu(go);
