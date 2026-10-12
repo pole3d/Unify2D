@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using System.Linq;
 using Unify2D.Assets;
 using Unify2D.Core;
 using UnifyCore;
@@ -102,7 +103,8 @@ namespace Unify2D
                 if (SceneManager.Instance.CurrentScene != null)
                 {
 
-                    foreach (var item in SceneManager.Instance.CurrentScene.GameObjectsWithChildren)
+                    // Test children before their parents, in reverse scene drawing order.
+                    foreach (var item in SceneManager.Instance.CurrentScene.GameObjectsWithChildren.Reverse())
                     {
                         if (item.IsPointInBounds(mouseWorldPosition))
                         {
