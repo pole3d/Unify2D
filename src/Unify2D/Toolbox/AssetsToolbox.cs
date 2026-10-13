@@ -43,7 +43,10 @@ namespace Unify2D.Toolbox
         private const string AssetDragDropPayloadType = "ASSET";
 
         private FileSystemWatcher _watcher;
+        bool _disableDeleteWatcher;
+
         private readonly ConcurrentQueue<FileSystemEventArgs> _assetChanges = new();
+
 
         public override void Initialize(GameEditor editor)
         {
@@ -200,6 +203,10 @@ namespace Unify2D.Toolbox
             if (e.ChangeType != WatcherChangeTypes.Deleted)
                 return;
 
+            if (_disableDeleteWatcher)
+                return;
+
+            Reset();
             _assetChanges.Enqueue(e);
         }
 
@@ -263,6 +270,13 @@ namespace Unify2D.Toolbox
 
                 ImGui.EndPopup();
             }
+
+            if (_selectedAssets.Count >= 1 && ImGui.IsKeyPressed(ImGuiKey.Delete))
+            {
+                Console.WriteLine(_selectedAssets.Count);
+                DeleteSelectedAssets();
+            }
+
 
             DrawAssetTree();
 
@@ -457,6 +471,8 @@ namespace Unify2D.Toolbox
                 }
             }
 
+
+
             if (ImGui.Button(ShowInExplorerButtonLabel))
             {
                 ShowExplorer(asset.Path);
@@ -580,8 +596,19 @@ namespace Unify2D.Toolbox
 
         private void DeleteSelectedAssets()
         {
-            for (int n = 0; n < _selectedAssets.Count; n++)
-                DeleteAsset(_selectedAssets[n].FullPath);
+            _disableDeleteWatcher = true;
+
+            List<Asset> assetsToRemove = new List<Asset>(_selectedAssets);
+
+            int totalAssets = assetsToRemove.Count;
+            for (int n = totalAssets - 1; n >= 0; n--)
+            {
+                DeleteAsset(assetsToRemove[n].FullPath);
+            }
+
+            _disableDeleteWatcher = true;
+
+            Reset();
         }
 
         private void DeleteAsset(string fullPath)
@@ -590,6 +617,7 @@ namespace Unify2D.Toolbox
 
             if (TryGetAssetFromPath(fullPath, out Asset asset))
             {
+                Debug.Log("Removing asset : " + fullPath);
                 if (asset.IsDirectory)
                 {
                     string[] files = Directory.GetFiles(path);
@@ -597,14 +625,26 @@ namespace Unify2D.Toolbox
                     if (files.Length > 0)
                     {
                         foreach (string file in files)
-                            File.Delete(file);
+                            DeleteFile(file);
                     }
 
                     Directory.Delete(path, true);
                 }
                 else
-                    File.Delete(path);
+                    DeleteFile(path);
             }
+        }
+
+
+        private void DeleteFile(string path)
+        {
+
+            if (path.EndsWith("cs"))
+            {
+                string newPath = path + ".meta";
+                File.Delete(newPath);
+            }
+            File.Delete(path);
         }
 
         private static void ShowExplorer(string path)
