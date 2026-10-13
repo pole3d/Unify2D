@@ -115,7 +115,7 @@ namespace Unify2D.Scripting
             {
                 string content = File.ReadAllText(item);
                 sources[Path.GetFullPath(item)] = content;
-                SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(content, path: Path.GetFullPath(item));
+                SyntaxTree syntaxTree = ScriptCompilationDefaults.Parse(content, path: Path.GetFullPath(item));
                 syntaxes.Add(syntaxTree);
             }
 
@@ -133,7 +133,7 @@ namespace Unify2D.Scripting
 
             CSharpCompilation compilation = CSharpCompilation.Create(
             assemblyName,
-            syntaxTrees: syntaxes,
+            syntaxTrees: ScriptCompilationDefaults.WithImports(syntaxes),
             references: references,
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
@@ -295,6 +295,9 @@ namespace Unify2D.Scripting
                 return typeof(Component).Assembly.GetTypes().Concat(playScripts.Types).Where(IsComponentType).ToList();
             return _types;
         }
+
+        internal KeyValuePair<string, string>[] GetSourceSnapshot() =>
+            _sources?.ToArray() ?? Array.Empty<KeyValuePair<string, string>>();
 
         internal Runtime.PlayScriptAssembly CreatePlayAssembly()
         {

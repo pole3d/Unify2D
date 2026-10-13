@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameAssembly", "GameAssembl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VelcroPhysics", "..\VelcroPhysics-master-TEMP\src\VelcroPhysics\VelcroPhysics.csproj", "{4D7FC1E5-4859-4735-A510-E7F21179B3C0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImGuiColorTextEditNet", "ImGuiColorTextEditNet\ImGuiColorTextEditNet.csproj", "{A4657815-2F60-4509-8497-80E8031CAEC0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -253,6 +255,42 @@ Global
 		{4D7FC1E5-4859-4735-A510-E7F21179B3C0}.WindowsRelease|x64.Build.0 = WindowsRelease|Any CPU
 		{4D7FC1E5-4859-4735-A510-E7F21179B3C0}.WindowsRelease|x86.ActiveCfg = WindowsRelease|Any CPU
 		{4D7FC1E5-4859-4735-A510-E7F21179B3C0}.WindowsRelease|x86.Build.0 = WindowsRelease|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.Debug|x64.Build.0 = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.Debug|x86.Build.0 = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.LinuxDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.LinuxDebug|Any CPU.Build.0 = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.LinuxDebug|x64.ActiveCfg = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.LinuxDebug|x64.Build.0 = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.LinuxDebug|x86.ActiveCfg = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.LinuxDebug|x86.Build.0 = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.LinuxRelease|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.LinuxRelease|Any CPU.Build.0 = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.LinuxRelease|x64.ActiveCfg = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.LinuxRelease|x64.Build.0 = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.LinuxRelease|x86.ActiveCfg = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.LinuxRelease|x86.Build.0 = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.Release|x64.ActiveCfg = Release|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.Release|x64.Build.0 = Release|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.Release|x86.ActiveCfg = Release|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.Release|x86.Build.0 = Release|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.WindowsDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.WindowsDebug|Any CPU.Build.0 = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.WindowsDebug|x64.ActiveCfg = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.WindowsDebug|x64.Build.0 = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.WindowsDebug|x86.ActiveCfg = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.WindowsDebug|x86.Build.0 = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.WindowsRelease|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.WindowsRelease|Any CPU.Build.0 = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.WindowsRelease|x64.ActiveCfg = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.WindowsRelease|x64.Build.0 = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.WindowsRelease|x86.ActiveCfg = Debug|Any CPU
+		{A4657815-2F60-4509-8497-80E8031CAEC0}.WindowsRelease|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
