@@ -11,9 +11,14 @@ namespace Unify2D.Scripting
     // Works on text snapshots, never on the editor or collectible runtime assemblies.
     internal static class ScriptCompletion
     {
-        internal sealed record Description(string Kind, string Type, string[] Signatures);
+        internal sealed record Description(string Kind, string Type, string[] Signatures)
+        {
+            internal string Documentation { get; init; }
+        }
+        internal sealed record Edit(int Start, int Length, string Text, int? Cursor);
         internal sealed record Result(int Start, int Length, string[] Items)
         {
+            internal IReadOnlyDictionary<string, Edit> Changes { get; init; } = new Dictionary<string, Edit>();
             internal IReadOnlyDictionary<string, Description> Details { get; init; }
                 = new Dictionary<string, Description>();
         }
@@ -24,9 +29,6 @@ namespace Unify2D.Scripting
             .WithParameterOptions(SymbolDisplayParameterOptions.IncludeType | SymbolDisplayParameterOptions.IncludeName |
                 SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeDefaultValue |
                 SymbolDisplayParameterOptions.IncludeOptionalBrackets);
-
-        private static string Name(ISymbol symbol) =>
-            SyntaxFacts.GetKeywordKind(symbol.Name) != SyntaxKind.None ? "@" + symbol.Name : symbol.Name;
 
         private static Description Describe(ISymbol[] symbols)
         {
@@ -64,8 +66,21 @@ namespace Unify2D.Scripting
             ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")).Split(Path.PathSeparator)
                 .Select(path => MetadataReference.CreateFromFile(path)).ToArray());
 
+        private static readonly Lazy<Microsoft.CodeAnalysis.Host.Mef.MefHostServices> Host = new(() =>
+            Microsoft.CodeAnalysis.Host.Mef.MefHostServices.Create(
+                Microsoft.CodeAnalysis.Host.Mef.MefHostServices.DefaultAssemblies.Concat(new[] {
+                    System.Reflection.Assembly.Load("Microsoft.CodeAnalysis.CSharp.Workspaces"),
+                    System.Reflection.Assembly.Load("Microsoft.CodeAnalysis.Features"),
+                    System.Reflection.Assembly.Load("Microsoft.CodeAnalysis.CSharp.Features")
+                }).Distinct()));
+
         internal static Result Get(string source, int cursor, string path,
             KeyValuePair<string, string>[] otherSources, bool force = false)
+            => GetAsync(source, cursor, path, otherSources, force).GetAwaiter().GetResult();
+
+        internal static async System.Threading.Tasks.Task<Result> GetAsync(string source, int cursor, string path,
+            KeyValuePair<string, string>[] otherSources, bool force = false,
+            System.Threading.CancellationToken cancellationToken = default)
         {
             cursor = Math.Clamp(cursor, 0, source.Length);
             int start = cursor, end = cursor;
@@ -73,55 +88,58 @@ namespace Unify2D.Scripting
             while (end < source.Length && SyntaxFacts.IsIdentifierPartCharacter(source[end])) end++;
             string prefix = source.Substring(start, cursor - start);
             var empty = new Result(start, end - start, Array.Empty<string>());
-            bool afterDot = start > 0 && source[start - 1] == '.';
-            if (!force && prefix.Length < 2 && !afterDot) return empty;
+            if (!force && prefix.Length < 2 && !(start > 0 && source[start - 1] == '.')) return empty;
 
-            // A placeholder makes incomplete member access usable by the semantic model.
-            var tree = ScriptCompilationDefaults.Parse(source.Remove(start, end - start).Insert(start, "__completion"), path: path);
-            var root = tree.GetRoot();
-            var token = root.FindToken(start);
-            if (token.SpanStart != start || !token.IsKind(SyntaxKind.IdentifierToken)) return empty;
-            var trivia = root.FindTrivia(start, findInsideTrivia: true);
-            if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia) || trivia.IsKind(SyntaxKind.MultiLineCommentTrivia) ||
-                trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia) || trivia.IsKind(SyntaxKind.DisabledTextTrivia))
-                return empty;
+            using var workspace = new AdhocWorkspace(Host.Value);
+            var project = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Create(),
+                "ScriptCompletion", "ScriptCompletion", LanguageNames.CSharp,
+                parseOptions: CSharpParseOptions.Default,
+                compilationOptions: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary),
+                metadataReferences: References.Value));
+            var sources = otherSources.Where(pair => !string.Equals(pair.Key, path, StringComparison.OrdinalIgnoreCase))
+                .Select(pair => ScriptCompilationDefaults.Parse(pair.Value, pair.Key));
+            foreach (var tree in ScriptCompilationDefaults.WithImports(sources))
+                workspace.AddDocument(project.Id, tree.FilePath, tree.GetText(cancellationToken));
+            var document = workspace.AddDocument(project.Id, path,
+                ScriptCompilationDefaults.Parse(source, path).GetText(cancellationToken));
+            var service = Microsoft.CodeAnalysis.Completion.CompletionService.GetService(document);
+            if (service == null) throw new InvalidOperationException("C# completion service is unavailable.");
+            var list = await service.GetCompletionsAsync(document, cursor,
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+            if (list == null) return empty;
+            var items = list.Items
+                .Where(item => item.FilterText.TrimStart('@').StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(item => item.Rules.MatchPriority)
+                .ThenBy(item => !item.FilterText.StartsWith(prefix, StringComparison.Ordinal))
+                .ThenBy(item => item.SortText, StringComparer.OrdinalIgnoreCase)
+                .GroupBy(item => item.DisplayText).Select(group => group.First()).Take(40).ToArray();
 
-            var trees = otherSources.Where(pair => !string.Equals(pair.Key, path, StringComparison.OrdinalIgnoreCase))
-                .Select(pair => ScriptCompilationDefaults.Parse(pair.Value, path: pair.Key)).Append(tree);
-            var compilation = CSharpCompilation.Create("ScriptCompletion", ScriptCompilationDefaults.WithImports(trees), References.Value,
-                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-            var model = compilation.GetSemanticModel(tree);
-            IEnumerable<ISymbol> symbols;
-            var member = token.Parent?.Parent as MemberAccessExpressionSyntax;
-            if (member != null && member.Name.Span.Contains(start))
+            var details = new Dictionary<string, Description>();
+            var changes = new Dictionary<string, Edit>();
+            var model = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+            var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
+            var member = root.FindToken(Math.Max(0, cursor - 1)).Parent?.AncestorsAndSelf()
+                .OfType<MemberAccessExpressionSyntax>().FirstOrDefault(m => m.Name.FullSpan.Start <= cursor && m.FullSpan.End >= cursor);
+            INamespaceOrTypeSymbol container = null;
+            if (member != null)
+                container = model.GetSymbolInfo(member.Expression, cancellationToken).Symbol as INamespaceOrTypeSymbol
+                    ?? model.GetTypeInfo(member.Expression, cancellationToken).Type;
+            foreach (var item in items)
             {
-                var receiver = model.GetSymbolInfo(member.Expression).Symbol;
-                var container = receiver as INamespaceOrTypeSymbol ?? model.GetTypeInfo(member.Expression).Type;
-                if (container == null || container is ITypeSymbol { TypeKind: TypeKind.Error }) return empty;
-                bool staticOnly = receiver is INamespaceOrTypeSymbol;
-                symbols = model.LookupSymbols(start, container, includeReducedExtensionMethods: true)
-                    .Where(symbol => staticOnly ? symbol.IsStatic || symbol is INamespaceOrTypeSymbol :
-                        !symbol.IsStatic && symbol is not INamespaceOrTypeSymbol);
+                cancellationToken.ThrowIfCancellationRequested();
+                var description = await service.GetDescriptionAsync(document, item, cancellationToken).ConfigureAwait(false);
+                var change = await service.GetChangeAsync(document, item, cancellationToken: cancellationToken).ConfigureAwait(false);
+                // Roslyn may insert escaped identifiers or replace a span different from the typed prefix.
+                changes[item.DisplayText] = new Edit(change.TextChange.Span.Start, change.TextChange.Span.Length,
+                    change.TextChange.NewText, change.NewPosition);
+                var symbols = model.LookupSymbols(cursor, container, name: item.DisplayText.TrimStart('@'),
+                    includeReducedExtensionMethods: true).Where(s => s.CanBeReferencedByName).ToArray();
+                var detail = symbols.Length > 0 ? Describe(symbols)
+                    : new Description(item.Tags.FirstOrDefault()?.ToLowerInvariant() ?? "", "", Array.Empty<string>());
+                details[item.DisplayText] = detail with { Documentation = description.Text };
             }
-            else
-            {
-                if (afterDot) return empty;
-                symbols = model.LookupSymbols(start);
-            }
-
-            var descriptions = symbols.Where(symbol => !symbol.IsImplicitlyDeclared && symbol.CanBeReferencedByName)
-                .Where(symbol => Name(symbol).StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                .GroupBy(Name).ToDictionary(group => group.Key, group => Describe(group.ToArray()));
-            IEnumerable<string> names = descriptions.Keys;
-            if (member == null)
-            {
-                foreach (string keyword in SyntaxFacts.GetKeywordKinds().Select(SyntaxFacts.GetText))
-                    descriptions.TryAdd(keyword, new Description("keyword", "", new[] { keyword }));
-            }
-            return new Result(start, end - start, names
-                .Where(name => name != "__completion" && name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) && name != prefix)
-                .Distinct(StringComparer.Ordinal).OrderBy(name => !name.StartsWith(prefix, StringComparison.Ordinal))
-                .ThenBy(name => name, StringComparer.OrdinalIgnoreCase).Take(40).ToArray()) { Details = descriptions };
+            return new Result(start, end - start, items.Select(item => item.DisplayText).ToArray())
+                { Details = details, Changes = changes };
         }
     }
 }
