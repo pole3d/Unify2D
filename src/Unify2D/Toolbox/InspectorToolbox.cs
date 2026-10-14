@@ -75,6 +75,14 @@ namespace Unify2D.Toolbox
             _texturesBound.Clear();
         }
 
+        internal void ReleaseTextureBindings()
+        {
+            UnSelect();
+            foreach (var item in _texturesToUnbind)
+                _editor.GuiRenderer.UnbindTexture(item.IntPtr);
+            _texturesToUnbind.Clear();
+        }
+
         public override void Draw()
         {
             foreach (var item in _texturesToUnbind)

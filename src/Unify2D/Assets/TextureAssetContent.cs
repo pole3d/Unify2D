@@ -56,14 +56,22 @@ namespace Unify2D.Assets
             ImGui.Text($"{widthProperty.Name}: {width}");
 
             Texture2D texture = GameCore.Current.ResourcesManager.GetTexture(_asset.FullPath);
-            // Here improve performance to avoid binding the same texture everytime
-            IntPtr ptr = GameEditor.Instance.GuiRenderer.BindTexture(texture);
+            var binding = inspectorToolbox.GetTextureBound(texture);
+            if (binding == null)
+            {
+                binding = new TextureBound
+                {
+                    Texture = texture,
+                    IntPtr = inspectorToolbox.Editor.GuiRenderer.BindTexture(texture)
+                };
+                inspectorToolbox.AddTextureBound(binding);
+            }
 
             var windowSize = ImGui.GetContentRegionAvail();
             var imageSize = new System.Numerics.Vector2(int.Parse(width.ToString()), int.Parse(height.ToString()));
             var scale = Math.Min(windowSize.X / imageSize.X, windowSize.Y / imageSize.Y);
             var newSize = new System.Numerics.Vector2(imageSize.X * scale, imageSize.Y * scale);
-            ImGui.Image(ptr, newSize);
+            ImGui.Image(binding.IntPtr, newSize);
         }
     }
 }

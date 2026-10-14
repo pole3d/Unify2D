@@ -50,6 +50,8 @@ namespace Unify2D.Core
         static GameCore s_current;
 
         private Game _game;
+        private bool _ownsResources;
+        private bool _graphicsResourcesDisposed;
 
 
 
@@ -61,15 +63,25 @@ namespace Unify2D.Core
             PhysicsSettings = new PhysicsSettings();
         }
 
-        public void Initialize(GraphicsDevice graphicsDevice)
+        public void Initialize(GraphicsDevice graphicsDevice, ResourcesManager sharedResources = null)
         {
             GraphicsDevice = graphicsDevice;
 
             SpriteBatch = new SpriteBatch(graphicsDevice);
-            ResourcesManager = new ResourcesManager();
+            _ownsResources = sharedResources == null;
+            _graphicsResourcesDisposed = false;
+            ResourcesManager = sharedResources ?? new ResourcesManager();
             AssetsManager = new AssetsManager();
 
             InitPhysics();
+        }
+
+        public void DisposeGraphicsResources()
+        {
+            if (_graphicsResourcesDisposed) return;
+            _graphicsResourcesDisposed = true;
+            SpriteBatch?.Dispose();
+            if (_ownsResources) ResourcesManager?.Dispose();
         }
 
         public void InitPhysics()

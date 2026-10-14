@@ -85,6 +85,7 @@ namespace Unify2D
         // bool _projectLoaded = false;
 
         List<(RenderTarget2D, IntPtr)> _unbindTargets = new List<(RenderTarget2D, IntPtr)>();
+        private readonly List<GameCore> _closedCores = new();
 
         #endregion
 
@@ -214,6 +215,7 @@ namespace Unify2D
 
             // Call AfterLayout now to finish up and draw all the things
             _imGuiRenderer.AfterLayout();
+            ReleaseClosedCoreResources();
 
 
             // Unbind old rendertarget, need to be done outside the drawcalls or it crashes
@@ -287,6 +289,11 @@ namespace Unify2D
         protected override void UnloadContent()
         {
             PlayToolbox?.Stop();
+            InspectorToolbox?.ReleaseTextureBindings();
+            foreach (var viewer in _coreViewers.ToArray())
+                if (viewer != _coreViewerScene) CloseGameCore(viewer);
+            ReleaseClosedCoreResources();
+            _coreViewerScene?.GameCore.DisposeGraphicsResources();
             _scripting?.Unload();
             _settings.Save();
         }
@@ -304,7 +311,8 @@ namespace Unify2D
             GameCoreViewer prefabCoreViewer = new GameCoreViewer(new GameCore(this),
                 content.Asset.FullPath);
             _coreViewers.Add(prefabCoreViewer);
-            prefabCoreViewer.GameCore.Initialize(GraphicsDevice);
+            // Prefab assets can outlive their view. Their textures belong to the project cache.
+            prefabCoreViewer.GameCore.Initialize(GraphicsDevice, _coreViewerScene.GameCore.ResourcesManager);
 
             GameToolbox.SetCore(prefabCoreViewer);
             HierarchyToolbox.SetCore(prefabCoreViewer);
@@ -320,7 +328,9 @@ namespace Unify2D
         // Waiting to resolve operation
         internal void CloseGameCore(GameCoreViewer gameCoreViewer)
         {
-            _coreViewers.Remove(gameCoreViewer);
+            if (gameCoreViewer == _coreViewerScene || !_coreViewers.Remove(gameCoreViewer)) return;
+            if (GameCore.Current == gameCoreViewer.GameCore)
+                Selection.UnSelectObject();
             GameCoreViewer replaceCore =
                 _coreViewers.Count == 0 ? _coreViewerScene : _coreViewers[^1];
             if (GameToolbox.Tag == gameCoreViewer)
@@ -328,6 +338,14 @@ namespace Unify2D
             if (HierarchyToolbox.Tag == gameCoreViewer)
                 HierarchyToolbox.SetCore(replaceCore);
             GameCore.SetCurrent(replaceCore.GameCore);
+            // ImGui may still reference this frame's resources until AfterLayout completes.
+            _closedCores.Add(gameCoreViewer.GameCore);
+        }
+
+        internal void ReleaseClosedCoreResources()
+        {
+            foreach (var core in _closedCores) core.DisposeGraphicsResources();
+            _closedCores.Clear();
         }
 
         internal void PreloadProject()
