@@ -74,9 +74,17 @@ namespace Unify2D.Physics
             {
                 // A transform edited by the inspector, gizmos or a script teleports the body.
                 if (_gameObject.Position != _lastPosition)
+                {
                     _body.Position = _gameObject.Position / PhysicsSettings.UnitToPixelRatio;
+                    _body.Awake = true;
+                }
+
                 if (_gameObject.Rotation != _lastRotation)
+                {
                     _body.Rotation = _gameObject.Rotation;
+                    _body.Awake = true;
+                }
+
                 _gameObject.Position = _body.Position * PhysicsSettings.UnitToPixelRatio;
                 _gameObject.Rotation = _body.Rotation;
             }
