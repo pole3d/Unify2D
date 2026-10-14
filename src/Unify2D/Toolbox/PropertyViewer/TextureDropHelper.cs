@@ -33,28 +33,10 @@ namespace Unify2D.Toolbox
             return null;
         }
 
-        // Draws the Drag and Drop zone for textures 
         public static void DrawDropZone(
-            Texture2D currentTexture,
-            string currentNameOrPath,
             PropertyInfo property,
             object instance)
         {
-
-            // random size for the moment
-            ImGui.PushStyleColor(ImGuiCol.Button, new System.Numerics.Vector4(0.20f, 0.25f, 0.30f, 0.7f));
-
-            float availWidth = ImGui.GetContentRegionAvail().X;
-            string buttonText;
-
-            // area drag and drop image on sprite renderer (inspector) 
-            if (currentTexture != null)
-                buttonText = $"[ Deposer image ici ] : {Path.GetFileName(currentNameOrPath)}";
-            else
-                buttonText = "[ Glisser deposer image ici]";
-
-            ImGui.Button($"{buttonText}");
-
             if (ImGui.BeginDragDropTarget())
             {
                 var payload = ImGui.AcceptDragDropPayload(AssetPayloadType);
@@ -65,6 +47,15 @@ namespace Unify2D.Toolbox
 
                 ImGui.EndDragDropTarget();
             }
+        }
+
+        public static void DrawDropZone(
+            Texture2D currentTexture,
+            string currentNameOrPath,
+            PropertyInfo property,
+            object instance)
+        {
+            DrawDropZone(property, instance);
         }
 
         public static void AssignAssetToComponent(Asset asset, PropertyInfo property, object instance)
@@ -83,6 +74,18 @@ namespace Unify2D.Toolbox
                 else
                 {
                     spriteRenderer.SetAsset(gameAsset);
+                }
+            }
+            else if (instance is UIImage imageRenderer)
+            {
+                if (imageRenderer.GameObject == null)
+                {
+                    imageRenderer.AssetTexture = gameAsset;
+                    imageRenderer.Texture = GameCore.Current.ResourcesManager.GetTexture(asset.FullPath);
+                }
+                else
+                {
+                    imageRenderer.SetAsset(gameAsset);
                 }
             }
         }

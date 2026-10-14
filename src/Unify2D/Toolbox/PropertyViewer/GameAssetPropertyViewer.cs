@@ -2,7 +2,6 @@ using ImGuiNET;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Reflection;
-using Unify2D.Assets;
 using Unify2D.Core;
 using Unify2D.Core.Graphics;
 
@@ -40,14 +39,6 @@ namespace Unify2D.Toolbox
                 catch { }
             }
 
-            // Draw area drag and drop texture asset
-            TextureDropHelper.DrawDropZone(
-                currentTexture,
-                value?.Path ?? value?.Name ?? "",
-                property,
-                instance
-            );
-
             if (value == null)
             {
                 ImGui.InputText("path", ref newName, 50);
@@ -59,6 +50,12 @@ namespace Unify2D.Toolbox
 
                 ImGui.InputText("path", ref newName, 50);
             }
+
+            // Draw area drag and drop texture
+            TextureDropHelper.DrawDropZone(
+                property,
+                instance
+            );
 
             if (newName == name) return;
 
