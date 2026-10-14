@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using Unify2D.Assets;
 using Unify2D.Core;
@@ -15,6 +16,7 @@ namespace Unify2D.Toolbox
         private int _countGO = 0;
         //  private int _currentIndex = 0;
         private GameObject _goToDestroy = null;
+        private List<GameObject> _selectedObjects = new();
 
         private const string CreatePrefabButtonLabel = "Create Prefab";
         private const string DestroyButtonLabel = "Destroy";
@@ -31,8 +33,6 @@ namespace Unify2D.Toolbox
 
         public override void Draw()
         {
-
-
             ImGui.Begin(HierarchyWindowLabel);
 
             if (ImGui.Button(AddGameObjectButtonLabel, new System.Numerics.Vector2(-1, 0)))
@@ -96,10 +96,15 @@ namespace Unify2D.Toolbox
 
             if (_goToDestroy != null && SceneManager.Instance.CurrentScene != null)
             {
-                SceneManager.Instance.CurrentScene.DestroyImmediate(_goToDestroy);
-                Selection.UnSelectObject();
-                _goToDestroy = null;
+                DestroyGameObjects();
             }
+
+            if (_selectedObjects.Count >= 1 && ImGui.IsKeyPressed(ImGuiKey.Delete))
+            {
+
+                DestroyGameObjects();
+            }
+
         }
 
 
@@ -142,7 +147,8 @@ namespace Unify2D.Toolbox
                 }
                 if (ImGui.IsItemClicked())
                 {
-                    Selection.SelectObject(go);
+                    Debug.Log("AAAAAAAAAAAAAAAAAAH");
+                    SelectGO(go);
                 }
 
                 GameToolbox.TryDropScript(_editor, go);
@@ -169,8 +175,12 @@ namespace Unify2D.Toolbox
 
                 if (ImGui.IsItemClicked())
                 {
-                    Selection.SelectObject(go);
+                    //Debug.Log("Selecting Object");
+                    //SelectGO(go);
                 }
+
+
+
                 if (ImGui.IsItemFocused())
                 {
                     if (ImGui.IsKeyPressed(ImGuiKey.Space))
@@ -222,6 +232,37 @@ namespace Unify2D.Toolbox
             }
         }
 
+        private void SelectGO(GameObject go)
+        {
+            if (!ImGui.GetIO().KeyCtrl)
+            {
+                Debug.Log("Clearing list");
+                _selectedObjects.Clear();
+            }
+
+            if (!_selectedObjects.Contains(go))
+            {
+                Debug.Log("Adding to List");
+                _selectedObjects.Add(go);
+            }
+            Selection.SelectObject(go);
+
+        }
+
+        private void DestroyGameObjects()
+        {
+            Debug.Log("Destroying...");
+            List<GameObject> objectsToRemove = new List<GameObject>(_selectedObjects);
+
+            int totalObjects = objectsToRemove.Count;
+            for (int n = totalObjects - 1; n >= 0; n--)
+            {
+                Debug.Log(objectsToRemove[n].ToString());
+                _goToDestroy = objectsToRemove[n];
+                SceneManager.Instance.CurrentScene.DestroyImmediate(_goToDestroy);
+            }
+            _goToDestroy = null;
+        }
 
     }
 }
