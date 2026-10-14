@@ -30,7 +30,7 @@ namespace Unify2D.Toolbox
         internal GameCore EditingCore => _editingCore;
 
         public bool IsPlaying => _session != null;
-        public bool HasInputFocus => IsPlaying && _focused && _editor.IsActive;
+        public bool HasInputFocus => IsPlaying && _focused && _editor.WindowInput.IsActive;
 
         public void TogglePlay()
         {
@@ -98,13 +98,13 @@ namespace Unify2D.Toolbox
             if (_session == null) return;
             try
             {
-                var keyboard = HasInputFocus ? Keyboard.GetState() : default;
+                var keyboard = HasInputFocus ? _editor.WindowInput.Keyboard : default;
                 var mouse = new MouseState(-1, -1, 0, ButtonState.Released, ButtonState.Released,
                     ButtonState.Released, ButtonState.Released, ButtonState.Released);
                 if (HasInputFocus && _hovered && _imageSize.X > 0 && _imageSize.Y > 0)
                 {
                     var position = (ImGui.GetMousePos() - _imagePosition) / _imageSize;
-                    var state = Mouse.GetState();
+                    var state = _editor.WindowInput.Mouse;
                     mouse = new MouseState((int)(position.X * _target.Width), (int)(position.Y * _target.Height),
                         state.ScrollWheelValue, state.LeftButton, state.MiddleButton, state.RightButton,
                         state.XButton1, state.XButton2);

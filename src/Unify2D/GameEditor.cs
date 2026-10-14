@@ -44,6 +44,7 @@ namespace Unify2D
         public GameEditorSettings Settings => _settings;
         public Scripting.Scripting Scripting => _scripting;
         public ImGuiRenderer.Renderer GuiRenderer => _imGuiRenderer;
+        public ImGuiRenderer.WindowInput WindowInput => _imGuiRenderer.Input;
 
         // public GameObject Selected => _selected;
 
@@ -194,6 +195,7 @@ namespace Unify2D
         protected override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+            WindowInput.Capture();
 
             foreach (var item in _toolboxes)
             {

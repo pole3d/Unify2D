@@ -12,6 +12,7 @@ namespace Unify2D.Inputs
     internal class InputsManager
     {
         private KeyboardState _previousKeyboardState;
+        private int _focusVersion;
         private GameEditor _gameEditor;
 
         private Dictionary<Input, System.Action> _inputs = new Dictionary<Input, System.Action>();
@@ -26,13 +27,12 @@ namespace Unify2D.Inputs
 
         public void Update(GameTime gameTime)
         {
-            // Poll input
-            KeyboardState currentState = Keyboard.GetState();
-
+            KeyboardState currentState = _gameEditor.WindowInput.Keyboard;
+            if (_focusVersion != _gameEditor.WindowInput.FocusVersion)
+                _previousKeyboardState = currentState;
             ProcessKeys(currentState);
-
-            // Set the previous keyboard state for the next frame
             _previousKeyboardState = currentState;
+            _focusVersion = _gameEditor.WindowInput.FocusVersion;
         }
 
 
