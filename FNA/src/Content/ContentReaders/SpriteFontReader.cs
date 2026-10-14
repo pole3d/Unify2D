@@ -21,6 +21,13 @@ namespace Microsoft.Xna.Framework.Content
 {
 	internal class SpriteFontReader : ContentTypeReader<SpriteFont>
 	{
+		static string[] supportedExtensions = new string[] { ".ttf", ".otf" };
+
+		internal static string Normalize(string filename)
+		{
+			return Normalize(filename, supportedExtensions);
+		}
+
 		#region Internal Constructor
 
 		internal SpriteFontReader()

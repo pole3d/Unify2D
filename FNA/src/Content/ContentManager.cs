@@ -307,6 +307,10 @@ namespace Microsoft.Xna.Framework.Content
 				{
 					modifiedAssetName = VideoReader.Normalize(modifiedAssetName);
 				}
+				else if ((typeof(T) == typeof(SpriteFont)))//Warning
+				{
+					modifiedAssetName = SpriteFontReader.Normalize(modifiedAssetName);
+				}
 				else
 				{
 					// No raw format available, disregard!
@@ -415,6 +419,7 @@ namespace Microsoft.Xna.Framework.Content
 				else if (typeof(T) == typeof(SpriteFont))
 				{
                     Console.WriteLine("This is a sprite font");
+					//SpriteFont font = SpriteFont.
 				}
 				else
 				{
