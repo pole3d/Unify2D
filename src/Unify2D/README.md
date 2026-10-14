@@ -5,6 +5,19 @@
 - Download the native FNA dependencies from https://github.com/FNA-XNA/FNA/wiki/3:-Distributing-FNA-Games and copy them to the project output directory
 - Replace the marked MonoGame-specific parts of the code with their commented FNA counterparts (search for "FNA-specific")
 
+## Script editor
+
+User scripts implicitly have the aliases `Input = Microsoft.Xna.Framework.Input`, `Keys = Microsoft.Xna.Framework.Input.Keys` and `Vector2 = Microsoft.Xna.Framework.Vector2`, in completion, Play and exported games. For example, `Input.Keyboard.GetState().IsKeyDown(Keys.Space)` and `new Vector2(10, 20)` need no imports. Existing files are not modified. The Visual Studio project template supplies the same global aliases; redundant explicit aliases can be removed when working in Visual Studio.
+
+The editor uses the vendored C# [ImGuiColorTextEditNet](../ImGuiColorTextEditNet/README.md) component with our existing ImGui 1.88 integration. It provides line numbers, indentation, selection, clipboard and undo/redo. Roslyn supplies C# syntax colors, including multiline comments and strings.
+Use **Save** or **Ctrl+S** while the code editor is focused to save the script and request recompilation. **Ctrl+Z / Ctrl+Y** undo and redo, including inserted completions. Text is normalized to LF line endings.
+
+The embedded script editor suggests C# keywords, accessible symbols and members after a dot.
+Suggestions show the symbol kind and type. The adjacent details panel shows signatures, including return types, parameter names/types, optional defaults and overloads. Only the symbol name is inserted when accepting a suggestion.
+Suggestions appear in a floating list beside the text cursor after a short typing delay; **Ctrl+Space** requests them immediately.
+Use **Up/Down** to select, **Tab / Enter** or a click to insert, and **Escape** to dismiss. Tab still indents when no suggestions are shown.
+Analysis runs in the background using the current buffer and the other project scripts. Completion does not save the file or move focus when selecting a script asset.
+
 ## Play in the editor
 
 - Open a scene, then use **Play** or **F5** to run its current in-memory state in the Play toolbox. Saving or exporting is not required.

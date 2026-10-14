@@ -27,8 +27,6 @@ var project = Path.Combine(Path.GetTempPath(), "UnifyPlayTests-" + Guid.NewGuid(
 Directory.CreateDirectory(Path.Combine(project, "Assets"));
 File.WriteAllText(Path.Combine(project, "Assets", "Mover.cs"), """
 using System;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 using Unify2D.Core;
 public class Mover : Component
 {
@@ -36,11 +34,11 @@ public class Mover : Component
     public int Speed = 3;
     public GameObject Target;
     public bool Throw;
-    public override void Load(Game game) { Starts++; }
+    public override void Load(Microsoft.Xna.Framework.Game game) { Starts++; }
     public override void Update(GameCore game)
     {
         if (Throw) throw new Exception("Script failure");
-        if (Keyboard.GetState().IsKeyDown(Keys.Right))
+        if (Input.Keyboard.GetState().IsKeyDown(Keys.Right))
             GameObject.LocalPosition += new Vector2(Speed, 0);
     }
 }
@@ -152,6 +150,8 @@ Check(!context.IsAlive, "Stopped script assembly can be unloaded");
 
 var gui = new Unify2D.ImGuiRenderer.Renderer(editor);
 gui.RebuildFontAtlas();
+CompletionChecks.Run(Check);
+CompletionChecks.RunMouseCheck(gui, Check);
 Set(editor, "_imGuiRenderer", gui);
 var playToolbox = new PlayToolbox();
 playToolbox.Initialize(editor);
@@ -211,6 +211,51 @@ editor.GraphicsDevice.SetRenderTarget(null);
 gui.AfterLayout();
 Check(playToolbox.IsPlaying, "Play toolbox renders its ImGui controls and game image");
 Check(inspector.GameObject.LocalPosition == new Vector2(100, 20), "Drawing the live inspector preserves the current transform");
+// Exercise the actual toolbox input gate, not just PlaySession's injected input.
+typeof(Game).GetProperty(nameof(Game.IsActive))!.SetValue(editor, true);
+var inputWidget = new ScriptCompletionInput();
+string inputSource = "class Test {}";
+void InputFrame(int x, int y, ButtonState button, bool focusScript = false)
+{
+    Mouse.StateOverrideEXT = new MouseState(x, y, 0, button, ButtonState.Released,
+        ButtonState.Released, ButtonState.Released, ButtonState.Released);
+    gui.BeforeLayout(new GameTime(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1d / 60)));
+    ImGui.SetNextWindowPos(new System.Numerics.Vector2(0, 0));
+    ImGui.SetNextWindowSize(new System.Numerics.Vector2(390, 400));
+    ImGui.Begin("Input script test");
+    if (focusScript) inputWidget.Editor.Renderer.RequestFocus = true;
+    inputWidget.Draw(ref inputSource, new System.Numerics.Vector2(350, 320), "InputTest.cs",
+        () => Array.Empty<KeyValuePair<string, string>>());
+    ImGui.End();
+    ImGui.SetNextWindowPos(new System.Numerics.Vector2(400, 0));
+    ImGui.SetNextWindowSize(new System.Numerics.Vector2(400, 400));
+    playToolbox.Draw();
+    gui.AfterLayout();
+}
+try
+{
+    Keyboard.StateOverrideEXT = new KeyboardState(Keys.Right);
+    InputFrame(40, 100, ButtonState.Released, focusScript: true);
+    Check(!playToolbox.HasInputFocus, "Script editor focus disables Play input");
+    var beforeInput = inspector.GameObject.LocalPosition;
+    playToolbox.Update(new GameTime(TimeSpan.Zero, TimeSpan.FromSeconds(1d / 60)));
+    Check(inspector.GameObject.LocalPosition == beforeInput, "Script editing does not move the player");
+    InputFrame(500, 120, ButtonState.Released);
+    InputFrame(500, 120, ButtonState.Pressed);
+    InputFrame(500, 120, ButtonState.Released);
+    Check(playToolbox.HasInputFocus, "Clicking the Play image takes focus from the script editor");
+    playToolbox.Update(new GameTime(TimeSpan.Zero, TimeSpan.FromSeconds(1d / 60)));
+    Check(inspector.GameObject.LocalPosition.X == beforeInput.X + 9, "Play toolbox forwards keyboard input after clicking its image");
+    typeof(Game).GetProperty(nameof(Game.IsActive))!.SetValue(editor, false);
+    beforeInput = inspector.GameObject.LocalPosition;
+    playToolbox.Update(new GameTime(TimeSpan.Zero, TimeSpan.FromSeconds(1d / 60)));
+    Check(inspector.GameObject.LocalPosition == beforeInput, "Inactive application blocks Play input");
+}
+finally
+{
+    Keyboard.StateOverrideEXT = null;
+    Mouse.StateOverrideEXT = null;
+}
 liveScene.DestroyImmediate((GameObject)Selection.Selected);
 playToolbox.Update(new GameTime(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1d / 60)));
 Check(Selection.Selected == null && inspector.GameObject == null, "Destroyed runtime selection is cleared from the inspector");

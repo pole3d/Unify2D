@@ -163,6 +163,8 @@ namespace Unify2D.ImGuiRenderer
             _keys.Add(io.KeyMap[(int)ImGuiKey.Enter] = (int)Keys.Enter);
             _keys.Add(io.KeyMap[(int)ImGuiKey.Escape] = (int)Keys.Escape);
             _keys.Add(io.KeyMap[(int)ImGuiKey.Space] = (int)Keys.Space);
+            _keys.Add(io.KeyMap[(int)ImGuiKey.S] = (int)Keys.S);
+            _keys.Add(io.KeyMap[(int)ImGuiKey.Insert] = (int)Keys.Insert);
             _keys.Add(io.KeyMap[(int)ImGuiKey.A] = (int)Keys.A);
             _keys.Add(io.KeyMap[(int)ImGuiKey.C] = (int)Keys.C);
             _keys.Add(io.KeyMap[(int)ImGuiKey.V] = (int)Keys.V);

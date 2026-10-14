@@ -5,6 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Using Include="Microsoft.Xna.Framework.Input" Alias="Input" />
+    <Using Include="Microsoft.Xna.Framework.Input.Keys" Alias="Keys" />
+    <Using Include="Microsoft.Xna.Framework.Vector2" Alias="Vector2" />
     <Reference Include="UnifyCore">
       <HintPath>.\UnifyCore.dll</HintPath>
     </Reference>

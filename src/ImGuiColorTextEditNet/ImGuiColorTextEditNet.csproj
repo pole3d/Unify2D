@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="ImGui.NET.Branches.Docking" Version="1.88.0" />
+    <None Include="LICENSE" CopyToOutputDirectory="PreserveNewest" TargetPath="Licenses/ImGuiColorTextEditNet.txt" />
+  </ItemGroup>
+</Project>

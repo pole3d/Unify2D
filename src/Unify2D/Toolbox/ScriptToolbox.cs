@@ -19,6 +19,7 @@ namespace Unify2D.Toolbox
 
         Asset _asset;
         bool _hasUnsavedChanges;
+        readonly ScriptCompletionInput _completion = new();
 
         public override void Initialize(GameEditor editor)
         {
@@ -30,6 +31,7 @@ namespace Unify2D.Toolbox
         {
             if (_asset == asset) return;
             _asset = asset;
+            _completion.Reset();
             _hasUnsavedChanges = false;
             RefreshSource();
         }
@@ -37,7 +39,11 @@ namespace Unify2D.Toolbox
         private void RefreshSource()
         {
             if (!_hasUnsavedChanges && _asset?.AssetContent is ScriptAssetContent script && File.Exists(script.Path))
+            {
+                string previous = script.Content;
                 script.Load();
+                if (script.Content != previous) _completion.Reset();
+            }
         }
 
         public override void Draw()
@@ -47,7 +53,11 @@ namespace Unify2D.Toolbox
 
             var scriptAsset = _asset.AssetContent as ScriptAssetContent;
 
-            ImGui.Begin($"Script : {_asset.Name}###script", ImGuiWindowFlags.NoFocusOnAppearing);
+            if (!ImGui.Begin($"Script : {_asset.Name}###script", ImGuiWindowFlags.NoFocusOnAppearing))
+            {
+                ImGui.End();
+                return;
+            }
 
             if (ImGui.Button("Open in VS"))
             {
@@ -71,9 +81,7 @@ namespace Unify2D.Toolbox
             ImGui.SameLine();
             if (ImGui.Button("Save"))
             {
-                scriptAsset.Save();
-                _hasUnsavedChanges = false;
-                _editor.Scripting.RequestReload();
+                Save(scriptAsset);
             }
 
             if (scriptAsset != null)
@@ -81,15 +89,22 @@ namespace Unify2D.Toolbox
                 if (scriptAsset.IsLoaded == false)
                     scriptAsset.Load();
 
-                 System.Numerics.Vector2 size =  ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin();
-                size.Y -= 40;
-
-                if (ImGui.InputTextMultiline("##source", ref scriptAsset.Content, ushort.MaxValue, size, ImGuiInputTextFlags.AllowTabInput))
+                var size = ImGui.GetContentRegionAvail();
+                if (_completion.Draw(ref scriptAsset.Content, size, Path.GetFullPath(scriptAsset.Path),
+                    _editor.Scripting.GetSourceSnapshot))
                     _hasUnsavedChanges = true;
+                if (_completion.SaveRequested) Save(scriptAsset);
          
             }
 
             ImGui.End();
+        }
+
+        private void Save(ScriptAssetContent script)
+        {
+            script.Save();
+            _hasUnsavedChanges = false;
+            _editor.Scripting.RequestReload();
         }
 
     }

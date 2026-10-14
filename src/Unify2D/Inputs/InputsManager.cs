@@ -42,6 +42,8 @@ namespace Unify2D.Inputs
             {
                 var input = inputMethodPair.Key;
                 var key = input.Key;
+                if (ImGuiNET.ImGui.GetIO().WantTextInput && key != Keys.F5)
+                    continue;
                 if (_gameEditor.PlayToolbox?.HasInputFocus == true && key != Keys.F5)
                     continue;
                 if (state.IsKeyDown(key) && _previousKeyboardState.IsKeyUp(key) && (input.PressControl == false || state.IsKeyDown(Keys.LeftControl)))

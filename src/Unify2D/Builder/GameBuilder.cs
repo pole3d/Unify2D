@@ -128,10 +128,10 @@ namespace Unify2D.Builder
 
             if (Directory.Exists(_editor.AssetsPath))
             {
-                foreach (string item in Directory.GetFiles(_editor.AssetsPath, "*.cs"))
+                foreach (string item in Directory.GetFiles(_editor.AssetsPath, "*.cs", SearchOption.AllDirectories))
                 {
                     string content = File.ReadAllText(item);
-                    SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(content);
+                    SyntaxTree syntaxTree = Unify2D.Scripting.ScriptCompilationDefaults.Parse(content, Path.GetFullPath(item));
                     syntaxes.Add(syntaxTree);
 
                 }
@@ -149,7 +149,7 @@ namespace Unify2D.Builder
 
             CSharpCompilation compilation = CSharpCompilation.Create(
             AssemblyName,
-            syntaxTrees: syntaxes,
+            syntaxTrees: Unify2D.Scripting.ScriptCompilationDefaults.WithImports(syntaxes),
             references: references,
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
