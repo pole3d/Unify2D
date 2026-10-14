@@ -22,7 +22,9 @@ namespace Unify2D.Toolbox
         private const string HierarchyWindowLabel = "Hierarchy";
         private const string GameObjectNamePrefix = "GameObject_";
         private const string GameObjectListChildLabel = "gameObjectList";
-
+        private GameObject _draggedGameObject;
+        private GameObject _pendingChild = null;
+        private GameObject _pendingParent = null;
 
         public void SetCore(GameCoreViewer coreViewer)
         {
@@ -31,8 +33,6 @@ namespace Unify2D.Toolbox
 
         public override void Draw()
         {
-
-
             ImGui.Begin(HierarchyWindowLabel);
 
             if (ImGui.Button(AddGameObjectButtonLabel, new System.Numerics.Vector2(-1, 0)))
@@ -86,6 +86,21 @@ namespace Unify2D.Toolbox
                 ImGui.InvisibleButton("##hierarchy_empty_space", remainingSpace);
                 if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
                     Selection.UnSelectObject();
+
+                if (ImGui.BeginDragDropTarget())
+                {
+                    var payload = ImGui.AcceptDragDropPayload("GameObject");
+                    unsafe
+                    {
+                        if (payload.NativePtr != null && _draggedGameObject != null)
+                        {
+                            //Set parent to null so we can with the Set child verification move the child to the root scene parent list
+                            GameObject.SetChild(null, _draggedGameObject);
+                            _draggedGameObject = null;
+                        }
+                    }
+                    ImGui.EndDragDropTarget();
+                }
             }
 
             ImGui.EndGroup();
@@ -99,6 +114,15 @@ namespace Unify2D.Toolbox
                 SceneManager.Instance.CurrentScene.DestroyImmediate(_goToDestroy);
                 Selection.UnSelectObject();
                 _goToDestroy = null;
+            }
+
+            // move child to parent after the draw loop because a change parent/child 
+            // in the tree while drawing may cause a crash
+            if (_pendingParent != null && _pendingChild != null)
+            {
+                GameObject.SetChild(_pendingParent, _pendingChild);
+                _pendingParent = null;
+                _pendingChild = null;
             }
         }
 
@@ -132,6 +156,7 @@ namespace Unify2D.Toolbox
                     ImGui.TreeNodeEx($"{go.Name}##{go.GetHashCode()}", base_flags);
 
                 }
+                HandleDragAndDrop(go);
 
                 if (ImGui.IsItemFocused())
                 {
@@ -167,6 +192,8 @@ namespace Unify2D.Toolbox
                     open = ImGui.TreeNodeEx($"{go.Name}##{go.GetHashCode()}", base_flags);
                 }
 
+                HandleDragAndDrop(go);
+
                 if (ImGui.IsItemClicked())
                 {
                     Selection.SelectObject(go);
@@ -199,6 +226,43 @@ namespace Unify2D.Toolbox
             ImGui.PopID();
         }
 
+        /// <summary>
+        /// this method handle drag and drop of game objects in the hierarchy.
+        /// Parents and childs are set in pending variables to avoid changing them during the draw loop.
+        /// </summary>
+        /// <param name="go">the game object to handle</param>
+        private void HandleDragAndDrop(GameObject go)
+        {
+            if (ImGui.BeginDragDropSource())
+            {
+                _draggedGameObject = go;
+                ImGui.SetDragDropPayload("GameObject", IntPtr.Zero, 0);
+                ImGui.Text(go.Name);
+                ImGui.EndDragDropSource();
+            }
+
+            if (ImGui.BeginDragDropTarget())
+            {
+                var payload = ImGui.AcceptDragDropPayload("GameObject");
+                unsafe
+                {
+                    if (payload.NativePtr != null && _draggedGameObject != null)
+                    {
+                        if (_draggedGameObject != go)
+                        {
+                            if (_draggedGameObject.Parent != go)
+                            {
+                                _pendingParent = go;
+                                _pendingChild = _draggedGameObject;
+                                _draggedGameObject = null;
+                            }
+                        }
+                    }
+                }
+                ImGui.EndDragDropTarget();
+            }
+        }
+
         private void ShowContextMenu(GameObject go)
         {
             if (ImGui.BeginPopupContextItem())
@@ -221,7 +285,5 @@ namespace Unify2D.Toolbox
                 ImGui.EndPopup();
             }
         }
-
-
     }
 }

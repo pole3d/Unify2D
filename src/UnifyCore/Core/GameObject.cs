@@ -111,27 +111,51 @@ namespace Unify2D.Core
 
         public static GameObject CreateChild(GameObject parent)
         {
-            GameObject child = new GameObject();
-            child.UID = s_maxID++;
+            GameObject child = new()
+            {
+                UID = s_maxID++
+            };
 
-            if (parent.Children == null)
-                parent.Children = new List<GameObject>();
-
-            child.Parent = parent;
-            parent.Children.Add(child);
+            SetChild(parent, child);
 
             //SceneManager.Instance.CurrentScene.AddRootGameObject(child);
 
             return child;
         }
 
+        /// <summary>
+        /// Set the parent of a child, and move the child from the old parent's children to the new parent's children.
+        /// If the new parent is null, the child will become a root object.
+        /// </summary>
+        /// <param name="parent">The new parent. If null, the child will be a root object.</param>
+        /// <param name="child">The child</param>
         public static void SetChild(GameObject parent, GameObject child)
         {
-            if (parent.Children == null)
-                parent.Children = new List<GameObject>();
+            if (child == null || child == parent || child.Parent == parent) return;
+
+            // Remove the child from the old parent if it has one
+            if (child.Parent != null)
+            {
+                //if a parent was set, remove it from the old parent children list
+                child.Parent.Children?.Remove(child);
+            }
+            else
+            {
+                // if a parent was not set, remove the child from the root objects list
+                SceneManager.Instance.CurrentScene?.RemoveRootGameObject(child);
+            }
 
             child.Parent = parent;
-            parent.Children.Add(child);
+
+            if (parent != null)
+            {
+                parent.Children ??= new List<GameObject>();
+                if (!parent.Children.Contains(child)) parent.Children.Add(child);
+            }
+            else
+            {
+                SceneManager.Instance.CurrentScene?.AddRootGameObject(child);
+            }
         }
 
         public IEnumerable<GameObject> GetAllChildren()
@@ -182,7 +206,7 @@ namespace Unify2D.Core
             }
         }
 
-        public Component GetComponent(int i) 
+        public Component GetComponent(int i)
         {
             return _components[i];
         }
@@ -297,12 +321,6 @@ namespace Unify2D.Core
 
                 if (HasCanvasInParents(out Canvas _) == false)
                 {
-                    if (Parent != null)
-                    {
-                        Parent.Children.Remove(this);
-                        Parent = null;
-                    }
-
                     if (hasCanvas == false)
                     {
                         GameObject canvasGameObject = Create();
@@ -449,23 +467,23 @@ namespace Unify2D.Core
         /// <summary>
         ///  Deserialize a prefab asset into a gameObject, load it and add it to the current core.
         /// </summary>
-         public static GameObject InstantiateFromPrefab(string originalAssetName)
-         {
-              StringBuilder sb = new StringBuilder(originalAssetName);
+        public static GameObject InstantiateFromPrefab(string originalAssetName)
+        {
+            StringBuilder sb = new StringBuilder(originalAssetName);
 
-             sb.Insert(0, GameCore.Current.Game.AssetsPath);
- 
-             // Get serialized text
-             string serializedText = File.ReadAllText(Path.GetFullPath(sb.ToString()));
-             
-             // Create gameObject
-             var settings = new JsonSerializerSettings
-             {
-                 TypeNameHandling = TypeNameHandling.Auto,
-                 SerializationBinder = GameCore.Current.SerializationBinder
-             };
-             GameObject go = JsonConvert.DeserializeObject<GameObject>(serializedText, settings);
-             go.Initialize(GameCore.Current.Game);
+            sb.Insert(0, GameCore.Current.Game.AssetsPath);
+
+            // Get serialized text
+            string serializedText = File.ReadAllText(Path.GetFullPath(sb.ToString()));
+
+            // Create gameObject
+            var settings = new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+                SerializationBinder = GameCore.Current.SerializationBinder
+            };
+            GameObject go = JsonConvert.DeserializeObject<GameObject>(serializedText, settings);
+            go.Initialize(GameCore.Current.Game);
 
 
             return go;
@@ -493,7 +511,7 @@ namespace Unify2D.Core
             if (Tag != null)
             {
 
-                for (int i = 0; i < updatedGameObject.ComponentCount;i++)
+                for (int i = 0; i < updatedGameObject.ComponentCount; i++)
                 {
                     var component = updatedGameObject.GetComponent(i);
                     foreach (var property in component.GetType().GetProperties())

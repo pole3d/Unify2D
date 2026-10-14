@@ -42,7 +42,7 @@ namespace Unify2D
                     {
                         yield return child;
                     }
-                    
+
                 }
             }
         }
@@ -114,11 +114,26 @@ namespace Unify2D
             e.ErrorContext.Handled = true;
         }
 
+        /// <summary>
+        /// Add a root game object to the scene after verifying that the same object does not already exist
+        /// </summary>
+        /// <param name="go">The game object to add</param>
         public void AddRootGameObject(GameObject go)
         {
-            GameObjects.Add(go);
+            if (!GameObjects.Contains(go))
+            {
+                GameObjects.Add(go);
+            }
         }
 
+        /// <summary>
+        /// Remove a root game object from the scene root list
+        /// </summary>
+        /// <param name="go">The game object to remove</param>
+        public void RemoveRootGameObject(GameObject go)
+        {
+            GameObjects.Remove(go);
+        }
         public void Draw()
         {
             if (_isLoaded == false)
@@ -144,8 +159,9 @@ namespace Unify2D
                 go.Update(GameCore.Current);
             }
 
-            for (int i = 0; i < _gameObjectsToDestroy.Count; i++)
-                GameObjects.Remove(_gameObjectsToDestroy[i]);
+            //Use of DestroyImmediate to remove child object
+            /// Removed Destroy Method because it only removed object from the scene list, if children, will not be removed.
+            for (int i = 0; i < _gameObjectsToDestroy.Count; i++) DestroyImmediate(_gameObjectsToDestroy[i]);
 
             PhysicsSettings.World.Step(elapsedTime);
 
@@ -163,12 +179,16 @@ namespace Unify2D
             _gameObjectsToDestroy.Add(gameObject);
         }
 
+        /// <summary>
+        /// Remove a game object and all its children from the scene.
+        /// </summary>
+        /// <param name="gameObject">The game object to destroy</param>
         public void DestroyImmediate(GameObject gameObject)
         {
-            if (gameObject.Parent != null)
-                gameObject.Parent.Children.Remove(gameObject);
-            else
-                GameObjects.Remove(gameObject);
+            // if a parent exist remove it from the parent children list
+            if (gameObject.Parent != null) gameObject.Parent.Children?.Remove(gameObject);
+            // remove it from the root game objects list
+            GameObjects.Remove(gameObject);
         }
 
         public bool HasCanvas(out Canvas canvas)
