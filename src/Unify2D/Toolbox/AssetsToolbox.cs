@@ -53,6 +53,8 @@ namespace Unify2D.Toolbox
             base.Initialize(editor);
 
             SetWatcher();
+            _assetChanges.Clear();
+            _pendingClickAsset = null;
             Reset();
         }
 

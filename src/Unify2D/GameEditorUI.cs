@@ -33,6 +33,7 @@ namespace Unify2D
                     {
                         _editor.ShowPopup(new LauncherPopup());
                     }
+                    ImGui.BeginDisabled(!_editor.IsProjectLoaded);
                     if (ImGui.MenuItem("Show Explorer"))
                     {
                         Process.Start("explorer.exe", _editor.Settings.Data.CurrentProjectPath);
@@ -57,6 +58,7 @@ namespace Unify2D
                         LoadScene();
                         Selection.UnSelectObject();
                     }
+                    ImGui.EndDisabled();
                     if (ImGui.MenuItem("Quit"))
                     {
                         _editor.Exit();

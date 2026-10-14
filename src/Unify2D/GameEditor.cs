@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Unify2D.Assets;
 using Unify2D.Builder;
 using Unify2D.Core;
@@ -42,6 +43,7 @@ namespace Unify2D
             : string.Empty;
 
         public GameEditorSettings Settings => _settings;
+        internal bool IsProjectLoaded { get; private set; }
         public Scripting.Scripting Scripting => _scripting;
         public ImGuiRenderer.Renderer GuiRenderer => _imGuiRenderer;
         public ImGuiRenderer.WindowInput WindowInput => _imGuiRenderer.Input;
@@ -132,10 +134,7 @@ namespace Unify2D
             // Set the current game core
             GameCore.SetCurrent(_coreViewerScene.GameCore);
 
-            Content.RootDirectory = ProjectPath;
-
             _scripting = new Scripting.Scripting();
-            _scripting.Load(this);
 
             _imGuiRenderer = new ImGuiRenderer.Renderer(this);
             _imGuiRenderer.RebuildFontAtlas();
@@ -202,7 +201,7 @@ namespace Unify2D
                 item.Update(gameTime);
             }
             _inputsManager.Update(gameTime);
-            _scripting?.Update();
+            if (IsProjectLoaded) _scripting?.Update();
         }
 
         protected override void Draw(GameTime gameTime)
@@ -333,14 +332,38 @@ namespace Unify2D
 
         internal void PreloadProject()
         {
+            string projectPath = Path.GetFullPath(ProjectPath);
+            if (!Directory.Exists(Path.Combine(projectPath, AssetsFolder)))
+                throw new DirectoryNotFoundException("The selected project has no Assets directory: " + projectPath);
             PlayToolbox?.Stop();
+            SpriteEditorToolbox?.Close();
+            Selection.UnSelectObject();
+            ScriptToolbox?.SetObject(null);
+            // Leave prefab views before changing the project root and clearing resource caches.
+            foreach (var viewer in _coreViewers.ToArray())
+                if (viewer != _coreViewerScene) CloseGameCore(viewer);
+            GameCore.SetCurrent(_coreViewerScene.GameCore);
+            _sceneEditorManager.CurrentScene?.ClearScene();
+            _sceneEditorManager.SetActiveScene(null);
+            GameCore.Current.MainCamera = null;
+            GameCore.Current.Tweens.Clear();
+            GameCore.Current.InitPhysics();
+            GameCore.Current.Settings.ScenesSave.Clear();
+            GameCore.Current.Settings.ScenesInGame.Clear();
+            _scripting.Unload();
+            Content.Unload();
+            Content.RootDirectory = projectPath;
+            GameCore.Current.ResourcesManager.SetRootDirectory(projectPath);
             GameCore.Current.AssetsManager.Initialize(AssetsPath);
+            EditorAssetManager = new EditorAssetManager(this);
+            _scripting.Load(this);
         }
 
         internal void ProjectLoaded()
         {
-            _scripting.Load(this);
-            InitializeToolBoxes();
+            if (_toolboxes.Count == 0) InitializeToolBoxes();
+            else AssetsToolBox.Initialize(this);
+            IsProjectLoaded = true;
             HidePopup();
 
         }

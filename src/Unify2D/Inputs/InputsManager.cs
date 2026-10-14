@@ -27,6 +27,7 @@ namespace Unify2D.Inputs
 
         public void Update(GameTime gameTime)
         {
+            if (!_gameEditor.IsProjectLoaded) return;
             KeyboardState currentState = _gameEditor.WindowInput.Keyboard;
             if (_focusVersion != _gameEditor.WindowInput.FocusVersion)
                 _previousKeyboardState = currentState;
