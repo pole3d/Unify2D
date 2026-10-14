@@ -71,12 +71,7 @@ namespace Unify2D.Toolbox
                 ImGui.PushStyleColor(ImGuiCol.ButtonActive, ToolsUI.ToColor32(255, 70, 50, 255));
                 if (ImGui.Button(Path.GetFileName(editor.Settings.Data.CurrentProjectPath)))
                 {
-                    string pathProject = Path.Combine(Directory.GetCurrentDirectory(), editor.Settings.Data.CurrentProjectPath);
-                    
-                    PreloadProject();
-
-                    LoadProject();
-                    SceneManager.Instance.CreateOrOpenSceneAtStart(pathProject, GameEditor.ScenesFolder);
+                    OnOpenProjectPathSelected(editor.Settings.Data.CurrentProjectPath);
                 }
                 ImGui.PopStyleColor();
                 ImGui.PopStyleColor();
@@ -112,16 +107,15 @@ namespace Unify2D.Toolbox
             
             PreloadProject();
 
-            SceneManager.Instance.CreateOrOpenSceneAtStart(path, GameEditor.ScenesFolder);
-
             LoadProject();
+
+            SceneManager.Instance.CreateOrOpenSceneAtStart(path, GameEditor.ScenesFolder);
 
         }
 
         private void OnNewProjectPathSelected(string path)
         {
             _newProjectPath = path;
-            SceneManager.Instance.CreateOrOpenSceneAtStart(path, GameEditor.ScenesFolder);
         }
 
         void LoadProject()

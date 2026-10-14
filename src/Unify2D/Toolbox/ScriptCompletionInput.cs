@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
+using System.Threading;
 using ImGuiNET;
 using ImGuiColorTextEditNet;
 using ImGuiColorTextEditNet.Editor;
@@ -23,6 +24,7 @@ namespace Unify2D.Toolbox
         private bool _scrollSelection;
         private ScriptCompletion.Result _result;
         private Task<ScriptCompletion.Result> _query;
+        private CancellationTokenSource _queryCancellation;
         private string _querySource;
         private string _queryPath;
         private int _queryCursor;
@@ -35,6 +37,7 @@ namespace Unify2D.Toolbox
 
         internal void Reset()
         {
+            _queryCancellation?.Cancel();
             Editor = new TextEditor();
             Editor.Renderer.IsShowingWhitespace = false;
             _keyboard = (StandardKeyboardInput)Editor.Renderer.KeyboardInput;
@@ -94,6 +97,7 @@ namespace Unify2D.Toolbox
             int cursor = OffsetAt(_source, Editor.CursorPosition, Editor.Options.TabSize);
             if (changed || cursor != _cursor || Editor.Selection.HasSelection)
             {
+                _queryCancellation?.Cancel();
                 _cursor = cursor;
                 _result = null;
                 _queryAt = Editor.Selection.HasSelection ? 0 : Environment.TickCount64 + 150;
@@ -106,7 +110,10 @@ namespace Unify2D.Toolbox
                 var text = _source;
                 bool force = _force;
                 var snapshot = sources();
-                _query = Task.Run(() => ScriptCompletion.Get(text, cursor, path, snapshot, force));
+                _queryCancellation?.Dispose();
+                _queryCancellation = new CancellationTokenSource();
+                var cancellationToken = _queryCancellation.Token;
+                _query = Task.Run(() => ScriptCompletion.GetAsync(text, cursor, path, snapshot, force, cancellationToken));
                 _queryAt = 0;
                 _force = false;
             }
@@ -137,6 +144,7 @@ namespace Unify2D.Toolbox
             {
                 if (ImGui.IsKeyPressed(ImGuiKey.Escape))
                 {
+                    _queryCancellation?.Cancel();
                     _result = null;
                     _querySource = null;
                     _queryAt = 0;
@@ -161,11 +169,15 @@ namespace Unify2D.Toolbox
         internal bool Accept(string item)
         {
             if (_result == null || Editor.AllText != _resultSource) return false;
-            var start = CoordinatesAt(_resultSource, _result.Start, Editor.Options.TabSize);
-            var end = CoordinatesAt(_resultSource, _result.Start + _result.Length, Editor.Options.TabSize);
+            var edit = _result.Changes.TryGetValue(item, out var change) ? change
+                : new ScriptCompletion.Edit(_result.Start, _result.Length, item, null);
+            var start = CoordinatesAt(_resultSource, edit.Start, Editor.Options.TabSize);
+            var end = CoordinatesAt(_resultSource, edit.Start + edit.Length, Editor.Options.TabSize);
             Editor.CursorPosition = end;
             Editor.Selection.Select(start, end);
-            TextEditorModify.ReplaceSelection(Editor, item);
+            TextEditorModify.ReplaceSelection(Editor, edit.Text);
+            if (edit.Cursor is int caret)
+                Editor.CursorPosition = CoordinatesAt(Editor.AllText, caret, Editor.Options.TabSize);
             Editor.ScrollToLine(start.Line);
             _result = null;
             _querySource = null;
@@ -233,9 +245,11 @@ namespace Unify2D.Toolbox
                         ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoNavFocus | ImGuiWindowFlags.Tooltip);
                     ImGui.TextDisabled(selected.Kind + (selected.Signatures.Length > 1 ? $" — {selected.Signatures.Length} overloads" : ""));
                     ImGui.PushTextWrapPos(0);
+                    if (!string.IsNullOrEmpty(selected.Documentation))
+                        ImGui.TextUnformatted(selected.Documentation);
                     for (int i = 0; i < selected.Signatures.Length; i++)
                     {
-                        if (i > 0) ImGui.Separator();
+                        if (i > 0 || !string.IsNullOrEmpty(selected.Documentation)) ImGui.Separator();
                         ImGui.TextUnformatted(selected.Signatures[i]);
                     }
                     ImGui.PopTextWrapPos();

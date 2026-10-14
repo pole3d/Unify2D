@@ -65,6 +65,14 @@ namespace UnifyCore
             return font;
         }
 
+        public void SetRootDirectory(string path)
+        {
+            _content.Unload();
+            _textures.Clear();
+            _fonts.Clear();
+            _content.RootDirectory = path;
+        }
+
         public void Dispose()
         {
             _content.Dispose();

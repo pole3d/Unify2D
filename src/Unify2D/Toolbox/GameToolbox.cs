@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -271,7 +271,7 @@ namespace Unify2D.Toolbox
         }
         private void UpdateCamera()
         {
-            MouseState mouseState = Mouse.GetState();
+            MouseState mouseState = _editor.WindowInput.Mouse;
 
             #region Move Camera
 
@@ -302,7 +302,7 @@ namespace Unify2D.Toolbox
 
             #region Zoom Camera
 
-            if (mouseState.ScrollWheelValue != _lastMouseSroll & !Keyboard.GetState().IsKeyDown(Keys.LeftControl))
+            if (mouseState.ScrollWheelValue != _lastMouseSroll & !_editor.WindowInput.Keyboard.IsKeyDown(Keys.LeftControl))
             {
                 if (IsMouseInWindow())
                 {
@@ -336,7 +336,7 @@ namespace Unify2D.Toolbox
 
             #region Rotation Camera
 
-            if (mouseState.ScrollWheelValue != _lastMouseSroll & Keyboard.GetState().IsKeyDown(Keys.LeftControl))
+            if (mouseState.ScrollWheelValue != _lastMouseSroll & _editor.WindowInput.Keyboard.IsKeyDown(Keys.LeftControl))
             {
                 if (IsMouseInWindow())
                 {
@@ -358,7 +358,7 @@ namespace Unify2D.Toolbox
         public bool IsMouseInWindow()
         {
             if (!_isViewHovered) return false;
-            var mouseState = Mouse.GetState();
+            var mouseState = _editor.WindowInput.Mouse;
             Vector2 position = new Vector2(mouseState.X, mouseState.Y);
 
             position -= new Vector2(Position.X, Position.Y);
@@ -368,7 +368,7 @@ namespace Unify2D.Toolbox
         }
         public Vector2 GetMousePosition()
         {
-            var mouseState = Mouse.GetState();
+            var mouseState = _editor.WindowInput.Mouse;
 
             float mouseX = mouseState.X;
             float mouseY = mouseState.Y;

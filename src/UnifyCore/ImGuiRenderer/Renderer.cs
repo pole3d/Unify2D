@@ -14,6 +14,7 @@ namespace Unify2D.ImGuiRenderer
     public class Renderer
     {
         private Game _game;
+        public WindowInput Input { get; }
 
         // Graphics
         private GraphicsDevice _graphicsDevice;
@@ -37,6 +38,7 @@ namespace Unify2D.ImGuiRenderer
 
         // Input
         private int _scrollWheelValue;
+        private bool _inputActive;
 
         private List<int> _keys = new List<int>();
 
@@ -46,6 +48,7 @@ namespace Unify2D.ImGuiRenderer
             ImGui.SetCurrentContext(context);
 
             _game = game ?? throw new ArgumentNullException(nameof(game));
+            Input = new WindowInput(game);
             _graphicsDevice = game.GraphicsDevice;
 
             _loadedTextures = new Dictionary<IntPtr, Texture2D>();
@@ -184,7 +187,7 @@ namespace Unify2D.ImGuiRenderer
             // FNA-specific ///////////////////////////
             TextInputEXT.TextInput += c =>
             {
-                if (c == '\t') return;
+                if (c == '\t' || !Input.IsActive) return;
 
                 ImGui.GetIO().AddInputCharacter(c);
             };
@@ -219,8 +222,13 @@ namespace Unify2D.ImGuiRenderer
         {
             var io = ImGui.GetIO();
 
-            var mouse = Mouse.GetState();
-            var keyboard = Keyboard.GetState();
+            Input.Capture();
+            var mouse = Input.Mouse;
+            bool active = Input.IsActive;
+            bool focusChanged = active != _inputActive;
+            if (focusChanged) io.AddFocusEvent(active);
+            _inputActive = active;
+            var keyboard = Input.Keyboard;
 
             for (int i = 0; i < _keys.Count; i++)
             {
@@ -235,14 +243,16 @@ namespace Unify2D.ImGuiRenderer
             io.DisplaySize = new System.Numerics.Vector2(_graphicsDevice.PresentationParameters.BackBufferWidth, _graphicsDevice.PresentationParameters.BackBufferHeight);
             io.DisplayFramebufferScale = new System.Numerics.Vector2(1f, 1f);
 
-            io.MousePos = new System.Numerics.Vector2(mouse.X, mouse.Y);
+            io.MousePos = active ? new System.Numerics.Vector2(mouse.X, mouse.Y)
+                : new System.Numerics.Vector2(-float.MaxValue, -float.MaxValue);
 
             io.MouseDown[0] = mouse.LeftButton == ButtonState.Pressed;
             io.MouseDown[1] = mouse.RightButton == ButtonState.Pressed;
             io.MouseDown[2] = mouse.MiddleButton == ButtonState.Pressed;
+            if (!active) io.ClearInputCharacters();
 
             var scrollDelta = mouse.ScrollWheelValue - _scrollWheelValue;
-            io.MouseWheel = scrollDelta > 0 ? 1 : scrollDelta < 0 ? -1 : 0;
+            io.MouseWheel = !active || focusChanged ? 0 : scrollDelta > 0 ? 1 : scrollDelta < 0 ? -1 : 0;
             _scrollWheelValue = mouse.ScrollWheelValue;
         }
 

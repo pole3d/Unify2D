@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System.Linq;
@@ -93,7 +93,7 @@ namespace Unify2D
 
         internal static void Update(GameTime gameTime)
         {
-            var mouseState = Mouse.GetState();
+            var mouseState = GameEditor.Instance.WindowInput.Mouse;
             if (_selectState == SelectedState.Empty && mouseState.LeftButton == ButtonState.Released)
             {
                 _selectState = SelectedState.None;
