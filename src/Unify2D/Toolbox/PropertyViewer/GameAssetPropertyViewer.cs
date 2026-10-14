@@ -1,7 +1,8 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Reflection;
+using Unify2D.Assets;
 using Unify2D.Core;
 using Unify2D.Core.Graphics;
 
@@ -9,15 +10,43 @@ namespace Unify2D.Toolbox
 {
     internal class GameAssetPropertyViewer : PropertyViewer
     {
-
-
         public override void Draw(PropertyInfo property, object instance)
         {
             object valueTemp = property.GetValue(instance);
-            GameAsset value =  valueTemp as GameAsset;
+            GameAsset value = valueTemp as GameAsset;
             string name = "none";
             string newName = "none";
 
+            // Area drag and drop from files explorer 
+            Texture2D currentTexture = null;
+            if (instance is SpriteRenderer sr)
+            {
+                currentTexture = sr.Texture;
+            }
+            else if (instance is UIImage ui)
+            {
+                currentTexture = ui.Texture;
+            }
+            else if (value?.Asset is Texture2D tex)
+            {
+                currentTexture = tex;
+            }
+            else if (value != null && !string.IsNullOrEmpty(value.Path))
+            {
+                try
+                {
+                    currentTexture = GameCore.Current.ResourcesManager.GetTexture(value.Path);
+                }
+                catch { }
+            }
+
+            // Draw area drag and drop texture asset
+            TextureDropHelper.DrawDropZone(
+                currentTexture,
+                value?.Path ?? value?.Name ?? "",
+                property,
+                instance
+            );
 
             if (value == null)
             {
@@ -31,13 +60,11 @@ namespace Unify2D.Toolbox
                 ImGui.InputText("path", ref newName, 50);
             }
 
-            if (newName == name)
-                return;
+            if (newName == name) return;
 
-            name = newName;
-
-            if (name != "none")
-            { 
+            if (newName != name && newName != "none")
+            {
+                name = newName;
                 GameEditor.Instance.AssetsToolBox.TryGetAssetFromPath(name, out var asset);
 
                 if (asset != null && (value == null || asset != value.Asset))
@@ -46,7 +73,7 @@ namespace Unify2D.Toolbox
                     {
                         if (spriteRenderer.GameObject == null) // is prefab TODO : better system to detect
                         {
-                            property.SetValue(instance,asset.ToGameAsset());
+                            property.SetValue(instance, asset.ToGameAsset());
                         }
                         else
                             spriteRenderer.SetAsset(asset.ToGameAsset());
@@ -72,23 +99,19 @@ namespace Unify2D.Toolbox
                 }
             }
 
-            if (value != null)
+            if (value != null && currentTexture != null)
             {
-                Texture2D texture = value.Asset as Texture2D;
-                TextureBound textureBound = GameEditor.Instance.InspectorToolbox.GetTextureBound(texture);
+                TextureBound textureBound = GameEditor.Instance.InspectorToolbox.GetTextureBound(currentTexture);
                 if (textureBound == null)
                 {
-                    IntPtr ptr = GameEditor.Instance.GuiRenderer.BindTexture(texture);
-
-                    textureBound = new TextureBound { IntPtr = ptr, Texture = texture };
+                    IntPtr ptr = GameEditor.Instance.GuiRenderer.BindTexture(currentTexture);
+                    textureBound = new TextureBound { IntPtr = ptr, Texture = currentTexture };
                     GameEditor.Instance.InspectorToolbox.AddTextureBound(textureBound);
-
                 }
                 else
                 {
                     ImGui.Image(textureBound.IntPtr, new System.Numerics.Vector2(40, 40));
                 }
-
             }
         }
     }

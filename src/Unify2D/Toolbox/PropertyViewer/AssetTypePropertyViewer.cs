@@ -38,7 +38,6 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
         //    property.SetValue(instance, asset);
         //    return;
         //}
-
         DrawFoldout(ref asset, property, instance);
     }
 
@@ -49,32 +48,20 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
     protected virtual Dictionary<string, Asset> GetAssetLists()
     {
         Dictionary<string, Asset> dictionary = new();
-        //(string name, string path) baseAsset = GetBaseAsset();
-        Asset baseAsset = new Asset("", "Rectangle", ".png", "null");
-        dictionary.Add(baseAsset.Name, baseAsset);
         string extension = GetAssetExtension();
 
-        if (baseAsset.Path.Length > 0 && File.Exists(baseAsset.Path + ".meta"))
+        if (GameEditor.Instance?.AssetsToolBox?.Assets != null)
         {
-            Asset assetDictionary = new Asset(File.ReadAllText(baseAsset.Path + ".meta"), baseAsset.Name, extension, baseAsset.Path);
-            dictionary.Add(baseAsset.Name, assetDictionary);
-        }
-
-        //Asset assetDictionary = new Asset(File.ReadAllText(baseAsset.path + ".meta"), baseAsset.name, "", baseAsset.path);
-        //dictionary.Add(baseAsset.name, assetDictionary);
-
-        List<Asset> assets = GameEditor.Instance.AssetsToolBox.Assets;
-        foreach (Asset asset in assets)
-        {
-            string name = asset.Name;
-            string path = asset.FullPath;
-            if (path.EndsWith(extension))
+            foreach (Asset asset in GameEditor.Instance.AssetsToolBox.Assets)
             {
-                path = path.Remove(0, 1);
-                path = $"{GameCore.Current.Game.Content.RootDirectory}/Assets/{path}";
-
-                Asset assetAdd = new Asset(File.ReadAllText(path + ".meta"), name, extension, path);
-                dictionary.Add(name, assetAdd);
+                if (asset != null && !asset.IsDirectory && asset.FullPath != null &&
+                    asset.FullPath.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (!dictionary.ContainsKey(asset.Name))
+                    {
+                        dictionary.Add(asset.Name, asset);
+                    }
+                }
             }
         }
 
@@ -83,8 +70,9 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
 
     private int _currentFoldoutIndex;
     private string _search = string.Empty;
+
     /// <summary>
-    /// This method draw the foldout for the asset property with all the files in the project that can be chosen.
+    /// This method draws the foldout for the asset property with all matching files in the project.
     /// </summary>
     /// <param name="asset">The property asset</param>
     /// <param name="property">The property</param>
@@ -92,10 +80,16 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
     protected void DrawFoldout(ref T asset, PropertyInfo property, object instance)
     {
         Dictionary<string, Asset> dictionary = GetAssetLists();
+        if (dictionary.Count == 0)
+            return;
+
         var dictionaryList = dictionary.ToList();
 
+        if (_currentFoldoutIndex >= dictionaryList.Count)
+            _currentFoldoutIndex = 0;
+
         int foldoutIndex = _currentFoldoutIndex;
-        if (ImGui.BeginCombo($"{GetPropertyName()}", dictionaryList[_currentFoldoutIndex].Key))
+        if (ImGui.BeginCombo($"{GetPropertyName()}##Combo_{property.Name}", dictionaryList[_currentFoldoutIndex].Key))
         {
             ImGui.InputText("search", ref _search, 100);
             Dictionary<string, Asset> filteredFileDictionary = new();
@@ -126,16 +120,16 @@ public abstract class AssetTypePropertyViewer<T> : PropertyViewer where T : clas
 
         var selected = dictionaryList[_currentFoldoutIndex].Value;
 
-        T assetContent = selected.AssetContent.RawAsset as T;
-        if (assetContent == null)
+        if (selected.AssetContent != null)
         {
-            selected.AssetContent.Load();
-        }
-
-        SetAsset(selected.AssetContent.RawAsset as T, property, instance as Component);
+            T assetContent = selected.AssetContent.RawAsset as T;
+            if (assetContent == null)
+            {
+                selected.AssetContent.Load();
+            }
 
         // property.SetValue(instance, asset);
+            SetAsset(selected.AssetContent.RawAsset as T, property, instance as Component);
+        }
     }
-
-
 }

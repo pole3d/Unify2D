@@ -1,8 +1,10 @@
-﻿using System.IO;
+using System.IO;
 using System.Reflection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Unify2D.Assets;
 using Unify2D.Core;
+using Unify2D.Core.Graphics;
 
 namespace Unify2D.Toolbox;
 
@@ -20,6 +22,11 @@ public class Texture2DPropertyViewer : AssetTypePropertyViewer<Texture2D>
     protected override string GetPropertyName() => "Sprite";
     protected override string GetAssetExtension() => ".png";
 
+    public override void Draw(PropertyInfo property, object instance)
+    {
+        Texture2D asset = property.GetValue(instance) as Texture2D;
+        base.Draw(property, instance);
+    }
 
     /// <summary>
     /// TODO reuse same texture
@@ -49,12 +56,25 @@ public class Texture2DPropertyViewer : AssetTypePropertyViewer<Texture2D>
     public override void SetAsset(Texture2D asset, PropertyInfo propertyInfo, Component component)
     {
         propertyInfo.SetValue(component, asset);
-        component.Initialize(component.GameObject);
+        //component.Initialize(component.GameObject);
 
         //find a way to make this dynamic
         //if (component is UIImage uiImage)
         //{
         //    uiImage.SetSprite(asset, propertyInfo, path);
         //}
+        if (component != null && component.GameObject != null)
+        {
+            component.Initialize(component.GameObject);
+        }
+
+        if (component is SpriteRenderer sr)
+        {
+            sr.Texture = asset;
+        }
+        else if (component is UIImage ui)
+        {
+            ui.Texture = asset;
+        }
     }
 }
