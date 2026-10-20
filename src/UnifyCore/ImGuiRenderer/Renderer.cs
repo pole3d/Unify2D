@@ -14,6 +14,30 @@ namespace Unify2D.ImGuiRenderer
     public class Renderer
     {
         private Game _game;
+        private PlatformWindows _platformWindows;
+        private System.Numerics.Vector2 _drawPosition, _drawSize;
+        private Point _mainWindowSize;
+
+        public void EnablePlatformWindows(bool showWindows = true)
+        {
+            if (_platformWindows != null) return;
+            _platformWindows = new PlatformWindows(_game.Window.Handle, showWindows);
+            Input.PlatformWindows = _platformWindows;
+        }
+
+        public void ShutdownPlatformWindows()
+        {
+            _platformWindows?.Dispose();
+            _platformWindows = null;
+            Input.PlatformWindows = null;
+        }
+
+        public void Present()
+        {
+            SDL2.SDL.SDL_GetWindowSize(_game.Window.Handle, out int w, out int h);
+            if (w > 0 && h > 0)
+                _graphicsDevice.Present(new Rectangle(0, 0, w, h), null, _game.Window.Handle);
+        }
         public WindowInput Input { get; }
 
         // Graphics
@@ -123,6 +147,7 @@ namespace Unify2D.ImGuiRenderer
         {
             ImGui.GetIO().DeltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            _platformWindows?.Update();
             UpdateInput();
 
             ImGui.NewFrame();
@@ -135,10 +160,39 @@ namespace Unify2D.ImGuiRenderer
         {
             ImGui.Render();
 
-            unsafe { RenderDrawData(ImGui.GetDrawData()); }
-            
-            ImGui.UpdatePlatformWindows();
-            ImGui.RenderPlatformWindowsDefault();
+            if (_platformWindows != null)
+            {
+                ImGui.UpdatePlatformWindows();
+                var views = ImGui.GetPlatformIO().Viewports;
+                SDL2.SDL.SDL_GetWindowSize(_game.Window.Handle, out int width, out int height);
+                var mainWindowSize = new Point(width, height);
+                for (int i = 1; i < views.Size; i++)
+                {
+                    width = Math.Max(width, (int)views[i].Size.X);
+                    height = Math.Max(height, (int)views[i].Size.Y);
+                }
+                var pp = _graphicsDevice.PresentationParameters;
+                if (pp.BackBufferWidth != width || pp.BackBufferHeight != height || _mainWindowSize != mainWindowSize)
+                {
+                    pp.BackBufferWidth = Math.Max(1, width);
+                    pp.BackBufferHeight = Math.Max(1, height);
+                    // Resize the main swapchain to its native window bounds as well.
+                    // A stale swapchain makes Windows scale the UI after a resize.
+                    pp.DeviceWindowHandle = _game.Window.Handle;
+                    _graphicsDevice.Reset(pp);
+                    _mainWindowSize = mainWindowSize;
+                }
+                for (int i = 1; i < views.Size; i++)
+                {
+                    var view = views[i];
+                    if (view.PlatformHandle == IntPtr.Zero || (SDL2.SDL.SDL_GetWindowFlags(view.PlatformHandle) & (uint)SDL2.SDL.SDL_WindowFlags.SDL_WINDOW_MINIMIZED) != 0) continue;
+                    _graphicsDevice.Clear(Color.Black);
+                    RenderDrawData(view.DrawData);
+                    _graphicsDevice.Present(new Rectangle(0, 0, (int)view.Size.X, (int)view.Size.Y), null, view.PlatformHandle);
+                }
+                _graphicsDevice.Clear(Color.Black);
+            }
+            RenderDrawData(ImGui.GetDrawData());
         }
 
         #endregion ImGuiRenderer
@@ -207,7 +261,7 @@ namespace Unify2D.ImGuiRenderer
 
             _effect.World = Matrix.Identity;
             _effect.View = Matrix.Identity;
-            _effect.Projection = Matrix.CreateOrthographicOffCenter(0f, io.DisplaySize.X, io.DisplaySize.Y, 0f, -1f, 1f);
+            _effect.Projection = Matrix.CreateOrthographicOffCenter(_drawPosition.X, _drawPosition.X + _drawSize.X, _drawPosition.Y + _drawSize.Y, _drawPosition.Y, -1f, 1f);
             _effect.TextureEnabled = true;
             _effect.Texture = texture;
             _effect.VertexColorEnabled = true;
@@ -241,6 +295,11 @@ namespace Unify2D.ImGuiRenderer
             io.KeySuper = keyboard.IsKeyDown(Keys.LeftWindows) || keyboard.IsKeyDown(Keys.RightWindows);
 
             io.DisplaySize = new System.Numerics.Vector2(_graphicsDevice.PresentationParameters.BackBufferWidth, _graphicsDevice.PresentationParameters.BackBufferHeight);
+            if (_platformWindows != null)
+            {
+                SDL2.SDL.SDL_GetWindowSize(_game.Window.Handle, out int width, out int height);
+                io.DisplaySize = new System.Numerics.Vector2(width, height);
+            }
             io.DisplayFramebufferScale = new System.Numerics.Vector2(1f, 1f);
 
             io.MousePos = active ? new System.Numerics.Vector2(mouse.X, mouse.Y)
@@ -265,9 +324,13 @@ namespace Unify2D.ImGuiRenderer
         /// </summary>
         private void RenderDrawData(ImDrawDataPtr drawData)
         {
+            if (drawData.DisplaySize.X <= 0 || drawData.DisplaySize.Y <= 0 || drawData.TotalVtxCount == 0) return;
+            _drawPosition = drawData.DisplayPos;
+            _drawSize = drawData.DisplaySize;
             // Setup render state: alpha-blending enabled, no face culling, no depth testing, scissor enabled, vertex/texcoord/color pointers
             var lastViewport = _graphicsDevice.Viewport;
             var lastScissorBox = _graphicsDevice.ScissorRectangle;
+            var lastSampler = _graphicsDevice.SamplerStates[0];
 
             _graphicsDevice.BlendFactor = Color.White;
             _graphicsDevice.BlendState = BlendState.NonPremultiplied;
@@ -275,18 +338,19 @@ namespace Unify2D.ImGuiRenderer
             _graphicsDevice.DepthStencilState = DepthStencilState.DepthRead;
 
             // Handle cases of screen coordinates != from framebuffer coordinates (e.g. retina displays)
-            drawData.ScaleClipRects(ImGui.GetIO().DisplayFramebufferScale);
+
 
             // Setup projection
-            _graphicsDevice.Viewport = new Viewport(0, 0, _graphicsDevice.PresentationParameters.BackBufferWidth, _graphicsDevice.PresentationParameters.BackBufferHeight);
+            _graphicsDevice.Viewport = new Viewport(0, 0, (int)drawData.DisplaySize.X, (int)drawData.DisplaySize.Y);
 
             UpdateBuffers(drawData);
 
-            RenderCommandLists(drawData);
+            RenderCommandLists(drawData, lastSampler);
 
             // Restore modified state
             _graphicsDevice.Viewport = lastViewport;
             _graphicsDevice.ScissorRectangle = lastScissorBox;
+            _graphicsDevice.SamplerStates[0] = lastSampler;
         }
 
         private unsafe void UpdateBuffers(ImDrawDataPtr drawData)
@@ -339,7 +403,7 @@ namespace Unify2D.ImGuiRenderer
             _indexBuffer.SetData(_indexData, 0, drawData.TotalIdxCount * sizeof(ushort));
         }
 
-        private unsafe void RenderCommandLists(ImDrawDataPtr drawData)
+        private unsafe void RenderCommandLists(ImDrawDataPtr drawData, SamplerState imageSampler)
         {
             _graphicsDevice.SetVertexBuffer(_vertexBuffer);
             _graphicsDevice.Indices = _indexBuffer;
@@ -365,13 +429,17 @@ namespace Unify2D.ImGuiRenderer
                         throw new InvalidOperationException($"Could not find a texture with id '{drawCmd.TextureId}', please check your bindings");
                     }
 
-                    _graphicsDevice.ScissorRectangle = new Rectangle(
-                        (int)drawCmd.ClipRect.X,
-                        (int)drawCmd.ClipRect.Y,
-                        (int)(drawCmd.ClipRect.Z - drawCmd.ClipRect.X),
-                        (int)(drawCmd.ClipRect.W - drawCmd.ClipRect.Y)
-                    );
+                    int left = Math.Max(0, (int)(drawCmd.ClipRect.X - drawData.DisplayPos.X));
+                    int top = Math.Max(0, (int)(drawCmd.ClipRect.Y - drawData.DisplayPos.Y));
+                    int right = Math.Min((int)drawData.DisplaySize.X, (int)(drawCmd.ClipRect.Z - drawData.DisplayPos.X));
+                    int bottom = Math.Min((int)drawData.DisplaySize.Y, (int)(drawCmd.ClipRect.W - drawData.DisplayPos.Y));
+                    if (right <= left || bottom <= top) continue;
+                    _graphicsDevice.ScissorRectangle = new Rectangle(left, top, right - left, bottom - top);
 
+                    // Font sampling must not inherit the scene's pixel-art sampler.
+                    // Point filtering can drop glyph rows at subpixel sampling boundaries.
+                    _graphicsDevice.SamplerStates[0] = drawCmd.TextureId == _fontTextureId
+                        ? SamplerState.LinearClamp : imageSampler;
                     var effect = UpdateEffect(_loadedTextures[drawCmd.TextureId]);
 
                     foreach (var pass in effect.CurrentTechnique.Passes)

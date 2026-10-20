@@ -13,7 +13,8 @@ namespace Unify2D.ImGuiRenderer
         private int _rawScroll;
         private int _scroll;
         private bool _initialized;
-        public bool IsActive => _game.IsActive;
+        internal PlatformWindows PlatformWindows { get; set; }
+        public bool IsActive => PlatformWindows?.IsActive ?? _game.IsActive;
         public KeyboardState Keyboard { get; private set; }
         public int FocusVersion { get; private set; }
         public MouseState Mouse { get; private set; }
@@ -24,6 +25,14 @@ namespace Unify2D.ImGuiRenderer
         public void Capture()
         {
             var mouse = Microsoft.Xna.Framework.Input.Mouse.GetState();
+            if (PlatformWindows != null)
+            {
+                uint buttons = SDL2.SDL.SDL_GetGlobalMouseState(out int x, out int y);
+                PlatformWindows.UpdateMouseCapture(buttons);
+                buttons &= PlatformWindows.MouseButtons;
+                ButtonState Button(int index) => (buttons & (1u << (index - 1))) != 0 ? ButtonState.Pressed : ButtonState.Released;
+                mouse = new MouseState(x, y, mouse.ScrollWheelValue, Button(1), Button(2), Button(3), Button(4), Button(5));
+            }
             var keyboard = Microsoft.Xna.Framework.Input.Keyboard.GetState();
             bool active = IsActive;
             // Discard scrolling and shortcut presses accumulated outside the application.

@@ -140,7 +140,8 @@ namespace Unify2D
             _imGuiRenderer = new ImGuiRenderer.Renderer(this);
             _imGuiRenderer.RebuildFontAtlas();
             ImGui.GetIO().ConfigWindowsMoveFromTitleBarOnly = true;
-            ImGui.GetIO().ConfigFlags |= ImGuiConfigFlags.DockingEnable | ImGuiConfigFlags.ViewportsEnable;
+            ImGui.GetIO().ConfigFlags |= ImGuiConfigFlags.DockingEnable;
+            _imGuiRenderer.EnablePlatformWindows();
 
             Window.AllowUserResizing = true;
             _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
@@ -286,6 +287,12 @@ namespace Unify2D
 
         #endregion
 
+        protected override void EndDraw()
+        {
+            if (_imGuiRenderer != null) _imGuiRenderer.Present();
+            else base.EndDraw();
+        }
+
         protected override void UnloadContent()
         {
             PlayToolbox?.Stop();
@@ -295,6 +302,7 @@ namespace Unify2D
             ReleaseClosedCoreResources();
             _coreViewerScene?.GameCore.DisposeGraphicsResources();
             _scripting?.Unload();
+            _imGuiRenderer?.ShutdownPlatformWindows();
             _settings.Save();
         }
 
