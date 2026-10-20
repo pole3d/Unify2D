@@ -146,6 +146,15 @@ namespace Unify2D.Scripting
                 options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
             using var ms = new MemoryStream();
+            var ruleErrors = ScriptComponentRules.Validate(compilation);
+            if (ruleErrors.Count > 0)
+            {
+                HasCompilationErrors = true;
+                _sources = sources;
+                SourcesChanged?.Invoke();
+                foreach (var diagnostic in ruleErrors) Debug.LogError(diagnostic.ToString());
+                return;
+            }
             EmitResult result = compilation.Emit(ms);
             HasCompilationErrors = !result.Success;
             _sources = sources;

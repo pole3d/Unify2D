@@ -71,9 +71,7 @@ namespace Unify2D.Builder
 
             SaveAllScene();
 
-            CreateDll();
-
-            return true;
+            return CreateDll();
         }
 
         private void SaveAllScene()
@@ -122,7 +120,7 @@ namespace Unify2D.Builder
             }
         }
 
-        void CreateDll()
+        bool CreateDll()
         {
             List<SyntaxTree> syntaxes = new List<SyntaxTree>();
 
@@ -155,6 +153,12 @@ namespace Unify2D.Builder
 
             string dllPath = CoreTools.CombinePath(BuildPathFull, $"{AssemblyName}.dll");
 
+            var ruleErrors = Unify2D.Scripting.ScriptComponentRules.Validate(compilation);
+            if (ruleErrors.Count > 0)
+            {
+                foreach (var diagnostic in ruleErrors) Debug.LogError(diagnostic.ToString());
+                return false;
+            }
             EmitResult result = compilation.Emit(dllPath);
 
             if (!result.Success)
@@ -168,10 +172,7 @@ namespace Unify2D.Builder
                     Console.Error.WriteLine("{0}: {1}", diagnostic.Id, diagnostic.GetMessage());
                 }
             }
-            else
-            {
-
-            }
+            return result.Success;
         }
 
         public void StartBuild()
