@@ -103,91 +103,113 @@ namespace Unify2D.Scripting
             type.IsSubclassOf(typeof(Component)) && !type.IsAbstract &&
             !type.ContainsGenericParameters && type.GetConstructor(Type.EmptyTypes) != null;
 
+        internal bool LastLoadUsedCache { get; private set; }
+
         private void LoadScripts()
         {
-            List<SyntaxTree> syntaxes = new List<SyntaxTree>();
             var sources = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (!Directory.Exists(_editor.AssetsPath)) return;
+            foreach (var path in Directory.GetFiles(_editor.AssetsPath, "*.cs", SearchOption.AllDirectories))
+                sources[Path.GetFullPath(path)] = File.ReadAllText(path);
 
-            if (Directory.Exists(_editor.AssetsPath) == false)
-                return;
-
-            foreach (var item in Directory.GetFiles(_editor.AssetsPath, "*.cs", SearchOption.AllDirectories))
-            {
-                string content = File.ReadAllText(item);
-                sources[Path.GetFullPath(item)] = content;
-                SyntaxTree syntaxTree = ScriptCompilationDefaults.Parse(content, path: Path.GetFullPath(item));
-                syntaxes.Add(syntaxTree);
-            }
-
+            // Check before parsing: watcher notifications often leave sources unchanged.
             if (_sources != null && sources.Count == _sources.Count &&
                 sources.All(pair => _sources.TryGetValue(pair.Key, out var text) && text == pair.Value))
                 return;
 
-            string assemblyName = "GameAssembly";
-            List<MetadataReference> references = new();
-
-            foreach (var r in ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")).Split(Path.PathSeparator))
+            LastLoadUsedCache = false;
+            string fingerprint = ScriptAssemblyCache.Fingerprint(sources);
+            string cachePath = ScriptAssemblyCache.GetPath(_editor.AssetsPath);
+            var cached = ScriptAssemblyCache.Read(cachePath, fingerprint, sources);
+            if (cached != null)
             {
-                references.Add(MetadataReference.CreateFromFile(r));
+                try
+                {
+                    ActivateAssembly(cached.Image, cached.TypesBySource);
+                    HasCompilationErrors = false;
+                    _sources = sources;
+                    LastLoadUsedCache = true;
+                    SourcesChanged?.Invoke();
+                    return;
+                }
+                catch (BadImageFormatException) { }
+                catch (System.IO.FileLoadException) { }
+                catch (TypeLoadException) { }
+                catch (ReflectionTypeLoadException) { }
             }
 
-            CSharpCompilation compilation = CSharpCompilation.Create(
-            assemblyName,
-            syntaxTrees: ScriptCompilationDefaults.WithImports(syntaxes),
-            references: references,
-            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            var syntaxes = sources.Select(pair => ScriptCompilationDefaults.Parse(pair.Value, pair.Key)).ToList();
+            var compilation = CSharpCompilation.Create(
+                "GameAssembly",
+                syntaxTrees: ScriptCompilationDefaults.WithImports(syntaxes),
+                references: ScriptAssemblyCache.References,
+                options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-          //  bool success = true;
-
-            using (var ms = new MemoryStream())
+            using var ms = new MemoryStream();
+            EmitResult result = compilation.Emit(ms);
+            HasCompilationErrors = !result.Success;
+            _sources = sources;
+            SourcesChanged?.Invoke();
+            if (!result.Success)
             {
-                EmitResult result = compilation.Emit(ms);
-                HasCompilationErrors = !result.Success;
-                _sources = sources;
-                SourcesChanged?.Invoke();
+                foreach (var diagnostic in result.Diagnostics.Where(diagnostic =>
+                    diagnostic.IsWarningAsError || diagnostic.Severity == DiagnosticSeverity.Error))
+                    Debug.LogError($"{diagnostic.Id}: {diagnostic.GetMessage()}");
+                return;
+            }
 
-                if (!result.Success)
+            var namesBySource = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+            foreach (var syntax in syntaxes)
+            {
+                var model = compilation.GetSemanticModel(syntax);
+                namesBySource[syntax.FilePath] = syntax.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>()
+                    .Select(declaration => model.GetDeclaredSymbol(declaration)?.ToDisplayString())
+                    .Where(name => name != null).ToArray();
+            }
+            byte[] image = ms.ToArray();
+            ActivateAssembly(image, namesBySource);
+            ScriptAssemblyCache.Write(cachePath, new ScriptAssemblyCache.Entry {
+                Fingerprint = fingerprint, Image = image, TypesBySource = namesBySource
+            });
+        }
+
+        private void ActivateAssembly(byte[] image, Dictionary<string, string[]> namesBySource)
+        {
+            var context = new AssemblyLoadContext(null, true);
+            Assembly assembly;
+            List<Type> scriptTypes;
+            var typesBySource = new Dictionary<string, List<Type>>(StringComparer.OrdinalIgnoreCase);
+            try
+            {
+                using var ms = new MemoryStream(image);
+                assembly = context.LoadFromStream(ms);
+                scriptTypes = assembly.GetTypes().Where(IsComponentType).ToList();
+                foreach (var pair in namesBySource)
                 {
-                    //success = false;
-                    IEnumerable<Diagnostic> failures = result.Diagnostics.Where(diagnostic =>
-                        diagnostic.IsWarningAsError ||
-                        diagnostic.Severity == DiagnosticSeverity.Error);
-
-                    foreach (Diagnostic diagnostic in failures)
-                    {
-                        Debug.LogError($"{diagnostic.Id}: {diagnostic.GetMessage()}");
-                    }
+                    var names = pair.Value.ToHashSet();
+                    typesBySource[pair.Key] = scriptTypes
+                        .Where(type => names.Contains(type.FullName.Replace('+', '.'))).ToList();
                 }
-                else
-                {
-                    _assemblyImage = ms.ToArray();
-                    ms.Seek(0, SeekOrigin.Begin);
+            }
+            catch
+            {
+                context.Unload();
+                throw;
+            }
 
-                    var previousContext = _context;
-                    _context = new AssemblyLoadContext(null, true);
-                    Assembly assembly = _context.LoadFromStream(ms);
-
-                    _types.Clear();
-                    _types.AddRange(typeof(Component).Assembly.GetTypes().Where(IsComponentType));
-                    var scriptTypes = assembly.GetTypes().Where(IsComponentType).ToList();
-                    _types.AddRange(scriptTypes);
-                    var previousScriptTypes = _scriptTypes;
-                    _scriptTypes = new Dictionary<string, List<Type>>(StringComparer.OrdinalIgnoreCase);
-                    foreach (var syntax in syntaxes)
-                    {
-                        var model = compilation.GetSemanticModel(syntax);
-                        var names = syntax.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>()
-                            .Select(declaration => model.GetDeclaredSymbol(declaration)?.ToDisplayString())
-                            .ToHashSet();
-                        _scriptTypes[syntax.FilePath] = scriptTypes
-                            .Where(type => names.Contains(type.FullName.Replace('+', '.'))).ToList();
-                    }
-                    if (previousContext != null)
-                    {
-                        ReplaceComponents(GetRenamedTypes(previousScriptTypes));
-                        previousContext.Unload();
-                    }
-                }
+            var previousContext = _context;
+            var previousScriptTypes = _scriptTypes;
+            _context = context;
+            _assemblyImage = image;
+            _scriptTypes = typesBySource;
+            _types.Clear();
+            _types.AddRange(typeof(Component).Assembly.GetTypes().Where(IsComponentType));
+            _types.AddRange(scriptTypes);
+            GuidTypeBinder.Instance.SetScriptAssembly(assembly);
+            if (previousContext != null)
+            {
+                try { ReplaceComponents(GetRenamedTypes(previousScriptTypes)); }
+                finally { previousContext.Unload(); }
             }
         }
 
@@ -277,6 +299,7 @@ namespace Unify2D.Scripting
 
         public void Unload()
         {
+            GuidTypeBinder.Instance.SetScriptAssembly(null);
             _watcher?.Dispose();
             _watcher = null;
             _watchedPath = null;
