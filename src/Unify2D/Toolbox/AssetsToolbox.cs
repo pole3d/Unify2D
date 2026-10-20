@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
@@ -173,18 +173,7 @@ namespace Unify2D.Toolbox
             if (_extensionsToIgnore.Contains(extension))
                 return null;
 
-            string pathMeta = file + ".meta";
-            string uid = string.Empty;
-
-            if (File.Exists(pathMeta) == false)
-            {
-                uid = Guid.NewGuid().ToString();
-                File.WriteAllText(pathMeta, uid);
-            }
-            else
-            {
-                uid = File.ReadAllText(pathMeta);
-            }
+            string uid = AssetMetadata.GetOrCreateGuid(file);
 
             Asset newAsset = new Asset(uid, Path.GetFileNameWithoutExtension(relativeFile),
                 Path.GetExtension(relativeFile), Path.GetDirectoryName(relativeFile));
@@ -208,7 +197,6 @@ namespace Unify2D.Toolbox
             if (_disableDeleteWatcher)
                 return;
 
-            Reset();
             _assetChanges.Enqueue(e);
         }
 
@@ -225,6 +213,11 @@ namespace Unify2D.Toolbox
             bool refresh = false;
             while (_assetChanges.TryDequeue(out var change))
             {
+                if (change is RenamedEventArgs moved && !moved.FullPath.EndsWith(".meta", StringComparison.OrdinalIgnoreCase))
+                {
+                    try { AssetMetadata.FollowExternalRename(moved.OldFullPath, moved.FullPath); }
+                    catch (IOException error) { Debug.LogError(error.Message); }
+                }
                 if (change is RenamedEventArgs renamed &&
                     TryGetAssetFromPath($"\\{renamed.OldName}", out var asset) && !asset.IsDirectory &&
                     string.Equals(Path.GetDirectoryName(renamed.OldFullPath), Path.GetDirectoryName(renamed.FullPath), StringComparison.OrdinalIgnoreCase) &&
@@ -457,16 +450,16 @@ namespace Unify2D.Toolbox
 
                     if (ImGui.Button(ApplyRenameButtonLabel))
                     {
-                        string oldPath = asset.FullPath;
-                        asset.SetName(_newFileName);
-
-                        if (asset.IsDirectory)
-                            Directory.Move($"{_path}{oldPath}", $"{_path}{asset.FullPath}");
-                        else
-                            File.Move($"{_path}{oldPath}", $"{_path}{asset.FullPath}");
-
-                        _canRefreshName = true;
-                        ImGui.CloseCurrentPopup();
+                        string oldPath = CoreTools.CombinePath(_path, asset.FullPath);
+                        string newPath = Path.Combine(Path.GetDirectoryName(oldPath), _newFileName + asset.Extension);
+                        try
+                        {
+                            AssetMetadata.Move(oldPath, newPath);
+                            asset.SetName(_newFileName);
+                            _canRefreshName = true;
+                            ImGui.CloseCurrentPopup();
+                        }
+                        catch (IOException error) { Debug.LogError(error.Message); }
                     }
 
                     ImGui.EndPopup();
@@ -531,12 +524,12 @@ namespace Unify2D.Toolbox
                     if (Path.Exists(newPath))
                         return;
 
-                    if (movingAsset.IsDirectory)
-                        Directory.Move(oldPath, newPath);
-                    else
-                        File.Move(oldPath, newPath);
-
-                    movingAsset.SetPath(asset.FullPath);
+                    try
+                    {
+                        AssetMetadata.Move(oldPath, newPath);
+                        movingAsset.SetPath(asset.FullPath);
+                    }
+                    catch (IOException error) { Debug.LogError(error.Message); }
                 }
             }
 

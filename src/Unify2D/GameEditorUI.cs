@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+using ImGuiNET;
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using NativeFileDialogs.Net;
@@ -95,7 +96,11 @@ namespace Unify2D
             {
                 _editor.PlayToolbox?.Stop();
                 Selection.UnSelectObject();
-                SceneManager.Instance.LoadSceneWithPath(path);
+                try { SceneManager.Instance.LoadSceneWithPath(path); }
+                catch (Exception error) when (error is Newtonsoft.Json.JsonException || error is IOException)
+                {
+                    Debug.LogError(error.Message);
+                }
             }
         }
 
@@ -110,7 +115,11 @@ namespace Unify2D
                     _editor.PlayToolbox?.Stop();
                     Selection.UnSelectObject();
                     Scene scene = new Scene(Path.GetFileName(path),path);
-                    SceneManager.Instance.LoadSceneWithPath(path);
+                    try { SceneManager.Instance.LoadSceneWithPath(path); }
+                    catch (Exception error) when (error is Newtonsoft.Json.JsonException || error is IOException)
+                    {
+                        Debug.LogError(error.Message);
+                    }
                 }
             }
             else

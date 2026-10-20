@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Unify2D;
@@ -78,24 +78,9 @@ namespace UnifyCore
             if (_extensionsToIgnore.Contains(extension) == true)
                 return;
 
-            string pathMeta = file + ".meta";
-            string uid = string.Empty;
-
-            if (File.Exists(pathMeta) == false)
-            {
-                uid = Guid.NewGuid().ToString();
-                File.WriteAllText(pathMeta, uid);
-            }
-            else
-            {
-                uid = File.ReadAllText(pathMeta);
-
-                if (_assets.ContainsKey(uid))
-                {
-                    Debug.LogError($"asset duplication {file} - {uid}");
-                    return;
-                }
-            }
+            string uid = AssetMetadata.GetOrCreateGuid(file);
+            if (_assets.ContainsKey(uid))
+                throw new InvalidDataException($"Duplicate asset GUID {uid}: {file}");
 
             GameAsset newAsset = new GameAsset(uid, null, 
                 Path.GetFileNameWithoutExtension(relativeFile),

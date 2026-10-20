@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.IO;
 using Unify2D.Builder;
@@ -90,12 +90,14 @@ namespace Unify2D
         #region Save/Load
         public void Save(Scene scene)
         {
+            if (scene.HasLoadErrors) throw new InvalidOperationException("Cannot overwrite a scene that failed to load.");
             if (scene.Name == null)
                 return;
 
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.TypeNameHandling = TypeNameHandling.Auto;
             settings.Formatting = Formatting.Indented;
+            settings.SerializationBinder = GameCore.Current.SerializationBinder ?? GuidTypeBinder.Instance;
             string sceneContent = JsonConvert.SerializeObject(scene.GameObjects, settings);
 
             string directory = Path.GetDirectoryName(scene.Path);
@@ -136,35 +138,31 @@ namespace Unify2D
         }
         public void LoadScene(string sceneName)
         {
-            ClearScene();
-            _currentScene = GetSceneByName(sceneName);
-            LoadSceneFromFile();
+            LoadSceneFromFile(GetSceneByName(sceneName));
         }
 
         public void LoadSceneWithPath(string scenePath)
         {
-            ClearScene();
-            _currentScene = new Scene(Path.GetFileName(scenePath), scenePath);
-            LoadSceneFromFile();
+            LoadSceneFromFile(new Scene(Path.GetFileName(scenePath), scenePath));
         }
+
         public void LoadScene(int sceneBuildIndex)
         {
-            ClearScene();
-            _currentScene = GetSceneByBuildIndex(sceneBuildIndex);
-            LoadSceneFromFile();
+            LoadSceneFromFile(GetSceneByBuildIndex(sceneBuildIndex));
         }
+
         public void LoadNextSceneInBuild()
         {
-            ClearScene();
-            _currentScene = GetSceneByBuildIndex(_currentScene.BuildIndex + 1);
-            LoadSceneFromFile();
+            LoadSceneFromFile(GetSceneByBuildIndex(_currentScene.BuildIndex + 1));
         }
 
-        private void LoadSceneFromFile()
+        private void LoadSceneFromFile(Scene next)
         {
-            _currentScene.LoadFromFile();
+            // Resolve every component before replacing the scene currently being edited.
+            next.LoadFromFile();
+            ClearScene();
+            _currentScene = next;
             _currentScene.Initialize();
-
             OnSceneLoaded?.Invoke();
         }
 

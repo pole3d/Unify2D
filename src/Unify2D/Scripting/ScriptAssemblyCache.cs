@@ -36,6 +36,7 @@ namespace Unify2D.Scripting
 
         internal static string Fingerprint(Dictionary<string, string> sources)
         {
+            var guids = ScriptMetadata.ReadGuids(sources.Keys);
             using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
             void Add(string value)
             {
@@ -59,6 +60,7 @@ namespace Unify2D.Scripting
             {
                 Add(source.Key);
                 Add(source.Value);
+                Add(guids[source.Key]);
             }
             return Convert.ToHexString(hash.GetHashAndReset());
         }

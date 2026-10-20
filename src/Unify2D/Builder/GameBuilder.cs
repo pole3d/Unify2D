@@ -33,6 +33,11 @@ namespace Unify2D.Builder
         {
             _core = core;
             _editor = editor;
+            _editor.Scripting.Reload();
+            if (_editor.Scripting.HasCompilationErrors) return false;
+            var migration = Unify2D.Scripting.ScriptGuidMigration.Run(_editor.ProjectPath, GuidTypeBinder.Instance);
+            foreach (var error in migration.Errors) Debug.LogError(error);
+            if (!migration.Success) return false;
 
             if (Directory.Exists(BuildPathFull) == false)
                 Directory.CreateDirectory(BuildPathFull);
@@ -47,6 +52,7 @@ namespace Unify2D.Builder
                 return false;
             }
 
+            SaveAllScene();
             foreach (string file in Directory.GetFiles(TemplatePath))
             {
                 string fileName = Path.GetFileName(file);
@@ -68,8 +74,6 @@ namespace Unify2D.Builder
                 string newPath = CoreTools.CombinePath(BuildPathFull, AssetsPath);
                 CopyFilesRecursively(AssetsPathFull, newPath);
             }
-
-            SaveAllScene();
 
             return CreateDll();
         }
@@ -114,7 +118,8 @@ namespace Unify2D.Builder
             //Copy all the files & Replaces any files with the same name
             foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
             {
-                if (Path.GetExtension(newPath) == ".cs" || Path.GetExtension(newPath) == ".cs.meta") continue;
+                if (newPath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) ||
+                    newPath.EndsWith(".cs.meta", StringComparison.OrdinalIgnoreCase)) continue;
 
                 File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
             }
@@ -157,6 +162,16 @@ namespace Unify2D.Builder
             if (ruleErrors.Count > 0)
             {
                 foreach (var diagnostic in ruleErrors) Debug.LogError(diagnostic.ToString());
+                return false;
+            }
+            try
+            {
+                var guids = Unify2D.Scripting.ScriptMetadata.ReadGuids(syntaxes.Select(tree => tree.FilePath));
+                compilation = Unify2D.Scripting.ScriptMetadata.AddIdentities(compilation, guids);
+            }
+            catch (InvalidDataException error)
+            {
+                Debug.LogError(error.Message);
                 return false;
             }
             EmitResult result = compilation.Emit(dllPath);

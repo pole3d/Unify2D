@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -15,6 +15,7 @@ namespace Unify2D
 
         public string Name => _sceneInfo.Name;
         public string Path => _sceneInfo.Path;
+        public bool HasLoadErrors { get; private set; }
         public int RootCount => GameObjects.Count;
         public int BuildIndex { get; private set; }
         public List<GameObject> GameObjects { get; private set; } = new List<GameObject>();
@@ -61,13 +62,17 @@ namespace Unify2D
                 string text = File.ReadAllText(_sceneInfo.Path);
                 JsonSerializerSettings settings = new JsonSerializerSettings();
                 settings.TypeNameHandling = TypeNameHandling.Auto;
-                settings.Error += SilentErrors;
+
                 settings.SerializationBinder = GameCore.Current.SerializationBinder ?? GuidTypeBinder.Instance;
-                GameObjects = JsonConvert.DeserializeObject<List<GameObject>>(text, settings);
+                GameObjects = JsonConvert.DeserializeObject<List<GameObject>>(text, settings)
+                    ?? throw new JsonSerializationException("Scene contains no object list.");
+                HasLoadErrors = false;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                HasLoadErrors = true;
+                Debug.LogError(ex.Message);
+                throw;
             }
         }
 

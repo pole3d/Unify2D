@@ -44,6 +44,7 @@ namespace Unify2D
 
         public GameEditorSettings Settings => _settings;
         internal bool IsProjectLoaded { get; private set; }
+        internal string ProjectLoadError { get; private set; }
         public Scripting.Scripting Scripting => _scripting;
         public ImGuiRenderer.Renderer GuiRenderer => _imGuiRenderer;
         public ImGuiRenderer.WindowInput WindowInput => _imGuiRenderer.Input;
@@ -356,7 +357,21 @@ namespace Unify2D
             _closedCores.Clear();
         }
 
-        internal void PreloadProject()
+        internal bool PreloadProject()
+        {
+            IsProjectLoaded = false;
+            ProjectLoadError = null;
+            try { return PrepareProject(); }
+            catch (Exception error) when (error is IOException || error is UnauthorizedAccessException ||
+                error is Newtonsoft.Json.JsonException)
+            {
+                ProjectLoadError = error.Message;
+                Debug.LogError(ProjectLoadError);
+                return false;
+            }
+        }
+
+        private bool PrepareProject()
         {
             string projectPath = Path.GetFullPath(ProjectPath);
             if (!Directory.Exists(Path.Combine(projectPath, AssetsFolder)))
@@ -383,6 +398,18 @@ namespace Unify2D
             GameCore.Current.AssetsManager.Initialize(AssetsPath);
             EditorAssetManager = new EditorAssetManager(this);
             _scripting.Load(this);
+            if (_scripting.HasCompilationErrors)
+            {
+                ProjectLoadError = _scripting.LastError ?? "Corrigez les erreurs de scripts avant d'ouvrir le projet.";
+                return false;
+            }
+            var migration = Unify2D.Scripting.ScriptGuidMigration.Run(projectPath, GuidTypeBinder.Instance);
+            foreach (var error in migration.Errors) Debug.LogError(error);
+            if (!migration.Success)
+                ProjectLoadError = string.Join("\n", migration.Errors);
+            if (migration.ChangedFiles > 0)
+                Debug.Log($"Migrated {migration.ChangedFiles} scene/prefab files to script GUIDs. Originals: .unify/migrations/script-guids-v1");
+            return migration.Success;
         }
 
         internal void ProjectLoaded()

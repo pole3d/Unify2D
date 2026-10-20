@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
@@ -462,7 +462,7 @@ namespace Unify2D.Core
              var settings = new JsonSerializerSettings
              {
                  TypeNameHandling = TypeNameHandling.Auto,
-                 SerializationBinder = GameCore.Current.SerializationBinder
+                 SerializationBinder = GameCore.Current.SerializationBinder ?? GuidTypeBinder.Instance
              };
              GameObject go = JsonConvert.DeserializeObject<GameObject>(serializedText, settings);
              go.Initialize(GameCore.Current.Game);
@@ -540,6 +540,7 @@ namespace Unify2D.Core
             string json = JsonConvert.SerializeObject(original, new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.Auto,
+                SerializationBinder = GameCore.Current.SerializationBinder ?? GuidTypeBinder.Instance,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
 
@@ -547,6 +548,7 @@ namespace Unify2D.Core
             GameObject copy = JsonConvert.DeserializeObject<GameObject>(json, new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.Auto,
+                SerializationBinder = GameCore.Current.SerializationBinder ?? GuidTypeBinder.Instance,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
 

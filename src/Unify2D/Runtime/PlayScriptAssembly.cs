@@ -11,6 +11,7 @@ namespace Unify2D.Runtime
     {
         private AssemblyLoadContext _context;
         private Assembly _assembly;
+        private readonly GuidTypeBinder _binder = new();
         internal Type[] Types => _assembly.GetTypes();
 
         public PlayScriptAssembly(byte[] image)
@@ -18,15 +19,14 @@ namespace Unify2D.Runtime
             _context = new AssemblyLoadContext("Play-" + Guid.NewGuid(), isCollectible: true);
             using var stream = new MemoryStream(image, writable: false);
             _assembly = _context.LoadFromStream(stream);
+            _binder.SetScriptAssembly(_assembly);
         }
 
         public Type BindToType(string assemblyName, string typeName)
         {
             if (Guid.TryParse(typeName, out _))
             {
-                var registered = GuidTypeBinder.Instance.BindToType(assemblyName, typeName);
-                return _assembly.GetType(registered?.FullName ?? "") ?? registered
-                    ?? throw new JsonSerializationException($"Unknown component: {typeName}");
+                return _binder.BindToType(assemblyName, typeName);
             }
 
             string qualifiedName = string.IsNullOrEmpty(assemblyName) ? typeName : $"{typeName}, {assemblyName}";
@@ -38,12 +38,12 @@ namespace Unify2D.Runtime
 
         public void BindToName(Type type, out string assemblyName, out string typeName)
         {
-            assemblyName = type.Assembly.GetName().Name;
-            typeName = type.FullName;
+            _binder.BindToName(type, out assemblyName, out typeName);
         }
 
         public void Dispose()
         {
+            _binder.SetScriptAssembly(null);
             _assembly = null;
             _context?.Unload();
             _context = null;

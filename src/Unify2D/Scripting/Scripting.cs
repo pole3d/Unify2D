@@ -25,7 +25,9 @@ namespace Unify2D.Scripting
         long _reloadAt;
         Dictionary<string, string> _sources;
         byte[] _assemblyImage;
+        string _fingerprint;
         public bool HasCompilationErrors { get; private set; }
+        internal string LastError { get; private set; }
         const int ReloadDelayMilliseconds = 350;
         public event Action SourcesChanged;
 
@@ -65,7 +67,8 @@ namespace Unify2D.Scripting
             };
             _watcher.Changed += (_, e) =>
             {
-                if (string.Equals(Path.GetExtension(e.FullPath), ".cs", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(Path.GetExtension(e.FullPath), ".cs", StringComparison.OrdinalIgnoreCase) ||
+                    e.FullPath.EndsWith(".cs.meta", StringComparison.OrdinalIgnoreCase))
                     RequestReload();
             };
             // Include directory moves and atomic saves through temporary files.
@@ -112,13 +115,19 @@ namespace Unify2D.Scripting
             foreach (var path in Directory.GetFiles(_editor.AssetsPath, "*.cs", SearchOption.AllDirectories))
                 sources[Path.GetFullPath(path)] = File.ReadAllText(path);
 
-            // Check before parsing: watcher notifications often leave sources unchanged.
-            if (_sources != null && sources.Count == _sources.Count &&
-                sources.All(pair => _sources.TryGetValue(pair.Key, out var text) && text == pair.Value))
-                return;
-
             LastLoadUsedCache = false;
-            string fingerprint = ScriptAssemblyCache.Fingerprint(sources);
+            string fingerprint;
+            try { fingerprint = ScriptAssemblyCache.Fingerprint(sources); }
+            catch (InvalidDataException error)
+            {
+                HasCompilationErrors = true;
+                LastError = error.Message;
+                _fingerprint = null;
+                Debug.LogError(error.Message);
+                return;
+            }
+            if (_sources != null && fingerprint == _fingerprint) return;
+            _fingerprint = fingerprint;
             string cachePath = ScriptAssemblyCache.GetPath(_editor.AssetsPath);
             var cached = ScriptAssemblyCache.Read(cachePath, fingerprint, sources);
             if (cached != null)
@@ -127,6 +136,7 @@ namespace Unify2D.Scripting
                 {
                     ActivateAssembly(cached.Image, cached.TypesBySource);
                     HasCompilationErrors = false;
+                    LastError = null;
                     _sources = sources;
                     LastLoadUsedCache = true;
                     SourcesChanged?.Invoke();
@@ -150,13 +160,17 @@ namespace Unify2D.Scripting
             if (ruleErrors.Count > 0)
             {
                 HasCompilationErrors = true;
+                LastError = string.Join("\n", ruleErrors.Select(diagnostic => diagnostic.ToString()));
                 _sources = sources;
                 SourcesChanged?.Invoke();
                 foreach (var diagnostic in ruleErrors) Debug.LogError(diagnostic.ToString());
                 return;
             }
+            compilation = ScriptMetadata.AddIdentities(compilation, ScriptMetadata.ReadGuids(sources.Keys));
             EmitResult result = compilation.Emit(ms);
             HasCompilationErrors = !result.Success;
+            LastError = result.Success ? null : string.Join("\n", result.Diagnostics
+                .Where(diagnostic => diagnostic.IsWarningAsError || diagnostic.Severity == DiagnosticSeverity.Error));
             _sources = sources;
             SourcesChanged?.Invoke();
             if (!result.Success)
@@ -225,22 +239,15 @@ namespace Unify2D.Scripting
         private Dictionary<Type, Type> GetRenamedTypes(Dictionary<string, List<Type>> previousScriptTypes)
         {
             var renamedTypes = new Dictionary<Type, Type>();
-            var previousNames = previousScriptTypes.Values.SelectMany(types => types)
-                .Select(type => type.FullName).ToHashSet();
-            var currentNames = _types.Select(type => type.FullName).ToHashSet();
-
-            foreach (var source in previousScriptTypes)
+            foreach (var oldType in previousScriptTypes.Values.SelectMany(types => types).Distinct())
             {
-                if (!_scriptTypes.TryGetValue(source.Key, out var currentTypes)) continue;
-
-                var removed = source.Value.Where(type => !currentNames.Contains(type.FullName)).ToList();
-                var added = currentTypes.Where(type => !previousNames.Contains(type.FullName)).ToList();
-                // A unique replacement in the same source file identifies a renamed class.
-                // Never guess between several removed or added component classes.
-                if (removed.Count == 1 && added.Count == 1)
-                    renamedTypes[removed[0]] = added[0];
+                var identity = oldType.Assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
+                    .FirstOrDefault(attribute => attribute.Key.StartsWith(GuidTypeBinder.ScriptGuidPrefix, StringComparison.Ordinal) &&
+                        attribute.Value == oldType.FullName);
+                if (identity != null && GuidTypeBinder.Instance.TryGetScriptType(
+                    identity.Key.Substring(GuidTypeBinder.ScriptGuidPrefix.Length), out var newType))
+                    renamedTypes[oldType] = newType;
             }
-
             return renamedTypes;
         }
 
@@ -315,6 +322,7 @@ namespace Unify2D.Scripting
             Interlocked.Exchange(ref _reloadAt, 0);
             _sources = null;
             _assemblyImage = null;
+            _fingerprint = null;
             _scriptTypes.Clear();
             _types.Clear();
             _context?.Unload();

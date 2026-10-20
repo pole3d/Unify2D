@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -31,8 +31,8 @@ namespace Unify2D.Assets
         {
             if (IsLoaded) return;
 
-            base.Load();
             InstantiateGameObjectOnLoad();
+            base.Load();
         }
 
         public GameObject Instantiate(Scene scene)
@@ -72,6 +72,7 @@ namespace Unify2D.Assets
             JsonSerializerSettings settings = new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.Auto,
+                SerializationBinder = GameCore.Current.SerializationBinder ?? GuidTypeBinder.Instance,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
 

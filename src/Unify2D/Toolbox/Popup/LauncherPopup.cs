@@ -20,6 +20,8 @@ namespace Unify2D.Toolbox
             DrawExistingProject(editor);
             ImGui.NewLine();
             DrawNewProject(editor);
+            if (!string.IsNullOrEmpty(editor.ProjectLoadError))
+                ImGui.TextWrapped(editor.ProjectLoadError);
 
         }
 
@@ -95,9 +97,9 @@ namespace Unify2D.Toolbox
 
         }
 
-        private void PreloadProject()
+        private bool PreloadProject()
         {
-            _editor.PreloadProject();
+            return _editor.PreloadProject();
 
         }
 
@@ -105,7 +107,7 @@ namespace Unify2D.Toolbox
         {
             _editor.Settings.Data.CurrentProjectPath = path;
             
-            PreloadProject();
+            if (!PreloadProject()) return;
 
             LoadProject();
 

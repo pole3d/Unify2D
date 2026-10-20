@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 
@@ -26,7 +26,7 @@ namespace Unify2D.Core
         public void PrefabInstancesToGameObjects()
         {
             foreach (PrefabInstance prefabInstance in _prefabInstances) {
-                GameObject go = JsonConvert.DeserializeObject<GameObject>(File.ReadAllText($"{GameCore.Current.Game.AssetsPath}{prefabInstance.PrefabAssetPath}")); //Don't use GameObject.Instantiate, deserialized gameObjects must not be added to the current core yet
+                GameObject go = JsonConvert.DeserializeObject<GameObject>(File.ReadAllText($"{GameCore.Current.Game.AssetsPath}{prefabInstance.PrefabAssetPath}"), new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto, SerializationBinder = GameCore.Current.SerializationBinder ?? GuidTypeBinder.Instance }); //Don't use GameObject.Instantiate, deserialized gameObjects must not be added to the current core yet
                 go.ApplyOverridesFromPrefabInstance(prefabInstance);
                 _gameObjects.Add(go);
             }

@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ public class GuidTypeBinder : ISerializationBinder
     // TODO : move this from here
     public GuidTypeBinder()
     {
-        Register(typeof(SpriteRenderer), "12345678-1234-1234-1234-123456789abc");
+        Register(typeof(SpriteRenderer), SpriteRendererGuid);
     }
 
     private readonly Dictionary<string, Type> _guidToType = new();
@@ -23,6 +23,12 @@ public class GuidTypeBinder : ISerializationBinder
     private readonly Dictionary<Assembly, Dictionary<string, Type>> _typeNames = new();
     private Assembly _scriptAssembly;
     private bool _triedScriptAssembly;
+    public const string ScriptGuidPrefix = "Unify2D.ScriptGuid.";
+    public const string SpriteRendererGuid = "12345678-1234-1234-1234-123456789abc";
+    private readonly Dictionary<string, Type> _scriptGuids = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, string> _scriptNames = new(StringComparer.Ordinal);
+    public bool TryGetScriptGuid(string fullName, out string guid) => _scriptNames.TryGetValue(fullName, out guid);
+    public bool TryGetScriptType(string guid, out Type type) => _scriptGuids.TryGetValue(guid, out type);
 
     public void SetScriptAssembly(Assembly assembly)
     {
@@ -31,6 +37,20 @@ public class GuidTypeBinder : ISerializationBinder
         _typeNames.Clear();
         _scriptAssembly = assembly;
         _triedScriptAssembly = assembly != null;
+        _scriptGuids.Clear();
+        _scriptNames.Clear();
+        if (assembly == null) return;
+        foreach (var metadata in assembly.GetCustomAttributes<AssemblyMetadataAttribute>())
+        {
+            if (!metadata.Key.StartsWith(ScriptGuidPrefix, StringComparison.Ordinal)) continue;
+            string guid = metadata.Key.Substring(ScriptGuidPrefix.Length);
+            var type = assembly.GetType(metadata.Value, throwOnError: true);
+            if (!Guid.TryParse(guid, out var parsed) || parsed == Guid.Empty ||
+                !type.IsSubclassOf(typeof(Unify2D.Core.Component)))
+                throw new JsonSerializationException($"Invalid script identity: {metadata.Key}");
+            _scriptGuids.Add(parsed.ToString("D"), type);
+            _scriptNames.Add(type.FullName, parsed.ToString("D"));
+        }
     }
 
     private Type FindType(Assembly assembly, string name)
@@ -68,6 +88,8 @@ public class GuidTypeBinder : ISerializationBinder
             return type;
         }
 
+        if (_scriptGuids.TryGetValue(guid, out type)) return type;
+
         var key = (assemblyName ?? string.Empty, guid);
         if (_resolvedTypes.TryGetValue(key, out type)) return type;
         string simpleAssemblyName = string.IsNullOrEmpty(assemblyName)
@@ -81,11 +103,14 @@ public class GuidTypeBinder : ISerializationBinder
             string path = Path.Combine(AppContext.BaseDirectory, "GameAssembly.dll");
             try
             {
-                if (File.Exists(path)) _scriptAssembly = Assembly.LoadFrom(path);
+                if (File.Exists(path)) SetScriptAssembly(Assembly.LoadFrom(path));
             }
             catch (IOException) { }
             catch (BadImageFormatException) { }
         }
+        if (_scriptGuids.TryGetValue(guid, out type)) return type;
+        if (Guid.TryParse(guid, out _))
+            throw new JsonSerializationException($"Unknown component GUID: {guid}. Restore its script and .meta.");
         if (_scriptAssembly != null &&
             (simpleAssemblyName == null || simpleAssemblyName == _scriptAssembly.GetName().Name))
         {
@@ -118,13 +143,13 @@ public class GuidTypeBinder : ISerializationBinder
     public void BindToName(Type serializedType, out string assemblyName, out string guid)
     {
         assemblyName = null;
-        if (_typeToGuid.TryGetValue(serializedType, out guid))
-        {
-
-        }
-        else
-        {
-            throw new JsonSerializationException($"Type not registered: {serializedType.FullName}");
-        }
+        if (serializedType.Assembly == _scriptAssembly &&
+            _scriptNames.TryGetValue(serializedType.FullName, out guid)) return;
+        if (_typeToGuid.TryGetValue(serializedType, out guid)) return;
+        if (serializedType.Assembly.GetName().Name == "GameAssembly" &&
+            serializedType.IsSubclassOf(typeof(Unify2D.Core.Component)))
+            throw new JsonSerializationException($"Script has no .meta identity: {serializedType.FullName}");
+        assemblyName = serializedType.Assembly.GetName().Name;
+        guid = serializedType.FullName;
     }
 }

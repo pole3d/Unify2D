@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -84,9 +84,9 @@ namespace Unify2D.Assets
                     nameSb.Append('1');
             }
 
-            string guid = new Guid().ToString();
             string filePath = Path.Combine(_editor.AssetsPath, $"{nameSb}{extension}");
             File.Create(filePath).Close();
+            string guid = UnifyCore.AssetMetadata.GetOrCreateGuid(filePath);
 
             // Create the asset and initialize its content
             Asset asset = new Asset(guid, nameSb.ToString(), extension, "\\");
