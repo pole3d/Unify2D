@@ -25,6 +25,21 @@ namespace Unify2D.Toolbox
         {
             base.Initialize(editor);
             editor.Scripting.SourcesChanged += RefreshSource;
+            Selection.Changed += OnSelectionChanged;
+        }
+
+        private void OnSelectionChanged(object selected)
+        {
+            if (selected is Asset asset && asset.AssetContent is ScriptAssetContent)
+                SetObject(asset);
+        }
+
+        public override void Destroy()
+        {
+            Selection.Changed -= OnSelectionChanged;
+            if (_editor?.Scripting != null)
+                _editor.Scripting.SourcesChanged -= RefreshSource;
+            base.Destroy();
         }
 
         public void SetObject(Asset asset)

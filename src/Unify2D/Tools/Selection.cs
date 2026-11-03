@@ -1,6 +1,7 @@
 using ImGuiNET;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using System;
 using System.Linq;
 using Unify2D.Assets;
 using Unify2D.Core;
@@ -14,6 +15,9 @@ namespace Unify2D
     /// </summary>
     public static class Selection
     {
+        public static event Action<object> Changed;
+        internal static event Action<GameObject> GameObjectPicked;
+
         enum SelectedState
         {
             None,
@@ -61,34 +65,14 @@ namespace Unify2D
                 return;
             }
 
-            if (_asset != null)
-            {
-                if (_asset.AssetContent is ScriptAssetContent)
-                {
-                    GameEditor.Instance.ScriptToolbox.SetObject(_asset);
-                    return;
-                }
-            }
-
-            if (_gameObject != null)
-            {
-
-            }
-
-            if (GameEditor.Instance.InspectorToolbox != null)
-            {
-                GameEditor.Instance.InspectorToolbox.SetObject(obj);
-            }
+            Changed?.Invoke(obj);
         }
         public static void UnSelectObject()
         {
             _selectState = SelectedState.None;
             Selected = null;
 
-            if (GameEditor.Instance.InspectorToolbox != null)
-            {
-                GameEditor.Instance.InspectorToolbox.SetObject(null);
-            }
+            Changed?.Invoke(null);
         }
 
         internal static void Update(GameTime gameTime)
@@ -116,6 +100,7 @@ namespace Unify2D
                             }
 
                             SelectObject(item);
+                            GameObjectPicked?.Invoke(item);
                             _selectState = SelectedState.Select;
                             _dragOffset = GameEditor.Instance.GetWorldMousePosition() - item.Position;
 

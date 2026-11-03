@@ -30,5 +30,9 @@ namespace Unify2D.Toolbox
         public virtual void Update(GameTime gameTime)
         {
         }
+
+        public virtual void Destroy()
+        {
+        }
     }
 }

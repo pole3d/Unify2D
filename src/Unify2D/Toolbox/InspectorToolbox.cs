@@ -49,6 +49,21 @@ namespace Unify2D.Toolbox
 
             //_propertyViewers.Add(typeof(SpriteFont), new SpriteFontPropertyViewer());
             _propertyViewers.Add(typeof(Texture2D), new Texture2DPropertyViewer());
+            Selection.Changed += OnSelectionChanged;
+        }
+
+        private void OnSelectionChanged(object selected)
+        {
+            if (selected is Asset asset && asset.AssetContent is ScriptAssetContent)
+                return;
+
+            SetObject(selected);
+        }
+
+        public override void Destroy()
+        {
+            Selection.Changed -= OnSelectionChanged;
+            base.Destroy();
         }
 
         public void SetObject(object obj)
