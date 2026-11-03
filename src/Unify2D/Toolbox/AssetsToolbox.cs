@@ -633,14 +633,17 @@ namespace Unify2D.Toolbox
 
         private void DeleteFile(string path)
         {
+            string newPath = path + ".meta";
 
             if (path.EndsWith("cs"))
             {
-                string newPath = path + ".meta";
-                File.Delete(newPath);
+                if (File.Exists(newPath))
+                    File.Delete(newPath);
             }
+
             File.Delete(path);
         }
+
 
         private static void ShowExplorer(string path)
         {
