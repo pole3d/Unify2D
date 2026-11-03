@@ -10,6 +10,7 @@ using Unify2D.Core;
 using Unify2D.Tools;
 using UnifyCore;
 using Microsoft.Xna.Framework;
+using System.Numerics;
 
 namespace Unify2D.Toolbox
 {
@@ -41,6 +42,7 @@ namespace Unify2D.Toolbox
         private const string CreateNewScriptButtonLabel = "Create New Script";
         private const string CreateNewFolderButtonLabel = "Create New Folder";
         private const string AssetDragDropPayloadType = "ASSET";
+        private const string AssetsListChildLabel = "assetList";
 
         private FileSystemWatcher _watcher;
         bool _disableDeleteWatcher;
@@ -242,6 +244,9 @@ namespace Unify2D.Toolbox
         {
             ImGui.Begin("Assets");
 
+            ImGui.BeginChild(AssetsListChildLabel);
+            ImGui.BeginGroup();
+
             if (ImGui.Button(ShowExplorerButtonLabel, new System.Numerics.Vector2(-1, 0)))
             {
                 ShowExplorer(string.Empty);
@@ -249,7 +254,7 @@ namespace Unify2D.Toolbox
 
             if (ImGui.BeginPopupContextWindow())
             {
-                DeselectedAssets();
+                //DeselectedAssets();
 
                 if (ImGui.Button(CreateNewScriptButtonLabel))
                 {
@@ -277,6 +282,26 @@ namespace Unify2D.Toolbox
 
             if (!ImGui.IsMouseDown(ImGuiMouseButton.Left))
                 _pendingClickAsset = null;
+
+
+
+
+            // Only a click starting in empty space clears selection, not a drop release.
+            System.Numerics.Vector2 remainingSpace = ImGui.GetContentRegionAvail();
+
+            if (remainingSpace.X > 0 && remainingSpace.Y > 0)
+            {
+                ImGui.InvisibleButton("##asset_empty_space", remainingSpace);
+                if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+                {
+                    Selection.UnSelectObject();
+                    _selectedAssets.Clear();
+                }
+            }
+
+            ImGui.EndGroup();
+            GameToolbox.TryDragAndDrop(_editor);
+            ImGui.EndChild();
 
             ImGui.End();
         }
@@ -612,7 +637,6 @@ namespace Unify2D.Toolbox
 
             if (TryGetAssetFromPath(fullPath, out Asset asset))
             {
-                Debug.Log("Removing asset : " + fullPath);
                 if (asset.IsDirectory)
                 {
                     string[] files = Directory.GetFiles(path);

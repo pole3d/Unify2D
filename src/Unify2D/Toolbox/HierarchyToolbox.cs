@@ -177,7 +177,7 @@ namespace Unify2D.Toolbox
 
                 if (ImGui.IsItemClicked())
                 {
-                    //SelectGO(go);
+                    SelectGO(go);
                 }
 
 
