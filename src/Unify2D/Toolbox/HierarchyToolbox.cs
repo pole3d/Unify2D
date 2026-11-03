@@ -85,7 +85,10 @@ namespace Unify2D.Toolbox
             {
                 ImGui.InvisibleButton("##hierarchy_empty_space", remainingSpace);
                 if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+                {
                     Selection.UnSelectObject();
+                    _selectedObjects.Clear();
+                }
             }
 
             ImGui.EndGroup();
@@ -147,7 +150,6 @@ namespace Unify2D.Toolbox
                 }
                 if (ImGui.IsItemClicked())
                 {
-                    Debug.Log("AAAAAAAAAAAAAAAAAAH");
                     SelectGO(go);
                 }
 
@@ -175,7 +177,6 @@ namespace Unify2D.Toolbox
 
                 if (ImGui.IsItemClicked())
                 {
-                    //Debug.Log("Selecting Object");
                     //SelectGO(go);
                 }
 
@@ -215,7 +216,6 @@ namespace Unify2D.Toolbox
             {
                 if (ImGui.Button(CreatePrefabButtonLabel))
                 {
-                    // Prefab creation Logic
                     Asset prefabAsset = GameEditor.Instance.EditorAssetManager.CreateAsset<PrefabAssetContent>(go.Name);
                     ((PrefabAssetContent)prefabAsset.AssetContent).Save(go);
 
@@ -236,13 +236,11 @@ namespace Unify2D.Toolbox
         {
             if (!ImGui.GetIO().KeyCtrl)
             {
-                Debug.Log("Clearing list");
                 _selectedObjects.Clear();
             }
 
             if (!_selectedObjects.Contains(go))
             {
-                Debug.Log("Adding to List");
                 _selectedObjects.Add(go);
             }
             Selection.SelectObject(go);
@@ -251,13 +249,11 @@ namespace Unify2D.Toolbox
 
         private void DestroyGameObjects()
         {
-            Debug.Log("Destroying...");
             List<GameObject> objectsToRemove = new List<GameObject>(_selectedObjects);
 
             int totalObjects = objectsToRemove.Count;
             for (int n = totalObjects - 1; n >= 0; n--)
             {
-                Debug.Log(objectsToRemove[n].ToString());
                 _goToDestroy = objectsToRemove[n];
                 SceneManager.Instance.CurrentScene.DestroyImmediate(_goToDestroy);
             }
