@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Unify2D.Assets;
@@ -34,6 +35,11 @@ namespace Unify2D.Toolbox
         private const string SavePrefabButtonLabel = "Save Prefab";
         private const string ApplyPrefabButtonLabel = "Apply to Prefab";
 
+        private bool _isLocked = false;
+        private Texture2D _lockTexture;
+        private Texture2D _unlockTexture;
+        private IntPtr _lockTexturePtr = IntPtr.Zero;
+        private IntPtr _unlockTexturePtr = IntPtr.Zero;
 
         public override void Initialize(GameEditor editor)
         {
@@ -52,6 +58,12 @@ namespace Unify2D.Toolbox
         }
 
         public void SetObject(object obj)
+        {
+            if (_isLocked) return;
+            SetObjectInternal(obj);
+        }
+
+        private void SetObjectInternal(object obj)
         {
             UnSelect();
 
@@ -122,6 +134,20 @@ namespace Unify2D.Toolbox
         public void ShowGameObject()
         {
             ImGui.BeginGroup();
+
+
+            /// Add button lock/unlock inspector
+            
+            CheckLockTextureButton();
+            IntPtr lockIcon = _isLocked ? _lockTexturePtr : _unlockTexturePtr;
+            if (lockIcon != IntPtr.Zero)
+            {
+                if (ImGui.ImageButton(lockIcon, new System.Numerics.Vector2(16, 16)))
+                {
+                    _isLocked = !_isLocked;
+                }
+            }
+
             if (CurrentPrefabAsset != null)
             {
                 // Add a button to save the prefab
@@ -296,6 +322,55 @@ namespace Unify2D.Toolbox
 
                 Debug.Log($"Prefab {GameObject.Name} saved from hierarchy!");
                 Console.WriteLine($"Prefab {gameObject.Name} saved from hierarchy!");
+            }
+        }
+
+        public string GetImagePath(string filename)
+        {
+            string basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", filename);
+            if (File.Exists(basePath)) return basePath;
+
+            string secondaryPath = Path.Combine(Directory.GetCurrentDirectory(), "Images", filename);
+            if (File.Exists(secondaryPath)) return secondaryPath;
+
+            string lastPath = Path.Combine(Directory.GetCurrentDirectory(), "bin", "Debug", "Unify2D", "Images", filename);
+            if (File.Exists(lastPath)) return lastPath;
+
+            return basePath;
+        }
+
+        private void CheckLockTextureButton()
+        {
+            if (_lockTexturePtr != IntPtr.Zero || _editor?.GuiRenderer == null) return;
+
+            var gd = _editor.GraphicsDevice ?? GameCore.Current?.GraphicsDevice;
+
+            if (gd == null) return;
+
+            try
+            {
+                string lockPath = GetImagePath("LockInspector.png");
+                if (File.Exists(lockPath))
+                {
+                    using var lockImage = File.OpenRead(lockPath);
+                    _lockTexture = Texture2D.FromStream(gd, lockImage);
+                    _lockTexturePtr = _editor.GuiRenderer.BindTexture(_lockTexture);
+                }
+
+                string unlockPath = GetImagePath("UnlockInspector.png");
+                if (File.Exists(unlockPath))
+                {
+                    using var unlockImage = File.OpenRead(unlockPath);
+                    _unlockTexture = Texture2D.FromStream(gd, unlockImage);
+                    _unlockTexturePtr = _editor.GuiRenderer.BindTexture(_unlockTexture);
+                }
+
+                if (_unlockTexturePtr == IntPtr.Zero && _lockTexturePtr != IntPtr.Zero) _unlockTexturePtr = _lockTexturePtr;
+                if (_lockTexturePtr == IntPtr.Zero && _unlockTexturePtr != IntPtr.Zero) _lockTexturePtr = _unlockTexturePtr;
+            }
+            catch (Exception ex)
+            {
+                Debug.Log($"ERROR texture (lock/unlock button)");
             }
         }
     }
