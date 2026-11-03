@@ -17,9 +17,9 @@ namespace Unify2D.Assets
 
         public override void Load()
         {
-            if (string.IsNullOrEmpty(_asset.Path) == false)
-                RawAsset = GameCore.Current.ResourcesManager.GetFont(_asset.FullPath);//test
-            else
+            //if (string.IsNullOrEmpty(_asset.Path) == false)
+            //    RawAsset = GameCore.Current.ResourcesManager.GetFont(_asset.FullPath);//test
+            //else
             {
                 RawAsset = null;
             }

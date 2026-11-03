@@ -10,7 +10,7 @@ namespace Unify2D.Toolbox
     {
         private const string ArialFontPath = @"C:\Windows\Fonts\arial.ttf";
         
-        protected override SpriteFont GetAssetFromPath(string path)
+        protected override SpriteFont GetAssetFromPath(string path) 
         {
             TtfFontBakerResult fontBakeResult = TtfFontBaker.Bake(File.ReadAllBytes(path),
                 25,

@@ -1,0 +1,301 @@
+﻿using FontStashSharp.Interfaces;
+using System;
+
+#if MONOGAME || FNA || KNI || XNA
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+#elif STRIDE
+using Stride.Core.Mathematics;
+using Stride.Graphics;
+#else
+using System.Drawing;
+using System.Numerics;
+#endif
+
+namespace FontStashSharp
+{
+	/// <summary>
+	/// A sprite font that dynamically renders and caches glyphs on-demand into texture atlases.
+	/// Supports multiple font sources, glyph effects, and text shaping.
+	/// </summary>
+	public partial class DynamicSpriteFont : RealFontBase
+	{
+		private const int SDFPadding = 2;
+
+		private class GlyphStorage
+		{
+			public Int32Map<DynamicFontGlyph> GlyphsByCodepoints = new Int32Map<DynamicFontGlyph>();
+			public Int32Map<DynamicFontGlyph> GlyphsByIds = new Int32Map<DynamicFontGlyph>();
+			public FontSystemEffect Effect;
+			public int EffectAmount;
+		}
+
+		private readonly Int32Map<GlyphStorage> _storages = new Int32Map<GlyphStorage>();
+		private GlyphStorage _lastStorage;
+		private readonly Int32Map<int> Kernings = new Int32Map<int>();
+		private FontMetrics[] IndexedMetrics;
+		private readonly FontSystem _fontSystem;
+
+		/// <inheritdoc/>
+		public override FontSystem FontSystem => _fontSystem;
+
+		/// <inheritdoc/>
+		public override FontRasterizationMode FontRasterizationMode => FontSystem.FontRasterizationMode;
+
+		/// <inheritdoc/>
+		public override Point TextureSize => new Point(_fontSystem.TextureWidth, _fontSystem.TextureHeight);
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DynamicSpriteFont"/> class.
+		/// </summary>
+		/// <param name="system">The font system managing this font. Cannot be null.</param>
+		/// <param name="size">The font size in points.</param>
+		/// <param name="lineHeight">The line height in pixels.</param>
+		internal DynamicSpriteFont(FontSystem system, float size, int lineHeight) : base(size, lineHeight)
+		{
+			if (system == null)
+			{
+				throw new ArgumentNullException(nameof(system));
+			}
+
+			_fontSystem = system;
+
+			_shapedTextCache = new ShapedTextCache(system.ShapedTextCacheSize);
+		}
+
+		internal Int32Map<DynamicFontGlyph> GetGlyphs(FontSystemEffect effect, int effectAmount)
+		{
+			return GetGlyphStorage(effect, effectAmount).GlyphsByCodepoints;
+		}
+
+		private GlyphStorage GetGlyphStorage(FontSystemEffect effect, int effectAmount)
+		{
+			if (_lastStorage != null && _lastStorage.Effect == effect && _lastStorage.EffectAmount == effectAmount)
+			{
+				return _lastStorage;
+			}
+
+			var key = (int)effect << 16 | effectAmount;
+
+			GlyphStorage result;
+			if (!_storages.TryGetValue(key, out result))
+			{
+				result = new GlyphStorage
+				{
+					Effect = effect,
+					EffectAmount = effectAmount
+				};
+
+				_storages[key] = result;
+			}
+
+			_lastStorage = result;
+
+			return result;
+		}
+
+		private DynamicFontGlyph GetGlyphByCodepointWithoutBitmap(int codepoint, FontSystemEffect effect, int effectAmount)
+		{
+			if (effect == FontSystemEffect.None)
+			{
+			}
+			else if (effectAmount == 0)
+			{
+				effect = FontSystemEffect.None;
+			}
+
+			var storage = GetGlyphs(effect, effectAmount);
+
+			DynamicFontGlyph glyph;
+			if (storage.TryGetValue(codepoint, out glyph))
+			{
+				return glyph;
+			}
+
+			int fontSourceIndex;
+			var g = FontSystem.GetCodepointIndex(codepoint, out fontSourceIndex);
+			if (g == null)
+			{
+				storage[codepoint] = null;
+				return null;
+			}
+
+			var font = FontSystem.FontSources[fontSourceIndex];
+
+			int advance, x0, y0, x1, y1;
+			font.GetGlyphMetrics(g.Value, FontSize, out advance, out x0, out y0, out x1, out y1);
+
+			var gw = x1 - x0;
+			var gh = y1 - y0;
+
+			if (FontRasterizationMode == FontRasterizationMode.Standard)
+			{
+				gw += effectAmount * 2;
+				gh += effectAmount * 2;
+			}
+			else
+			{
+				gw += SDFPadding * 2;
+				gh += SDFPadding * 2;
+			}
+
+			glyph = new DynamicFontGlyph
+			{
+				Codepoint = codepoint,
+				Id = g.Value,
+				FontSize = FontSize,
+				FontSourceIndex = fontSourceIndex,
+				RenderOffset = new Point(x0, y0),
+				Size = new Point(gw, gh),
+				XAdvance = advance,
+				Effect = effect,
+				EffectAmount = effectAmount,
+				FontRasterizationMode = FontRasterizationMode,
+				SDFPadding = SDFPadding
+			};
+
+			storage[codepoint] = glyph;
+
+			return glyph;
+		}
+
+#if MONOGAME || FNA || KNI || XNA || STRIDE
+		private DynamicFontGlyph GetGlyphByCodepointInternal(GraphicsDevice device, int codepoint, FontSystemEffect effect, int effectAmount)
+#else
+		private DynamicFontGlyph GetGlyphByCodepointInternal(ITexture2DManager device, int codepoint, FontSystemEffect effect, int effectAmount)
+#endif
+		{
+			var glyph = GetGlyphByCodepointWithoutBitmap(codepoint, effect, effectAmount);
+			if (glyph == null)
+			{
+				return null;
+			}
+
+			if (device == null || glyph.Texture != null)
+				return glyph;
+
+			FontSystem.RenderGlyphOnAtlas(device, glyph);
+
+			return glyph;
+		}
+
+#if MONOGAME || FNA || KNI || XNA || STRIDE
+		private DynamicFontGlyph GetGlyphByCodepoint(GraphicsDevice device, int codepoint, FontSystemEffect effect, int effectAmount)
+#else
+		private DynamicFontGlyph GetGlyphByCodepoint(ITexture2DManager device, int codepoint, FontSystemEffect effect, int effectAmount)
+#endif
+		{
+			var result = GetGlyphByCodepointInternal(device, codepoint, effect, effectAmount);
+			if (result == null && FontSystem.DefaultCharacter != null)
+			{
+				result = GetGlyphByCodepointInternal(device, FontSystem.DefaultCharacter.Value, effect, effectAmount);
+			}
+
+			return result;
+		}
+
+#if MONOGAME || FNA || KNI || XNA || STRIDE
+		/// <summary>
+		/// Gets a glyph for the specified codepoint with optional effects applied.
+		/// </summary>
+		/// <param name="device">The graphics device</param>
+		/// <param name="codepoint">The Unicode codepoint for the character</param>
+		/// <param name="effect">The font system effect to apply</param>
+		/// <param name="effectAmount">The amount of the effect to apply</param>
+		/// <returns>The font glyph for the specified codepoint</returns>
+		protected internal override FontGlyph GetGlyph(GraphicsDevice device, int codepoint, FontSystemEffect effect, int effectAmount)
+#else
+		/// <summary>
+		/// Gets a glyph for the specified codepoint with optional effects applied.
+		/// </summary>
+		/// <param name="device">The texture manager</param>
+		/// <param name="codepoint">The Unicode codepoint for the character</param>
+		/// <param name="effect">The font system effect to apply</param>
+		/// <param name="effectAmount">The amount of the effect to apply</param>
+		/// <returns>The font glyph for the specified codepoint</returns>
+		protected internal override FontGlyph GetGlyph(ITexture2DManager device, int codepoint, FontSystemEffect effect, int effectAmount)
+#endif
+		{
+			return GetGlyphByCodepoint(device, codepoint, effect, effectAmount);
+		}
+
+		private void GetMetrics(int fontSourceIndex, out FontMetrics result)
+		{
+			if (IndexedMetrics == null || IndexedMetrics.Length != FontSystem.FontSources.Count)
+			{
+				IndexedMetrics = new FontMetrics[FontSystem.FontSources.Count];
+				for (var i = 0; i < IndexedMetrics.Length; ++i)
+				{
+					int ascent, descent, lineHeight;
+					FontSystem.FontSources[i].GetMetricsForSize(FontSize, out ascent, out descent, out lineHeight);
+
+					IndexedMetrics[i] = new FontMetrics(ascent, descent, lineHeight);
+				}
+			}
+
+			result = IndexedMetrics[fontSourceIndex];
+		}
+
+		internal override void PreDraw(TextSource source, FontSystemEffect effect, int effectAmount,
+			out int ascent, out int lineHeight)
+		{
+			// Determine ascent and lineHeight from first character
+			ascent = 0;
+			lineHeight = 0;
+			while (true)
+			{
+				int codepoint;
+				if (!source.GetNextCodepoint(out codepoint))
+				{
+					break;
+				}
+
+				var glyph = GetGlyphByCodepoint(null, codepoint, effect, effectAmount);
+				if (glyph == null)
+				{
+					continue;
+				}
+
+				FontMetrics metrics;
+				GetMetrics(glyph.FontSourceIndex, out metrics);
+				ascent = metrics.Ascent;
+				lineHeight = metrics.LineHeight;
+				break;
+			}
+
+			source.Reset();
+		}
+
+		private static int GetKerningsKey(int glyph1, int glyph2)
+		{
+			return ((glyph1 << 16) | (glyph1 >> 16)) ^ glyph2;
+		}
+
+		internal override float GetKerning(FontGlyph glyph, FontGlyph prevGlyph)
+		{
+			if (!FontSystem.UseKernings)
+			{
+				return 0.0f;
+			}
+
+			var dynamicGlyph = (DynamicFontGlyph)glyph;
+			var dynamicPrevGlyph = (DynamicFontGlyph)prevGlyph;
+			if (dynamicGlyph.FontSourceIndex != dynamicPrevGlyph.FontSourceIndex)
+			{
+				return 0.0f;
+			}
+
+			var key = GetKerningsKey(prevGlyph.Id, dynamicGlyph.Id);
+			var result = 0;
+			if (!Kernings.TryGetValue(key, out result))
+			{
+				var fontSource = FontSystem.FontSources[dynamicGlyph.FontSourceIndex];
+				result = fontSource.GetGlyphKernAdvance(prevGlyph.Id, dynamicGlyph.Id, dynamicGlyph.FontSize);
+
+				Kernings[key] = result;
+			}
+
+			return result;
+		}
+	}
+}

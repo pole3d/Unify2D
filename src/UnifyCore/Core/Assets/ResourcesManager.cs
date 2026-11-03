@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Unify2D.Core;
+using FontStashSharp;
+using SpriteFontPlus;
 
 namespace UnifyCore
 {
@@ -14,6 +16,7 @@ namespace UnifyCore
         Dictionary<string, Texture2D> _textures = new Dictionary<string, Texture2D>();
 
         private SpriteFont _defaultFont;
+
 
         private Microsoft.Xna.Framework.Content.ContentManager _content;
 
@@ -51,14 +54,31 @@ namespace UnifyCore
         }
 
         public SpriteFont GetFont(string path)
+
         {
+
+
             if (string.IsNullOrEmpty(path))
                 return _defaultFont;
+
 
             if (_fonts.TryGetValue(path, out SpriteFont font))
                 return font;
 
-            font = _content.Load<SpriteFont>($"./Assets/{path}");
+            //font = _content.Load<SpriteFont>($"./Assets/{path}");
+
+            TtfFontBakerResult bakedFont = TtfFontBaker.Bake(
+           File.ReadAllBytes(Path.Combine(_content.RootDirectory, "Assets", path.TrimStart('\\', '/'))),
+           25,
+           1024,
+           1024,
+           new[]
+           {
+        CharacterRange.BasicLatin,
+        CharacterRange.Latin1Supplement
+           });
+
+            font = bakedFont.CreateSpriteFont(GameCore.Current.Game.GraphicsDevice);
 
             _fonts.Add(path, font);
 
