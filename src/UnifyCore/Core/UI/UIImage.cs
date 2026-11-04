@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using System;
@@ -13,9 +13,7 @@ public class UIImage : UIComponent
     [JsonIgnore]
     public Texture2D Texture { get; set; }
     public Color Color { get; set; } = Color.White;
-
     [JsonProperty] private string _imageGuid;
-
     public void SetAsset(GameAsset asset)
     {
         _imageGuid = asset.GUID;
@@ -36,14 +34,23 @@ public class UIImage : UIComponent
     }
 
 
+    public override void Initialize(GameObject go)
+    {
+        base.Initialize(go);
+
+        Texture = GameCore.Current.ResourcesManager.GetTexture(null);
+        UpdateBounds();
+        OnAnchorUpdate += UpdateBounds;
+    }
+
+
     public override void Load(Game game)
     {
         base.Load(game);
 
-        var asset = GameCore.Current.AssetsManager.GetAsset(_imageGuid);
+        GameAsset asset = GameCore.Current.AssetsManager.GetAsset(_imageGuid);
         if (asset == null)
         {
-
             Debug.LogError($"Can't load image {_imageGuid} {_gameObject.Name}");
             return;
         }

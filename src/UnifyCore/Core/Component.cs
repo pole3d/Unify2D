@@ -1,5 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
+using System;
+using System.IO;
+
 
 namespace Unify2D.Core
 {
@@ -53,15 +56,28 @@ namespace Unify2D.Core
 
         }
 
+        public virtual string GetImagePath(string filename)
+        {
+            string basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", filename);
+            if (File.Exists(basePath)) return basePath;
+
+            string secondaryPath = Path.Combine(Directory.GetCurrentDirectory(), "Images", filename);
+            if (File.Exists(secondaryPath)) return secondaryPath;
+
+            string lastPath = Path.Combine(Directory.GetCurrentDirectory(), "bin", "Debug", "Unify2D", "Images", filename);
+            if (File.Exists(lastPath)) return lastPath;
+
+            return basePath;
+        }
 
         internal virtual void Destroy()
         {
-            
+
         }
 
         internal virtual void DrawGizmo()
         {
-            
+
         }
     }
 }
