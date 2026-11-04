@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
 using Unify2D.Assets;
@@ -150,10 +151,9 @@ namespace Unify2D.Toolbox
                 base_flags = ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.Leaf |
                              ImGuiTreeNodeFlags.NoTreePushOnOpen;
 
-                if (Selection.Selected == go)
-                {
+                //Affect color to selected object
+                if (_selectedObjects.Contains(go))
                     base_flags |= ImGuiTreeNodeFlags.Selected;
-                }
 
                 // Add cyan color if prefab
                 if (go.Tag is PrefabAssetContent)

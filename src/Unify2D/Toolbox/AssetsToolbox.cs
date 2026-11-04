@@ -324,7 +324,7 @@ namespace Unify2D.Toolbox
                 base_flags = ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.Leaf |
                              ImGuiTreeNodeFlags.NoTreePushOnOpen; // ImGuiTreeNodeFlags_Bullet
 
-                if (Selection.Selected == node)
+                if (_selectedAssets.Contains(node))
                     base_flags |= ImGuiTreeNodeFlags.Selected;
 
                 if (node.AssetContent is PrefabAssetContent)
