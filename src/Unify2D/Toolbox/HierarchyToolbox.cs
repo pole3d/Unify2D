@@ -17,6 +17,8 @@ namespace Unify2D.Toolbox
         //  private int _currentIndex = 0;
         private GameObject _goToDestroy = null;
         private List<GameObject> _selectedObjects = new();
+        private GameObject _objectToReveal;
+        private readonly HashSet<GameObject> _parentsToReveal = new();
 
         private const string CreatePrefabButtonLabel = "Create Prefab";
         private const string DestroyButtonLabel = "Destroy";
@@ -29,6 +31,23 @@ namespace Unify2D.Toolbox
         public void SetCore(GameCoreViewer coreViewer)
         {
             _tag = coreViewer;
+        }
+
+        public override void Initialize(GameEditor editor)
+        {
+            base.Initialize(editor);
+            Selection.GameObjectPicked += Reveal;
+        }
+
+        public override void Destroy()
+        {
+            Selection.GameObjectPicked -= Reveal;
+            base.Destroy();
+        }
+
+        private void Reveal(GameObject gameObject)
+        {
+            _objectToReveal = gameObject;
         }
 
         public override void Draw()
@@ -66,6 +85,11 @@ namespace Unify2D.Toolbox
             ImGui.BeginChild(GameObjectListChildLabel);
             ImGui.BeginGroup();
 
+            _parentsToReveal.Clear();
+            if (_objectToReveal != Selection.Selected)
+                _objectToReveal = null;
+            for (var parent = _objectToReveal?.Parent; parent != null; parent = parent.Parent)
+                _parentsToReveal.Add(parent);
 
 
             if (SceneManager.Instance.CurrentScene != null)
@@ -115,6 +139,9 @@ namespace Unify2D.Toolbox
         {
             ImGui.PushID((int)go.UID);
 
+            if (_parentsToReveal.Contains(go))
+                ImGui.SetNextItemOpen(true, ImGuiCond.Always);
+
             ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.OpenOnDoubleClick |
                                             ImGuiTreeNodeFlags.SpanAvailWidth;
 
@@ -140,6 +167,8 @@ namespace Unify2D.Toolbox
                     ImGui.TreeNodeEx($"{go.Name}##{go.GetHashCode()}", base_flags);
 
                 }
+
+                ScrollToRevealedObject(go);
 
                 if (ImGui.IsItemFocused())
                 {
@@ -175,6 +204,8 @@ namespace Unify2D.Toolbox
                     open = ImGui.TreeNodeEx($"{go.Name}##{go.GetHashCode()}", base_flags);
                 }
 
+                ScrollToRevealedObject(go);
+
                 if (ImGui.IsItemClicked())
                 {
                     SelectGO(go);
@@ -208,6 +239,15 @@ namespace Unify2D.Toolbox
             }
 
             ImGui.PopID();
+        }
+
+        private void ScrollToRevealedObject(GameObject go)
+        {
+            if (_objectToReveal != go)
+                return;
+
+            ImGui.SetScrollHereY(0.5f);
+            _objectToReveal = null;
         }
 
         private void ShowContextMenu(GameObject go)

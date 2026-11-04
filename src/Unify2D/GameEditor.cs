@@ -296,6 +296,9 @@ namespace Unify2D
 
         protected override void UnloadContent()
         {
+            foreach (var toolbox in _toolboxes)
+                toolbox.Destroy();
+
             PlayToolbox?.Stop();
             InspectorToolbox?.ReleaseTextureBindings();
             foreach (var viewer in _coreViewers.ToArray())
