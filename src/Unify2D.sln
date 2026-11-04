@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.10.12201.205 stable
+VisualStudioVersion = 18.10.12201.205
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Unify2D", "Unify2D\Unify2D.csproj", "{3024336E-9A19-475F-A95D-60A60C0B1C0D}"
 EndProject
@@ -16,8 +16,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VelcroPhysics", "..\VelcroPhysics-master-TEMP\src\VelcroPhysics\VelcroPhysics.csproj", "{4D7FC1E5-4859-4735-A510-E7F21179B3C0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImGuiColorTextEditNet", "ImGuiColorTextEditNet\ImGuiColorTextEditNet.csproj", "{A4657815-2F60-4509-8497-80E8031CAEC0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FontStashSharp.FNA", "..\FontStash\XNA\FontStashSharp.FNA.csproj", "{4558B0AE-154A-2847-C477-1485D6F524C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -293,42 +291,6 @@ Global
 		{A4657815-2F60-4509-8497-80E8031CAEC0}.WindowsRelease|x64.Build.0 = Debug|Any CPU
 		{A4657815-2F60-4509-8497-80E8031CAEC0}.WindowsRelease|x86.ActiveCfg = Debug|Any CPU
 		{A4657815-2F60-4509-8497-80E8031CAEC0}.WindowsRelease|x86.Build.0 = Debug|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.Debug|x64.Build.0 = Debug|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.Debug|x86.Build.0 = Debug|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.LinuxDebug|Any CPU.ActiveCfg = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.LinuxDebug|Any CPU.Build.0 = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.LinuxDebug|x64.ActiveCfg = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.LinuxDebug|x64.Build.0 = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.LinuxDebug|x86.ActiveCfg = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.LinuxDebug|x86.Build.0 = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.LinuxRelease|Any CPU.ActiveCfg = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.LinuxRelease|Any CPU.Build.0 = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.LinuxRelease|x64.ActiveCfg = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.LinuxRelease|x64.Build.0 = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.LinuxRelease|x86.ActiveCfg = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.LinuxRelease|x86.Build.0 = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.Release|x64.ActiveCfg = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.Release|x64.Build.0 = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.Release|x86.ActiveCfg = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.Release|x86.Build.0 = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.WindowsDebug|Any CPU.ActiveCfg = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.WindowsDebug|Any CPU.Build.0 = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.WindowsDebug|x64.ActiveCfg = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.WindowsDebug|x64.Build.0 = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.WindowsDebug|x86.ActiveCfg = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.WindowsDebug|x86.Build.0 = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.WindowsRelease|Any CPU.ActiveCfg = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.WindowsRelease|Any CPU.Build.0 = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.WindowsRelease|x64.ActiveCfg = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.WindowsRelease|x64.Build.0 = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.WindowsRelease|x86.ActiveCfg = Release|Any CPU
-		{4558B0AE-154A-2847-C477-1485D6F524C0}.WindowsRelease|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

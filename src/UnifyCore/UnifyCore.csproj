@@ -9,7 +9,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\FNA\FNA.csproj" />
-		<ProjectReference Include="..\..\FontStash\XNA\FontStashSharp.FNA.csproj" />
 		<ProjectReference Include="..\..\VelcroPhysics-master-TEMP\src\VelcroPhysics\VelcroPhysics.csproj" />
 	</ItemGroup>
 
