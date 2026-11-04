@@ -40,18 +40,27 @@ namespace Unify2D
         }
         public virtual void Draw()
         {
-            if (s_SelectedLogs.Contains(this))
+            ImGui.PushID(GetHashCode());
+            bool isSelected = s_SelectedLogs.Contains(this);
+            if (ImGui.MenuItem(_menuText, string.Empty, isSelected))
             {
-                //ImGui.SeparatorText(_menuText);
-            }
-            else if (ImGui.MenuItem(_menuText))
-            {
-                if(! Keyboard.GetState().IsKeyDown(Keys.LeftShift)) 
+                var keyState = Keyboard.GetState();
+                bool multiSelect = keyState.IsKeyDown(Keys.LeftControl);
+
+                if (!multiSelect)
                 {
                     s_SelectedLogs.Clear();
+                    s_SelectedLogs.Add(this);
                 }
-                s_SelectedLogs.Add(this);
+                else
+                {
+                    if (isSelected)
+                        s_SelectedLogs.Remove(this);
+                    else
+                        s_SelectedLogs.Add(this);
+                }
             }
+            ImGui.PopID();
         }
 
         public virtual void DrawSelected()
