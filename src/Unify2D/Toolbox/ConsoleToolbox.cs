@@ -69,6 +69,7 @@ namespace Unify2D.Toolbox
             if (ImGui.TabItemButton("Clear"))
             {
                 Debug.ClearLogs();
+                DebugLog.s_SelectedLogs.Clear();
             }
             if (ImGui.TabItemButton("Filter"))
             {
