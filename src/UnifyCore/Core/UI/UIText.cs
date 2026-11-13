@@ -47,7 +47,7 @@ namespace Unify2D.Core
             var asset = GameCore.Current.AssetsManager.GetAsset(_textGuid);
             if (asset == null)
             {
-
+                Font = GameCore.Current.ResourcesManager.GetFont(null);
                 Debug.LogError($"Can't load font {_textGuid} {_gameObject.Name}");
                 return;
             }
@@ -78,6 +78,12 @@ namespace Unify2D.Core
                 Vector2.One * FontSize * GameObject.Scale,
                 SpriteEffects.None,
                 0);
+        }
+
+        public override void Reset(GameObject go)
+        {
+            base.Reset(go);
+            Font = GameCore.Current.ResourcesManager.GetFont(null);
         }
 
         internal override void Destroy()

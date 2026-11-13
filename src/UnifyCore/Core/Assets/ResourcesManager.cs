@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Unify2D.Core;
+using FontStashSharp;
+using SpriteFontPlus;
 
 namespace UnifyCore
 {
@@ -14,6 +16,8 @@ namespace UnifyCore
         Dictionary<string, Texture2D> _textures = new Dictionary<string, Texture2D>();
 
         private SpriteFont _defaultFont;
+        private string _arialDefault = @"C:\Windows\Fonts\arial.ttf"; // _Common Font test
+
 
         private Microsoft.Xna.Framework.Content.ContentManager _content;
 
@@ -31,7 +35,7 @@ namespace UnifyCore
             }
             _whiteTexture.SetData(colors);
 
-            _defaultFont = null;
+            _defaultFont = LoadFontFromFile(_arialDefault);
         }
 
 
@@ -51,18 +55,38 @@ namespace UnifyCore
         }
 
         public SpriteFont GetFont(string path)
+
         {
+
+
             if (string.IsNullOrEmpty(path))
                 return _defaultFont;
 
+
             if (_fonts.TryGetValue(path, out SpriteFont font))
                 return font;
+            //font = _content.Load<SpriteFont>($"./Assets/{path}");
 
-            font = _content.Load<SpriteFont>($"./Assets/{path}");
+            string fullPath = Path.Combine(_content.RootDirectory, "Assets", path.TrimStart('\\', '/'));            
+
+            font = LoadFontFromFile(fullPath);
 
             _fonts.Add(path, font);
 
             return font;
+        }
+
+        private SpriteFont LoadFontFromFile(string fullPath) 
+        {
+            var baked = TtfFontBaker.Bake(File.ReadAllBytes(fullPath), 50, 1024, 1024, new[]
+            {
+                CharacterRange.BasicLatin,
+                CharacterRange.Latin1Supplement,
+                CharacterRange.LatinExtendedA,
+                CharacterRange.Cyrillic
+            });
+
+            return baked.CreateSpriteFont(GameCore.Current.GraphicsDevice);
         }
 
         public void SetRootDirectory(string path)

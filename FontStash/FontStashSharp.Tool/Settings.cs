@@ -1,0 +1,50 @@
+﻿using Microsoft.Xna.Framework;
+using System.ComponentModel;
+
+namespace FontStashSharp.Tool
+{
+	internal class Settings
+	{
+		public static Settings Instance { get; } = new Settings();
+
+		[Category("General")]
+		public Color TextColor { get; set; } = Color.White;
+
+		[Category("General")]
+		public Color BackgroundColor { get; set; } = Color.CornflowerBlue;
+
+		[Category("Supersampling")]
+		public float? FontResolutionFactor { get; set; }
+
+		[Category("Supersampling")]
+		public int KernelWidth { get; set; }
+
+		[Category("Supersampling")]
+		public int KernelHeight { get; set; }
+
+		[Category("SDF")]
+		public bool UseSDF { get; set; } = true;
+
+		[Category("SDF")]
+		public float? FixedFontSize { get; set; } = 64.0f;
+
+		[Category("SDF")]
+		public bool SDFSupersampling { get; set; } = true;
+
+		[Category("SDF")]
+		public Color ShadowColor { get; set; } = Color.Black;
+
+		[Category("SDF")]
+		public Vector2 ShadowOffset { get; set; } = new Vector2(2, 2);
+
+		[Category("SDF")]
+		public Color StrokeColor { get; set; } = Color.Black;
+
+		[Category("SDF")]
+		public float StrokeThickness { get; set; } = 0.2f;
+
+		private Settings()
+		{
+		}
+	}
+}

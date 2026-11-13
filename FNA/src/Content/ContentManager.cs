@@ -17,6 +17,7 @@ using System.Reflection;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Media;
+
 #endregion
 
 namespace Microsoft.Xna.Framework.Content
@@ -419,7 +420,9 @@ namespace Microsoft.Xna.Framework.Content
 				else if (typeof(T) == typeof(SpriteFont))
 				{
                     Console.WriteLine("This is a sprite font");
+					
 					//SpriteFont font = SpriteFont.
+					//SpriteFont font = S
 				}
 				else
 				{
